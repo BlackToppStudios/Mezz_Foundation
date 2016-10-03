@@ -1,0 +1,56 @@
+version: 0.0.{build}
+clone_folder: C:\projects\Mezz_Test
+
+environment:
+  matrix:
+  - GENERATOR: MinGW Makefiles
+    CompilerPath: C:\msys64\mingw32\bin
+    TestPath: "."
+  - GENERATOR: MinGW Makefiles
+    CompilerPath: C:\msys64\mingw64\bin
+    TestPath: "."
+#  - GENERATOR: Visual Studio 14 2015
+#    TestPath: "./%configuration%"
+  - GENERATOR: Visual Studio 14 2015 Win64
+    TestPath: "./%configuration%"
+
+configuration:
+  - Debug
+  - Release
+
+before_build:
+  # Workaround for CMake not wanting sh.exe on PATH for MinGW
+  - set PATH=%PATH:C:\Program Files\Git\bin;=%
+  - set PATH=%PATH:C:\Program Files\Git\usr\bin;=%
+  - set PATH=%PATH:C:\Program Files (x86)\Git\bin;=%
+  - set PATH=%PATH:C:\Program Files (x86)\Git\usr\bin;=%
+  # Move the non-mingw-w64 install to the end of the PATH
+  - set PATH=%PATH:C:\MinGW\bin;=%
+  # Ensure the appropriate install is in the PATH
+  - set PATH=%CompilerPath%;%PATH%
+  # Stop useless Xamarin Build targets from making messages
+  - del "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets"
+  # Finalize build prep
+  - mkdir build
+  - cd build
+  - mkdir JagatiPackages
+  - set JAGATI_DIR=C:\projects\Mezz_Test\build\JagatiPackages
+  - echo "Current Configuration is '%CONFIGURATION%'"
+  - cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE=%CONFIGURATION% .. -DMEZZ_BuildDoxygen=OFF
+
+build_script:
+  - cmake --build . --config %CONFIGURATION%
+
+test_script:
+  - cmd: cd C:\projects\Mezz_Test\build
+  - cmd: cd %TestPath%
+  - cmd: Test_Tester
+
+notifications:
+- provider: Email
+  to:
+  - contact@blacktoppstudios.com
+  on_build_success: false
+  on_build_failure: true
+  on_build_status_changed: true
+

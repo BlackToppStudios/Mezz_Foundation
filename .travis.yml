@@ -1,0 +1,35 @@
+sudo: required
+dist: trusty
+language: cpp
+
+os:
+  - linux
+  - osx
+
+compiler:
+  - clang
+  - gcc
+
+before_script:
+  - mkdir build
+  - cd build
+  - mkdir JagatiPackages
+  - export JAGATI_DIR=`pwd`/JagatiPackages
+  - cmake -G"Ninja" .. -DMEZZ_BuildDoxygen=OFF
+
+install:
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then sudo apt-get install valgrind ninja-build -q -y; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]   ; then brew install valgrind ninja; fi
+
+script:
+  - ninja
+  - ./Test_Tester
+  - valgrind --tool=memcheck --leak-check=full  --error-exitcode=1 ./Test_Tester
+  - valgrind --tool=memcheck --leak-check=full  --error-exitcode=1 ./Test_Tester debugtests Test
+
+notifications:
+  email:
+    recipients:
+      - contact@blacktoppstudios.com
+    on_success: change
+    on_failure: always

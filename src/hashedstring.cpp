@@ -1,4 +1,4 @@
-// © Copyright 2010 - 2015 BlackTopp Studios Inc.
+// © Copyright 2010 - 2016 BlackTopp Studios Inc.
 /* This file is part of The Mezzanine Engine.
 
     The Mezzanine Engine is free software: you can redistribute it and/or modify
@@ -55,7 +55,7 @@ namespace Mezzanine
     }
 
     HashedString32::HashedString32() :
-        Hash(0)
+        Hash(1364076727) // Magic number is hash of ""
     {}
 
     HashedString32::HashedString32(const String& StartingString) :
@@ -99,6 +99,9 @@ namespace Mezzanine
         //    { return TheString > Other.TheString; }
         return Hash > Other.Hash;
     }
+
+    Boole HashedString32::IsEmpty() const
+        { return 1364076727 == Hash; }
 
 
     Int32 HashedString32::GetHash() const
@@ -148,10 +151,10 @@ namespace Mezzanine
                 Hash=OneNode.GetAttribute("Hash").AsInteger();
                 TheString=OneNode.GetAttribute("String").AsString();
             }else{
-                MEZZ_EXCEPTION(Exception::INVALID_VERSION_EXCEPTION,"Incompatible XML Version for " + GetSerializableName() + ": Not Version 1.");
+                MEZZ_EXCEPTION(ExceptionBase::INVALID_VERSION_EXCEPTION,"Incompatible XML Version for " + GetSerializableName() + ": Not Version 1.");
             }
         }else{
-            MEZZ_EXCEPTION(Exception::II_IDENTITY_INVALID_EXCEPTION,"Attempting to deserialize a " + GetSerializableName() + ", found a " + String(OneNode.Name()) + ".");
+            MEZZ_EXCEPTION(ExceptionBase::II_IDENTITY_INVALID_EXCEPTION,"Attempting to deserialize a " + GetSerializableName() + ", found a " + String(OneNode.Name()) + ".");
         }
     }
 
