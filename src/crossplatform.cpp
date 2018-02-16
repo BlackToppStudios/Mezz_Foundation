@@ -1,4 +1,4 @@
-// © Copyright 2010 - 2014 BlackTopp Studios Inc.
+// © Copyright 2010 - 2017 BlackTopp Studios Inc.
 /* This file is part of The Mezzanine Engine.
 
     The Mezzanine Engine is free software: you can redistribute it and/or modify
@@ -37,30 +37,45 @@
    Joseph Toppi - toppij@gmail.com
    John Blackwood - makoenergy02@gmail.com
 */
-#ifndef statetransitionaction_cpp
-#define statetransitionaction_cpp
+#ifndef _crossplatform_cpp
+#define _crossplatform_cpp
+///////////////////////////////////////////////////////////////////////////////
+//this is the place where ALL of the non-multiplatform code goes.
 
-/// @file
-/// @brief Describe file here
+//Internal includes
+#include "crossplatform.h"
 
-#include "statetransitionaction.h"
+#include "Threading/systemcalls.h"
+
+#include <stdio.h>
 
 namespace Mezzanine
 {
+    namespace crossplatform
+    {
+        String GetPlatform()
+        {
+            #ifdef MEZZ_LINUX
+                return "Linux";
+            #endif
+            #ifdef MEZZ_WINDOWS
+                return "Windows";
+            #endif
+            #ifdef MEZZ_MACOSX
+                return "MacOSX";
+            #endif
+        }
 
-    StateTransitionAction::~StateTransitionAction()
-        { }
+        MaxInt GetTimeStamp()
+            { return Mezzanine::GetTimeStamp(); }
 
-    Boole StateTransitionNoAction::operator()()
-        { return true; }
+        Whole GetTimeStampResolution()
+            { return Mezzanine::GetTimeStampResolution(); }
 
-    StateTransitionNoAction::~StateTransitionNoAction()
-        { }
+        Whole GetCPUCount()
+            { return Mezzanine::GetCPUCount(); }
 
-    StateTransitionAction* StateTransitionNoAction::clone()
-        { return new StateTransitionNoAction(); }
+    }// Crossplatform
+}//Mezzanine
 
-} // /namespace Mezzanine
-
-#endif // Include guard
-
+#endif

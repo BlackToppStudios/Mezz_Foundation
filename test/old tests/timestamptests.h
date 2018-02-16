@@ -37,78 +37,59 @@
    Joseph Toppi - toppij@gmail.com
    John Blackwood - makoenergy02@gmail.com
 */
-#ifndef _logtooltests_h
-#define _logtooltests_h
+#ifndef _timestamptests_h
+#define _timestamptests_h
 
 #include "mezztest.h"
 
-#include <sstream>
+#include "dagframescheduler.h"
 
 /// @file
-/// @brief This has tests for logging dedicated components in the frame scheduler
+/// @brief Basic tests of the timestamp tools in the framescheduler
 
+using namespace std;
 using namespace Mezzanine;
 using namespace Mezzanine::Testing;
+using namespace Mezzanine::Threading;
 
-/// @brief Tests the ScopedTimer to verify its format is what is expected to be in the log
-class logtooltests : public UnitTestGroup
+/// @brief Tests for the timestamp tools
+class timestamptests : public UnitTestGroup
 {
     public:
         /// @copydoc Mezzanine::Testing::UnitTestGroup::Name
-        /// @return Returns a String containing "BoilerPlate"
+        /// @return Returns a String containing "TimeStamp"
         virtual String Name()
-            { return String("LogTool"); }
+            { return String("TimeStamp"); }
 
-        std::stringstream TestLog;
-
-        void ScopedTimerTest()
-        {
-            SCOPEDTIMER(TestLog);
-            Mezzanine::Threading::this_thread::sleep_for(10000);
-        }
-
-        /// @brief This is called when Automatic tests are run
+        /// @brief Test if the timestamp tools works correctly were possible
         void RunAutomaticTests()
         {
-            TestOutput << "Instrumenting a sample function and reading log: " << endl;
-            TestLog << "<log>" << endl;
-            ScopedTimerTest();
-            TestLog << "</log>" << endl;
+            TestOutput << "Starting timekeeping tests." << endl;
+            TestOutput << "Getting Timestamp1" << endl;
+            Mezzanine::MaxInt Timestamp1 = Mezzanine::GetTimeStamp();
 
-            pugi::xml_document Doc;
-            Doc.load(TestLog);
+            TestOutput << "Sleeping main thread for 300ms." << endl;
+            Mezzanine::Threading::this_thread::sleep_for(300000);
 
-            pugi::xpath_node_set Results = Doc.select_nodes("/log/ScopedTimerBegin/@TimeStamp");
-            String ResultString(Results.first().attribute().as_string());
-            TEST(ResultString.size()>0,"BeginTimeStamp");
+            TestOutput << "Getting Timestamp2" << endl;
+            Mezzanine::MaxInt Timestamp2 = Mezzanine::GetTimeStamp();
 
-            Results = Doc.select_nodes("/log/ScopedTimerBegin/@Line");
-            Whole LineNumber = Results.first().attribute().as_int();
-            TEST(LineNumber==66,"BeginLine");
+            TestOutput << "Timestamp1: " << Timestamp1 << endl;
+            TestOutput << "Timestamp2: " << Timestamp2 << endl;
+            TestOutput << "Timestamp2 - Timestamp1 = " << Timestamp2-Timestamp1 << endl;
+            TestOutput << "Is Timestamp1 <= Timestamp2: " << (Timestamp1<=Timestamp2) << endl;
+            TestOutput << "Timer Resolution: " << GetTimeStampResolution() << " microsecond(s)" << endl;
+            TEST(Timestamp1<=Timestamp2,"TimeStampChronology")
 
-            Results = Doc.select_nodes("/log/ScopedTimerBegin/@FileName");
-            ResultString = String(Results.first().attribute().as_string());
-            Whole Location = ResultString.find_last_of("\\/") + 1;
-            if(Location <= ResultString.size() )
-                { ResultString = ResultString.substr(Location); }
-            TEST(ResultString == String("logtooltests.h"),"BeginFileName");
-
-            Results = Doc.select_nodes("/log/ScopedTimerEnd/@TimeStamp");
-            ResultString = String(Results.first().attribute().as_string());
-            TEST(ResultString.size()>0,"EndTimeStamp");
-
-            Results = Doc.select_nodes("/log/ScopedTimerEnd/@Duration");
-            Whole Duration = Results.first().attribute().as_int();
-            TEST(9900<Duration && Duration<12000,"EndDuration");
-
-            TestOutput << TestLog.str() << endl;
+            TestOutput << "Is Timestamp1+300000-(2*TimerResolution) <= Timestamp2 = " << Timestamp1+300000-(2*GetTimeStampResolution()) << "<=" << Timestamp2 << endl;
+            TestOutput << "Is Timestamp1+300000-(2*TimerResolution) <= Timestamp2: " << (MaxInt(Timestamp1+300000-(2*GetTimeStampResolution()))<=Timestamp2) << endl;
+            TEST(MaxInt(Timestamp1+300000-(2*GetTimeStampResolution()))<=Timestamp2,"TimeStampResolution")
         }
 
         /// @brief Since RunAutomaticTests is implemented so is this.
         /// @return returns true
         virtual bool HasAutomaticTests() const
             { return true; }
-
 
 };
 

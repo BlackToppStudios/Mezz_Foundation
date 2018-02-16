@@ -1,9 +1,11 @@
 sudo: required
 dist: trusty
 language: cpp
+osx_image: xcode8.3
 
 os:
-  - linux
+#  - linux # Remarking this disables the Linux build on Travis. When move onto better than a 3 year old os in beta,
+#            we will reconsider using them for our linux builds again. In the mean time check out our Jenkinsfile.
   - osx
 
 compiler:
@@ -15,17 +17,42 @@ before_script:
   - cd build
   - mkdir JagatiPackages
   - export JAGATI_DIR=`pwd`/JagatiPackages
-  - cmake -G"Ninja" .. -DMEZZ_BuildDoxygen=OFF
+  - cmake -G"Ninja" .. -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=ON -DCMAKE_USE_OPENSSL=ON
 
 install:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then sudo apt-get install valgrind ninja-build -q -y; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]   ; then brew install valgrind ninja; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ;
+        then sudo apt-get install valgrind ninja-build -q -y;
+    fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ;
+        then brew install ninja;
+    fi
 
 script:
   - ninja
-  - ./Test_Tester
-  - valgrind --tool=memcheck --leak-check=full  --error-exitcode=1 ./Test_Tester
-  - valgrind --tool=memcheck --leak-check=full  --error-exitcode=1 ./Test_Tester debugtests Test
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
+        ./StaticFoundation_Tester
+        MEZZ_CompilerIsEmscripten:0     MEZZ_CompilerIsIntel:0  MEZZ_CompilerIsMsvc:0
+        MEZZ_BuildStaticLibraries:1     MEZZ_BuildDoxygen:0     MEZZ_Debug:0    MEZZ_CodeCoverage:1
+        MEZZ_Linux:1        MEZZ_MacOSX:0       MEZZ_Windows:0
+        MEZZ_CompilerDesignNix:1            MEZZ_CompilerDesignMS:0
+        MEZZ_Arch64:1       MEZZ_Arch32:0 ;
+    fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then
+        ./StaticFoundation_Tester
+        MEZZ_CompilerIsEmscripten:0     MEZZ_CompilerIsIntel:0  MEZZ_CompilerIsMsvc:0
+        MEZZ_BuildStaticLibraries:1     MEZZ_BuildDoxygen:0     MEZZ_Debug:0    MEZZ_CodeCoverage:1
+        MEZZ_Linux:0        MEZZ_MacOSX:1       MEZZ_Windows:0
+        MEZZ_CompilerDesignNix:1            MEZZ_CompilerDesignMS:0
+        MEZZ_Arch64:1       MEZZ_Arch32:0 ;
+    fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then
+        valgrind --tool=memcheck --leak-check=full --error-exitcode=1
+            ./StaticFoundation_Tester MEZZ_BuildDoxygen:0;
+    fi # TODO: Duplicate this in Jenkins
+
+after_success:
+  - ninja StaticFoundationCoverage
+  - bash <(curl -s https://codecov.io/bash)
 
 notifications:
   email:

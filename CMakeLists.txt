@@ -43,89 +43,48 @@ project(Foundation)
 message(STATUS "${PROJECT_NAME} - Starting Configuration.")
 
 ##########################################################################|#############################################
-set(JagatiChecksum "1168e9aa1ea49d5bc863618153fb162e41f2cb02f6bddfe1da6793\
-4dccb44a2dc8d4f3a633786b16302adead50f08d316eceee34e875da5144f59184081c25f5")
-
-file(DOWNLOAD
-    "https://raw.githubusercontent.com/BlackToppStudios/Jagati/0.5.2/Jagati.cmake"
-    "${${PROJECT_NAME}_BINARY_DIR}/Jagati.cmake"
-    EXPECTED_HASH SHA512=${JagatiChecksum}
-)
-
+# Dowload, Verify and setup the Jagati
+#set(JagatiChecksum "ae061311fcc4ecca287e7e7df38f9f52fbacc2060946f92bdece21\
+#d86584f1de152c59a7181992a30365c07bb58772f3dadef38adbb4b15c305429a1b966f314")
+#file(DOWNLOAD
+#    "https://raw.githubusercontent.com/BlackToppStudios/Jagati/0.12.1/Jagati.cmake"
+#    "${${PROJECT_NAME}_BINARY_DIR}/Jagati.cmake"
+#    EXPECTED_HASH SHA512=${JagatiChecksum}
+#)
 include("${${PROJECT_NAME}_BINARY_DIR}/Jagati.cmake")
 
 StandardJagatiSetup()
-
 IncludeJagatiPackage("StaticFoundation")
 IncludeJagatiPackage("Test")
 
 ########################################################################################################################
+# Source files
 message(STATUS "Determining Source Files.")
 set(FoundationHeaderFiles
-    "${FoundationIncludeDir}asdf.h"
+    "${FoundationIncludeDir}StreamLogging.h"
 )
-ShowList("Source Files:" "\t" "${FoundationHeaderFiles}")
+ShowList("Header Files:" "\t" "${FoundationHeaderFiles}")
 
 set(FoundationSourceFiles
-    "${FoundationSourceDir}asdf.cpp"
+    "${FoundationSourceDir}StreamLogging.cpp"
 )
 ShowList("Source Files:" "\t" "${FoundationSourceFiles}")
 
-set(DoxFiles
-    "${TestDoxDir}dox.h"
+set(FoundationDoxFiles
+    "${FoundationDoxDir}dox.h"
 )
-ShowList("Doxygen Input Files:" "\t" "${DoxFiles}")
-AddJagatiDoxInput("${DoxFiles}")
+ShowList("Doxygen Input Files:" "\t" "${FoundationDoxFiles}")
+AddJagatiDoxInput("${FoundationDoxFiles}")
 
 ########################################################################################################################
-# This setup is unusual but could be useful.
+# Basic Targets and Test declaration
+AddJagatiLibrary()
+CreateCoverageTarget(${FoundationLib} "${FoundationSourceFiles}")
 
-include_directories(
-    ${${PROJECT_NAME}IncludeDir}
-    ${FoundationIncludeDir}
-    ${StaticFoundationIncludeDir}
-    ${StaticFoundationGenHeadersDir}
-)
-
-# A normal project would put declaration of targets here, a really good project would house the bulk of its
-# functionality in a library so that it could easily be linked to the testing library and the final executable.
-#add_library(${YourLibraryHere} ${MEZZ_LibraryBuildType} ${YourHeaders} ${YourSources})
-
-AddJagatiLibrary("Foundation")
-
-# This has only one test and could be added as follows.
-AddTest("vector3tests")
-
-# Spit out the C++ file
+AddTestClass("StreamLogging")
 EmitTestCode()
-AddTestTarget("")
+AddTestTarget()
 
-# You need to link the test library to your stuff to be tested.
-#target_link_libraries(${TestLib} ${YourLibraryHere})
-
-
-
-########################################################################################################################
-# Set up Build targets
-
-
-
-# A Project to do nothing but get All the Source files visible in IDEs
-add_custom_target(
-    ${PROJECT_NAME}_IDE_Visibility
-    DEPENDS ${PROJECT_NAME}_Tester
-            "${${PROJECT_NAME}BinaryDir}Guidelines.md"
-            ExternalProjectDownload
-    SOURCES ${FoundationHeaderFiles}
-            ${FoundationSourceFiles}
-            ${TestSourceFiles}
-            ${SwigFiles}
-            ${StaticFoundationConfigFilename}
-            README.md
-            COPYING.md
-            .travis.yml
-            appveyor.yml
-            "${DoxFiles}"
-)
-
+SetCodeCoverage()
+AddIDEVisibility("")
 message(STATUS "${PROJECT_NAME} - Ending Configuration.")

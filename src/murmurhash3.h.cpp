@@ -1,4 +1,4 @@
-// © Copyright 2010 - 2014 BlackTopp Studios Inc.
+// © Copyright 2010 - 2017 BlackTopp Studios Inc.
 /* This file is part of The Mezzanine Engine.
 
     The Mezzanine Engine is free software: you can redistribute it and/or modify
@@ -37,60 +37,44 @@
    Joseph Toppi - toppij@gmail.com
    John Blackwood - makoenergy02@gmail.com
 */
-#ifndef statetransition_cpp
-#define statetransition_cpp
+
+
+//-----------------------------------------------------------------------------
+// MurmurHash3 was written by Austin Appleby, and is placed in the public
+// domain. The author hereby disclaims copyright to this source code.
+
+#ifndef _MURMURHASH3_H_
+#define _MURMURHASH3_H_
+
+// If Microsoft Visual Studio
+#if defined(_MSC_VER) && (_MSC_VER < 1600)
+    typedef unsigned char uint8_t;
+    typedef unsigned int uint32_t;
+    typedef unsigned __int64 uint64_t;
+    // Other compilers
+#else
+    #include <stdint.h>
+#endif // !defined(_MSC_VER)
+
 
 /// @file
-/// @brief Describe file here
-
-#include "statetransition.h"
+/// @brief This is an external library for a non-cryptographic hash function
+/// @details This was chosen because it is fast, resists collisions, works on
+/// all Mezzanine target platforms and is liberally licensed.
+/// @n @n
+/// Copied with written permission on Mar 10, 2014
+/// from https://code.google.com/p/smhasher/
 
 namespace Mezzanine
 {
-
-    StateTransition::StateTransition(   const HashedString32& FromState,
-                                        const HashedString32& ToState,
-                                        StateTransitionAction* OwningActionPointer)
-        : From(FromState), To(ToState), Action(OwningActionPointer)
-    {}
-
-    StateTransition::StateTransition(const StateTransition& CopiedTransition)
-        : From(CopiedTransition.From), To(CopiedTransition.To)
-        { Action = CopiedTransition.Action->clone(); }
-
-    StateTransition& StateTransition::operator=(const StateTransition& CopiedTransition)
+    namespace Internal
     {
-        From = CopiedTransition.From;
-        To = CopiedTransition.To;
-        Action = CopiedTransition.Action->clone();
-        return *this;
+        void MurmurHash3_x86_32  ( const void * key, int len, uint32_t seed, void * out );
+
+        void MurmurHash3_x86_128 ( const void * key, int len, uint32_t seed, void * out );
+
+        void MurmurHash3_x64_128 ( const void * key, int len, uint32_t seed, void * out );
     }
+}
 
-    StateTransition::~StateTransition()
-        { delete Action; }
-
-    Boole StateTransition::operator< (const StateTransition& Other) const
-    {
-        if(this->From == Other.From)
-            { return this->To.GetHash() < Other.To.GetHash(); }
-        else
-            { return this->From.GetHash() < Other.From.GetHash(); }
-    }
-
-    Boole StateTransition::operator()()
-        { return Action->operator()(); }
-
-    const HashedString32&StateTransition::FromState() const
-        { return From; }
-
-    const HashedString32&StateTransition::ToState() const
-        { return To; }
-
-
-    Boole StateTransitionPointerSorter::operator()(StateTransition* Left, StateTransition* Right)
-        { return *Left < *Right; }
-
-} // /namespace Mezzanine
-
-#endif // Include guard
-
+#endif // _MURMURHASH3_H_

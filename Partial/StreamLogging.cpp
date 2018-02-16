@@ -1,4 +1,4 @@
-// © Copyright 2010 - 2017 BlackTopp Studios Inc.
+// © Copyright 2010 - 2016 BlackTopp Studios Inc.
 /* This file is part of The Mezzanine Engine.
 
     The Mezzanine Engine is free software: you can redistribute it and/or modify
@@ -41,28 +41,7 @@
 #ifndef _logging_cpp
 #define _logging_cpp
 
-#include "streamlogging.h"
-
-LogLevel MergeLogLevel(LogLevel First, LogLevel Second)
-    { return (LogLevel)( First | Second ); }
-
-LogLevel MergeLogLevel(LogLevel First, LogLevel Second, LogLevel Third)
-    { return MergeLogLevel( MergeLogLevel(First, Second), Third); }
-
-LogLevel MergeLogLevel(LogLevel First, LogLevel Second, LogLevel Third, LogLevel Fourth)
-    { return MergeLogLevel( MergeLogLevel(First, Second, Third), Fourth); }
-
-LogLevel MergeLogLevel(LogLevel First, LogLevel Second, LogLevel Third, LogLevel Fourth, LogLevel Fifth)
-    { return MergeLogLevel( MergeLogLevel(First, Second, Third, Fourth), Fifth); }
-
-LogLevel MergeLogLevel(LogLevel First, LogLevel Second, LogLevel Third, LogLevel Fourth, LogLevel Fifth, LogLevel Sixth)
-    { return MergeLogLevel( MergeLogLevel(First, Second, Third, Fourth, Fifth), Sixth); }
-
-LogLevel MergeLogLevel(LogLevel First, LogLevel Second, LogLevel Third, LogLevel Fourth, LogLevel Fifth, LogLevel Sixth, LogLevel Seventh)
-    { return MergeLogLevel( MergeLogLevel(First, Second, Third, Fourth, Fifth, Sixth), Seventh); }
-
-LogLevel MergeLogLevel(LogLevel First, LogLevel Second, LogLevel Third, LogLevel Fourth, LogLevel Fifth, LogLevel Sixth, LogLevel Seventh, LogLevel Eighth)
-    { return MergeLogLevel( MergeLogLevel(First, Second, Third, Fourth, Fifth, Sixth, Seventh), Eighth); }
+#include "StreamLogging.h"
 
 LogLevel GloballyLogging = LL_TraceAndHigher;
 

@@ -1,4 +1,4 @@
-// © Copyright 2010 - 2017 BlackTopp Studios Inc.
+// © Copyright 2010 - 2016 BlackTopp Studios Inc.
 /* This file is part of The Mezzanine Engine.
 
     The Mezzanine Engine is free software: you can redistribute it and/or modify
@@ -38,38 +38,43 @@
    John Blackwood - makoenergy02@gmail.com
 */
 
-#ifndef _logging_cpp
-#define _logging_cpp
 
-#include "streamlogging.h"
+//-----------------------------------------------------------------------------
+// MurmurHash3 was written by Austin Appleby, and is placed in the public
+// domain. The author hereby disclaims copyright to this source code.
 
-LogLevel MergeLogLevel(LogLevel First, LogLevel Second)
-    { return (LogLevel)( First | Second ); }
+#ifndef _MURMURHASH3_H_
+#define _MURMURHASH3_H_
 
-LogLevel MergeLogLevel(LogLevel First, LogLevel Second, LogLevel Third)
-    { return MergeLogLevel( MergeLogLevel(First, Second), Third); }
+// If Microsoft Visual Studio
+#if defined(_MSC_VER) && (_MSC_VER < 1600)
+    typedef unsigned char uint8_t;
+    typedef unsigned int uint32_t;
+    typedef unsigned __int64 uint64_t;
+    // Other compilers
+#else
+    #include <stdint.h>
+#endif // !defined(_MSC_VER)
 
-LogLevel MergeLogLevel(LogLevel First, LogLevel Second, LogLevel Third, LogLevel Fourth)
-    { return MergeLogLevel( MergeLogLevel(First, Second, Third), Fourth); }
 
-LogLevel MergeLogLevel(LogLevel First, LogLevel Second, LogLevel Third, LogLevel Fourth, LogLevel Fifth)
-    { return MergeLogLevel( MergeLogLevel(First, Second, Third, Fourth), Fifth); }
 
-LogLevel MergeLogLevel(LogLevel First, LogLevel Second, LogLevel Third, LogLevel Fourth, LogLevel Fifth, LogLevel Sixth)
-    { return MergeLogLevel( MergeLogLevel(First, Second, Third, Fourth, Fifth), Sixth); }
+/// @brief This is an external library for a non-cryptographic hash function
+/// @details This was chosen because it is fast, resists collisions, works on
+/// all Mezzanine target platforms and is liberally licensed.
+/// @n @n
+/// Copied with written permission on Mar 10, 2014
+/// from https://code.google.com/p/smhasher/
 
-LogLevel MergeLogLevel(LogLevel First, LogLevel Second, LogLevel Third, LogLevel Fourth, LogLevel Fifth, LogLevel Sixth, LogLevel Seventh)
-    { return MergeLogLevel( MergeLogLevel(First, Second, Third, Fourth, Fifth, Sixth), Seventh); }
+namespace Mezzanine
+{
+    namespace Internal
+    {
+        void MurmurHash3_x86_32  ( const void * key, int len, uint32_t seed, void * out );
 
-LogLevel MergeLogLevel(LogLevel First, LogLevel Second, LogLevel Third, LogLevel Fourth, LogLevel Fifth, LogLevel Sixth, LogLevel Seventh, LogLevel Eighth)
-    { return MergeLogLevel( MergeLogLevel(First, Second, Third, Fourth, Fifth, Sixth, Seventh), Eighth); }
+        void MurmurHash3_x86_128 ( const void * key, int len, uint32_t seed, void * out );
 
-LogLevel GloballyLogging = LL_TraceAndHigher;
+        void MurmurHash3_x64_128 ( const void * key, int len, uint32_t seed, void * out );
+    }
+}
 
-void SetStandardLoggingLevel(LogLevel NewLevel)
-    { GloballyLogging = NewLevel; }
-
-LogLevel GetStandardLoggingLevel()
-    { return GloballyLogging; }
-
-#endif //_logging_cpp
+#endif // _MURMURHASH3_H_

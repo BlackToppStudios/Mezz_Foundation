@@ -1,4 +1,4 @@
-// © Copyright 2010 - 2017 BlackTopp Studios Inc.
+// © Copyright 2010 - 2016 BlackTopp Studios Inc.
 /* This file is part of The Mezzanine Engine.
 
     The Mezzanine Engine is free software: you can redistribute it and/or modify
@@ -38,10 +38,10 @@
    John Blackwood - makoenergy02@gmail.com
 */
 
-#ifndef _logging_h
-#define _logging_h
+#ifndef Mezz_Foundation_StreamLogging_h
+#define Mezz_Foundation_StreamLogging_h
 
-#include "crossplatformexport.h"
+#include "CrossPlatformExport.h"
 #include <iostream>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -71,67 +71,6 @@ enum LogLevel {
     LL_Highest     = 16,                                                    ///< IS the highest bitvalue intended to be used for logging.
     LL_FlagLimit   = 32                                                     ///< The next higher power of two past the valid loglevels, will therefor be exactly 1 higher than a full bitfield.
 };
-
-/// @brief Merge 2 log levels into 1
-/// @details To maintain type safety normal bitwise operations should not be used with loglevels
-/// @param First One of many LogLevel instances to merge into one.
-/// @param Second Another of many loglevel instances to merge.
-LogLevel MEZZ_LIB MergeLogLevel(LogLevel First, LogLevel Second);
-
-/// @brief Merge 3 log levels into 1
-/// @param First One of many LogLevel instances to merge into one.
-/// @param Second Another of many loglevel instances to merge.
-/// @param Third Another of many loglevel instances to merge.
-LogLevel MEZZ_LIB MergeLogLevel(LogLevel First, LogLevel Second, LogLevel Third);
-
-/// @brief Merge 4 log levels into 1
-/// @param First One of many LogLevel instances to merge into one.
-/// @param Second Another of many loglevel instances to merge.
-/// @param Third Another of many loglevel instances to merge.
-/// @param Fourth Another of many loglevel instances to merge.
-LogLevel MEZZ_LIB MergeLogLevel(LogLevel First, LogLevel Second, LogLevel Third, LogLevel Fourth);
-
-/// @brief Merge 5 log levels into 1
-/// @param First One of many LogLevel instances to merge into one.
-/// @param Second Another of many loglevel instances to merge.
-/// @param Third Another of many loglevel instances to merge.
-/// @param Fourth Another of many loglevel instances to merge.
-/// @param Fifth Another of many loglevel instances to merge.
-LogLevel MEZZ_LIB MergeLogLevel(LogLevel First, LogLevel Second, LogLevel Third, LogLevel Fourth, LogLevel Fifth);
-
-/// @brief Merge 6 log levels into 1
-/// @param First One of many LogLevel instances to merge into one.
-/// @param Second Another of many loglevel instances to merge.
-/// @param Third Another of many loglevel instances to merge.
-/// @param Fourth Another of many loglevel instances to merge.
-/// @param Fifth Another of many loglevel instances to merge.
-/// @param Sixth Another of many loglevel instances to merge.
-LogLevel MEZZ_LIB MergeLogLevel(LogLevel First, LogLevel Second, LogLevel Third, LogLevel Fourth, LogLevel Fifth, LogLevel Sixth);
-
-/// @brief Merge 7 log levels into 1
-/// @param First One of many LogLevel instances to merge into one.
-/// @param Second Another of many loglevel instances to merge.
-/// @param Third Another of many loglevel instances to merge.
-/// @param Fourth Another of many loglevel instances to merge.
-/// @param Fifth Another of many loglevel instances to merge.
-/// @param Sixth Another of many loglevel instances to merge.
-/// @param Seventh Another of many loglevel instances to merge.
-/// @return All of the LogLevels merged into one bitfield that is still a valid LogLevel.
-LogLevel MEZZ_LIB MergeLogLevel(LogLevel First, LogLevel Second, LogLevel Third, LogLevel Fourth, LogLevel Fifth, LogLevel Sixth, LogLevel Seventh);
-
-/// @brief Merge 8 log levels into 1
-/// @param First This
-/// @param Second accepts
-/// @param Third a
-/// @param Fourth truly
-/// @param Fifth obnoxious
-/// @param Sixth amount
-/// @param Seventh of
-/// @param Eighth parameters.
-/// @return All of the LogLevels merged into one bitfield that is still a valid LogLevel.
-/// @todo Replace this Shenanigans with a variadic template when it becomes available. Though this crao should be easy for even bad optimizers to cleanup.
-LogLevel MEZZ_LIB MergeLogLevel(LogLevel First, LogLevel Second, LogLevel Third, LogLevel Fourth, LogLevel Fifth, LogLevel Sixth, LogLevel Seventh, LogLevel Eighth);
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // STD Streams configuration
