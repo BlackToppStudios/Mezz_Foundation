@@ -6,21 +6,17 @@ common facilities that such games need. This is just one component of many.
 
 ## About this Library ##
 
-This library, the StaticFoundation, is responsible for detecting compilation options, compiler settings, doing work at
-compile time (like string manipulation) and handling other platform specific details.
-
-It does this by a mix a of use of preprocessor macros, constexpr C++11/14 and configuration time/CMake scripting
-techniques.
+This library, the Foundation Under Heavy construction and not yet working.
 
 ## Build Status ##
 
 The current Travis CI (Apple - GCC/Clang) build status is:
-[![Build Status](https://travis-ci.org/BlackToppStudios/Mezz_StaticFoundation.svg?branch=master)](https://travis-ci.org/BlackToppStudios/Mezz_StaticFoundation)
+[![Build Status](https://travis-ci.org/BlackToppStudios/Mezz_Foundation.svg?branch=master)](https://travis-ci.org/BlackToppStudios/Mezz_Foundation)
 
 The current Appveyor (Windows - MinGW/Msvc) build status is:
-[![Build Status](https://ci.appveyor.com/api/projects/status/github/BlackToppStudios/Mezz_StaticFoundation?branch=master&svg=true)](https://ci.appveyor.com/project/Sqeaky/mezz-staticfoundation)
+[![Build Status](https://ci.appveyor.com/api/projects/status/github/BlackToppStudios/Mezz_Foundation?branch=master&svg=true)](https://ci.appveyor.com/project/Sqeaky/mezz-foundation)
 
 The current code coverage for tests is:
-[![codecov](https://codecov.io/gh/BlackToppStudios/Mezz_StaticFoundation/branch/master/graph/badge.svg)](https://codecov.io/gh/BlackToppStudios/Mezz_StaticFoundation)
+[![codecov](https://codecov.io/gh/BlackToppStudios/Mezz_Foundation/branch/master/graph/badge.svg)](https://codecov.io/gh/BlackToppStudios/Mezz_Foundation)
 
-The current Jenkins, which covers Linux (Emscripten, Rasberry Pi, Ubuntu and Fedora), old Mac OS X (High Sierra) and old windows (7 64 bit msvc and mingw), build status is available on the [BTS Jenkins Instance](http://blacktopp.ddns.net:8080/blue/organizations/jenkins/Mezz_StaticFoundation/activity). The current status is: [![Build Status](http://blacktopp.ddns.net:8080/job/Mezz_StaticFoundation/job/master/badge/icon)](http://blacktopp.ddns.net:8080/blue/organizations/jenkins/Mezz_StaticFoundation/activity)
+The current Jenkins, which covers Linux (Emscripten, Rasberry Pi, Ubuntu and Fedora), old Mac OS X (High Sierra) and old windows (7 64 bit msvc and mingw), build status is available on the [BTS Jenkins Instance](http://blacktopp.ddns.net:8080/blue/organizations/jenkins/Mezz_Foundation/activity). The current status is: [![Build Status](http://blacktopp.ddns.net:8080/job/Mezz_Foundation/job/master/badge/icon)](http://blacktopp.ddns.net:8080/blue/organizations/jenkins/Mezz_Foundation/activity)
