@@ -1,4 +1,4 @@
-// © Copyright 2010 - 2016 BlackTopp Studios Inc.
+// © Copyright 2010 - 2018 BlackTopp Studios Inc.
 /* This file is part of The Mezzanine Engine.
 
     The Mezzanine Engine is free software: you can redistribute it and/or modify
@@ -42,7 +42,16 @@
 #define Mezz_Foundation_StreamLogging_h
 
 #include "CrossPlatformExport.h"
+
 #include <iostream>
+#include <string>
+
+// This will get replaced when we do DataTypes.h
+
+namespace Mezzanine {
+    typedef std::string String;
+    typedef int Integer;
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // LogLevel Declaration and Tools
@@ -239,7 +248,9 @@ LogStream<CharType, CharTraits>& LogFatal(LogStream<CharType, CharTraits>& Outpu
 /// @return A reference to the stream being modified.
 /// @note When inserted into any standard this affects all standard streams.
 template<class CharType, class CharTraits>
-std::basic_ostream<CharType, CharTraits>& MessageLogLevel(std::basic_ostream<CharType, CharTraits>& OutputStream, LogLevel CurrentLevel)
+std::basic_ostream<CharType, CharTraits>& MessageLogLevel(std::basic_ostream<CharType,
+                                                          CharTraits>& OutputStream,
+                                                          LogLevel CurrentLevel)
 {
     if(CurrentLevel & GetStandardLoggingLevel())
         { OutputStream.clear(std::basic_ios<CharType, CharTraits>::goodbit); }

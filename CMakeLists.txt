@@ -1,4 +1,4 @@
-# © Copyright 2010 - 2016 BlackTopp Studios Inc.
+# © Copyright 2010 - 2018 BlackTopp Studios Inc.
 # This file is part of The Mezzanine Engine.
 #
 #    The Mezzanine Engine is free software: you can redistribute it and/or modify
@@ -31,7 +31,7 @@
 #        your distribution
 #
 #   These and other limitations could cause serious legal problems if you ignore
-#   them, so it is best to simply contact us or the Free Software Foundation, if
+#   them, so it is best to simply contact us or the Free So${JagatiLinkArray}ftware Foundation, if
 #   you have any questions.
 #
 #   Joseph Toppi - toppij@gmail.com
@@ -43,14 +43,15 @@ project(Foundation)
 message(STATUS "${PROJECT_NAME} - Starting Configuration.")
 
 ##########################################################################|#############################################
-# Dowload, Verify and setup the Jagati
-#set(JagatiChecksum "ae061311fcc4ecca287e7e7df38f9f52fbacc2060946f92bdece21\
-#d86584f1de152c59a7181992a30365c07bb58772f3dadef38adbb4b15c305429a1b966f314")
-#file(DOWNLOAD
-#    "https://raw.githubusercontent.com/BlackToppStudios/Jagati/0.12.1/Jagati.cmake"
-#    "${${PROJECT_NAME}_BINARY_DIR}/Jagati.cmake"
-#    EXPECTED_HASH SHA512=${JagatiChecksum}
-#)
+# Download, Verify and setup the Jagati
+set(JagatiChecksum "ffc1c50a4268728835e36d59f3208b3485d1866bcd2e3fb6baf4f0\
+bcdc0b27321ab762c03e4878e66071b556bacad786f0aa145a0e233e4d44f5ede1762d1c93")
+file(DOWNLOAD
+    "https://raw.githubusercontent.com/BlackToppStudios/Jagati/0.21.0/Jagati.cmake"
+    "${${PROJECT_NAME}_BINARY_DIR}/Jagati.cmake"
+    EXPECTED_HASH SHA512=${JagatiChecksum}
+)
+
 include("${${PROJECT_NAME}_BINARY_DIR}/Jagati.cmake")
 
 StandardJagatiSetup()
@@ -60,28 +61,23 @@ IncludeJagatiPackage("Test")
 ########################################################################################################################
 # Source files
 message(STATUS "Determining Source Files.")
-set(FoundationHeaderFiles
-    "${FoundationIncludeDir}StreamLogging.h"
-)
+
+AddHeaderFile("StreamLogging.h")
+AddHeaderFile("Version.h")
 ShowList("Header Files:" "\t" "${FoundationHeaderFiles}")
 
-set(FoundationSourceFiles
-    "${FoundationSourceDir}StreamLogging.cpp"
-)
+AddSourceFile("StreamLogging.cpp")
 ShowList("Source Files:" "\t" "${FoundationSourceFiles}")
 
-set(FoundationDoxFiles
-    "${FoundationDoxDir}dox.h"
-)
+#AddJagatiDoxInput("Dox.h") # Little d
 ShowList("Doxygen Input Files:" "\t" "${FoundationDoxFiles}")
-AddJagatiDoxInput("${FoundationDoxFiles}")
 
 ########################################################################################################################
 # Basic Targets and Test declaration
 AddJagatiLibrary()
 CreateCoverageTarget(${FoundationLib} "${FoundationSourceFiles}")
 
-AddTestClass("StreamLogging")
+AddTestFile("StreamLoggingTests.h")
 EmitTestCode()
 AddTestTarget()
 

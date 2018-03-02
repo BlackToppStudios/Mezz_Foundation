@@ -1,4 +1,4 @@
-// © Copyright 2010 - 2016 BlackTopp Studios Inc.
+// © Copyright 2010 - 2018 BlackTopp Studios Inc.
 /* This file is part of The Mezzanine Engine.
 
     The Mezzanine Engine is free software: you can redistribute it and/or modify
@@ -38,9 +38,6 @@
    John Blackwood - makoenergy02@gmail.com
 */
 
-#ifndef _logging_cpp
-#define _logging_cpp
-
 #include "StreamLogging.h"
 
 LogLevel GloballyLogging = LL_TraceAndHigher;
@@ -50,5 +47,3 @@ void SetStandardLoggingLevel(LogLevel NewLevel)
 
 LogLevel GetStandardLoggingLevel()
     { return GloballyLogging; }
-
-#endif //_logging_cpp
