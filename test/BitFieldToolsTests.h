@@ -37,42 +37,54 @@
    Joseph Toppi - toppij@gmail.com
    John Blackwood - makoenergy02@gmail.com
 */
+#ifndef Mezz_Test_BitFieldTools_h
+#define Mezz_Test_BitFieldTools_h
 
-#include "StreamLogging.h"
+/// @file
+/// @brief A Simple tests for Stream logging tools
 
-namespace Mezzanine {
-    LogLevel StdStreamsLoggingFilter = LogLevel::TraceAndHigher;
+// Add other headers you need here
+#include "MezzTest.h"
 
-    void SetStandardLoggingLevel(LogLevel NewLevel)
-        { StdStreamsLoggingFilter = NewLevel; }
+#include "BitFieldTools.h"
 
-    LogLevel GetStandardLoggingLevel()
-        { return StdStreamsLoggingFilter; }
-} // \Mezzanine Namespace
+enum class TestBitField : Mezzanine::UInt8 {
+    None    = 0,
 
-std::ostream& operator << (std::ostream& Stream, Mezzanine::LogLevel StreamingLevel)
+    A       = 1,
+    B       = 2,
+    C       = 4,
+
+    AB      = 3,
+    AC      = 5,
+    BC      = 6,
+    ABC     = 7
+};
+ENABLE_BITMASK_OPERATORS(TestBitField)
+
+std::ostream& operator << (std::ostream& Stream, TestBitField StreamingBit);
+
+// This is to allow  TEST_EQUAL to stream this sensibly in the case of failure
+std::ostream& operator << (std::ostream& Stream, TestBitField StreamingBit)
 {
-    using Mezzanine::LogLevel;
-
-    Stream << "[LogLevel - " << static_cast<Mezzanine::Integer>(StreamingLevel) << " -";
-    switch(StreamingLevel)
-    {
-        case LogLevel::None:    Stream << " None"; break;
-        case LogLevel::Trace:   Stream << " Trace"; break;
-        case LogLevel::Debug:   Stream << " Debug"; break;
-        case LogLevel::Warn:    Stream << " Warn"; break;
-        case LogLevel::Error:   Stream << " Error"; break;
-        case LogLevel::Fatal:   Stream << " Fatal"; break;
-        default:
-            if((LogLevel::Trace & StreamingLevel) != LogLevel::None) { Stream << " Trace"; }
-            if((LogLevel::Debug & StreamingLevel) != LogLevel::None) { Stream << " Debug"; }
-            if((LogLevel::Warn  & StreamingLevel) != LogLevel::None) { Stream << " Warn"; }
-            if((LogLevel::Error & StreamingLevel) != LogLevel::None) { Stream << " Error"; }
-            if((LogLevel::Fatal & StreamingLevel) != LogLevel::None) { Stream << " Fatal"; }
-            break;
-    }
-
-    Stream << "]";
+    using InternalType = typename std::underlying_type<TestBitField>::type;
+    if(static_cast<InternalType>(TestBitField::A) | static_cast<InternalType>(StreamingBit)) { Stream << "A"; }
+    if(static_cast<InternalType>(TestBitField::B) | static_cast<InternalType>(StreamingBit)) { Stream << "B"; }
+    if(static_cast<InternalType>(TestBitField::C) | static_cast<InternalType>(StreamingBit)) { Stream << "C"; }
     return Stream;
 }
 
+DEFAULT_TEST_GROUP(BitFieldToolsTests, BitFieldTools)
+{
+    using namespace Mezzanine;
+
+    TEST_EQUAL("OrAB", TestBitField::AB, TestBitField::A | TestBitField::B);
+    TEST_EQUAL("OrABC", TestBitField::ABC, TestBitField::A | TestBitField::B | TestBitField::C);
+    TEST_EQUAL("OrABandBCisABC", TestBitField::ABC, TestBitField::AB | TestBitField::BC);
+
+    TEST_EQUAL("AndABisNone", TestBitField::None, TestBitField::A & TestBitField::B);
+    TEST_EQUAL("AndAandBCisNone", TestBitField::None, TestBitField::A & TestBitField::BC);
+    TEST_EQUAL("AndABandBCisB", TestBitField::B, TestBitField::AB & TestBitField::BC);
+}
+
+#endif

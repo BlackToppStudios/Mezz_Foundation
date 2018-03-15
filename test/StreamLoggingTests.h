@@ -48,6 +48,7 @@
 
 #include "StreamLogging.h"
 
+// Function declatations
 Mezzanine::Integer FindCount(const Mezzanine::String& Haystack, const Mezzanine::String& Needle);
 
 /// @brief Counts the amount of needles is found in the haystack
@@ -68,41 +69,213 @@ Mezzanine::Integer FindCount(const Mezzanine::String& Haystack, const Mezzanine:
 
 DEFAULT_TEST_GROUP(StreamLoggingTests, StreamLogging)
 {
-    // Tests should use the macros from TestMacros.h to automatically function, filename and line number.
-    TEST("ExamplePassingTest", true);
+    using namespace Mezzanine;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Test Mezzanine::LogStream
+    {
+        // Test a simple use of normal log streams
+        std::stringstream TestStealRDBuf;
+        Mezzanine::LogStream TestingLogStream(TestStealRDBuf); // Creating our own logstream
+
+        LogLevel Filter = LogLevel::DebugAndHigher;
+        TestingLogStream.SetLoggingLevel(Filter);
+
+        TestingLogStream << "Part 1 - Logging against a LogStream backed by an std::stringstream" << std::endl;
+        TestingLogStream << "Current LogLevel: " << Filter << std::endl;
+        TestingLogStream << "Should be displayed - Default" << std::endl;
+        TestingLogStream << LogTrace << "Should be NOT displayed - Trace" << std::endl;
+        TestingLogStream << LogDebug << "Should be displayed - Debug" << std::endl;
+        TestingLogStream << LogWarn  << "Should be displayed - Warning" << std::endl;
+        TestingLogStream << LogError << "Should be displayed - Error" << std::endl;
+        TestingLogStream << LogFatal << "Should be displayed - Fatal" << std::endl;
+
+        Mezzanine::Integer Expected = 5;
+        Mezzanine::String Output(TestStealRDBuf.str());
+        std::cout << Output
+                  << "You should have seen no 'NOT's and " << Expected << " messages with the word 'displayed'. \n"
+                  << std::endl;
+
+        TEST_EQUAL("InternalStreamSingleNotsDropped", 0, FindCount(Output, "NOT"));
+        TEST_EQUAL("InternalStreamSinglePassedThrough", Expected, FindCount(Output, "Should be displayed"));
+    }
 
     {
-        std::stringstream TestStealRDBuf;
-        LogStream<char> LogOut(TestStealRDBuf);
-        LogOut.SetLoggingLevel(LL_DebugAndHigher);
-        LogOut << "Part 1 - Logging against a LogStream backedby an std::stringstream" << std::endl;
-        LogOut << "Should be displayed - Default" << std::endl;
-        LogOut << LogWarn << "Should be displayed - Warning" << std::endl;
-        LogOut << LogError << "Should be displayed - Error" << std::endl;
-        LogOut << LogTrace << "Should be NOT displayed - Trace" << std::endl;
-        LogOut << LogFatal << "Should be displayed - Fatal" << std::endl;
-        Mezzanine::String Output(TestStealRDBuf.str());
-        std::cout << Output << std::endl;
+        // Tests the OR(|) operator on Log streams
 
-        TEST_EQUAL("InternalNotsDropped", 0, FindCount(Output, "NOT"));
-        TEST_EQUAL("InternalPassedThrough", 4,FindCount(Output, "displayed"));
-        std::cout << "You should have seen no 'NOT's and 4 messages with the word 'displayed'." << std::endl;
+        std::stringstream TestStealRDBuf;
+        Mezzanine::LogStream TestingLogStream(TestStealRDBuf); // Creating our own logstream
+
+        LogLevel Filter = LogLevel::Trace | LogLevel::Warn;
+        TestingLogStream.SetLoggingLevel(Filter);
+
+        TestingLogStream << "Current LogLevel: " << Filter << std::endl;
+        TestingLogStream << "Part 2 - Logging against any other stream" << std::endl;
+
+        TestingLogStream << "Should be displayed - Default" << std::endl;
+        TestingLogStream << LogTrace << "Should be displayed - Trace" << std::endl;
+        TestingLogStream << LogDebug << "Should NOT be displayed - Debug" << std::endl;
+        TestingLogStream << LogWarn  << "Should be displayed - Warning" << std::endl;
+        TestingLogStream << LogError << "Should NOT be displayed - Error" << std::endl;
+        TestingLogStream << LogFatal << "Should NOT be displayed - Fatal" << std::endl;
+
+        Mezzanine::Integer Expected = 3;
+        Mezzanine::String Output(TestStealRDBuf.str());
+        std::cout << Output
+                  << "You should have seen no 'NOT's and " << Expected << " messages with the word 'displayed'. \n"
+                  << std::endl;
+
+        TEST_EQUAL("InternalStreamORdNotsDropped", 0, FindCount(Output, "NOT"));
+        TEST_EQUAL("InternalStreamORdPassedThrough", Expected, FindCount(Output, "Should be displayed"));
     }
-//    {
-//        std::stringstream TestRawStream;
-//        SetStandardLoggingLevel( Mezzanine::MergeLogLevel(LL_Trace, LL_Debug, LL_Warn) );
-//        TestRawStream << "Part 2 - Logging against any other stream" << std::endl;
-//        TestRawStream << "Should be displayed - Default" << std::endl;
-//        TestRawStream << LogWarn << "Should be displayed - Warning" << std::endl;
-//        TestRawStream << LogError << "Should be NOT displayed - Error" << std::endl;
-//        TestRawStream << LogTrace << "Should be displayed - Trace" << std::endl;
-//        TestRawStream << LogFatal << "Should be NOT displayed - Fatal" << std::endl;
-//        Mezzanine::String Output(TestRawStream.str());
-//        std::cout << Output << std::endl;
-//        TEST_EQUAL("StandardExternalNotsDropped", 0, FindCount(Output, "NOT"));
-//        TEST_EQUAL("StandardExternalPassedThrough", 3, FindCount(Output, "displayed"));
-//        std::cout << "You should have seen no 'NOT's and 3 messages with the word 'displayed'."  << std::endl;
-//    }
+
+    {
+        // Tests the AND(&) operator on log streams
+
+        std::stringstream TestStealRDBuf;
+        Mezzanine::LogStream TestingLogStream(TestStealRDBuf); // Creating our own logstream
+
+        LogLevel Filter = LogLevel::DebugAndHigher & LogLevel::ErrorAndLower;
+        TestingLogStream.SetLoggingLevel(Filter);
+
+        SetStandardLoggingLevel( LogLevel::DebugAndHigher & LogLevel::ErrorAndLower);
+        TestingLogStream << "Current LogLevel: " << Filter << std::endl;
+        TestingLogStream << "Part 3 - Logging against any other stream" << std::endl;
+
+        TestingLogStream << "Should be displayed - Default" << std::endl;
+        TestingLogStream << LogTrace << "Should NOT be displayed - Trace" << std::endl;
+        TestingLogStream << LogDebug << "Should be displayed - Debug" << std::endl;
+        TestingLogStream << LogWarn  << "Should be displayed - Warning" << std::endl;
+        TestingLogStream << LogError << "Should be displayed - Error" << std::endl;
+        TestingLogStream << LogFatal << "Should NOT be displayed - Fatal" << std::endl;
+
+        Mezzanine::Integer Expected = 4;
+        Mezzanine::String Output(TestStealRDBuf.str());
+        std::cout << Output
+                  << "You should have seen no 'NOT's and " << Expected << " messages with the word 'displayed'. \n"
+                  << std::endl;
+
+        TEST_EQUAL("InternalStreamANDedNotsDropped", 0, FindCount(Output, "NOT"));
+        TEST_EQUAL("InternalStreamANDedPassedThrough", Expected, FindCount(Output, "Should be displayed"));
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Using the logging tools with iostreams
+    {
+        // Test a simple use of normal iostreams
+
+        std::stringstream TestingLogStream;
+        // Not creating log stream, setting globally
+        LogLevel Filter = LogLevel::DebugAndHigher;
+        SetStandardLoggingLevel(Filter);
+
+        TestingLogStream << "Part 4 - Logging against a LogStream backed by an std::stringstream" << std::endl;
+        TestingLogStream << "Current LogLevel: " << Filter << std::endl;
+        TestingLogStream << "Should be displayed - Default" << std::endl;
+        TestingLogStream << LogTrace << "Should be NOT displayed - Trace" << std::endl;
+        TestingLogStream << LogDebug << "Should be displayed - Debug" << std::endl;
+        TestingLogStream << LogWarn  << "Should be displayed - Warning" << std::endl;
+        TestingLogStream << LogError << "Should be displayed - Error" << std::endl;
+        TestingLogStream << LogFatal << "Should be displayed - Fatal" << std::endl;
+
+        Mezzanine::Integer Expected = 5;
+        Mezzanine::String Output(TestingLogStream.str());
+        std::cout << Output
+                  << "You should have seen no 'NOT's and " << Expected << " messages with the word 'displayed'. \n"
+                  << std::endl;
+
+        TEST_EQUAL("StandardlStreamSingleNotsDropped", 0, FindCount(Output, "NOT"));
+        TEST_EQUAL("StandardStreamSinglePassedThrough", Expected, FindCount(Output, "Should be displayed"));
+    }
+
+    {
+        // Tests the OR(|) operator globally in std iostreams
+
+        std::stringstream TestingLogStream;
+        // Not creating log stream, setting globally
+        LogLevel Filter = LogLevel::Trace | LogLevel::Warn;
+        SetStandardLoggingLevel(Filter);
+
+        TestingLogStream << "Current LogLevel: " << Filter << std::endl;
+        TestingLogStream << "Part 5 - Logging against any other stream" << std::endl;
+
+        TestingLogStream << "Should be displayed - Default" << std::endl;
+        TestingLogStream << LogTrace << "Should be displayed - Trace" << std::endl;
+        TestingLogStream << LogDebug << "Should NOT be displayed - Debug" << std::endl;
+        TestingLogStream << LogWarn  << "Should be displayed - Warning" << std::endl;
+        TestingLogStream << LogError << "Should NOT be displayed - Error" << std::endl;
+        TestingLogStream << LogFatal << "Should NOT be displayed - Fatal" << std::endl;
+
+        Mezzanine::Integer Expected = 3;
+        Mezzanine::String Output(TestingLogStream.str());
+        std::cout << Output
+                  << "You should have seen no 'NOT's and " << Expected << " messages with the word 'displayed'. \n"
+                  << std::endl;
+
+        TEST_EQUAL("StandardStreamORdNotsDropped", 0, FindCount(Output, "NOT"));
+        TEST_EQUAL("StandardStreamORdPassedThrough", Expected, FindCount(Output, "Should be displayed"));
+    }
+
+    {
+        // Tests the AND(&) operator globally in std iostreams
+
+        std::stringstream TestingLogStream;
+        // Not creating log stream, setting globally
+
+        LogLevel Filter = LogLevel::DebugAndHigher & LogLevel::ErrorAndLower;
+        SetStandardLoggingLevel(Filter);
+
+        TestingLogStream << "Current LogLevel: " << Filter << std::endl;
+        TestingLogStream << "Part 6 - Logging against any other stream" << std::endl;
+
+        TestingLogStream << "Should be displayed - Default" << std::endl;
+        TestingLogStream << LogTrace << "Should NOT be displayed - Trace" << std::endl;
+        TestingLogStream << LogDebug << "Should be displayed - Debug" << std::endl;
+        TestingLogStream << LogWarn  << "Should be displayed - Warning" << std::endl;
+        TestingLogStream << LogError << "Should be displayed - Error" << std::endl;
+        TestingLogStream << LogFatal << "Should NOT be displayed - Fatal" << std::endl;
+
+        Mezzanine::Integer Expected = 4;
+        Mezzanine::String Output(TestingLogStream.str());
+        std::cout << Output
+                  << "You should have seen no 'NOT's and " << Expected << " messages with the word 'displayed'. \n"
+                  << std::endl;
+
+        TEST_EQUAL("StandardStreamANDedNotsDropped", 0, FindCount(Output, "NOT"));
+        TEST_EQUAL("StandardStreamANDedPassedThrough", Expected, FindCount(Output, "Should be displayed"));
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Streaming operator tests
+    {
+        // This is just a few checks that the name of each level appears at least once for each LogLevel
+
+        std::stringstream Converter;
+
+        Converter << LogLevel::None;
+        TEST("LogLevelNoneStreams", 0 < FindCount(Converter.str(), "None"));
+        Converter.str("");
+
+        Converter << LogLevel::Trace;
+        TEST("LogLevelTraceStreams", 0 < FindCount(Converter.str(), "Trace"));
+        Converter.str("");
+
+        Converter << LogLevel::Debug;
+        TEST("LogLevelDebugStreams", 0 < FindCount(Converter.str(), "Debug"));
+        Converter.str("");
+
+        Converter << LogLevel::Warn;
+        TEST("LogLevelWarnStreams", 0 < FindCount(Converter.str(), "Warn"));
+        Converter.str("");
+
+        Converter << LogLevel::Error;
+        TEST("LogLevelErrorStreams", 0 < FindCount(Converter.str(), "Error"));
+        Converter.str("");
+
+        Converter << LogLevel::Fatal;
+        TEST("LogLevelFatalStreams", 0 < FindCount(Converter.str(), "Fatal"));
+        Converter.str("");
+    }
 }
 
 #endif
