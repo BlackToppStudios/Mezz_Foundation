@@ -39,9 +39,13 @@
 */
 
 #include "StreamLogging.h"
+#include "SuppressWarnings.h"
 
 namespace Mezzanine {
+    SAVE_WARNING_STATE
+    SUPPRESS_CLANG_WARNING("-Wmissing-variable-declarations") // This is supposed to be well hiden and located only here.
     LogLevel StdStreamsLoggingFilter = LogLevel::TraceAndHigher;
+    RESTORE_WARNING_STATE
 
     void SetStandardLoggingLevel(LogLevel NewLevel)
         { StdStreamsLoggingFilter = NewLevel; }
@@ -55,6 +59,9 @@ std::ostream& operator << (std::ostream& Stream, Mezzanine::LogLevel StreamingLe
     using Mezzanine::LogLevel;
 
     Stream << "[LogLevel - " << static_cast<Mezzanine::Integer>(StreamingLevel) << " -";
+
+    SAVE_WARNING_STATE
+    SUPPRESS_CLANG_WARNING("-Wswitch-enum") // This is a bitfield not all cases can be explicitly covered.
     switch(StreamingLevel)
     {
         case LogLevel::None:    Stream << " None"; break;
@@ -71,6 +78,7 @@ std::ostream& operator << (std::ostream& Stream, Mezzanine::LogLevel StreamingLe
             if((LogLevel::Fatal & StreamingLevel) != LogLevel::None) { Stream << " Fatal"; }
             break;
     }
+    RESTORE_WARNING_STATE
 
     Stream << "]";
     return Stream;
