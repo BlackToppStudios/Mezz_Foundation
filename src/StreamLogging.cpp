@@ -62,6 +62,7 @@ std::ostream& operator << (std::ostream& Stream, Mezzanine::LogLevel StreamingLe
 
     SAVE_WARNING_STATE
     SUPPRESS_CLANG_WARNING("-Wswitch-enum") // This is a bitfield not all cases can be explicitly covered.
+    SUPPRESS_VC_WARNING(4061) // Again, this is a bitfield the extra cases are covered.
     switch(StreamingLevel)
     {
         case LogLevel::None:    Stream << " None"; break;
