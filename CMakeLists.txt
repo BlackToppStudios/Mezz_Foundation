@@ -84,5 +84,5 @@ EmitTestCode()
 AddTestTarget()
 
 SetCodeCoverage()
-AddIDEVisibility("")
+AddIDEVisibility("Jenkinsfile")
 message(STATUS "${PROJECT_NAME} - Ending Configuration.")
