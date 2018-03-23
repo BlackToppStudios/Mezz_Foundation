@@ -89,7 +89,7 @@ class loggingtests : public UnitTestGroup
                 std::cout << Output << std::endl;
                 TEST(0 == FindCount(Output, "NOT"), "InternalNotsDropped");
                 TEST(4 == FindCount(Output, "displayed"), "InternalPassedThrough");
-                std::cout << "You should have seen no 'NOT's and 4 messages with the word 'displayed'." << std::endl;
+                std::cout << "You should have seen no 'NOT's and 4 messages with the word 'displayed'." << std::endl << std::endl;
             }
 
             {
@@ -103,9 +103,9 @@ class loggingtests : public UnitTestGroup
                 TestRawStream << LogFatal << "Should be NOT displayed - Fatal" << std::endl;
                 String Output(TestRawStream.str());
                 std::cout << Output << std::endl;
-                TEST("StandardExternalNotsDropped", 0, FindCount(Output, "NOT"), );
-                TEST("StandardExternalPassedThrough", 3, FindCount(Output, "displayed"));
-                std::cout << "You should have seen no 'NOT's and 3 messages with the word 'displayed'."  << std::endl;
+                TEST(0 == FindCount(Output, "NOT"), "StandardExternalNotsDropped");
+                TEST(3 == FindCount(Output, "displayed"), "StandardExternalPassedThrough");
+                std::cout << "You should have seen no 'NOT's and 3 messages with the word 'displayed'." << std::endl << std::endl;
             }
         }
         /// @brief Since RunAutomaticTests is implemented so is this.

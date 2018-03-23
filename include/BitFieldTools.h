@@ -41,12 +41,9 @@
 #ifndef Mezz_Foundation_BitFieldTools_h
 #define Mezz_Foundation_BitFieldTools_h
 
-
 // Some headers we don't want swig to see.
 #ifndef SWIG
-
     #include "DataTypes.h"
-
 #endif
 
 namespace Mezzanine {

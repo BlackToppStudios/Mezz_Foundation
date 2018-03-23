@@ -99,7 +99,7 @@ namespace Mezzanine {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // STD Streams configuration
-    //////////////LogLevel////////////////////////////////////
+    //////////////////////////////////////////////////
 
     /// @brief The Standard Streams will filter log messages based on the value passed here.
     /// @details This defaults to Trace and higher which should include all messages.
@@ -128,33 +128,33 @@ namespace Mezzanine {
         /// message is streamed, otherwise it is dropped silently. This can be thought of as a logging filter.
         LogLevel ActivelyLogging;
 
-        public:
-            /// @brief Buffer Stealing Constructor
-            /// @details When used to create a LogStream this will use the rdbuf of another std::basic_ostream
-            /// @param OutputStream This is the stream to steal the buffer from
-            /// @param WillLog The starting LogLevel to capture, which Defaults to TraceAndHigher.
-            BasicLogStream(std::basic_ostream<CharType, CharTraits>& OutputStream,
-                           LogLevel WillLog = LogLevel::TraceAndHigher)
-                : std::basic_ostream<CharType, CharTraits>(OutputStream.rdbuf()),
-                  ActivelyLogging(WillLog)
-                { }
+    public:
+        /// @brief Buffer Stealing Constructor
+        /// @details When used to create a LogStream this will use the rdbuf of another std::basic_ostream
+        /// @param OutputStream This is the stream to steal the buffer from
+        /// @param WillLog The starting LogLevel to capture, which Defaults to TraceAndHigher.
+        BasicLogStream(std::basic_ostream<CharType, CharTraits>& OutputStream,
+                       LogLevel WillLog = LogLevel::TraceAndHigher)
+            : std::basic_ostream<CharType, CharTraits>(OutputStream.rdbuf()),
+              ActivelyLogging(WillLog)
+            { }
 
-            /// @brief Change the level of what this Stream is logging.
-            /// @param NewLevel After this returns any messages sent to this stream will be compared against this.
-            void SetLoggingLevel(LogLevel NewLevel)
-                { ActivelyLogging = NewLevel; }
+        /// @brief Change the level of what this Stream is logging.
+        /// @param NewLevel After this returns any messages sent to this stream will be compared against this.
+        void SetLoggingLevel(LogLevel NewLevel)
+            { ActivelyLogging = NewLevel; }
 
-            /// @brief What will currently be logged?
-            /// @return A LogLevel that is the bitmap of what will be logged.
-            LogLevel GetLoggingLevel()
-                { return ActivelyLogging; }
+        /// @brief What will currently be logged?
+        /// @return A LogLevel that is the bitmap of what will be logged.
+        LogLevel GetLoggingLevel()
+            { return ActivelyLogging; }
 
-            /// @brief Custom Manipulator inserter
-            /// @param pf Accepts a pointer to a LogStream Manipulator
-            /// @return Whatever stream the manipulator returns which should be *this.
-            BasicLogStream<CharType, CharTraits>& operator<<
-                (BasicLogStream<CharType, CharTraits>& (*pf) (BasicLogStream<CharType, CharTraits>&))
-                { return pf(*this); }
+        /// @brief Custom Manipulator inserter
+        /// @param pf Accepts a pointer to a LogStream Manipulator
+        /// @return Whatever stream the manipulator returns which should be *this.
+        BasicLogStream<CharType, CharTraits>& operator<<
+            (BasicLogStream<CharType, CharTraits>& (*pf) (BasicLogStream<CharType, CharTraits>&))
+            { return pf(*this); }
     };
 
     /// @brief If you need a simple stream for logging use this.

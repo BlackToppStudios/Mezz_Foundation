@@ -31,7 +31,7 @@
 #        your distribution
 #
 #   These and other limitations could cause serious legal problems if you ignore
-#   them, so it is best to simply contact us or the Free So${JagatiLinkArray}ftware Foundation, if
+#   them, so it is best to simply contact us or the Free Software Foundation, if
 #   you have any questions.
 #
 #   Joseph Toppi - toppij@gmail.com
