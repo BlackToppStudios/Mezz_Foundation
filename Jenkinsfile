@@ -122,7 +122,7 @@ pipeline {
                         dir('build-debug') { sh """
                             cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
                             ninja &&
-                            node Foundation_Tester.js
+                            node Foundation_Tester.js NoThreads
                         """ }
                     }
                     // Don't capture Emscripten logs, because it cannot make files
@@ -269,7 +269,7 @@ pipeline {
                         dir('build-release') { sh """
                             cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
                             ninja &&
-                            node Foundation_Tester.js
+                            node Foundation_Tester.js NoThreads
                         """ }
                     }
                     // Don't capture Emscripten logs, because it cannot make files

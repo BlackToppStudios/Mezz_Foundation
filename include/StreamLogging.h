@@ -49,6 +49,7 @@
 
     #include "CrossPlatformExport.h"
     #include "DataTypes.h"
+    #include "SuppressWarnings.h"
 
     #include <iostream>
     #include <ostream>
@@ -114,6 +115,9 @@ namespace Mezzanine {
     // LogStream and Modifiers
     //////////////////////////////////////////////////
 
+    SAVE_WARNING_STATE
+    SUPPRESS_CLANG_WARNING("-Wpadded") // Don't care if this is padded, its a stream.
+
     /// @brief A stream that tracks its own level of logging.
     /// @tparam CharType This is kind of character that the stream will work with.
     /// @tparam CharTraits The traits (move, equality, assignment, etc...) of the character type passed in
@@ -156,6 +160,8 @@ namespace Mezzanine {
             (BasicLogStream<CharType, CharTraits>& (*pf) (BasicLogStream<CharType, CharTraits>&))
             { return pf(*this); }
     };
+
+    RESTORE_WARNING_STATE
 
     /// @brief If you need a simple stream for logging use this.
     /// @details These do not provide their own backing storage of any kind so you must provide one, but this isn't

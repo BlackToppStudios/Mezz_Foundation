@@ -38,7 +38,7 @@ build_script:
 
 test_script:
   - cmd: cd C:\projects\Foundation_Tester\build
-  - cmd: Foundation_Tester
+  - cmd: Foundation_Tester xml
 
 notifications:
 - provider: Email
