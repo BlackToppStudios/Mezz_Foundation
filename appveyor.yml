@@ -37,7 +37,7 @@ build_script:
   - cmake --build . --config %CONFIGURATION%
 
 test_script:
-  - cmd: cd C:\projects\Foundation_Tester\build
+  - cmd: cd C:\projects\Mezz_Foundation\build
   - cmd: Foundation_Tester xml
 
 notifications:

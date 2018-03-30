@@ -60,6 +60,8 @@ enum class TestBitField : Mezzanine::UInt8 {
     BC      = 6,
     ABC     = 7
 };
+
+// If your build fails here on an older version of GCC, it may be a compiler bug, please upgrade.
 ENABLE_BITMASK_OPERATORS(TestBitField)
 
 std::ostream& operator << (std::ostream& Stream, TestBitField StreamingBit);
