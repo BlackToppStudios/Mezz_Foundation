@@ -62,9 +62,10 @@ IncludeJagatiPackage("Test")
 # Source files
 message(STATUS "Determining Source Files.")
 
+AddHeaderFile("BitFieldTools.h")
+AddHeaderFile("ManagedArray.h")
 AddHeaderFile("StreamLogging.h")
 AddHeaderFile("Version.h")
-AddHeaderFile("BitFieldTools.h")
 ShowList("Header Files:" "\t" "${FoundationHeaderFiles}")
 
 AddSourceFile("StreamLogging.cpp")
@@ -79,6 +80,7 @@ AddJagatiLibrary()
 CreateCoverageTarget(${FoundationLib} "${FoundationSourceFiles}")
 
 AddTestFile("BitFieldToolsTests.h")
+AddTestFile("ManagedArrayTests.h")
 AddTestFile("StreamLoggingTests.h")
 EmitTestCode()
 AddTestTarget()
