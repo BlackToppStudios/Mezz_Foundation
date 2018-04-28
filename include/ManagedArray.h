@@ -392,16 +392,17 @@ namespace Mezzanine
         template<class InputIterator>
         iterator insert(const_iterator Pos, InputIterator First, InputIterator Last)
         {
-            const std::difference_type ToInsert = std::distance(First,Last);
-            if( static_cast<std::difference_type>( UsedSpace ) + ToInsert > NumElements ) {
+            using DifferenceType = typename std::iterator_traits<InputIterator>::difference_type;
+            const DifferenceType ToInsert = std::distance(First,Last);
+            if( UsedSpace + static_cast<size_t>( ToInsert ) > NumElements ) {
                 throw std::out_of_range("Attempting to add a range of elements that would exceed array capacity.");
             }
 
             iterator Ret = const_cast<iterator>(Pos);
             if( ToInsert > 0 ) {
-                std::difference_type ToMoveConstruct = end() - Pos;
-                std::difference_type ToCopyConstruct = ( ToInsert > ToMoveConstruct ? ToInsert - ToMoveConstruct : 0 );
-                //std::difference_type ToCopy = ToInsert - ToCopyConstruct;
+                DifferenceType ToMoveConstruct = end() - Pos;
+                DifferenceType ToCopyConstruct = ( ToInsert > ToMoveConstruct ? ToInsert - ToMoveConstruct : 0 );
+                //DifferenceType ToCopy = ToInsert - ToCopyConstruct;
 
                 iterator InitTarget = end() + ToInsert - 1;
                 for(  ; ToMoveConstruct > 0 ; --ToMoveConstruct, --InitTarget )
