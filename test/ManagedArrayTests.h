@@ -265,7 +265,7 @@ DEFAULT_TEST_GROUP(ManagedArrayTests,ManagedArray)
 
         TEST_THROW("ManagedArray::insert(const_iterator,const_value_type&)-Throw",
                    std::out_of_range,
-                   [&InsertCopyArray](){ InsertCopyArray.insert(InsertCopyArray.begin(),0xDEADBEEF); });
+                   [&InsertCopyArray](){ InsertCopyArray.insert(InsertCopyArray.begin(),7331); });
 
         ManagedArray<int,3> InsertMoveArray = { 9, 11 };
         InsertMoveArray.insert( InsertMoveArray.begin() + 1, std::move(10) );
@@ -276,7 +276,7 @@ DEFAULT_TEST_GROUP(ManagedArrayTests,ManagedArray)
 
         TEST_THROW("ManagedArray::insert(const_iterator,value_type&&)-Throw",
                    std::out_of_range,
-                   [&InsertMoveArray](){ InsertMoveArray.insert(InsertMoveArray.begin(),0xBAADC0DE); });
+                   [&InsertMoveArray](){ InsertMoveArray.insert(InsertMoveArray.begin(),3317); });
 
         ManagedArray<int,14> InsertRangeArray = { 0, 55, 89 };//{ 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89 };
         ManagedArray<int,4> FirstInsertSource = { 8, 13, 21, 34 };

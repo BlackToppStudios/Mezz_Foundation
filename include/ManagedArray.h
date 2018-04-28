@@ -116,13 +116,13 @@ namespace Mezzanine
         void Destroy(value_type* ToDestroy)
             { ToDestroy->~value_type(); }
         /// @brief Destroys all elements in the container after the specified element.
-        /// @param NewLast A pointer to the element that will become the new end iterator.
+        /// @param NewEnd A pointer to the element that will become the new end iterator.
         void DestroyAtAndAfter(value_type* NewEnd)
         {
             value_type* CountdownToEnd = end();
             while( NewEnd != CountdownToEnd )
                 { Destroy(--CountdownToEnd); }
-            UsedSpace = std::distance(begin(),NewEnd);
+            UsedSpace = static_cast<size_t>( std::distance(begin(),NewEnd) );
         }
     public:
         /// @brief Class constructor.
@@ -392,16 +392,16 @@ namespace Mezzanine
         template<class InputIterator>
         iterator insert(const_iterator Pos, InputIterator First, InputIterator Last)
         {
-            const size_t ToInsert = std::distance(First,Last);
-            if( UsedSpace + ToInsert > NumElements ) {
+            const std::difference_type ToInsert = std::distance(First,Last);
+            if( static_cast<std::difference_type>( UsedSpace ) + ToInsert > NumElements ) {
                 throw std::out_of_range("Attempting to add a range of elements that would exceed array capacity.");
             }
 
             iterator Ret = const_cast<iterator>(Pos);
             if( ToInsert > 0 ) {
-                size_t ToMoveConstruct = end() - Pos;
-                size_t ToCopyConstruct = ( ToInsert > ToMoveConstruct ? ToInsert - ToMoveConstruct : 0 );
-                //size_t ToCopy = ToInsert - ToCopyConstruct;
+                std::difference_type ToMoveConstruct = end() - Pos;
+                std::difference_type ToCopyConstruct = ( ToInsert > ToMoveConstruct ? ToInsert - ToMoveConstruct : 0 );
+                //std::difference_type ToCopy = ToInsert - ToCopyConstruct;
 
                 iterator InitTarget = end() + ToInsert - 1;
                 for(  ; ToMoveConstruct > 0 ; --ToMoveConstruct, --InitTarget )
@@ -411,7 +411,7 @@ namespace Mezzanine
                     { Create( InitTarget, *(--Last) ); }
 
                 std::copy(First,Last,Ret);
-                UsedSpace += ToInsert;
+                UsedSpace += static_cast<size_t>( ToInsert );
             }
             return Ret;
         }
