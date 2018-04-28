@@ -159,6 +159,7 @@ namespace Mezzanine
         /// @return Returns a reference to this.
         SelfType& operator=(SelfType&& Other)
         {
+            clear();
             for( Whole CurrIdx = 0 ; CurrIdx < Other.size() ; ++CurrIdx )
                 { push_back( std::move( Other[CurrIdx] ) ); }
             Other.clear();
