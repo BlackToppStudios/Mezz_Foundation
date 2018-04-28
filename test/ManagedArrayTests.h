@@ -93,7 +93,7 @@ DEFAULT_TEST_GROUP(ManagedArrayTests,ManagedArray)
         ManagedArray<int,12> CopyAssignSource = { 1, 3, 5, 7, 9 };
         ManagedArray<int,12> CopyAssignDest = { 9, 7, 5, 3, 1, 0 };
         CopyAssignDest = CopyAssignSource;
-        TEST_EQUAL("ManagedArray::operator=(const_ManagedArray&)-SourceSize",size_t(5),CopyAssignSource.size());
+        TEST_EQUAL("ManagedArray::operator=(const_ManagedArray&)-SourceSize",size_t(0),CopyAssignSource.size());
         TEST_EQUAL("ManagedArray::operator=(const_ManagedArray&)-DestSize",size_t(5),CopyAssignDest.size());
         TEST_EQUAL("ManagedArray::operator=(const_ManagedArray&)-SourceElement1",1,CopyAssignSource[0]);
         TEST_EQUAL("ManagedArray::operator=(const_ManagedArray&)-SourceElement2",3,CopyAssignSource[1]);
