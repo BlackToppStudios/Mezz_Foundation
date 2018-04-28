@@ -50,6 +50,9 @@
 
 namespace Mezzanine
 {
+    SAVE_WARNING_STATE
+    SUPPRESS_CLANG_WARNING("-Wpadded")
+
     /// @addtogroup Containers
     /// @{
 
@@ -444,11 +447,12 @@ namespace Mezzanine
         /// @return Returns an iterator to the first element after the removed range.
         iterator erase(const_iterator First, const_iterator Last)
         {
+            using DifferenceType = typename std::iterator_traits<const_iterator>::difference_type;
             if( !(First >= begin() && Last < end()) ) {
                 throw std::out_of_range("Iterator range is outside the valid container range.");
             }
             iterator Ret = const_cast<iterator>(First);
-            size_t ElementsToErase = std::distance(First,Last);
+            DifferenceType ElementsToErase = std::distance(First,Last);
             if( ElementsToErase > 0 ) {
                 DestroyAtAndAfter( std::move(Ret + ElementsToErase,end(),Ret) );
             }
@@ -474,6 +478,8 @@ namespace Mezzanine
     };//ManagedArray
 
     /// @}
+
+    RESTORE_WARNING_STATE
 } // Mezzanine
 
 #endif // Include guard
