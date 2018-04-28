@@ -51,6 +51,8 @@
 namespace Mezzanine
 {
     SAVE_WARNING_STATE
+    SUPPRESS_VC_WARNING(4996)
+    SUPPRESS_GCC_WARNING("-Wpadded")
     SUPPRESS_CLANG_WARNING("-Wpadded")
 
     /// @addtogroup Containers
