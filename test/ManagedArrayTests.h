@@ -261,7 +261,7 @@ DEFAULT_TEST_GROUP(ManagedArrayTests,ManagedArray)
         const int InsertCopyValue = 5;
         InsertCopyArray.insert( InsertCopyArray.begin() + 1, InsertCopyValue );
         InsertCopyArray.insert( InsertCopyArray.end(), 7 );
-        TEST_EQUAL("ManagedArray::insert(const_iterator,const_value_type&)-Size",size_t(3),InsertCopyArray.size());
+        TEST_EQUAL("ManagedArray::insert(const_iterator,const_value_type&)-Size",size_t(4),InsertCopyArray.size());
         TEST_EQUAL("ManagedArray::insert(const_iterator,const_value_type&)-Element1",4,InsertCopyArray[0]);
         TEST_EQUAL("ManagedArray::insert(const_iterator,const_value_type&)-Element2",5,InsertCopyArray[1]);
         TEST_EQUAL("ManagedArray::insert(const_iterator,const_value_type&)-Element3",6,InsertCopyArray[2]);
@@ -274,7 +274,7 @@ DEFAULT_TEST_GROUP(ManagedArrayTests,ManagedArray)
         ManagedArray<int,4> InsertMoveArray = { 9, 11 };
         InsertMoveArray.insert( InsertMoveArray.begin() + 1, std::move(10) );
         InsertMoveArray.insert( InsertMoveArray.end(), std::move(12) );
-        TEST_EQUAL("ManagedArray::insert(const_iterator,value_type&&)-Size",size_t(3),InsertMoveArray.size());
+        TEST_EQUAL("ManagedArray::insert(const_iterator,value_type&&)-Size",size_t(4),InsertMoveArray.size());
         TEST_EQUAL("ManagedArray::insert(const_iterator,value_type&&)-Element1",9,InsertMoveArray[0]);
         TEST_EQUAL("ManagedArray::insert(const_iterator,value_type&&)-Element2",10,InsertMoveArray[1]);
         TEST_EQUAL("ManagedArray::insert(const_iterator,value_type&&)-Element3",11,InsertMoveArray[2]);
