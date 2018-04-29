@@ -231,7 +231,7 @@ DEFAULT_TEST_GROUP(ManagedArrayTests,ManagedArray)
                    std::out_of_range,
                    [&](){ AppendArray.append(ThrowAppendSource.begin(),ThrowAppendSource.end()); });
 
-        ManagedArray<int,4> EmplaceArray = { 1, 3, 7 };
+        ManagedArray<int,5> EmplaceArray = { 1, 3, 7 };
         EmplaceArray.emplace(EmplaceArray.begin() + 1, 3 );
         EmplaceArray.emplace(EmplaceArray.end(),1337);
         TEST_EQUAL("ManagedArray::emplace(const_iterator,ArgTypes&&...)-Size",size_t(5),EmplaceArray.size());
@@ -258,9 +258,10 @@ DEFAULT_TEST_GROUP(ManagedArrayTests,ManagedArray)
                    [&EmplaceBackArray](){ EmplaceBackArray.emplace_back("NOT!"); });
 
         ManagedArray<int,4> InsertCopyArray = { 4, 6 };
-        const int InsertCopyValue = 5;
-        InsertCopyArray.insert( InsertCopyArray.begin() + 1, InsertCopyValue );
-        InsertCopyArray.insert( InsertCopyArray.end(), 7 );
+        const int InsertCopyValue1 = 5;
+        const int InsertCopyValue2 = 7;
+        InsertCopyArray.insert( InsertCopyArray.begin() + 1, InsertCopyValue1 );
+        InsertCopyArray.insert( InsertCopyArray.end(), InsertCopyValue2 );
         TEST_EQUAL("ManagedArray::insert(const_iterator,const_value_type&)-Size",size_t(4),InsertCopyArray.size());
         TEST_EQUAL("ManagedArray::insert(const_iterator,const_value_type&)-Element1",4,InsertCopyArray[0]);
         TEST_EQUAL("ManagedArray::insert(const_iterator,const_value_type&)-Element2",5,InsertCopyArray[1]);
