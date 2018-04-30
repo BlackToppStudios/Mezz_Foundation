@@ -10,16 +10,16 @@ matrix:
 #      env: BUILD_TYPE=Release
     - os: osx
       compiler: clang
-      env: BUILD_TYPE=Release
+      env: BUILD_TYPE=Debug
     - os: osx
       compiler: gcc
-      env: BUILD_TYPE=Release
+      env: BUILD_TYPE=Debug
     - os: osx
       compiler: clang
-      env: BUILD_TYPE=Debug
+      env: BUILD_TYPE=Release
     - os: osx
       compiler: gcc
-      env: BUILD_TYPE=Debug
+      env: BUILD_TYPE=Release
 
 before_script:
   - mkdir build
