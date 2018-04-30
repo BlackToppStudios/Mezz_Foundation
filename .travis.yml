@@ -4,18 +4,22 @@ language: cpp
 
 matrix:
   include:
-    #- os: linux
-    #  env: BUILD_TYPE=Debug
-    #- os: linux
-    #  env: BUILD_TYPE=Release
+#    - os: linux
+#      env: BUILD_TYPE=Debug
+#    - os: linux
+#      env: BUILD_TYPE=Release
     - os: osx
+      compiler: clang
+      env: BUILD_TYPE=Release
+    - os: osx
+      compiler: gcc
+      env: BUILD_TYPE=Release
+    - os: osx
+      compiler: clang
       env: BUILD_TYPE=Debug
     - os: osx
-      env: BUILD_TYPE=Release
-
-compiler:
-  - clang
-  - gcc
+      compiler: gcc
+      env: BUILD_TYPE=Debug
 
 before_script:
   - mkdir build
