@@ -24,7 +24,7 @@ matrix:
 before_script:
   - mkdir build
   - cd build
-  - cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=$(BUILD_TYPE) -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=ON
+  - cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=ON
 
 install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then sudo apt-get install valgrind ninja-build ggcov -q -y; fi
