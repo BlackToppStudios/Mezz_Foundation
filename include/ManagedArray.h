@@ -50,9 +50,6 @@
 
 namespace Mezzanine
 {
-    SAVE_WARNING_STATE
-    SUPPRESS_CLANG_WARNING("-Wpadded")
-
     /// @addtogroup Containers
     /// @{
 
@@ -87,10 +84,15 @@ namespace Mezzanine
         /// @brief Type of const reverse iterator for random access. Invalidated on all insertions.
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
     private:
+        SAVE_WARNING_STATE
+        SUPPRESS_CLANG_WARNING("-Wpadded")
+
         /// @brief The internal buffer storing all of our objects.
         BufferElementType InternalStorage[NumElements];
         /// @brief The amount of initialized elements that exist in the buffer.
         size_t UsedSpace{0};
+
+        RESTORE_WARNING_STATE
 
         ///////////////////////////////////////////////////////////////////////////////
         // Raw buffer/element management
@@ -478,8 +480,6 @@ namespace Mezzanine
     };//ManagedArray
 
     /// @}
-
-    RESTORE_WARNING_STATE
 } // Mezzanine
 
 #endif // Include guard
