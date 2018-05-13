@@ -42,17 +42,27 @@ cmake_minimum_required(VERSION 3.0)
 project(Foundation)
 message(STATUS "${PROJECT_NAME} - Starting Configuration.")
 
-##########################################################################|#############################################
-# Download, Verify and setup the Jagati
-set(JagatiChecksum "ac7d90ec940c72e7154d1a7593ed5c80da866699e09e16685e699c\
-a9383e302b69afdcf5d9a239e730538fc0ba65e88d61cdb8dc08f05a2ea37f87cbcb8c5bc5")
-file(DOWNLOAD
-    "https://raw.githubusercontent.com/BlackToppStudios/Jagati/0.22.0/Jagati.cmake"
-    "${${PROJECT_NAME}_BINARY_DIR}/Jagati.cmake"
-    EXPECTED_HASH SHA512=${JagatiChecksum}
-)
+############################################################################|###########################################
+# Download, Verify and Setup the Jagati
+if(NOT JAGATI_File)
+    set(JAGATI_File "${${PROJECT_NAME}_BINARY_DIR}/Jagati.cmake" CACHE FILEPATH
+        "The file to load the Jagati from and potentially to download it to.")
+endif(NOT JAGATI_File)
+if(NOT JAGATI_Download)
+    option(JAGATI_Download "Should the Jagati be downloaded automatically" ON)
+endif(NOT JAGATI_Download)
+if(JAGATI_Download)
+    set(JAGATI_Checksum "a6ef39bf2436c98dfdf476e1e4d2649a2d8e267dbbdc7ec6d66\
+5850e23ef00718d7df60f586673ea902eb69637ff14b3c33d0e36d76057e2c4c4f6fa6cabb414"
+        CACHE STRING "Check that when the Jagati is downloaded the right one is used (for consistency and security).")
+    set(JAGATI_Url "https://raw.githubusercontent.com/BlackToppStudios/Jagati/0.22.2/Jagati.cmake"
+        CACHE STRING "Where to download the Jagati from.")
+    file(DOWNLOAD "${JAGATI_Url}" "${JAGATI_File}" EXPECTED_HASH SHA512=${JAGATI_Checksum})
+endif(JAGATI_Download)
+include("${JAGATI_File}")
 
-include("${${PROJECT_NAME}_BINARY_DIR}/Jagati.cmake")
+########################################################################################################################
+# The rest of the Jagati setup
 
 StandardJagatiSetup()
 IncludeJagatiPackage("StaticFoundation")
