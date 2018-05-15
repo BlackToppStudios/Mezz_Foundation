@@ -44,10 +44,10 @@ message(STATUS "${PROJECT_NAME} - Starting Configuration.")
 
 ##########################################################################|#############################################
 # Download, Verify and setup the Jagati
-set(JagatiChecksum "d17080276fb7f2bfae1b7bfc1cb0812e8f9b44bf20ff2c2387fbee\
-397b186643f7da522855ebb8e641ffacaeffc0deabb26688f350382e444f82074e751f512e")
+set(JagatiChecksum "3a79e63b4c83bfa4b45ff35d851f02cfb3488fd041685b84943f0d\
+c06dac0128dec60ab43db1c5b08eab587f75e4dc1256eb4b5f340c3dfacf7905fe51de1f27")
 file(DOWNLOAD
-    "https://raw.githubusercontent.com/BlackToppStudios/Jagati/0.22.3/Jagati.cmake"
+    "https://raw.githubusercontent.com/BlackToppStudios/Jagati/0.23.0/Jagati.cmake"
     "${${PROJECT_NAME}_BINARY_DIR}/Jagati.cmake"
     EXPECTED_HASH SHA512=${JagatiChecksum}
 )
