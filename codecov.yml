@@ -9,7 +9,7 @@ coverage:
   precision: 2
   range:
   - 70.0
-  - 100.0
+  - 95.0
   round: down
   status:
     changes: false

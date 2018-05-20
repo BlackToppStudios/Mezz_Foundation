@@ -4,27 +4,27 @@ language: cpp
 
 matrix:
   include:
-#    - os: linux
-#      env: BUILD_TYPE=Debug
-#    - os: linux
-#      env: BUILD_TYPE=Release
     - os: osx
       compiler: clang
       env: BUILD_TYPE=Debug
+      env: CXX_FLAGS=-O0
     - os: osx
       compiler: gcc
       env: BUILD_TYPE=Debug
+      env: CXX_FLAGS=-O0
     - os: osx
       compiler: clang
       env: BUILD_TYPE=Release
+      env: CXX_FLAGS=
     - os: osx
       compiler: gcc
       env: BUILD_TYPE=Release
+      env: CXX_FLAGS=
 
 before_script:
   - mkdir build
   - cd build
-  - cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=ON
+  - cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DCMAKE_CXX_FLAGS="$CXX_FLAGS" -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=ON
 
 install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then sudo apt-get install valgrind ninja-build ggcov -q -y; fi
