@@ -52,10 +52,10 @@ if(NOT JAGATI_Download)
     option(JAGATI_Download "Should the Jagati be downloaded automatically" ON)
 endif(NOT JAGATI_Download)
 if(JAGATI_Download)
-    set(JAGATI_Checksum "a6ef39bf2436c98dfdf476e1e4d2649a2d8e267dbbdc7ec6d66\
-5850e23ef00718d7df60f586673ea902eb69637ff14b3c33d0e36d76057e2c4c4f6fa6cabb414"
+    set(JAGATI_Checksum "e1594b1c012268a7714fc65cda1ea2eaa0ea385f48bcec0c964\
+dfb88a5943b6be88c0c3b0c8839cc18c86cafcd353fa88f7963ada1c1cebcf4949ae555101522"
         CACHE STRING "Check that when the Jagati is downloaded the right one is used (for consistency and security).")
-    set(JAGATI_Url "https://raw.githubusercontent.com/BlackToppStudios/Jagati/0.22.2/Jagati.cmake"
+    set(JAGATI_Url "https://raw.githubusercontent.com/BlackToppStudios/Jagati/0.25.0/Jagati.cmake"
         CACHE STRING "Where to download the Jagati from.")
     file(DOWNLOAD "${JAGATI_Url}" "${JAGATI_File}" EXPECTED_HASH SHA512=${JAGATI_Checksum})
 endif(JAGATI_Download)
@@ -72,9 +72,10 @@ IncludeJagatiPackage("Test")
 # Source files
 message(STATUS "Determining Source Files.")
 
+AddHeaderFile("BitFieldTools.h")
+AddHeaderFile("ManagedArray.h")
 AddHeaderFile("StreamLogging.h")
 AddHeaderFile("Version.h")
-AddHeaderFile("BitFieldTools.h")
 ShowList("Header Files:" "\t" "${FoundationHeaderFiles}")
 
 AddSourceFile("StreamLogging.cpp")
@@ -89,6 +90,7 @@ AddJagatiLibrary()
 CreateCoverageTarget(${FoundationLib} "${FoundationSourceFiles}")
 
 AddTestFile("BitFieldToolsTests.h")
+AddTestFile("ManagedArrayTests.h")
 AddTestFile("StreamLoggingTests.h")
 EmitTestCode()
 AddTestTarget()
