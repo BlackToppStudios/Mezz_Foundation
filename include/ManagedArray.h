@@ -182,6 +182,10 @@ namespace Mezzanine
         /// @return A const iterator pointing to the first element.
         const_iterator begin() const noexcept
             { return reinterpret_cast<const value_type*>( InternalStorage ); }
+        /// @brief Get a const iterator to the beginning of the container.
+        /// @return A const iterator pointing to the first element.
+        const_iterator cbegin() const noexcept
+            { return reinterpret_cast<const value_type*>( InternalStorage ); }
 
         /// @brief Get an iterator to one past the end of the container.
         /// @return A mutable iterator to one past the end of the container.
@@ -190,6 +194,10 @@ namespace Mezzanine
         /// @brief Get a const iterator to one past the end of the container.
         /// @return A const iterator to one past the end of the container.
         const_iterator end() const noexcept
+            { return begin() + UsedSpace; }
+        /// @brief Get a const iterator to one past the end of the container.
+        /// @return A const iterator to one past the end of the container.
+        const_iterator cend() const noexcept
             { return begin() + UsedSpace; }
 
         /// @brief Get an iterator to the last element of the container, going backwards.
@@ -200,6 +208,10 @@ namespace Mezzanine
         /// @return A const reverse iterator pointing to the first element at the end.
         const_reverse_iterator rbegin() const noexcept
             { return const_reverse_iterator( end() ); }
+        /// @brief Get a const iterator to the last element of the container, going backwards.
+        /// @return A const reverse iterator pointing to the first element at the end.
+        const_reverse_iterator crbegin() const noexcept
+            { return const_reverse_iterator( end() ); }
 
         /// @brief Get an iterator to one before the first element of the container.
         /// @return A mutable reverse iterator pointing to the reverse end element at the start.
@@ -208,6 +220,10 @@ namespace Mezzanine
         /// @brief Get a const iterator to one before the first element of the container.
         /// @return A const reverse iterator pointing to the reverse end element at the start.
         const_reverse_iterator rend() const noexcept
+            { return const_reverse_iterator( begin() ); }
+        /// @brief Get a const iterator to one before the first element of the container.
+        /// @return A const reverse iterator pointing to the reverse end element at the start.
+        const_reverse_iterator crend() const noexcept
             { return const_reverse_iterator( begin() ); }
 
         ///////////////////////////////////////////////////////////////////////////////
