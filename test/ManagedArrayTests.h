@@ -131,23 +131,31 @@ DEFAULT_TEST_GROUP(ManagedArrayTests,ManagedArray)
         const ManagedArray<int,15> ConstTestArray = { 1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 66, 78, 91, 105, 120 };
 
         ManagedArray<int,10>::iterator BeginIter = TestArray.begin();
+        ManagedArray<int,10>::const_iterator CBeginIter = TestArray.cbegin();
         ManagedArray<int,15>::const_iterator ConstBeginIter = ConstTestArray.begin();
         TEST_EQUAL("ManagedArray::begin()",3,*BeginIter);
+        TEST_EQUAL("ManagedArray::cbegin()",3,*CBeginIter);
         TEST_EQUAL("ManagedArray::begin()_const",1,*ConstBeginIter);
 
         ManagedArray<int,10>::iterator EndIter = TestArray.end();
+        ManagedArray<int,10>::const_iterator CEndIter = TestArray.cend();
         ManagedArray<int,15>::const_iterator ConstEndIter = ConstTestArray.end();
         TEST_EQUAL("ManagedArray::end()",10,EndIter - BeginIter);
+        TEST_EQUAL("ManagedArray::cend()",10,CEndIter - CBeginIter);
         TEST_EQUAL("ManagedArray::end()_const",15,ConstEndIter - ConstBeginIter);
 
         ManagedArray<int,10>::reverse_iterator BeginRevIter = TestArray.rbegin();
+        ManagedArray<int,10>::const_reverse_iterator CBeginRevIter = TestArray.crbegin();
         ManagedArray<int,15>::const_reverse_iterator ConstBeginRevIter = ConstTestArray.rbegin();
         TEST_EQUAL("ManagedArray::rbegin()",38,*BeginRevIter);
+        TEST_EQUAL("ManagedArray::crbegin()",38,*CBeginRevIter);
         TEST_EQUAL("ManagedArray::rbegin()_const",120,*ConstBeginRevIter);
 
         ManagedArray<int,10>::reverse_iterator EndRevIter = TestArray.rend();
+        ManagedArray<int,10>::const_reverse_iterator CEndRevIter = TestArray.crend();
         ManagedArray<int,15>::const_reverse_iterator ConstEndRevIter = ConstTestArray.rend();
         TEST_EQUAL("ManagedArray::rend()",10,EndRevIter - BeginRevIter);
+        TEST_EQUAL("ManagedArray::crend()",10,CEndRevIter - CBeginRevIter);
         TEST_EQUAL("ManagedArray::rend()_const",15,ConstEndRevIter - ConstBeginRevIter);
     }//Iterators
 
