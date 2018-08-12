@@ -29,7 +29,7 @@ before_script:
 install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then sudo apt-get install valgrind ninja-build ggcov -q -y; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] ; then sudo ln -sf /usr/bin/gcov-4.8 /usr/bin/gcov; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]   ; then brew install valgrind ninja; fi
+#  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]   ; then brew install valgrind ninja; fi
 
 script:
   - ninja
