@@ -1,4 +1,4 @@
-// © Copyright 2010 - 2017 BlackTopp Studios Inc.
+// Â© Copyright 2010 - 2018 BlackTopp Studios Inc.
 /* This file is part of The Mezzanine Engine.
 
     The Mezzanine Engine is free software: you can redistribute it and/or modify
@@ -38,8 +38,8 @@
    John Blackwood - makoenergy02@gmail.com
 */
 
-#ifndef _version_h
-#define _version_h
+#ifndef Mezz_Foundation_Version_h
+#define Mezz_Foundation_Version_h
 
 #include "datatypes.h"
 

@@ -52,10 +52,10 @@ if(NOT JAGATI_Download)
     option(JAGATI_Download "Should the Jagati be downloaded automatically" ON)
 endif(NOT JAGATI_Download)
 if(JAGATI_Download)
-    set(JAGATI_Checksum "5417802bf9150088c086df70453e091b060b6d03edf005f90dd\
-a39b504906f76bffa0dbcc02248597e536beceed7dc90c8c582aae9f4a98447efdf8d609b23c0"
+    set(JAGATI_Checksum "04ab32b7021c9ca0f1ccbda42bc0f3294a42002d1b27fe0814b\
+b9d669ff4f84f5fbee1306a4841910c5aa84ec477980ade9219ad33d88b70984a7cc4dad8be61"
         CACHE STRING "Check that when the Jagati is downloaded the right one is used (for consistency and security).")
-    set(JAGATI_Url "https://raw.githubusercontent.com/BlackToppStudios/Jagati/0.25.1/Jagati.cmake"
+    set(JAGATI_Url "https://raw.githubusercontent.com/BlackToppStudios/Jagati/0.26.0/Jagati.cmake"
         CACHE STRING "Where to download the Jagati from.")
     file(DOWNLOAD "${JAGATI_Url}" "${JAGATI_File}" EXPECTED_HASH SHA512=${JAGATI_Checksum})
 endif(JAGATI_Download)
@@ -74,6 +74,8 @@ message(STATUS "Determining Source Files.")
 
 AddHeaderFile("BitFieldTools.h")
 AddHeaderFile("ManagedArray.h")
+#AddHeaderFile("SerializationBackEnd.h")
+#AddHeaderFile("SerializationNode.h")
 AddHeaderFile("StreamLogging.h")
 AddHeaderFile("Version.h")
 ShowList("Header Files:" "\t" "${FoundationHeaderFiles}")
