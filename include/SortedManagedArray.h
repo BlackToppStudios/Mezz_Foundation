@@ -106,38 +106,38 @@ namespace Mezzanine
 
         /// @brief Get an iterator to the beginning of the container.
         /// @return A mutable iterator pointing to the first element.
-        iterator begin()
+        iterator begin() noexcept
             { return InternalStorage.begin(); }
         /// @brief Get a const iterator to the beginning of the container.
         /// @return A const iterator pointing to the first element.
-        const_iterator begin() const
+        const_iterator begin() const noexcept
             { return InternalStorage.begin(); }
 
         /// @brief Get an iterator to one past the end of the container.
         /// @return A mutable iterator to one past the end of the container.
-        iterator end()
+        iterator end() noexcept
             { return InternalStorage.end(); }
         /// @brief Get an iterator to one past the end of the container.
         /// @return A const iterator to one past the end of the container.
-        const_iterator end() const
+        const_iterator end() const noexcept
             { return InternalStorage.end(); }
 
         /// @brief Get an iterator to the last element of the container, going backwards.
         /// @return A mutable reverse iterator pointing to the first element at the end.
-        reverse_iterator rbegin()
+        reverse_iterator rbegin() noexcept
             { return InternalStorage.rbegin(); }
         /// @brief Get a const iterator to the last element of the container, going backwards.
         /// @return A const reverse iterator pointing to the first element at the end.
-        const_reverse_iterator rbegin() const
+        const_reverse_iterator rbegin() const noexcept
             { return InternalStorage.rbegin(); }
 
         /// @brief Get an iterator to one before the first element of the container.
         /// @return A mutable reverse iterator pointing to the reverse end element at the start.
-        reverse_iterator rend()
+        reverse_iterator rend() noexcept
             { return InternalStorage.rend(); }
         /// @brief Get a const iterator to one before the first element of the container.
         /// @return A const reverse iterator pointing to the reverse end element at the start.
-        const_reverse_iterator rend() const
+        const_reverse_iterator rend() const noexcept
             { return InternalStorage.rend(); }
 
         /// @brief Uses std::sort to sort this, might using something more special focus in the
@@ -147,7 +147,7 @@ namespace Mezzanine
 
         /// @brief How many items are stored in this?
         /// @return Some integer type, likely unsigned indicating how many items this stores.
-        size_type size() const
+        size_type size() const noexcept
             { return InternalStorage.size(); }
 
         /// @brief Since this container has no array-like concept this inserts the item were
@@ -260,7 +260,7 @@ namespace Mezzanine
             { InternalStorage.clear(); }
         /// @brief How many items can this store before requiring an allocation.
         /// @return Returns the total number of elements this array has room for.
-        size_type capacity() const
+        size_type capacity() const noexcept
             { return InternalStorage.capacity(); }
         /// @brief Gets whether or not this array is empty.
         /// @return Returns true if this array is not storing any elements, false otherwise.

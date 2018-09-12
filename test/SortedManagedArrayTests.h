@@ -61,22 +61,22 @@ DEFAULT_TEST_GROUP(SortedManagedArrayTests,SortedManagedArray)
         TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-Element6",92,InitializerTest[5]);
 
         SortedManagedArray<int,10,std::less<int>> InitializerTestLess = { 3, 14, 15, 92, 65, 35 };
-        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-ResultSizeLess",size_t(6),InitializerTest.size());
-        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-Element1Less",3,InitializerTest[0]);
-        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-Element2Less",14,InitializerTest[1]);
-        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-Element3Less",15,InitializerTest[2]);
-        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-Element4Less",35,InitializerTest[3]);
-        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-Element5Less",65,InitializerTest[4]);
-        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-Element6Less",92,InitializerTest[5]);
+        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-ResultSizeLess",size_t(6),InitializerTestLess.size());
+        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-Element1Less",3,InitializerTestLess[0]);
+        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-Element2Less",14,InitializerTestLess[1]);
+        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-Element3Less",15,InitializerTestLess[2]);
+        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-Element4Less",35,InitializerTestLess[3]);
+        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-Element5Less",65,InitializerTestLess[4]);
+        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-Element6Less",92,InitializerTestLess[5]);
 
         SortedManagedArray<int,10,std::greater<int>> InitializerTestGreater = { 3, 14, 15, 92, 65, 35 };
-        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-ResultSizeGreater",size_t(6),InitializerTest.size());
-        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-Element1Greater",92,InitializerTest[0]);
-        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-Element2Greater",65,InitializerTest[1]);
-        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-Element3Greater",35,InitializerTest[2]);
-        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-Element4Greater",15,InitializerTest[3]);
-        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-Element5Greater",14,InitializerTest[4]);
-        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-Element6Greater",3,InitializerTest[5]);
+        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-ResultSizeGreater",size_t(6),InitializerTestGreater.size());
+        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-Element1Greater",92,InitializerTestGreater[0]);
+        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-Element2Greater",65,InitializerTestGreater[1]);
+        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-Element3Greater",35,InitializerTestGreater[2]);
+        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-Element4Greater",15,InitializerTestGreater[3]);
+        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-Element5Greater",14,InitializerTestGreater[4]);
+        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-Element6Greater",3,InitializerTestGreater[5]);
 
         SortedManagedArray<int,10> CopyTest(InitializerTest);
         TEST_EQUAL("SortedManagedArray::SortedManagedArray(const_SortedManagedArray&)-ResultSize",size_t(6),CopyTest.size());
@@ -208,41 +208,40 @@ DEFAULT_TEST_GROUP(SortedManagedArrayTests,SortedManagedArray)
         TEST_EQUAL("SortedManagedArray::contains(const_value_type&)_const-Pass",true,QueryArray.contains(36));
         TEST_EQUAL("SortedManagedArray::contains(const_value_type&)_const-Fail",false,QueryArray.contains(50));
 
-        TEST_EQUAL("SortedManagedArray::find()-4",4,*QueryArray.find(4));
         SortedManagedArray<int,16>::iterator Find4 = QueryArray.find(4);
-        SortedManagedArray<int,16>::iterator Find8 = QueryArray.find(8);
+        SortedManagedArray<int,16>::iterator Find9 = QueryArray.find(9);
         SortedManagedArray<int,16>::iterator Find64 = QueryArray.find(64);
         SortedManagedArray<int,16>::iterator FindFail = QueryArray.find(999);
         SortedManagedArray<int,16>::iterator FindEnd = QueryArray.end();
-        SortedManagedArray<int,24>::const_iterator ConstFind4 = QueryArray.find(4);
-        SortedManagedArray<int,24>::const_iterator ConstFind8 = QueryArray.find(8);
-        SortedManagedArray<int,24>::const_iterator ConstFind64 = QueryArray.find(64);
-        SortedManagedArray<int,24>::const_iterator ConstFindFail = QueryArray.find(999);
-        SortedManagedArray<int,24>::const_iterator ConstFindEnd = QueryArray.end();
+        SortedManagedArray<int,24>::const_iterator ConstFind1 = ConstQueryArray.find(1);
+        SortedManagedArray<int,24>::const_iterator ConstFind8 = ConstQueryArray.find(8);
+        SortedManagedArray<int,24>::const_iterator ConstFind64 = ConstQueryArray.find(64);
+        SortedManagedArray<int,24>::const_iterator ConstFindFail = ConstQueryArray.find(999);
+        SortedManagedArray<int,24>::const_iterator ConstFindEnd = ConstQueryArray.end();
 
         TEST_EQUAL("SortedManagedArray::find()-4",4,*Find4);
-        TEST_EQUAL("SortedManagedArray::find()-8",8,*Find8);
+        TEST_EQUAL("SortedManagedArray::find()-9",9,*Find9);
         TEST_EQUAL("SortedManagedArray::find()-64",64,*Find64);
         TEST_EQUAL("SortedManagedArray::find()-Fail",FindFail,FindEnd);
-        TEST_EQUAL("SortedManagedArray::find()_const-4",4,*ConstFind4);
+        TEST_EQUAL("SortedManagedArray::find()_const-1",1,*ConstFind1);
         TEST_EQUAL("SortedManagedArray::find()_const-8",8,*ConstFind8);
         TEST_EQUAL("SortedManagedArray::find()-const_64",64,*ConstFind64);
         TEST_EQUAL("SortedManagedArray::find()-const_Fail",ConstFindFail,ConstFindEnd);
 
         SortedManagedArray<int,16>::iterator Findif4 = QueryArray.find_if([](const int Num){ return Num == 4; });
-        SortedManagedArray<int,16>::iterator Findif8 = QueryArray.find_if([](const int Num){ return Num == 8; });
+        SortedManagedArray<int,16>::iterator Findif9 = QueryArray.find_if([](const int Num){ return Num == 9; });
         SortedManagedArray<int,16>::iterator Findif64 = QueryArray.find_if([](const int Num){ return Num == 64; });
         SortedManagedArray<int,16>::iterator FindifFail = QueryArray.find_if([](const int Num){ return Num == 999; });
         SortedManagedArray<int,16>::iterator FindifEnd = QueryArray.end();
 
         TEST_EQUAL("SortedManagedArray::findif()-4",4,*Findif4);
-        TEST_EQUAL("SortedManagedArray::findif()-8",8,*Findif8);
+        TEST_EQUAL("SortedManagedArray::findif()-8",9,*Findif9);
         TEST_EQUAL("SortedManagedArray::findif()-64",64,*Findif64);
         TEST_EQUAL("SortedManagedArray::findif()-Fail",FindifFail,FindifEnd);
     }//Query and Access End
 
     {//Sequence Modifiers
-        SortedManagedArray<int,8> ModifierArray = { 1, 10 };
+        SortedManagedArray<int,7> ModifierArray = { 1, 10 };
 
         ModifierArray.add(0);
         ModifierArray.add(5);
@@ -266,8 +265,8 @@ DEFAULT_TEST_GROUP(SortedManagedArrayTests,SortedManagedArray)
         TEST_EQUAL("SortedManagedArray::add_range()-Element3",2,ModifierArray[2]);
         TEST_EQUAL("SortedManagedArray::add_range()-Element4",5,ModifierArray[3]);
         TEST_EQUAL("SortedManagedArray::add_range()-Element5",10,ModifierArray[4]);
-        TEST_EQUAL("SortedManagedArray::add_range()-Element5",11,ModifierArray[5]);
-        TEST_EQUAL("SortedManagedArray::add_range()-Element5",50,ModifierArray[6]);
+        TEST_EQUAL("SortedManagedArray::add_range()-Element6",11,ModifierArray[5]);
+        TEST_EQUAL("SortedManagedArray::add_range()-Element7",50,ModifierArray[6]);
 
         TEST_THROW("SortedManagedArray::add()-Throw",
                 std::out_of_range,
@@ -285,12 +284,12 @@ DEFAULT_TEST_GROUP(SortedManagedArrayTests,SortedManagedArray)
 
         ModifierArray.erase(ModifierArray.begin()+1,ModifierArray.begin()+3);
 
-        TEST_EQUAL("SortedManagedArray::erase()-size",size_t(4),ModifierArray.size());
+        TEST_EQUAL("SortedManagedArray::erase()-Multiple",size_t(4),ModifierArray.size());
         // {1, 10, 11, 50}
-        TEST_EQUAL("SortedManagedArray::add_range()-Element1",1,ModifierArray[0]);
-        TEST_EQUAL("SortedManagedArray::add_range()-Element2",10,ModifierArray[1]);
-        TEST_EQUAL("SortedManagedArray::add_range()-Element3",11,ModifierArray[2]);
-        TEST_EQUAL("SortedManagedArray::add_range()-Element4",50,ModifierArray[3]);
+        TEST_EQUAL("SortedManagedArray::add_range()-PostEraseElement1",1,ModifierArray[0]);
+        TEST_EQUAL("SortedManagedArray::add_range()-PostEraseElement2",10,ModifierArray[1]);
+        TEST_EQUAL("SortedManagedArray::add_range()-PostEraseElement3",11,ModifierArray[2]);
+        TEST_EQUAL("SortedManagedArray::add_range()-PostEraseElement4",50,ModifierArray[3]);
 
         ModifierArray.clear();
 
@@ -301,9 +300,9 @@ DEFAULT_TEST_GROUP(SortedManagedArrayTests,SortedManagedArray)
         SortedManagedArray<String,10> StringTest = { "A", "C", "B" };
 
         TEST_EQUAL("SortedManagedArray::size()-initial",size_t(3),StringTest.size())
-        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-Element1","A",StringTest[0]);
-        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-Element2","B",StringTest[1]);
-        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-Element3","C",StringTest[2]);
+        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-StringElement1","A",StringTest[0]);
+        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-StringElement2","B",StringTest[1]);
+        TEST_EQUAL("SortedManagedArray::SortedManagedArray(std::initializer_list<ElementType>)-StringElement3","C",StringTest[2]);
 
         StringTest.erase(StringTest.begin());
         TEST_EQUAL("SortedManagedArray::size()-StringErase",size_t(2),StringTest.size())
