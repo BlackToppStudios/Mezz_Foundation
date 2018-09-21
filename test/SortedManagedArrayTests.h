@@ -255,7 +255,7 @@ DEFAULT_TEST_GROUP(SortedManagedArrayTests,SortedManagedArray)
         TEST_EQUAL("SortedManagedArray::add()-Element4",10,ModifierArray[3]);
         TEST_EQUAL("SortedManagedArray::add()-Element5",50,ModifierArray[4]);
 
-        std::vector<Whole> AddRangeTest = { 2, 11 };
+        std::vector<int> AddRangeTest = { 2, 11 };
         ModifierArray.add_range(AddRangeTest.begin(),AddRangeTest.end());
 
         TEST_EQUAL("SortedManagedArray::add_range()-size",size_t(7),ModifierArray.size());
