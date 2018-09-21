@@ -56,10 +56,12 @@ namespace Mezzanine
         // Finds the lower bound in at most log(last - first) + 1 comparisons
         Iter i = std::lower_bound(begin, end, val, Comparer);
 
-        if (i != end && !Comparer(val,*i))
+        if (i != end && !Comparer(val,*i)) {
             return i; // found
-        else
+        }
+        else {
             return end; // not found
+        }
     }
 
     /// @brief Search throught an iterator range and return the desired iterator.
@@ -80,10 +82,12 @@ namespace Mezzanine
         // Finds the lower bound in at most log(last - first) + 1 comparisons
         Iter i = std::lower_bound(begin, end, val);
 
-        if (i != end && !(val < *i))
+        if (i != end && !(val < *i)) {
             return i; // found
-        else
+        }
+        else {
             return end; // not found
+        }
     }
 }//Mezzanine
 
