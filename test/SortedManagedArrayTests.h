@@ -143,23 +143,31 @@ DEFAULT_TEST_GROUP(SortedManagedArrayTests,SortedManagedArray)
         const SortedManagedArray<int,15> ConstTestArray = { 1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 66, 78, 91, 105, 120 };
 
         SortedManagedArray<int,10>::iterator BeginIter = TestArray.begin();
+        SortedManagedArray<int,10>::const_iterator CBeginIter = TestArray.cbegin();
         SortedManagedArray<int,15>::const_iterator ConstBeginIter = ConstTestArray.begin();
         TEST_EQUAL("SortedManagedArray::begin()",3,*BeginIter);
+        TEST_EQUAL("SortedManagedArray::cbegin()",3,*CBeginIter);
         TEST_EQUAL("SortedManagedArray::begin()_const",1,*ConstBeginIter);
 
         SortedManagedArray<int,10>::iterator EndIter = TestArray.end();
+        SortedManagedArray<int,10>::const_iterator CEndIter = TestArray.cend();
         SortedManagedArray<int,15>::const_iterator ConstEndIter = ConstTestArray.end();
         TEST_EQUAL("SortedManagedArray::end()",10,EndIter - BeginIter);
+        TEST_EQUAL("SortedManagedArray::cend()",10,CEndIter - CBeginIter);
         TEST_EQUAL("SortedManagedArray::end()_const",15,ConstEndIter - ConstBeginIter);
 
         SortedManagedArray<int,10>::reverse_iterator BeginRevIter = TestArray.rbegin();
+        SortedManagedArray<int,10>::const_reverse_iterator CBeginRevIter = TestArray.crbegin();
         SortedManagedArray<int,15>::const_reverse_iterator ConstBeginRevIter = ConstTestArray.rbegin();
         TEST_EQUAL("SortedManagedArray::rbegin()",92,*BeginRevIter);
+        TEST_EQUAL("SortedManagedArray::crbegin()",92,*CBeginRevIter);
         TEST_EQUAL("SortedManagedArray::rbegin()_const",120,*ConstBeginRevIter);
 
         SortedManagedArray<int,10>::reverse_iterator EndRevIter = TestArray.rend();
+        SortedManagedArray<int,10>::const_reverse_iterator CEndRevIter = TestArray.crend();
         SortedManagedArray<int,15>::const_reverse_iterator ConstEndRevIter = ConstTestArray.rend();
         TEST_EQUAL("SortedManagedArray::rend()",10,EndRevIter - BeginRevIter);
+        TEST_EQUAL("SortedManagedArray::crend()",10,CEndRevIter - CBeginRevIter);
         TEST_EQUAL("SortedManagedArray::rend()_const",15,ConstEndRevIter - ConstBeginRevIter);
     }//Iterators End
 
