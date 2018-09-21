@@ -296,7 +296,7 @@ DEFAULT_TEST_GROUP(SortedManagedArrayTests,SortedManagedArray)
         TEST_EQUAL("SortedManagedArray::clear()-size",size_t(0),ModifierArray.size());
     }//Sequence Modifiers End
 
-    {
+    {//Alternate Element Types
         SortedManagedArray<String,10> StringTest = { "A", "C", "B" };
 
         TEST_EQUAL("SortedManagedArray::size()-initial",size_t(3),StringTest.size())
@@ -317,7 +317,7 @@ DEFAULT_TEST_GROUP(SortedManagedArrayTests,SortedManagedArray)
 
         StringTest.clear();
         TEST_EQUAL("SortedManagedArray::clear()-Strings",size_t(0),StringTest.size());
-    }
-}//sortedmanagedarraytests
+    }//Alternate Element Types End
+}
 
 #endif

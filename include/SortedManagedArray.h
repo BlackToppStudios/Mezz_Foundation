@@ -38,7 +38,7 @@
 /// @brief This file includes the declaration and definition for the SortedArray class.
 
 #ifndef SWIG
-    #include "binaryfind.h"
+    #include "BinaryFind.h"
     #include "ManagedArray.h"
 #endif
 
@@ -48,6 +48,7 @@ namespace Mezzanine
     /// @brief This container uses a ManagedArray for storage, but manages the amount of used space and keeps them sorted.
     /// @tparam ElementType The type this container will store, must implement operator< for sorting with the default sorter.
     /// @tparam NumElements The number of ElementType instances this array will be allocated to store.
+    /// @tparam Sorter The Sorter type to determine how the elements are sorted.
     ///////////////////////////////////////
     template<typename ElementType, size_t NumElements, typename Sorter = std::less<ElementType> >
     class SortedManagedArray
@@ -140,7 +141,7 @@ namespace Mezzanine
         const_reverse_iterator rend() const noexcept
             { return InternalStorage.rend(); }
 
-        /// @brief Uses std::sort to sort this, might using something more special focus in the
+        /// @brief Uses std::sort to sort this, might use something more special in the
         /// future.
         void sort()
             { std::sort(begin(),end(), Sorter()); }
@@ -150,7 +151,7 @@ namespace Mezzanine
         size_type size() const noexcept
             { return InternalStorage.size(); }
 
-        /// @brief Since this container has no array-like concept this inserts the item were
+        /// @brief Since this container has no array-like concept this inserts the item where
         /// it needs to go.
         /// @details This has all the potential allocation slow downs of push_back
         /// and costs of find the required place to insert. This sorts the whole container after
@@ -158,15 +159,17 @@ namespace Mezzanine
         /// @ref add_range to only sort once.
         /// @param value The value to put into the array.
         /// @return Returns an iterator to the added element.
-        iterator add(ElementType value)
+        iterator add(const ElementType& value)
         {
             const_iterator InsertPos = std::lower_bound(begin(),end(),value,Sorter());
             return InternalStorage.insert(InsertPos,value);
         }
 
         /// @brief As "add" but allows construction of the element in the container.
+        /// @tparam Compare Binary predicate type to determine position of the element in the container.
         /// @tparam Args A variadic template of arguments to be used to construct the element in place.
         /// @param Params List of arguments needed to construct the element.
+        /// @param PosFinder Binary predicate type to find position to construct the element.
         template<typename Compare, class... Args>
         iterator add_emplace(Compare PosFinder, Args&&... Params)
         {
