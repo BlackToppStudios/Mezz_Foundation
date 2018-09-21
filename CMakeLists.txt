@@ -72,6 +72,7 @@ IncludeJagatiPackage("Test")
 # Source files
 message(STATUS "Determining Source Files.")
 
+AddHeaderFile("BinaryFind.h")
 AddHeaderFile("BitFieldTools.h")
 AddHeaderFile("ManagedArray.h")
 AddHeaderFile("SortedManagedArray.h")

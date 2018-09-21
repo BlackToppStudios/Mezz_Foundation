@@ -1,4 +1,4 @@
-// © Copyright 2010 - 2017 BlackTopp Studios Inc.
+// © Copyright 2010 - 2018 BlackTopp Studios Inc.
 /* This file is part of The Mezzanine Engine.
     The Mezzanine Engine is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,10 +31,13 @@
    Joseph Toppi - toppij@gmail.com
    John Blackwood - makoenergy02@gmail.com
 */
-#ifndef binaryfind_h
-#define binaryfind_h
+#ifndef Mezz_Foundation_BinaryFind_h
+#define Mezz_Foundation_BinaryFind_h
 
-#include "DataTypes.h"
+#ifndef SWIG
+    #include "DataTypes.h"
+#endif
+
 
 namespace Mezzanine
 {
