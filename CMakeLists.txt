@@ -72,8 +72,10 @@ IncludeJagatiPackage("Test")
 # Source files
 message(STATUS "Determining Source Files.")
 
+AddHeaderFile("BinaryFind.h")
 AddHeaderFile("BitFieldTools.h")
 AddHeaderFile("ManagedArray.h")
+AddHeaderFile("SortedManagedArray.h")
 AddHeaderFile("StreamLogging.h")
 AddHeaderFile("Version.h")
 ShowList("Header Files:" "\t" "${FoundationHeaderFiles}")
@@ -91,6 +93,7 @@ CreateCoverageTarget(${FoundationLib} "${FoundationSourceFiles}")
 
 AddTestFile("BitFieldToolsTests.h")
 AddTestFile("ManagedArrayTests.h")
+AddTestFile("SortedManagedArrayTests.h")
 AddTestFile("StreamLoggingTests.h")
 EmitTestCode()
 AddTestTarget()
