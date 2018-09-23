@@ -182,18 +182,6 @@ namespace Mezzanine
             return InternalStorage.insert(InsertPos,value);
         }
 
-        /// @brief As "add" but allows construction of the element in the container.
-        /// @tparam Compare Binary predicate type to determine position of the element in the container.
-        /// @tparam Args A variadic template of arguments to be used to construct the element in place.
-        /// @param Params List of arguments needed to construct the element.
-        /// @param PosFinder Binary predicate type to find position to construct the element.
-        template<typename Compare, class... Args>
-        iterator add_emplace(Compare PosFinder, Args&&... Params)
-        {
-            const_iterator InsertPos = std::lower_bound(begin(),end(),Params...,PosFinder);
-            return InternalStorage.emplace(InsertPos,Params...);
-        }
-
         /// @brief Add several items at once efficiently.
         /// @details Sorts only once so is much faster than add(),
         /// @tparam ForeignIterator The type of the other container's iterator, must be at least a forward iterator.
