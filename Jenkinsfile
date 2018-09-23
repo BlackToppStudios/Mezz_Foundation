@@ -4,7 +4,7 @@ pipeline {
     agent none
     options {
         buildDiscarder(logRotator(numToKeepStr:'30'))
-        timeout(time: 1200, unit: 'SECONDS')
+        timeout(time: 600, unit: 'SECONDS')
     }
     stages {
         stage('Checkout') {

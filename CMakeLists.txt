@@ -72,16 +72,14 @@ IncludeJagatiPackage("Test")
 # Source files
 message(STATUS "Determining Source Files.")
 
-
 AddHeaderFile("BaseSerializationAttribute.h")
 AddHeaderFile("BaseSerializationBackEnd.h")
 AddHeaderFile("BaseSerializationNode.h")
 AddHeaderFile("BaseSerializationRootNode.h")
-
+AddHeaderFile("BinaryFind.h")
 AddHeaderFile("BitFieldTools.h")
 AddHeaderFile("ManagedArray.h")
-#AddHeaderFile("SerializationBackEnd.h")
-#AddHeaderFile("SerializationNode.h")
+AddHeaderFile("SortedManagedArray.h")
 AddHeaderFile("StreamLogging.h")
 AddHeaderFile("Version.h")
 ShowList("Header Files:" "\t" "${FoundationHeaderFiles}")
@@ -99,8 +97,9 @@ CreateCoverageTarget(${FoundationLib} "${FoundationSourceFiles}")
 
 AddTestFile("BitFieldToolsTests.h")
 AddTestFile("ManagedArrayTests.h")
-AddTestFile("StreamLoggingTests.h")
 AddTestFile("SerializationTests.h")
+AddTestFile("SortedManagedArrayTests.h")
+AddTestFile("StreamLoggingTests.h")
 EmitTestCode()
 AddTestTarget()
 
