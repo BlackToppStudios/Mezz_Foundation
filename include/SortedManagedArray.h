@@ -45,8 +45,9 @@
 namespace Mezzanine
 {
     ///////////////////////////////////////////////////////////////////////////////
-    /// @brief This container uses a ManagedArray for storage, but manages the amount of used space and keeps them sorted.
-    /// @tparam ElementType The type this container will store, must implement operator< for sorting with the default sorter.
+    /// @brief This container uses a ManagedArray for storage, but keeps them sorted and manages used space.
+    /// @tparam ElementType The type this container will store, must implement operator< for sorting
+    /// with the default sorter.
     /// @tparam NumElements The number of ElementType instances this array will be allocated to store.
     /// @tparam Sorter The Sorter type to determine how the elements are sorted.
     ///////////////////////////////////////
@@ -116,7 +117,7 @@ namespace Mezzanine
         /// @brief Get a const iterator to the beginning of the container.
         /// @return A const iterator pointing to the first element.
         const_iterator cbegin() const noexcept
-            { return InternalStorage.begin(); }
+            { return InternalStorage.cbegin(); }
 
         /// @brief Get an iterator to one past the end of the container.
         /// @return A mutable iterator to one past the end of the container.
@@ -129,7 +130,7 @@ namespace Mezzanine
         /// @brief Get an iterator to one past the end of the container.
         /// @return A const iterator to one past the end of the container.
         const_iterator cend() const noexcept
-            { return InternalStorage.end(); }
+            { return InternalStorage.cend(); }
 
         /// @brief Get an iterator to the last element of the container, going backwards.
         /// @return A mutable reverse iterator pointing to the first element at the end.
@@ -142,7 +143,7 @@ namespace Mezzanine
         /// @brief Get a const iterator to the last element of the container, going backwards.
         /// @return A const reverse iterator pointing to the first element at the end.
         const_reverse_iterator crbegin() const noexcept
-            { return InternalStorage.rbegin(); }
+            { return InternalStorage.crbegin(); }
 
         /// @brief Get an iterator to one before the first element of the container.
         /// @return A mutable reverse iterator pointing to the reverse end element at the start.
@@ -155,7 +156,7 @@ namespace Mezzanine
         /// @brief Get a const iterator to one before the first element of the container.
         /// @return A const reverse iterator pointing to the reverse end element at the start.
         const_reverse_iterator crend() const noexcept
-            { return InternalStorage.rend(); }
+            { return InternalStorage.crend(); }
 
         /// @brief Uses std::sort to sort this, might use something more special in the
         /// future.
@@ -195,8 +196,7 @@ namespace Mezzanine
 
         /// @brief Add several items at once efficiently.
         /// @details Sorts only once so is much faster than add(),
-        /// @tparam ForeignIterator The type of the the iterator of the other container, must
-        /// be at least a forward iterator.
+        /// @tparam ForeignIterator The type of the other container's iterator, must be at least a forward iterator.
         /// @param OtherBegin An iterator to the start of the other range to be copied.
         /// @param OtherEnd An iterator to one past the end.
         template<class ForeignIterator>
@@ -255,15 +255,17 @@ namespace Mezzanine
 
         /// @brief A convenience method for invoking std::find_if with all the elements of this container.
         /// @tparam UnaryPredicate The type of invokable that will perform the checks.
-        /// @param Pred An instance of the predicate that will takes one of this containers elements and returns true or false.
-        /// @return Returns an iterator to the element that made the predicate return true, or the end iterator if they all returned false.
+        /// @param Pred A predicate instance that takes one of this containers elements and returns true or false.
+        /// @return Returns an iterator to the element that made the predicate return true, or the
+        /// end iterator if they all returned false.
         template<class UnaryPredicate>
         iterator find_if(UnaryPredicate Pred)
             { return std::find_if(begin(),end(),Pred); }
         /// @brief A convenience method for invoking std::find_if with all the elements of this container.
         /// @tparam UnaryPredicate The type of invokable that will perform the checks.
-        /// @param Pred An instance of the predicate that will takes one of this containers elements and returns true or false.
-        /// @return Returns a const iterator to the element that made the predicate return true, or the end iterator if they all returned false.
+        /// @param Pred A predicate instance that takes one of this containers elements and returns true or false.
+        /// @return Returns a const iterator to the element that made the predicate return true, or the
+        /// end iterator if they all returned false.
         template<class UnaryPredicate>
         const_iterator find_if(UnaryPredicate Pred) const
             { return std::find_if(begin(),end(),Pred); }
