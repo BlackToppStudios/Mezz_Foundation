@@ -191,6 +191,8 @@ namespace Mezzanine
     ///////////////////////////////////////////////////////////////////////////////
     /// @brief A container that uses type-erasure to store a single instance of a type with a specific size.
     /// @tparam AnySize The size of the object to be stored.  Smaller objects may be stored as well.
+    /// @remarks On some platforms this class will pad its members to an alignment boundary, usually 4-byte
+    /// on 32-bit systems and 8-byte on 64-bit systems.
     ///////////////////////////////////////
     template<size_t AnySize>
     class StaticAny
@@ -222,10 +224,10 @@ namespace Mezzanine
         SAVE_WARNING_STATE
         SUPPRESS_CLANG_WARNING("-Wpadded")
 
-        /// @brief Pointer to the operation function for performing common operations on our Element.
-        OperationFunct ElementOp = nullptr;
         /// @brief Internal buffer storing our type-erased Element.
         BufferType InternalStorage;
+        /// @brief Pointer to the operation function for performing common operations on our Element.
+        OperationFunct ElementOp = nullptr;
 
         RESTORE_WARNING_STATE
 
@@ -464,7 +466,7 @@ namespace Mezzanine
         if( std::type_index( typeid(ElementType) ) != std::type_index( Any.get_type() ) ) {
             throw std::bad_cast();
         }
-        return reinterpret_cast<ElementType&>( Any.InternalStorage );
+        return *reinterpret_cast<ElementType*>( Any.InternalStorage );
     }
     /// @brief Casts a StaticAny into its appropriate type.
     /// @warning You can only cast a StaticAny into the exact type that that was stored in it.  You cannot
@@ -482,7 +484,7 @@ namespace Mezzanine
         if( std::type_index( typeid(ElementType) ) != std::type_index( Any.get_type() ) ) {
             throw std::bad_cast();
         }
-        return reinterpret_cast<const ElementType&>( Any.InternalStorage );
+        return *reinterpret_cast<const ElementType*>( Any.InternalStorage );
     }
     /// @brief Casts a StaticAny into its appropriate type.
     /// @warning You can only cast a StaticAny into the exact type that that was stored in it.  You cannot
