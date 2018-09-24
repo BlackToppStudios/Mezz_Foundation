@@ -182,7 +182,7 @@ namespace Mezzanine
         constexpr size_t GetBestAlign(const size_t Val) noexcept
         {
             size_t Ret = 1;
-            while( Ret < Val )
+            while( Ret < Val && Ret < alignof(std::max_align_t) )
                 { Ret *= 2; }
             return Ret;
         }
@@ -203,7 +203,8 @@ namespace Mezzanine
         /// @brief Function pointer type containing our operations for the stored data.
         using OperationFunct = void(*)(const StaticAnyOperations Op, void* Any, void* Datum);
         /// @brief The type of internal buffer where our object will be stored.
-        using BufferType = typename std::aligned_storage<AnySize,StaticAnyHelpers::GetBestAlign(AnySize)>::type;
+        //using BufferType = typename std::aligned_storage<AnySize,StaticAnyHelpers::GetBestAlign(AnySize)>::type;
+        using BufferType = alignas(StaticAnyHelpers::GetBestAlign(AnySize)) char[AnySize];
     protected:
         // Friend declarations for the various implementations of StaticAnyCast.
         template<size_t>
@@ -502,7 +503,7 @@ namespace Mezzanine
         if( std::type_index( typeid(ElementType) ) != std::type_index( Any->get_type() ) ) {
             throw std::bad_cast();
         }
-        return reinterpret_cast<ElementType*>( &(Any->InternalStorage) );
+        return reinterpret_cast<ElementType*>( Any->InternalStorage );
     }
     /// @brief Casts a StaticAny into its appropriate type.
     /// @warning You can only cast a StaticAny into the exact type that that was stored in it.  You cannot
@@ -520,7 +521,7 @@ namespace Mezzanine
         if( std::type_index( typeid(ElementType) ) != std::type_index( Any->get_type() ) ) {
             throw std::bad_cast();
         }
-        return reinterpret_cast<const ElementType*>( &(Any->InternalStorage) );
+        return reinterpret_cast<const ElementType*>( Any->InternalStorage );
     }
 }//Mezzanine
 
