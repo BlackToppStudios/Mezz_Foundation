@@ -219,10 +219,15 @@ namespace Mezzanine
         template<class ElementType, size_t AnyCastSize>
         friend const ElementType* StaticAnyCast(const StaticAny<AnyCastSize>* Any);
 
+        SAVE_WARNING_STATE
+        SUPPRESS_CLANG_WARNING("-Wpadded")
+
         /// @brief Pointer to the operation function for performing common operations on our Element.
         OperationFunct ElementOp = nullptr;
         /// @brief Internal buffer storing our type-erased Element.
         BufferType InternalStorage;
+
+        RESTORE_WARNING_STATE
 
         /// @brief Copies an Element into this StaticAny.
         /// @tparam ElementType The type that will be stored.
