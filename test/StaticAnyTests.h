@@ -92,10 +92,10 @@ DEFAULT_TEST_GROUP(StaticAnyTests,StaticAny)
         const double Eulers(2.7182818);
         AnyType DoubleAny( Archimedes );
         const AnyType ConstDoubleAny( Eulers );
-        TEST_EQUAL( "StaticAnyCast<double>(StaticAny<>)-Ptr-Pass",
-                    Archimedes, *StaticAnyCast<double>(&DoubleAny) );
-        TEST_EQUAL( "StaticAnyCast<double>(StaticAny<>)-ConstPtr-Pass",
-                    Eulers, *StaticAnyCast<double>(&ConstDoubleAny) );
+        TEST_EQUAL_EPSILON( "StaticAnyCast<double>(StaticAny<>)-Ptr-Pass",
+                            Archimedes, *StaticAnyCast<double>(&DoubleAny) );
+        TEST_EQUAL_EPSILON( "StaticAnyCast<double>(StaticAny<>)-ConstPtr-Pass",
+                            Eulers, *StaticAnyCast<double>(&ConstDoubleAny) );
         TEST_THROW( "StaticAnyCast<double>(StaticAny<>)-Ptr-Fail",
                     std::bad_cast,
                     [&DoubleAny](){ StaticAnyCast<float>(DoubleAny); } );
@@ -224,7 +224,7 @@ DEFAULT_TEST_GROUP(StaticAnyTests,StaticAny)
         TEST_EQUAL( "empty()_const-Unsigned",
                     true, UtilityAny.empty() );
 
-        UtilityAny.emplace<unsigned>(2304);
+        UtilityAny.emplace<unsigned>(unsigned(2304));
         TEST_EQUAL( "emplace(ArgTypes&&...)-Unsigned",
                     unsigned(2304), StaticAnyCast<unsigned>(UtilityAny) );
 
