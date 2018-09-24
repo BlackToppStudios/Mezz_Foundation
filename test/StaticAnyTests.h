@@ -103,16 +103,16 @@ DEFAULT_TEST_GROUP(StaticAnyTests,StaticAny)
                     std::bad_cast,
                     [&ConstDoubleAny](){ StaticAnyCast<float>(ConstDoubleAny); } );
 
-        AnyType SharedPtrAny( std::make_shared<int>(123) );
-        const AnyType ConstSharedPtrAny( std::make_shared<float>(1.25f) );
-        TEST_EQUAL( "StaticAnyCast<_std::shared_ptr<int>_>(StaticAny<>)-Ref-Pass",
-                    int(123), *( StaticAnyCast< std::shared_ptr<int> >(SharedPtrAny) ) );
-        TEST_EQUAL( "StaticAnyCast<_std::shared_ptr<float>_>(StaticAny<>)-ConstRef-Pass",
-                    float(1.25f), *( StaticAnyCast< std::shared_ptr<float> >(ConstSharedPtrAny) ) );
-        TEST_THROW( "StaticAnyCast<_std::shared_ptr<int>_>(StaticAny<>)-Ref-Fail",
+        AnyType SharedPtrAny( std::make_shared<long>(123) );
+        const AnyType ConstSharedPtrAny( std::make_shared<short>(123456) );
+        TEST_EQUAL( "StaticAnyCast<_std::shared_ptr<long>_>(StaticAny<>)-Ref-Pass",
+                    long(123), *( StaticAnyCast< std::shared_ptr<long> >(SharedPtrAny) ) );
+        TEST_EQUAL( "StaticAnyCast<_std::shared_ptr<long unsigned>_>(StaticAny<>)-ConstRef-Pass",
+                    short(12345), *( StaticAnyCast< std::shared_ptr<short> >(ConstSharedPtrAny) ) );
+        TEST_THROW( "StaticAnyCast<_std::shared_ptr<long>_>(StaticAny<>)-Ref-Fail",
                     std::bad_cast,
                     [&SharedPtrAny](){ StaticAnyCast< std::shared_ptr<char> >(SharedPtrAny); } );
-        TEST_THROW( "StaticAnyCast<_std::shared_ptr<float>_>(StaticAny<>)-ConstRef-Fail",
+        TEST_THROW( "StaticAnyCast<_std::shared_ptr<short>_>(StaticAny<>)-ConstRef-Fail",
                     std::bad_cast,
                     [&ConstSharedPtrAny](){ StaticAnyCast< std::shared_ptr<char> >(ConstSharedPtrAny); } );
     }// Casting

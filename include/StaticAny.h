@@ -313,13 +313,13 @@ namespace Mezzanine
         explicit StaticAny(StaticAny&& Other)
             { MoveAny( std::move(Other) ); }
         /// @brief Copy from different size StaticAny constructor.
-        /// @tparam Size The size of the internal buffer in the StaticAny to copy.
+        /// @tparam CheckSize The size of the internal buffer in the StaticAny to copy.
         /// @param Other The other StaticAny to copy.
         template<size_t CheckSize, typename = std::enable_if_t< (CheckSize < AnySize) > >
         StaticAny(const StaticAny<CheckSize>& Other)
             { CopyAny(Other); }
         /// @brief Move from different size StaticAny constructor.
-        /// @tparam Size The size of the internal buffer in the StaticAny to move.
+        /// @tparam CheckSize The size of the internal buffer in the StaticAny to move.
         /// @param Other The other StaticAny to move.
         template<size_t CheckSize, typename = std::enable_if_t< (CheckSize < AnySize) > >
         StaticAny(StaticAny<CheckSize>&& Other)
@@ -327,7 +327,6 @@ namespace Mezzanine
         /// @brief Move value constructor.
         /// @tparam ElementType The type of element that will be stored inside the StaticAny.
         /// @param Val The value to be moved.
-        //template<typename ElementType, typename = std::enable_if_t< !is_static_any_v< std::remove_cv_t< std::remove_reference_t<ElementType> > > > >
         template<typename ElementType, typename = std::enable_if_t< !is_static_any_decayed_v< ElementType > > >
         StaticAny(ElementType&& Val)
             { CopyOrMoveValue( std::forward<ElementType>( Val ) ); }
@@ -379,7 +378,6 @@ namespace Mezzanine
         /// @tparam ElementType The type of element to be moved.
         /// @param Val The element to be moved.
         /// @return Returns a reference to this.
-        //template<typename ElementType, typename = std::enable_if_t< !is_static_any_v< std::remove_cv_t< std::remove_reference_t<ElementType> > > > >
         template<typename ElementType, typename = std::enable_if_t< !is_static_any_decayed_v< ElementType > > >
         SelfType& operator=(ElementType&& Val)
         {
