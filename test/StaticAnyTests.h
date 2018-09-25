@@ -103,8 +103,8 @@ DEFAULT_TEST_GROUP(StaticAnyTests,StaticAny)
                     std::bad_cast,
                     [&ConstDoubleAny](){ StaticAnyCast<float>(ConstDoubleAny); } );
 
-        AnyType SharedPtrAny( std::make_shared<long>(123) );
-        const AnyType ConstSharedPtrAny( std::make_shared<short>(12345) );
+        AnyType SharedPtrAny( std::make_shared<long>( long(123) ) );
+        const AnyType ConstSharedPtrAny( std::make_shared<short>( short(12345) ) );
         TEST_EQUAL( "StaticAnyCast<_std::shared_ptr<long>_>(StaticAny<>)-Ref-Pass",
                     long(123), *( StaticAnyCast< std::shared_ptr<long> >(SharedPtrAny) ) );
         TEST_EQUAL( "StaticAnyCast<_std::shared_ptr<short>_>(StaticAny<>)-ConstRef-Pass",
@@ -153,10 +153,10 @@ DEFAULT_TEST_GROUP(StaticAnyTests,StaticAny)
         TEST_EQUAL( "StaticAny(StaticAny&&)-Source-Unsigned",
                     true, MoveAnySource.empty() );
 
-        SmallerAnyType SmallerAny( short(54321) );
+        SmallerAnyType SmallerAny( short(4321) );
         AnyType CopySmallerAny(SmallerAny);
         TEST_EQUAL( "StaticAny(const_StaticAny<size_t>&)-Unsigned",
-                    short(54321), StaticAnyCast<short>(CopySmallerAny) );
+                    short(4321), StaticAnyCast<short>(CopySmallerAny) );
 
         SmallerAnyType SmallerMoveSource( short(123) );
         AnyType SmallerMoveDest( std::move(SmallerMoveSource) );
