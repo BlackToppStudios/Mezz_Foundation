@@ -191,8 +191,9 @@ namespace Mezzanine
     ///////////////////////////////////////////////////////////////////////////////
     /// @brief A container that uses type-erasure to store a single instance of a type with a specific size.
     /// @tparam AnySize The size of the object to be stored.  Smaller objects may be stored as well.
-    /// @remarks On some platforms this class will pad its members to an alignment boundary, usually 4-byte
-    /// on 32-bit systems and 8-byte on 64-bit systems.
+    /// @remarks On some platforms this class will pad its members to an alignment boundary as determined by
+    /// 'StaticAnyHelpers::GetBestAlign(size_t)'.  Extended alignment (any alignment that exceeds
+    /// std::max_align_t) is not supported by this class.
     ///////////////////////////////////////
     template<size_t AnySize>
     class StaticAny
@@ -285,8 +286,7 @@ namespace Mezzanine
         template<size_t OtherSize>
         void CopyAny(const StaticAny<OtherSize>& Other)
         {
-            //using OtherBufType = typename StaticAny<OtherSize>::BufferType;
-            static_assert(AnySize >= OtherSize,"Element must be able to fit in the allocated space.");
+            static_assert(AnySize >= OtherSize,"Element size exceeds allocated space.");
             assert(ElementOp == nullptr);
 
             void* ThisData = GetStoragePtr();
@@ -300,7 +300,6 @@ namespace Mezzanine
         template<size_t OtherSize>
         void MoveAny(StaticAny<OtherSize>&& Other)
         {
-            //using OtherBufType = typename StaticAny<OtherSize>::BufferType;
             static_assert(AnySize >= OtherSize,"Element must be able to fit in the allocated space.");
             assert(ElementOp == nullptr);
 

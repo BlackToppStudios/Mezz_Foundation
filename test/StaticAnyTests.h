@@ -73,7 +73,9 @@ DEFAULT_TEST_GROUP(StaticAnyTests,StaticAny)
     }// Traits
 
     {// Casting
-        using AnyType = StaticAny<32>;
+        // Originally this was setting StaticAny<32> as AnyType, but MSVC strings are too big for that.
+        // So now AnyType has to be a fatty to match MSVC's fatty-ness.
+        using AnyType = StaticAny<40>;
 
         AnyType StringAny( String("Test") );
         const AnyType ConstStringAny( String("ConstTest") );
