@@ -203,8 +203,7 @@ namespace Mezzanine
         /// @brief Function pointer type containing our operations for the stored data.
         using OperationFunct = void(*)(const StaticAnyOperations Op, void* Any, void* Datum);
         /// @brief The type of internal buffer where our object will be stored.
-        //using BufferType = typename std::aligned_storage<AnySize,StaticAnyHelpers::GetBestAlign(AnySize)>::type;
-        using BufferType = alignas(StaticAnyHelpers::GetBestAlign(AnySize)) char[AnySize];
+        using BufferType = typename std::aligned_storage<AnySize,StaticAnyHelpers::GetBestAlign(AnySize)>::type;
     protected:
         // Friend declarations for the various implementations of StaticAnyCast.
         template<size_t>
@@ -227,10 +226,20 @@ namespace Mezzanine
 
         /// @brief Internal buffer storing our type-erased Element.
         BufferType InternalStorage;
+        //alignas(StaticAnyHelpers::GetBestAlign(AnySize)) unsigned char InternalStorage[AnySize];
         /// @brief Pointer to the operation function for performing common operations on our Element.
         OperationFunct ElementOp = nullptr;
 
         RESTORE_WARNING_STATE
+
+        /// @brief Gets a usable pointer to the internal storage of this StaticAny.
+        /// @return Returns a char pointer pointing to the internal storage of this StaticAny.
+        void* GetStoragePtr()
+            { return reinterpret_cast<void*>( &InternalStorage ); }
+        /// @brief Gets a usable pointer to the internal storage of this StaticAny.
+        /// @return Returns a char pointer pointing to the internal storage of this StaticAny.
+        const void* GetStoragePtr() const
+            { return reinterpret_cast<const void*>( &InternalStorage ); }
 
         /// @brief Copies an Element into this StaticAny.
         /// @tparam ElementType The type that will be stored.
@@ -242,7 +251,7 @@ namespace Mezzanine
             static_assert(AnySize >= sizeof(DecayedElementType),"Element size exceeds allocated space.");
             assert(ElementOp == nullptr);
 
-            ::new( static_cast<void*>( &InternalStorage ) ) DecayedElementType(Val);
+            ::new( GetStoragePtr() ) DecayedElementType(Val);
             ElementOp = &StaticAnyHelpers::Operation<DecayedElementType>;
         }
         /// @brief Moves an Element into this StaticAny.
@@ -255,7 +264,7 @@ namespace Mezzanine
             static_assert(AnySize >= sizeof(DecayedElementType),"Element size exceeds allocated space.");
             assert(ElementOp == nullptr);
 
-            ::new( static_cast<void*>( &InternalStorage ) ) DecayedElementType(Val);
+            ::new( GetStoragePtr() ) DecayedElementType(Val);
             ElementOp = &StaticAnyHelpers::Operation<DecayedElementType>;
         }
         /// @brief A method that attempts to deduce whether the element needs to be copied or moved.
@@ -276,12 +285,12 @@ namespace Mezzanine
         template<size_t OtherSize>
         void CopyAny(const StaticAny<OtherSize>& Other)
         {
-            using OtherBufType = typename StaticAny<OtherSize>::BufferType;
+            //using OtherBufType = typename StaticAny<OtherSize>::BufferType;
             static_assert(AnySize >= OtherSize,"Element must be able to fit in the allocated space.");
             assert(ElementOp == nullptr);
 
-            void* ThisData = reinterpret_cast<void*>(&InternalStorage);
-            void* OtherData = reinterpret_cast<void*>(const_cast<OtherBufType*>(&Other.InternalStorage));
+            void* ThisData = GetStoragePtr();
+            void* OtherData = const_cast<StaticAny<OtherSize>&>(Other).GetStoragePtr();
             Other.ElementOp(StaticAnyOperations::Copy,ThisData,OtherData);
             ElementOp = Other.ElementOp;
         }
@@ -291,12 +300,12 @@ namespace Mezzanine
         template<size_t OtherSize>
         void MoveAny(StaticAny<OtherSize>&& Other)
         {
-            using OtherBufType = typename StaticAny<OtherSize>::BufferType;
+            //using OtherBufType = typename StaticAny<OtherSize>::BufferType;
             static_assert(AnySize >= OtherSize,"Element must be able to fit in the allocated space.");
             assert(ElementOp == nullptr);
 
-            void* ThisData = reinterpret_cast<void*>(&InternalStorage);
-            void* OtherData = reinterpret_cast<void*>(const_cast<OtherBufType*>(&Other.InternalStorage));
+            void* ThisData = GetStoragePtr();
+            void* OtherData = Other.GetStoragePtr();
             Other.ElementOp(StaticAnyOperations::Move,ThisData,OtherData);
             ElementOp = Other.ElementOp;
             Other.ElementOp = nullptr;
@@ -306,7 +315,7 @@ namespace Mezzanine
         void Destroy()
         {
             if( ElementOp != nullptr ) {
-                ElementOp(StaticAnyOperations::Destroy,&InternalStorage,nullptr);
+                ElementOp(StaticAnyOperations::Destroy,GetStoragePtr(),nullptr);
                 ElementOp = nullptr;
             }
         }
@@ -410,7 +419,7 @@ namespace Mezzanine
         {
             using DecayedElementType = std::decay_t<ElementType>;
             Destroy();
-            ::new (&InternalStorage) DecayedElementType(std::forward<ArgTypes>(Args)...);
+            ::new ( GetStoragePtr() ) DecayedElementType(std::forward<ArgTypes>(Args)...);
             ElementOp = &StaticAnyHelpers::Operation<DecayedElementType>;
         }
 
@@ -467,7 +476,7 @@ namespace Mezzanine
         if( std::type_index( typeid(ElementType) ) != std::type_index( Any.get_type() ) ) {
             throw std::bad_cast();
         }
-        return *reinterpret_cast<ElementType*>( Any.InternalStorage );
+        return *reinterpret_cast<ElementType*>( Any.GetStoragePtr() );
     }
     /// @brief Casts a StaticAny into its appropriate type.
     /// @warning You can only cast a StaticAny into the exact type that that was stored in it.  You cannot
@@ -485,7 +494,7 @@ namespace Mezzanine
         if( std::type_index( typeid(ElementType) ) != std::type_index( Any.get_type() ) ) {
             throw std::bad_cast();
         }
-        return *reinterpret_cast<const ElementType*>( Any.InternalStorage );
+        return *reinterpret_cast<const ElementType*>( Any.GetStoragePtr() );
     }
     /// @brief Casts a StaticAny into its appropriate type.
     /// @warning You can only cast a StaticAny into the exact type that that was stored in it.  You cannot
@@ -503,7 +512,7 @@ namespace Mezzanine
         if( std::type_index( typeid(ElementType) ) != std::type_index( Any->get_type() ) ) {
             throw std::bad_cast();
         }
-        return reinterpret_cast<ElementType*>( Any->InternalStorage );
+        return reinterpret_cast<ElementType*>( Any->GetStoragePtr() );
     }
     /// @brief Casts a StaticAny into its appropriate type.
     /// @warning You can only cast a StaticAny into the exact type that that was stored in it.  You cannot
@@ -521,7 +530,7 @@ namespace Mezzanine
         if( std::type_index( typeid(ElementType) ) != std::type_index( Any->get_type() ) ) {
             throw std::bad_cast();
         }
-        return reinterpret_cast<const ElementType*>( Any->InternalStorage );
+        return reinterpret_cast<const ElementType*>( Any->GetStoragePtr() );
     }
 }//Mezzanine
 
