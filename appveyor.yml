@@ -1,6 +1,9 @@
 version: 0.0.{build}
 clone_folder: C:\projects\Mezz_Foundation
 
+image:
+  - Visual Studio 2017
+
 environment:
   matrix:
   - GENERATOR: MinGW Makefiles
