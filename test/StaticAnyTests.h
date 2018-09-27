@@ -253,7 +253,7 @@ DEFAULT_TEST_GROUP(StaticAnyTests,StaticAny)
     }// Integer
 
     {// String
-        using AnyType = StaticAny<sizeof(String)>;
+        using AnyType = StaticAny<sizeof(String),alignof(String)>;
         using SmallerAnyType = StaticAny<(sizeof(char) * 3)>;
 
         //
@@ -364,7 +364,7 @@ DEFAULT_TEST_GROUP(StaticAnyTests,StaticAny)
                     (sizeof(char) * 3), SmallerAnyType::capacity() );
 
         TEST_EQUAL( "align()-String",
-                    size_t(16), AnyType::align() );
+                    alignof(String), AnyType::align() );
         TEST_EQUAL( "align()-CharString",
                     size_t(4), SmallerAnyType::align() );
 
