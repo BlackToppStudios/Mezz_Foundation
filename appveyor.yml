@@ -7,7 +7,7 @@ environment:
     CompilerPath: C:\msys64\mingw32\bin
   - GENERATOR: MinGW Makefiles
     CompilerPath: C:\msys64\mingw64\bin
-  - GENERATOR: Visual Studio 14 2015 Win64
+  - GENERATOR: Visual Studio 15 2017 Win64
 
 configuration:
   - Debug
@@ -24,7 +24,7 @@ before_build:
   # Ensure the appropriate install is in the PATH
   - set PATH=%CompilerPath%;%PATH%
   # Stop useless Xamarin Build targets from making messages
-  - del "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets"
+  - del "C:\Program Files (x86)\MSBuild\15.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets"
   # Finalize build prep
   - mkdir build
   - cd build
