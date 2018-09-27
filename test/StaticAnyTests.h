@@ -52,7 +52,7 @@ DEFAULT_TEST_GROUP(StaticAnyTests,StaticAny)
     using namespace Mezzanine;
 
     {// Traits
-        using AnyType = StaticAny<12>;
+        using AnyType = StaticAny<12,4>;
         static_assert( is_static_any<AnyType>::value, "Supposed to Pass." );
         static_assert( !is_static_any<int>::value, "Supposed to Fail." );
         static_assert( is_static_any_v<AnyType>, "Supposed to Pass." );
@@ -120,7 +120,7 @@ DEFAULT_TEST_GROUP(StaticAnyTests,StaticAny)
     }// Casting
 
     {// Simple Construct / Destruct
-        using AnyType = StaticAny<32>;
+        using AnyType = StaticAny<32,alignof(std::shared_ptr<String>)>;
 
         std::shared_ptr<String> StringPtr = std::make_shared<String>("Test");
         AnyType FirstAny( StringPtr );
@@ -132,8 +132,8 @@ DEFAULT_TEST_GROUP(StaticAnyTests,StaticAny)
     }// Simple Construct / Destruct
 
     {// Integer
-        using AnyType = StaticAny<sizeof(unsigned)>;
-        using SmallerAnyType = StaticAny<sizeof(short)>;
+        using AnyType = StaticAny<sizeof(unsigned),alignof(unsigned)>;
+        using SmallerAnyType = StaticAny<sizeof(short),alignof(short)>;
 
         //
         // Constructors
@@ -237,10 +237,15 @@ DEFAULT_TEST_GROUP(StaticAnyTests,StaticAny)
         TEST_EQUAL( "size()_const-Unsigned",
                     size_t(1), UtilityAny.size() );
 
-        TEST_EQUAL( "capacity()-Large-Unsigned",
+        TEST_EQUAL( "capacity()-Unsigned",
                     sizeof(unsigned), AnyType::capacity() );
-        TEST_EQUAL( "capacity()-Small-Unsigned",
-                    sizeof(unsigned), AnyType::capacity() );
+        TEST_EQUAL( "capacity()-Short",
+                    sizeof(short), SmallerAnyType::capacity() );
+
+        TEST_EQUAL( "align()-Unsigned",
+                    alignof(unsigned), AnyType::align() );
+        TEST_EQUAL( "align()-Short",
+                    alignof(short), SmallerAnyType::align() );
 
         UtilityAny.clear();
         TEST_EQUAL( "clear()-Unsigned",
@@ -353,10 +358,15 @@ DEFAULT_TEST_GROUP(StaticAnyTests,StaticAny)
         TEST_EQUAL( "size()_const-String",
                     size_t(1), UtilityAny.size() );
 
-        TEST_EQUAL( "capacity()-Large-String",
+        TEST_EQUAL( "capacity()-String",
                     sizeof(String), AnyType::capacity() );
-        TEST_EQUAL( "capacity()-Small-String",
+        TEST_EQUAL( "capacity()-CharString",
                     (sizeof(char) * 3), SmallerAnyType::capacity() );
+
+        TEST_EQUAL( "align()-String",
+                    size_t(16), AnyType::align() );
+        TEST_EQUAL( "align()-CharString",
+                    size_t(4), SmallerAnyType::align() );
 
         UtilityAny.clear();
         TEST_EQUAL( "clear()-String",

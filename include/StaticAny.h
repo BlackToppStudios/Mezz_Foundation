@@ -50,20 +50,20 @@
 namespace Mezzanine
 {
     // Forward Declares
-    template<size_t AnySize>
+    template<size_t AnySize,size_t AnyAlign>
     class StaticAny;
 
-    template<class ElementType, size_t AnySize>
-    ElementType& StaticAnyCast(StaticAny<AnySize>& Any);
+    template<class ElementType, size_t AnySize, size_t AnyAlign>
+    ElementType& StaticAnyCast(StaticAny<AnySize,AnyAlign>& Any);
 
-    template<class ElementType, size_t AnySize>
-    const ElementType& StaticAnyCast(const StaticAny<AnySize>& Any);
+    template<class ElementType, size_t AnySize, size_t AnyAlign>
+    const ElementType& StaticAnyCast(const StaticAny<AnySize,AnyAlign>& Any);
 
-    template<class ElementType, size_t AnySize>
-    ElementType* StaticAnyCast(StaticAny<AnySize>* Any);
+    template<class ElementType, size_t AnySize, size_t AnyAlign>
+    ElementType* StaticAnyCast(StaticAny<AnySize,AnyAlign>* Any);
 
-    template<class ElementType, size_t AnySize>
-    const ElementType* StaticAnyCast(const StaticAny<AnySize>* Any);
+    template<class ElementType, size_t AnySize, size_t AnyAlign>
+    const ElementType* StaticAnyCast(const StaticAny<AnySize,AnyAlign>* Any);
 
     /// @brief A list of operations that can be done on the storage of a StaticAny.
     enum class StaticAnyOperations
@@ -85,10 +85,11 @@ namespace Mezzanine
 
     /// @brief A simple type trait to help identify static_any types.
     /// @tparam CheckSize The size of the StaticAny.  This is a deduced parameter.
+    /// @tparam CheckAlign The alignment of the StaticAny storage.  This is a deduced parameter.
     /// @details If the type being checked is a StaticAny, this is the overload that will
     /// be deemed the best fit and used.
-    template<size_t CheckSize>
-    struct is_static_any< StaticAny<CheckSize> > : public std::true_type
+    template<size_t CheckSize, size_t CheckAlign>
+    struct is_static_any< StaticAny<CheckSize,CheckAlign> > : public std::true_type
     {  };
 
     /// @brief Similar to is_static_any but will decay the ElementType prior to checking.
@@ -176,6 +177,14 @@ namespace Mezzanine
             }
         }
 
+        /// @brief Verifies the number provided can be used for memory alignment (is a power of 2).
+        /// @param Val The number to check if can be used for a valid alignment.
+        /// @return Returns true if the value specified is a power of 2.
+        constexpr Boole IsValidAlignment(const size_t Val) noexcept
+        {
+            return ( Val > 0 ) && ( Val & ( Val - 1 ) ) == 0;
+        }
+
         /// @brief Helper function for getting an alignment appropriate for a given size.
         /// @param Val The value to find the next highest power of 2 for.
         /// @return Returns the next highest power of 2 from the specified value.
@@ -191,11 +200,13 @@ namespace Mezzanine
     ///////////////////////////////////////////////////////////////////////////////
     /// @brief A container that uses type-erasure to store a single instance of a type with a specific size.
     /// @tparam AnySize The size of the object to be stored.  Smaller objects may be stored as well.
-    /// @remarks On some platforms this class will pad its members to an alignment boundary as determined by
-    /// 'StaticAnyHelpers::GetBestAlign(size_t)'.  Extended alignment (any alignment that exceeds
-    /// std::max_align_t) is not supported by this class.
+    /// @tparam AnyAlign The alignment requirement for objects to be stored in this StaticAny.
+    /// @remarks Extended alignment (any alignment that exceeds std::max_align_t) is not supported by this
+    /// class.  This class allows for a custom alignment to be specified if desired.  Extreme care should
+    /// be taken when using this as placing an object into the StaticAny that has an alignment requirement
+    /// greater than what was specified can cause undefined behavior.
     ///////////////////////////////////////
-    template<size_t AnySize>
+    template<size_t AnySize, size_t AnyAlign = StaticAnyHelpers::GetBestAlign(AnySize)>
     class StaticAny
     {
     public:
@@ -204,23 +215,25 @@ namespace Mezzanine
         /// @brief Function pointer type containing our operations for the stored data.
         using OperationFunct = void(*)(const StaticAnyOperations Op, void* Any, void* Datum);
         /// @brief The type of internal buffer where our object will be stored.
-        using BufferType = typename std::aligned_storage<AnySize,StaticAnyHelpers::GetBestAlign(AnySize)>::type;
+        using BufferType = typename std::aligned_storage<AnySize,AnyAlign>::type;
     protected:
+        static_assert(StaticAnyHelpers::IsValidAlignment(AnyAlign),"Invalid alignment value specified.");
+        static_assert(AnyAlign <= alignof(std::max_align_t),"StaticAny does not support Extended Alignment.");
         // Friend declarations for the various implementations of StaticAnyCast.
-        template<size_t>
+        template<size_t,size_t>
         friend class StaticAny;
 
-        template<class ElementType, size_t AnyCastSize>
-        friend ElementType& StaticAnyCast(StaticAny<AnyCastSize>& Any);
+        template<class ElementType, size_t AnyCastSize, size_t AnyCastAlign>
+        friend ElementType& StaticAnyCast(StaticAny<AnyCastSize,AnyCastAlign>& Any);
 
-        template<class ElementType, size_t AnyCastSize>
-        friend const ElementType& StaticAnyCast(const StaticAny<AnyCastSize>& Any);
+        template<class ElementType, size_t AnyCastSize, size_t AnyCastAlign>
+        friend const ElementType& StaticAnyCast(const StaticAny<AnyCastSize,AnyCastAlign>& Any);
 
-        template<class ElementType, size_t AnyCastSize>
-        friend ElementType* StaticAnyCast(StaticAny<AnyCastSize>* Any);
+        template<class ElementType, size_t AnyCastSize, size_t AnyCastAlign>
+        friend ElementType* StaticAnyCast(StaticAny<AnyCastSize,AnyCastAlign>* Any);
 
-        template<class ElementType, size_t AnyCastSize>
-        friend const ElementType* StaticAnyCast(const StaticAny<AnyCastSize>* Any);
+        template<class ElementType, size_t AnyCastSize, size_t AnyCastAlign>
+        friend const ElementType* StaticAnyCast(const StaticAny<AnyCastSize,AnyCastAlign>* Any);
 
         SAVE_WARNING_STATE
         SUPPRESS_CLANG_WARNING("-Wpadded")
@@ -250,6 +263,7 @@ namespace Mezzanine
         {
             using DecayedElementType = std::decay_t<ElementType>;
             static_assert(AnySize >= sizeof(DecayedElementType),"Element size exceeds allocated space.");
+            static_assert(AnyAlign >= alignof(DecayedElementType),"Element alignment exceeds allowed alignment.");
             assert(ElementOp == nullptr);
 
             ::new( GetStoragePtr() ) DecayedElementType(Val);
@@ -263,6 +277,7 @@ namespace Mezzanine
         {
             using DecayedElementType = std::decay_t<ElementType>;
             static_assert(AnySize >= sizeof(DecayedElementType),"Element size exceeds allocated space.");
+            static_assert(AnyAlign >= alignof(DecayedElementType),"Element alignment exceeds allowed alignment.");
             assert(ElementOp == nullptr);
 
             ::new( GetStoragePtr() ) DecayedElementType(Val);
@@ -281,12 +296,14 @@ namespace Mezzanine
             }
         }
         /// @brief Copies a StaticAny the same size or smaller into this StaticAny.
-        /// @tparam OtherSize The size of the other StaticAny to be copied into this.
+        /// @tparam OtherSize The storage size of the other StaticAny to be copied into this.
+        /// @tparam OtherAlign The storage alignment of the other StaticAny to be copied into this.
         /// @param Other The other StaticAny to be copied.
-        template<size_t OtherSize>
-        void CopyAny(const StaticAny<OtherSize>& Other)
+        template<size_t OtherSize, size_t OtherAlign>
+        void CopyAny(const StaticAny<OtherSize,OtherAlign>& Other)
         {
-            static_assert(AnySize >= OtherSize,"Element size exceeds allocated space.");
+            static_assert(AnySize >= OtherSize,"Other StaticAny size exceeds allocated space.");
+            static_assert(AnyAlign >= OtherAlign,"Other StaticAny alignment exceeds allowed alignment.");
             assert(ElementOp == nullptr);
 
             void* ThisData = GetStoragePtr();
@@ -295,12 +312,14 @@ namespace Mezzanine
             ElementOp = Other.ElementOp;
         }
         /// @brief Moves a StaticAny the same size or smaller into this StaticAny.
-        /// @tparam OtherSize The size of the other StaticAny to be moved into this.
+        /// @tparam OtherSize The storage size of the other StaticAny to be copied into this.
+        /// @tparam OtherAlign The storage alignment of the other StaticAny to be copied into this.
         /// @param Other The other StaticAny to be moved.
-        template<size_t OtherSize>
-        void MoveAny(StaticAny<OtherSize>&& Other)
+        template<size_t OtherSize, size_t OtherAlign>
+        void MoveAny(StaticAny<OtherSize,OtherAlign>&& Other)
         {
-            static_assert(AnySize >= OtherSize,"Element must be able to fit in the allocated space.");
+            static_assert(AnySize >= OtherSize,"Other StaticAny size exceeds allocated space.");
+            static_assert(AnyAlign >= OtherAlign,"Other StaticAny alignment exceeds allowed alignment.");
             assert(ElementOp == nullptr);
 
             void* ThisData = GetStoragePtr();
@@ -449,6 +468,10 @@ namespace Mezzanine
         /// @return Returns the "AnySize" template parameter of this StaticAny.
         static constexpr size_t capacity() noexcept
             { return AnySize; }
+        /// @brief Gets the alignment being used by this StaticAny's storage.
+        /// @return Returns the "AnyAlign" template parameter of this StaticAny.
+        static constexpr size_t align() noexcept
+            { return AnyAlign; }
         /// @brief Checks to see if the StaticAny is currently empty.
         /// @return Returns true if the StaticAny isn't storing an element, false otherwise.
         bool empty() const noexcept
@@ -467,10 +490,11 @@ namespace Mezzanine
     /// std::bad_cast exception will be thrown.
     /// @tparam ElementType The type to cast the type-erased element in the StaticAny to.
     /// @tparam AnyCastSize The (deduced) size of the internal storage of the StaticAny.
+    /// @tparam AnyCastAlign The (deduced) alignment of the internal storage of the StaticAny.
     /// @param Any The StaticAny to cast.
     /// @return Returns a reference to the internal buffer of the type specified by ElementType.
-    template<class ElementType, size_t AnyCastSize>
-    inline ElementType& StaticAnyCast(StaticAny<AnyCastSize>& Any)
+    template<class ElementType, size_t AnyCastSize, size_t AnyCastAlign>
+    inline ElementType& StaticAnyCast(StaticAny<AnyCastSize,AnyCastAlign>& Any)
     {
         if( std::type_index( typeid(ElementType) ) != std::type_index( Any.get_type() ) ) {
             throw std::bad_cast();
@@ -485,10 +509,11 @@ namespace Mezzanine
     /// std::bad_cast exception will be thrown.
     /// @tparam ElementType The type to cast the type-erased element in the StaticAny to.
     /// @tparam AnyCastSize The (deduced) size of the internal storage of the StaticAny.
+    /// @tparam AnyCastAlign The (deduced) alignment of the internal storage of the StaticAny.
     /// @param Any The StaticAny to cast.
     /// @return Returns a const reference to the internal buffer of the type specified by ElementType.
-    template<class ElementType, size_t AnyCastSize>
-    inline const ElementType& StaticAnyCast(const StaticAny<AnyCastSize>& Any)
+    template<class ElementType, size_t AnyCastSize, size_t AnyCastAlign>
+    inline const ElementType& StaticAnyCast(const StaticAny<AnyCastSize,AnyCastAlign>& Any)
     {
         if( std::type_index( typeid(ElementType) ) != std::type_index( Any.get_type() ) ) {
             throw std::bad_cast();
@@ -503,10 +528,11 @@ namespace Mezzanine
     /// std::bad_cast exception will be thrown.
     /// @tparam ElementType The type to cast the type-erased element in the StaticAny to.
     /// @tparam AnyCastSize The (deduced) size of the internal storage of the StaticAny.
+    /// @tparam AnyCastAlign The (deduced) alignment of the internal storage of the StaticAny.
     /// @param Any The StaticAny to cast.
     /// @return Returns a pointer to the internal buffer of the type specified by ElementType.
-    template<class ElementType, size_t AnyCastSize>
-    inline ElementType* StaticAnyCast(StaticAny<AnyCastSize>* Any)
+    template<class ElementType, size_t AnyCastSize, size_t AnyCastAlign>
+    inline ElementType* StaticAnyCast(StaticAny<AnyCastSize,AnyCastAlign>* Any)
     {
         if( std::type_index( typeid(ElementType) ) != std::type_index( Any->get_type() ) ) {
             throw std::bad_cast();
@@ -521,10 +547,11 @@ namespace Mezzanine
     /// std::bad_cast exception will be thrown.
     /// @tparam ElementType The type to cast the type-erased element in the StaticAny to.
     /// @tparam AnyCastSize The (deduced) size of the internal storage of the StaticAny.
+    /// @tparam AnyCastAlign The (deduced) alignment of the internal storage of the StaticAny.
     /// @param Any The StaticAny to cast.
     /// @return Returns a const pointer to the internal buffer of the type specified by ElementType.
-    template<class ElementType, size_t AnyCastSize>
-    inline const ElementType* StaticAnyCast(const StaticAny<AnyCastSize>* Any)
+    template<class ElementType, size_t AnyCastSize, size_t AnyCastAlign>
+    inline const ElementType* StaticAnyCast(const StaticAny<AnyCastSize,AnyCastAlign>* Any)
     {
         if( std::type_index( typeid(ElementType) ) != std::type_index( Any->get_type() ) ) {
             throw std::bad_cast();
