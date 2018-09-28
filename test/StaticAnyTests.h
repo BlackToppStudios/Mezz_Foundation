@@ -100,10 +100,10 @@ DEFAULT_TEST_GROUP(StaticAnyTests,StaticAny)
                             Eulers, *StaticAnyCast<double>(&ConstDoubleAny) );
         TEST_THROW( "StaticAnyCast<double>(StaticAny<>)-Ptr-Fail",
                     std::bad_cast,
-                    [&DoubleAny](){ StaticAnyCast<float>(DoubleAny); } );
+                    [&DoubleAny](){ StaticAnyCast<float>(&DoubleAny); } );
         TEST_THROW( "StaticAnyCast<double>(StaticAny<>)-ConstPtr-Fail",
                     std::bad_cast,
-                    [&ConstDoubleAny](){ StaticAnyCast<float>(ConstDoubleAny); } );
+                    [&ConstDoubleAny](){ StaticAnyCast<float>(&ConstDoubleAny); } );
 
         AnyType SharedPtrAny( std::make_shared<long>( long(123) ) );
         const AnyType ConstSharedPtrAny( std::make_shared<short>( short(12345) ) );
@@ -226,6 +226,9 @@ DEFAULT_TEST_GROUP(StaticAnyTests,StaticAny)
         TEST_EQUAL( "empty()_const-Unsigned",
                     true, UtilityAny.empty() );
 
+        TEST_EQUAL( "get_type()_const-void-Unsigned",
+                    typeid(void).hash_code(), UtilityAny.get_type().hash_code() );
+
         UtilityAny.emplace<unsigned>(unsigned(2304));
         TEST_EQUAL( "emplace(ArgTypes&&...)-Unsigned",
                     unsigned(2304), StaticAnyCast<unsigned>(UtilityAny) );
@@ -346,6 +349,9 @@ DEFAULT_TEST_GROUP(StaticAnyTests,StaticAny)
         AnyType UtilityAny;
         TEST_EQUAL( "empty()_const-String",
                     true, UtilityAny.empty() );
+
+        TEST_EQUAL( "get_type()_const-void-String",
+                    typeid(void).hash_code(),UtilityAny.get_type().hash_code() );
 
         UtilityAny.emplace<String>("2304");
         TEST_EQUAL( "emplace(ArgTypes&&...)-String",
