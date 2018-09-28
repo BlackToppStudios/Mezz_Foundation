@@ -344,24 +344,24 @@ namespace Mezzanine
         StaticAny() = default;
         /// @brief Copy constructor.
         /// @param Other The other StaticAny (of the same type) to copy.
-        explicit StaticAny(const StaticAny& Other)
+        explicit StaticAny(const SelfType& Other)
             { CopyAny(Other); }
         /// @brief Move constructor.
         /// @param Other The other StaticAny (of the same type) to move.
-        explicit StaticAny(StaticAny&& Other)
+        explicit StaticAny(SelfType&& Other)
             { MoveAny( std::move(Other) ); }
         /// @brief Copy from different size StaticAny constructor.
         /// @tparam Size The size of the internal buffer in the StaticAny to copy.
         /// @tparam Align The alignment of the internal buffer in the StaticAny to copy.
         /// @param Other The other StaticAny to copy.
-        template<size_t Size, size_t Align, class = std::enable_if_t< (Size < AnySize) && (Align < AnyAlign) > >
+        template<size_t Size, size_t Align, class = std::enable_if_t< (Size <= AnySize) && (Align <= AnyAlign) > >
         StaticAny(const StaticAny<Size,Align>& Other)
             { CopyAny(Other); }
         /// @brief Move from different size StaticAny constructor.
         /// @tparam Size The size of the internal buffer in the StaticAny to move.
         /// @tparam Align The alignment of the internal buffer in the StaticAny to copy.
         /// @param Other The other StaticAny to move.
-        template<size_t Size, size_t Align, class = std::enable_if_t< (Size < AnySize) && (Align < AnyAlign) > >
+        template<size_t Size, size_t Align, class = std::enable_if_t< (Size <= AnySize) && (Align <= AnyAlign) > >
         StaticAny(StaticAny<Size,Align>&& Other)
             { MoveAny( std::move(Other) ); }
         /// @brief Move value constructor.
@@ -397,7 +397,7 @@ namespace Mezzanine
         /// @tparam Align The alignment of the other StaticAny to be copied.
         /// @param Other The other StaticAny of the same size or smaller to be copied.
         /// @return Returns a reference to this.
-        template<size_t Size, size_t Align, class = std::enable_if_t< (Size < AnySize) && (Align < AnyAlign) > >
+        template<size_t Size, size_t Align, class = std::enable_if_t< (Size <= AnySize) && (Align <= AnyAlign) > >
         SelfType& operator=(const StaticAny<Size,Align>& Other)
         {
             Destroy();
@@ -409,7 +409,7 @@ namespace Mezzanine
         /// @tparam Align The alignment of the other StaticAny to be moved.
         /// @param Other The other StaticAny of the same size or smaller to be moved.
         /// @return Returns a reference to this.
-        template<size_t Size, size_t Align, class = std::enable_if_t< (Size < AnySize) && (Align < AnyAlign) > >
+        template<size_t Size, size_t Align, class = std::enable_if_t< (Size <= AnySize) && (Align <= AnyAlign) > >
         SelfType& operator=(StaticAny<Size,Align>&& Other)
         {
             Destroy();
