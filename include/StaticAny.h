@@ -218,32 +218,28 @@ namespace Mezzanine
         using BufferType = typename std::aligned_storage<AnySize,AnyAlign>::type;
     protected:
         static_assert(StaticAnyHelpers::IsValidAlignment(AnyAlign),"Invalid alignment value specified.");
+        static_assert(AnySize > 0,"StaticAny must have a storage space greater than zero.");
         static_assert(AnyAlign <= alignof(std::max_align_t),"StaticAny does not support Extended Alignment.");
-        // Friend declarations for the various implementations of StaticAnyCast.
-        template<size_t,size_t>
-        friend class StaticAny;
-
-        template<class ElementType, size_t AnyCastSize, size_t AnyCastAlign>
-        friend ElementType& StaticAnyCast(StaticAny<AnyCastSize,AnyCastAlign>& Any);
-
-        template<class ElementType, size_t AnyCastSize, size_t AnyCastAlign>
-        friend const ElementType& StaticAnyCast(const StaticAny<AnyCastSize,AnyCastAlign>& Any);
-
-        template<class ElementType, size_t AnyCastSize, size_t AnyCastAlign>
-        friend ElementType* StaticAnyCast(StaticAny<AnyCastSize,AnyCastAlign>* Any);
-
-        template<class ElementType, size_t AnyCastSize, size_t AnyCastAlign>
-        friend const ElementType* StaticAnyCast(const StaticAny<AnyCastSize,AnyCastAlign>* Any);
 
         SAVE_WARNING_STATE
         SUPPRESS_CLANG_WARNING("-Wpadded")
+
+        // Friend declarations for the various implementations of StaticAnyCast.
+        template<size_t,size_t>
+        friend class StaticAny;
+        template<class ElementType, size_t AnyCastSize, size_t AnyCastAlign>
+        friend ElementType& StaticAnyCast(StaticAny<AnyCastSize,AnyCastAlign>& Any);
+        template<class ElementType, size_t AnyCastSize, size_t AnyCastAlign>
+        friend const ElementType& StaticAnyCast(const StaticAny<AnyCastSize,AnyCastAlign>& Any);
+        template<class ElementType, size_t AnyCastSize, size_t AnyCastAlign>
+        friend ElementType* StaticAnyCast(StaticAny<AnyCastSize,AnyCastAlign>* Any);
+        template<class ElementType, size_t AnyCastSize, size_t AnyCastAlign>
+        friend const ElementType* StaticAnyCast(const StaticAny<AnyCastSize,AnyCastAlign>* Any);
 
         /// @brief Internal buffer storing our type-erased Element.
         BufferType InternalStorage;
         /// @brief Pointer to the operation function for performing common operations on our Element.
         OperationFunct ElementOp = nullptr;
-
-        RESTORE_WARNING_STATE
 
         /// @brief Gets a usable pointer to the internal storage of this StaticAny.
         /// @return Returns a char pointer pointing to the internal storage of this StaticAny.
@@ -431,6 +427,15 @@ namespace Mezzanine
         ///////////////////////////////////////////////////////////////////////////////
         // Utility
 
+        /// @brief Gets the maximum size this StaticAny can store.
+        /// @return Returns the "AnySize" template parameter of this StaticAny.
+        static constexpr size_t capacity() noexcept
+            { return AnySize; }
+        /// @brief Gets the alignment being used by this StaticAny's storage.
+        /// @return Returns the "AnyAlign" template parameter of this StaticAny.
+        static constexpr size_t align() noexcept
+            { return AnyAlign; }
+
         /// @brief Constructs an element inside the StaticAny storage.
         /// @tparam ElementType The type of element to be constructed.
         /// @tparam ArgTypes A variadic template of the arguments to the constructor that will be called.
@@ -467,14 +472,7 @@ namespace Mezzanine
             }
             return Ret;
         }
-        /// @brief Gets the maximum size this StaticAny can store.
-        /// @return Returns the "AnySize" template parameter of this StaticAny.
-        static constexpr size_t capacity() noexcept
-            { return AnySize; }
-        /// @brief Gets the alignment being used by this StaticAny's storage.
-        /// @return Returns the "AnyAlign" template parameter of this StaticAny.
-        static constexpr size_t align() noexcept
-            { return AnyAlign; }
+
         /// @brief Checks to see if the StaticAny is currently empty.
         /// @return Returns true if the StaticAny isn't storing an element, false otherwise.
         bool empty() const noexcept
@@ -483,6 +481,8 @@ namespace Mezzanine
         /// @brief Destroys the current object being stored by the StaticAny.
         void clear()
             { Destroy(); }
+
+        RESTORE_WARNING_STATE
     };//StaticAny
 
     /// @brief Casts a StaticAny into its appropriate type.
