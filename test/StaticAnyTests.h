@@ -223,23 +223,6 @@ DEFAULT_TEST_GROUP(StaticAnyTests,StaticAny)
         //
 
         AnyType UtilityAny;
-        TEST_EQUAL( "empty()_const-Unsigned",
-                    true, UtilityAny.empty() );
-
-        TEST_EQUAL( "get_type()_const-void-Unsigned",
-                    typeid(void).hash_code(), UtilityAny.get_type().hash_code() );
-
-        UtilityAny.emplace<unsigned>(unsigned(2304));
-        TEST_EQUAL( "emplace(ArgTypes&&...)-Unsigned",
-                    unsigned(2304), StaticAnyCast<unsigned>(UtilityAny) );
-
-        TEST_EQUAL( "get_type()_const-Unsigned",
-                    typeid(unsigned).hash_code(), UtilityAny.get_type().hash_code() );
-
-        UtilityAny = char('a');
-        TEST_EQUAL( "size()_const-Unsigned",
-                    size_t(1), UtilityAny.size() );
-
         TEST_EQUAL( "capacity()-Unsigned",
                     sizeof(unsigned), AnyType::capacity() );
         TEST_EQUAL( "capacity()-Short",
@@ -249,6 +232,35 @@ DEFAULT_TEST_GROUP(StaticAnyTests,StaticAny)
                     alignof(unsigned), AnyType::align() );
         TEST_EQUAL( "align()-Short",
                     alignof(short), SmallerAnyType::align() );
+
+        TEST_EQUAL( "empty()_const-Unassigned-Unsigned",
+                    true, UtilityAny.empty() );
+        TEST_EQUAL( "size()_const-Unassigned-Unsigned",
+                    size_t(0), UtilityAny.size() );
+        TEST_EQUAL( "get_type()_const-Unassigned-Unsigned",
+                    typeid(void).hash_code(), UtilityAny.get_type().hash_code() );
+
+        UtilityAny.emplace<unsigned>(unsigned(2304));
+        TEST_EQUAL( "emplace(ArgTypes&&...)-Unsigned",
+                    unsigned(2304), StaticAnyCast<unsigned>(UtilityAny) );
+
+        TEST_EQUAL( "empty()_const-Assigned-Unsigned",
+                    false, UtilityAny.empty() );
+        TEST_EQUAL( "size()_const-Assigned-Unsigned",
+                    sizeof(unsigned), UtilityAny.size() );
+        TEST_EQUAL( "get_type()_const-Assigned-Unsigned",
+                    typeid(unsigned).hash_code(), UtilityAny.get_type().hash_code() );
+
+        UtilityAny = char('A');
+        TEST_EQUAL( "operator=(ElementType&&)-Unsigned-Char",
+                    char('A'), StaticAnyCast<char>(UtilityAny) );
+
+        TEST_EQUAL( "empty()_const-Assigned-Unsigned-Char",
+                    false, UtilityAny.empty() );
+        TEST_EQUAL( "size()_const-Assigned-Unsigned-Char",
+                    sizeof(char), UtilityAny.size() );
+        TEST_EQUAL( "get_type()_const-Assigned-Unsigned-Char",
+                    typeid(char).hash_code(), UtilityAny.get_type().hash_code() );
 
         UtilityAny.clear();
         TEST_EQUAL( "clear()-Unsigned",
@@ -347,23 +359,6 @@ DEFAULT_TEST_GROUP(StaticAnyTests,StaticAny)
         //
 
         AnyType UtilityAny;
-        TEST_EQUAL( "empty()_const-String",
-                    true, UtilityAny.empty() );
-
-        TEST_EQUAL( "get_type()_const-void-String",
-                    typeid(void).hash_code(),UtilityAny.get_type().hash_code() );
-
-        UtilityAny.emplace<String>("2304");
-        TEST_EQUAL( "emplace(ArgTypes&&...)-String",
-                    String("2304"), StaticAnyCast<String>(UtilityAny) );
-
-        TEST_EQUAL( "get_type()_const-String",
-                    typeid(String).hash_code(),UtilityAny.get_type().hash_code() );
-
-        UtilityAny = char('a');
-        TEST_EQUAL( "size()_const-String",
-                    size_t(1), UtilityAny.size() );
-
         TEST_EQUAL( "capacity()-String",
                     sizeof(String), AnyType::capacity() );
         TEST_EQUAL( "capacity()-CharString",
@@ -373,6 +368,35 @@ DEFAULT_TEST_GROUP(StaticAnyTests,StaticAny)
                     alignof(String), AnyType::align() );
         TEST_EQUAL( "align()-CharString",
                     size_t(4), SmallerAnyType::align() );
+
+        TEST_EQUAL( "empty()_const-Unassigned-String",
+                    true, UtilityAny.empty() );
+        TEST_EQUAL( "size()_const-Unassigned-String",
+                    size_t(0), UtilityAny.size() );
+        TEST_EQUAL( "get_type()_const-Unassigned-String",
+                    typeid(void).hash_code(),UtilityAny.get_type().hash_code() );
+
+        UtilityAny.emplace<String>("2304");
+        TEST_EQUAL( "emplace(ArgTypes&&...)-String",
+                    String("2304"), StaticAnyCast<String>(UtilityAny) );
+
+        TEST_EQUAL( "empty()_const-Assigned-String",
+                    false, UtilityAny.empty() );
+        TEST_EQUAL( "size()_const-Assigned-String",
+                    sizeof(String), UtilityAny.size() );
+        TEST_EQUAL( "get_type()_const-Assigned-String",
+                    typeid(String).hash_code(),UtilityAny.get_type().hash_code() );
+
+        UtilityAny = char('a');
+        TEST_EQUAL( "operator=(ElementType&&)-String-Char",
+                    char('a'), StaticAnyCast<char>(UtilityAny) );
+
+        TEST_EQUAL( "empty()_const-Assigned-wchar_tChar",
+                    false, UtilityAny.empty() );
+        TEST_EQUAL( "size()_const-Assigned-wchar_tChar",
+                    sizeof(char), UtilityAny.size() );
+        TEST_EQUAL( "get_type()_const-Assigned-wchar_tChar",
+                    typeid(char).hash_code(),UtilityAny.get_type().hash_code() );
 
         UtilityAny.clear();
         TEST_EQUAL( "clear()-String",
