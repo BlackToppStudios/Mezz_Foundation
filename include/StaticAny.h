@@ -197,6 +197,9 @@ namespace Mezzanine
         }
     }//StaticAnyHelpers
 
+SAVE_WARNING_STATE
+SUPPRESS_CLANG_WARNING("-Wpadded")
+
     ///////////////////////////////////////////////////////////////////////////////
     /// @brief A container that uses type-erasure to store a single instance of a type with a specific size.
     /// @tparam AnySize The size of the object to be stored.  Smaller objects may be stored as well.
@@ -220,9 +223,6 @@ namespace Mezzanine
         static_assert(StaticAnyHelpers::IsValidAlignment(AnyAlign),"Invalid alignment value specified.");
         static_assert(AnySize > 0,"StaticAny must have a storage space greater than zero.");
         static_assert(AnyAlign <= alignof(std::max_align_t),"StaticAny does not support Extended Alignment.");
-
-        SAVE_WARNING_STATE
-        SUPPRESS_CLANG_WARNING("-Wpadded")
 
         // Friend declarations for the various implementations of StaticAnyCast.
         template<size_t,size_t>
@@ -481,9 +481,9 @@ namespace Mezzanine
         /// @brief Destroys the current object being stored by the StaticAny.
         void clear()
             { Destroy(); }
-
-        RESTORE_WARNING_STATE
     };//StaticAny
+
+RESTORE_WARNING_STATE
 
     /// @brief Casts a StaticAny into its appropriate type.
     /// @warning You can only cast a StaticAny into the exact type that that was stored in it.  You cannot
