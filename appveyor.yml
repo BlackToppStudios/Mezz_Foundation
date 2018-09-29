@@ -1,13 +1,16 @@
 version: 0.0.{build}
 clone_folder: C:\projects\Mezz_Foundation
 
+image:
+  - Visual Studio 2017
+
 environment:
   matrix:
   - GENERATOR: MinGW Makefiles
     CompilerPath: C:\msys64\mingw32\bin
   - GENERATOR: MinGW Makefiles
     CompilerPath: C:\msys64\mingw64\bin
-  - GENERATOR: Visual Studio 14 2015 Win64
+  - GENERATOR: Visual Studio 15 2017 Win64
 
 configuration:
   - Debug
