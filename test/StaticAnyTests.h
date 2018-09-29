@@ -391,11 +391,11 @@ DEFAULT_TEST_GROUP(StaticAnyTests,StaticAny)
         TEST_EQUAL( "operator=(ElementType&&)-String-Char",
                     char('a'), StaticAnyCast<char>(UtilityAny) );
 
-        TEST_EQUAL( "empty()_const-Assigned-wchar_tChar",
+        TEST_EQUAL( "empty()_const-Assigned-String-Char",
                     false, UtilityAny.empty() );
-        TEST_EQUAL( "size()_const-Assigned-wchar_tChar",
+        TEST_EQUAL( "size()_const-Assigned-String-Char",
                     sizeof(char), UtilityAny.size() );
-        TEST_EQUAL( "get_type()_const-Assigned-wchar_tChar",
+        TEST_EQUAL( "get_type()_const-Assigned-String-Char",
                     typeid(char).hash_code(),UtilityAny.get_type().hash_code() );
 
         UtilityAny.clear();
