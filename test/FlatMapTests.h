@@ -117,19 +117,19 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         FlatMap<int,float> MoveDestTest( std::move(MoveSourceTest) );
         FlatMap<int,float>::iterator MoveIter = MoveDestTest.begin();
         TEST_EQUAL( "FlatMap(SelfType&&)-Element1-First", 14, (*MoveIter).first );
-        TEST_EQUAL( "FlatMap(SelfType&&)-Element1-Second", 7.0f, (*MoveIter).second );
+        TEST_EQUAL_EPSILON( "FlatMap(SelfType&&)-Element1-Second", 7.0f, (*MoveIter).second );
         std::advance(MoveIter,1);
         TEST_EQUAL( "FlatMap(SelfType&&)-Element2-First", 15, (*MoveIter).first );
-        TEST_EQUAL( "FlatMap(SelfType&&)-Element2-Second", 7.5f, (*MoveIter).second );
+        TEST_EQUAL_EPSILON( "FlatMap(SelfType&&)-Element2-Second", 7.5f, (*MoveIter).second );
         std::advance(MoveIter,1);
         TEST_EQUAL( "FlatMap(SelfType&&)-Element3-First", 27, (*MoveIter).first );
-        TEST_EQUAL( "FlatMap(SelfType&&)-Element3-Second", 13.5f, (*MoveIter).second );
+        TEST_EQUAL_EPSILON( "FlatMap(SelfType&&)-Element3-Second", 13.5f, (*MoveIter).second );
         std::advance(MoveIter,1);
         TEST_EQUAL( "FlatMap(SelfType&&)-Element4-First", 73, (*MoveIter).first );
-        TEST_EQUAL( "FlatMap(SelfType&&)-Element4-Second", 36.5f, (*MoveIter).second );
+        TEST_EQUAL_EPSILON( "FlatMap(SelfType&&)-Element4-Second", 36.5f, (*MoveIter).second );
         std::advance(MoveIter,1);
         TEST_EQUAL( "FlatMap(SelfType&&)-Element5-First", 99, (*MoveIter).first );
-        TEST_EQUAL( "FlatMap(SelfType&&)-Element5-Second", 49.5f, (*MoveIter).second );
+        TEST_EQUAL_EPSILON( "FlatMap(SelfType&&)-Element5-Second", 49.5f, (*MoveIter).second );
         TEST_EQUAL( "FlatMap(SelfType&&)-ElementCount", 5u, MoveDestTest.size() );
     }//Construction
 
@@ -166,16 +166,16 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         TEST_EQUAL( "operator=(SelfType&&)-Source-ElementCount/Empty", true, MoveAssignSource.empty() );
         FlatMap<int,float>::iterator DestMoveIter = MoveAssignDest.begin();
         TEST_EQUAL( "operator=(SelfType&&)-Dest-Element1-First", 14, (*DestMoveIter).first );
-        TEST_EQUAL( "operator=(SelfType&&)-Dest-Element1-Second", 3.5f, (*DestMoveIter).second );
+        TEST_EQUAL_EPSILON( "operator=(SelfType&&)-Dest-Element1-Second", 3.5f, (*DestMoveIter).second );
         std::advance(DestMoveIter,1);
         TEST_EQUAL( "operator=(SelfType&&)-Dest-Element2-First", 32, (*DestMoveIter).first );
-        TEST_EQUAL( "operator=(SelfType&&)-Dest-Element2-Second", 8.0f, (*DestMoveIter).second );
+        TEST_EQUAL_EPSILON( "operator=(SelfType&&)-Dest-Element2-Second", 8.0f, (*DestMoveIter).second );
         std::advance(DestMoveIter,1);
         TEST_EQUAL( "operator=(SelfType&&)-Dest-Element3-First", 78, (*DestMoveIter).first );
-        TEST_EQUAL( "operator=(SelfType&&)-Dest-Element3-Second", 19.5f, (*DestMoveIter).second );
+        TEST_EQUAL_EPSILON( "operator=(SelfType&&)-Dest-Element3-Second", 19.5f, (*DestMoveIter).second );
         std::advance(DestMoveIter,1);
         TEST_EQUAL( "operator=(SelfType&&)-Dest-Element4-First", 96, (*DestMoveIter).first );
-        TEST_EQUAL( "operator=(SelfType&&)-Dest-Element4-Second", 24.0f, (*DestMoveIter).second );
+        TEST_EQUAL_EPSILON( "operator=(SelfType&&)-Dest-Element4-Second", 24.0f, (*DestMoveIter).second );
         TEST_EQUAL( "operator=(SelfType&&)-Dest-ElementCount", 4u, MoveAssignDest.size() );
     }//Operators
 
@@ -272,21 +272,21 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         TestMapType AccessMap = { {"Dione",0.232f}, {"Enceladus",0.113f}, {"Iapetus",0.223f}, {"Mimas",0.064f} };
         const TestMapType ConstMap = { {"Rhea",0.264f}, {"Tethys",0.146f}, {"Titan",1.352f} };
 
-        TEST_EQUAL( "operator[](const_key_type&)-Check1", 0.064f, AccessMap[std::string("Mimas")] );
-        TEST_EQUAL( "operator[](const_key_type&)-Check2", 0.223f, AccessMap[std::string("Iapetus")] );
-        TEST_EQUAL( "operator[](const_key_type&)-Check3", 0.113f, AccessMap[std::string("Enceladus")] );
-        TEST_EQUAL( "operator[](const_key_type&)-Check4", 0.232f, AccessMap[std::string("Dione")] );
+        TEST_EQUAL_EPSILON( "operator[](const_key_type&)-Check1", 0.064f, AccessMap[std::string("Mimas")] );
+        TEST_EQUAL_EPSILON( "operator[](const_key_type&)-Check2", 0.223f, AccessMap[std::string("Iapetus")] );
+        TEST_EQUAL_EPSILON( "operator[](const_key_type&)-Check3", 0.113f, AccessMap[std::string("Enceladus")] );
+        TEST_EQUAL_EPSILON( "operator[](const_key_type&)-Check4", 0.232f, AccessMap[std::string("Dione")] );
 
-        TEST_EQUAL( "operator[](const_key_type&)-Insert", 0.0f, AccessMap["Vacuum"] );
+        TEST_EQUAL_EPSILON( "operator[](const_key_type&)-Insert", 0.0f, AccessMap["Vacuum"] );
 
-        TEST_EQUAL( "at(const_key_type&)-Check1", 0.064f, AccessMap.at(std::string("Mimas")) );
-        TEST_EQUAL( "at(const_key_type&)-Check2", 0.223f, AccessMap.at(std::string("Iapetus")) );
-        TEST_EQUAL( "at(const_key_type&)-Check3", 0.113f, AccessMap.at(std::string("Enceladus")) );
-        TEST_EQUAL( "at(const_key_type&)-Check4", 0.232f, AccessMap.at(std::string("Dione")) );
+        TEST_EQUAL_EPSILON( "at(const_key_type&)-Check1", 0.064f, AccessMap.at(std::string("Mimas")) );
+        TEST_EQUAL_EPSILON( "at(const_key_type&)-Check2", 0.223f, AccessMap.at(std::string("Iapetus")) );
+        TEST_EQUAL_EPSILON( "at(const_key_type&)-Check3", 0.113f, AccessMap.at(std::string("Enceladus")) );
+        TEST_EQUAL_EPSILON( "at(const_key_type&)-Check4", 0.232f, AccessMap.at(std::string("Dione")) );
 
-        TEST_EQUAL( "at(const_key_type&)_const-Check1", 1.352f, ConstMap.at("Titan") );
-        TEST_EQUAL( "at(const_key_type&)_const-Check2", 0.146f, ConstMap.at("Tethys") );
-        TEST_EQUAL( "at(const_key_type&)_const-Check3", 0.264f, ConstMap.at("Rhea") );
+        TEST_EQUAL_EPSILON( "at(const_key_type&)_const-Check1", 1.352f, ConstMap.at("Titan") );
+        TEST_EQUAL_EPSILON( "at(const_key_type&)_const-Check2", 0.146f, ConstMap.at("Tethys") );
+        TEST_EQUAL_EPSILON( "at(const_key_type&)_const-Check3", 0.264f, ConstMap.at("Rhea") );
 
         TEST_THROW("at(const_key_type&)-Throw",
                    std::out_of_range,
