@@ -47,9 +47,6 @@
 /// @file
 /// @brief This file tests the functionality of the FlatMap class.
 
-using namespace Mezzanine;
-using namespace Mezzanine::Testing;
-
 namespace std {
     // Forward declares for the odd systems that seem to want them.
     bool operator<(const std::vector<char>& AltKey, const std::string& Str);
@@ -116,7 +113,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         TEST_EQUAL( "FlatMap(InputIterator,InputIterator)-Element4-Second", 21, (*RangeIter).second );
         TEST_EQUAL( "FlatMap(InputIterator,InputIterator)-ElementCount", 4u, RangeDestTest.size() );
 
-        FlatMap<int,float> MoveSourceTest = { {27,13.5f}, {73,36.5f}, {15,7.5f}, {14,7.0f}, {99,49.5} };
+        FlatMap<int,float> MoveSourceTest = { {27,13.5f}, {73,36.5f}, {15,7.5f}, {14,7.0f}, {99,49.5f} };
         FlatMap<int,float> MoveDestTest( std::move(MoveSourceTest) );
         FlatMap<int,float>::iterator MoveIter = MoveDestTest.begin();
         TEST_EQUAL( "FlatMap(SelfType&&)-Element1-First", 14, (*MoveIter).first );
@@ -263,7 +260,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
             SafeFloat() = default;
             SafeFloat(const SafeFloat& New) = default;
             SafeFloat(SafeFloat&& New) = default;
-            SafeFloat(const float New) : Val(New) {  };
+            SafeFloat(const float New) : Val(New) {  }
             ~SafeFloat() = default;
 
             SafeFloat& operator=(const SafeFloat& Other) = default;
@@ -322,17 +319,17 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
             return static_cast<int>( MapIt - ConstBeginIt );
         };
 
-        std::vector<char> MercuryAltKey = { {'M'}, {'e'}, {'r'}, {'c'}, {'u'}, {'r'}, {'y'} };
-        std::vector<char> VenusAltKey = { {'V'}, {'e'}, {'n'}, {'u'}, {'s'} };
-        std::vector<char> EarthAltKey = { {'E'}, {'a'}, {'r'}, {'t'}, {'h'} };
-        std::vector<char> MarsAltKey = { {'M'}, {'a'}, {'r'}, {'s'} };
-        std::vector<char> JupiterAltKey = { {'J'}, {'u'}, {'p'}, {'i'}, {'t'}, {'e'}, {'r'} };
-        std::vector<char> SaturnAltKey = { {'S'}, {'a'}, {'t'}, {'u'}, {'r'}, {'n'} };
-        std::vector<char> UranusAltKey = { {'U'}, {'r'}, {'a'}, {'n'}, {'u'}, {'s'} };
-        std::vector<char> NeptuneAltKey = { {'N'}, {'e'}, {'p'}, {'t'}, {'u'}, {'n'}, {'e'} };
-        std::vector<char> PlutoAltKey = { {'P'}, {'l'}, {'u'}, {'t'}, {'o'} };
-        std::vector<char> AgniaAltKey = { {'A'}, {'g'}, {'n'}, {'i'}, {'a'} };
-        std::vector<char> XeniaAltKey = { {'X'}, {'e'}, {'n'}, {'i'}, {'a'} };
+        std::vector<char> MercuryAltKey = { 'M', 'e', 'r', 'c', 'u', 'r', 'y' };
+        std::vector<char> VenusAltKey = { 'V', 'e', 'n', 'u', 's' };
+        std::vector<char> EarthAltKey = { 'E', 'a', 'r', 't', 'h' };
+        std::vector<char> MarsAltKey = { 'M', 'a', 'r', 's' };
+        std::vector<char> JupiterAltKey = { 'J', 'u', 'p', 'i', 't', 'e', 'r' };
+        std::vector<char> SaturnAltKey = { 'S', 'a', 't', 'u', 'r', 'n' };
+        std::vector<char> UranusAltKey = { 'U', 'r', 'a', 'n', 'u', 's' };
+        std::vector<char> NeptuneAltKey = { 'N', 'e', 'p', 't', 'u', 'n', 'e' };
+        std::vector<char> PlutoAltKey = { 'P', 'l', 'u', 't', 'o' };
+        std::vector<char> AgniaAltKey = { 'A', 'g', 'n', 'i', 'a' };
+        std::vector<char> XeniaAltKey = { 'X', 'e', 'n', 'i', 'a' };
 
         TEST_EQUAL( "count(const_key_type&)_const-Pass", 1u, LookupMap.count("Earth") );
         TEST_EQUAL( "count(const_key_type&)_const-Fail", 0u, LookupMap.count("Pluto") );

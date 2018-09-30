@@ -106,7 +106,7 @@ namespace Mezzanine
         FlatPairCompare(SelfType&& Other) = default;
         /// @brief Compare functor constructor.
         /// @param Funct The function object to initialize this comparison object with.
-        FlatPairCompare(CompareType Funct) :
+        FlatPairCompare(CompareType Funct) noexcept :
             CompFunct(Funct)
             {  }
 
@@ -660,7 +660,7 @@ namespace Mezzanine
             return Ret.first;
         }
         /// @brief Inserts a range of elements into the container.
-        /// @tparam The deduced iterator type defining the range to be inserted.
+        /// @tparam ItType The deduced iterator type defining the range to be inserted.
         /// @param First An iterator to the start of the range to be inserted.
         /// @param Last An iterator to one-passed-the-final element to be inserted.
         template<class ItType>
