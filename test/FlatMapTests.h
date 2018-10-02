@@ -213,7 +213,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         TEST_EQUAL( "cbegin()_const-First", "Charon", (*CBeginIter).first );
         TEST_EQUAL( "cbegin()_const-Second", 17536, (*CBeginIter).second );
         TEST_EQUAL( "begin()_const-First", "Callisto", (*ConstBeginIter).first );
-        TEST_EQUAL( "begin()_const-Second", 1.235f, (*ConstBeginIter).second );
+        TEST_EQUAL_EPSILON( "begin()_const-Second", 1.235f, (*ConstBeginIter).second );
 
         FirstMapType::iterator EndIter = TestMap.end();
         FirstMapType::const_iterator CEndIter = TestMap.cend();
@@ -230,7 +230,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         TEST_EQUAL( "crbegin()_const-First", "Styx", (*CBeginRevIter).first );
         TEST_EQUAL( "crbegin()_const-Second", 42656, (*CBeginRevIter).second );
         TEST_EQUAL( "rbegin()_const-First", "Io", (*ConstBeginRevIter).first );
-        TEST_EQUAL( "rbegin()_const-Second", 1.796f, (*ConstBeginRevIter).second );
+        TEST_EQUAL_EPSILON( "rbegin()_const-Second", 1.796f, (*ConstBeginRevIter).second );
 
         FirstMapType::reverse_iterator EndRevIter = TestMap.rend();
         FirstMapType::const_reverse_iterator CEndRevIter = TestMap.crend();
