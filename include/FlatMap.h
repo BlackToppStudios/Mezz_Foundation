@@ -174,6 +174,7 @@ namespace Mezzanine
     /// @tparam KeyType The type of key that will be used for element lookups.
     /// @tparam ElementType The type of element this container will store.
     /// @tparam Compare The comparator functor to use for sorting keys (and thus their associated elements).
+    /// This must be default constructible.
     /// @tparam Alloc Allocator type for elements in the map.
     /// @remarks This container tries to adhere to the api provided by the C++14 std::map as much as it
     /// can, with the addition of the "contains()" method that was included in C++20.  C++17 methods were
@@ -223,8 +224,11 @@ namespace Mezzanine
     protected:
         /// @brief The internal container storing all of our pairs.
         container_type InternalStorage;
-        /// @brief The comparison object to be used with stl algorithms.
-        value_compare CompareObj{ key_compare() };
+
+        /// @brief Gets the comparison object to be used with stl algorithms.
+        /// @return Returns a usable instance of comparator function for sorting values in this map.
+        value_compare GetCompareObj() const
+            { return value_compare( key_compare() ); }
     public:
         /// @brief Default constructor.
         FlatMap() = default;
@@ -359,7 +363,7 @@ namespace Mezzanine
                 InternalStorage.push_back( std::make_pair(Key,mapped_type()) );
                 return InternalStorage.back().second;
             }
-            if( !CompareObj.GetKeyComp()(Key,(*InsertIt).first) ) { // Exact match
+            if( !key_compare()(Key,(*InsertIt).first) ) { // Exact match
                 return (*InsertIt).second;
             }
             // Doesn't exist, insert somewhere in the sequence
@@ -382,7 +386,7 @@ namespace Mezzanine
                 InternalStorage.push_back( std::make_pair(Key,mapped_type()) );
                 return InternalStorage.back().second;
             }
-            if( !CompareObj.GetKeyComp()(Key,(*InsertIt).first) ) { // Exact match
+            if( !key_compare()(Key,(*InsertIt).first) ) { // Exact match
                 return (*InsertIt).second;
             }
             // Doesn't exist, insert somewhere in the sequence
@@ -443,26 +447,26 @@ namespace Mezzanine
         /// @param Key The key to search for.
         /// @return Returns an iterator to to the pair matching the specified key, or end() if no pair was found.
         iterator find(const key_type& Key)
-            { return binary_find(begin(),end(),Key,CompareObj); }
+            { return binary_find(begin(),end(),Key,GetCompareObj()); }
         /// @brief Gets an iterator to the stored pair with a specific key.
         /// @param Key The key to search for.
         /// @return Returns an const iterator to to the pair matching the specified key, or end() if no pair was found.
         const_iterator find(const key_type& Key) const
-            { return binary_find(begin(),end(),Key,CompareObj); }
+            { return binary_find(begin(),end(),Key,GetCompareObj()); }
         /// @brief Gets an iterator to the stored pair with a specific key.
         /// @tparam alt_key An type not matching key_type but is still equivalent comparable.
         /// @param Key The key to search for.
         /// @return Returns an iterator to to the pair matching the specified key, or end() if no pair was found.
         template<class alt_key, typename = std::enable_if_t<Is_Transparent<Compare,alt_key>::value>>
         iterator find(const alt_key& Key)
-            { return binary_find(begin(),end(),Key,CompareObj); }
+            { return binary_find(begin(),end(),Key,GetCompareObj()); }
         /// @brief Gets an iterator to the stored pair with a specific key.
         /// @tparam alt_key An type not matching key_type but is still equivalent comparable.
         /// @param Key The key to search for.
         /// @return Returns an const iterator to to the pair matching the specified key, or end() if no pair was found.
         template<class alt_key, typename = std::enable_if_t<Is_Transparent<Compare,alt_key>::value>>
         const_iterator find(const alt_key& Key) const
-            { return binary_find(begin(),end(),Key,CompareObj); }
+            { return binary_find(begin(),end(),Key,GetCompareObj()); }
 
         /// @brief Gets whether or not this container has a specific key stored.
         /// @param Key The key to search for.
@@ -484,7 +488,7 @@ namespace Mezzanine
         /// @return Returns a pair of iterators containing the range of elements equal to the
         /// specified key.
         iterator_pair equal_range(const key_type& Key)
-            { return std::equal_range(begin(),end(),Key,CompareObj); }
+            { return std::equal_range(begin(),end(),Key,GetCompareObj()); }
         /// @brief Gets an iterator pair representing the range of elements equal to the key.
         /// @remarks This method exists primarily for api compatibility with multi_maps.  This
         /// method will only ever return a range of one or two end iterators.
@@ -492,7 +496,7 @@ namespace Mezzanine
         /// @return Returns a pair of const iterators containing the range of elements equal
         /// to the specified key.
         const_iterator_pair equal_range(const key_type& Key) const
-            { return std::equal_range(begin(),end(),Key,CompareObj); }
+            { return std::equal_range(begin(),end(),Key,GetCompareObj()); }
         /// @brief Gets an iterator pair representing the range of elements equal to the key.
         /// @tparam alt_key An type not matching key_type but is still equivalent comparable.
         /// @remarks This method exists primarily for api compatibility with multi_maps.  This
@@ -502,7 +506,7 @@ namespace Mezzanine
         /// specified key.
         template<class alt_key, typename = std::enable_if_t<Is_Transparent<Compare,alt_key>::value>>
         iterator_pair equal_range(const alt_key& Key)
-            { return std::equal_range(begin(),end(),Key,CompareObj); }
+            { return std::equal_range(begin(),end(),Key,GetCompareObj()); }
         /// @brief Gets an iterator pair representing the range of elements equal to the key.
         /// @tparam alt_key An type not matching key_type but is still equivalent comparable.
         /// @remarks This method exists primarily for api compatibility with multi_maps.  This
@@ -512,20 +516,20 @@ namespace Mezzanine
         /// to the specified key.
         template<class alt_key, typename = std::enable_if_t<Is_Transparent<Compare,alt_key>::value>>
         const_iterator_pair equal_range(const alt_key& Key) const
-            { return std::equal_range(begin(),end(),Key,CompareObj); }
+            { return std::equal_range(begin(),end(),Key,GetCompareObj()); }
 
         /// @brief Gets an iterator to the first element that doesn't compare less than the key.
         /// @param Key The key to search for.
         /// @return Returns an iterator to first element that is not less than the key specified,
         /// or the end iterator if no such match could be found.
         iterator lower_bound(const key_type& Key)
-            { return std::lower_bound(begin(),end(),Key,CompareObj); }
+            { return std::lower_bound(begin(),end(),Key,GetCompareObj()); }
         /// @brief Gets an iterator to the first element that doesn't compare less than the key.
         /// @param Key The key to search for.
         /// @return Returns a const iterator to first element that is not less than the key
         /// specified, or the end iterator if no such match could be found.
         const_iterator lower_bound(const key_type& Key) const
-            { return std::lower_bound(begin(),end(),Key,CompareObj); }
+            { return std::lower_bound(begin(),end(),Key,GetCompareObj()); }
         /// @brief Gets an iterator to the first element that doesn't compare less than the key.
         /// @tparam alt_key An type not matching key_type but is still equivalent comparable.
         /// @param Key The key to search for.
@@ -533,7 +537,7 @@ namespace Mezzanine
         /// or the end iterator if no such match could be found.
         template<class alt_key, typename = std::enable_if_t<Is_Transparent<Compare,alt_key>::value>>
         iterator lower_bound(const alt_key& Key)
-            { return std::lower_bound(begin(),end(),Key,CompareObj); }
+            { return std::lower_bound(begin(),end(),Key,GetCompareObj()); }
         /// @brief Gets an iterator to the first element that doesn't compare less than the key.
         /// @tparam alt_key An type not matching key_type but is still equivalent comparable.
         /// @param Key The key to search for.
@@ -541,20 +545,20 @@ namespace Mezzanine
         /// specified, or the end iterator if no such match could be found.
         template<class alt_key, typename = std::enable_if_t<Is_Transparent<Compare,alt_key>::value>>
         const_iterator lower_bound(const alt_key& Key) const
-            { return std::lower_bound(begin(),end(),Key,CompareObj); }
+            { return std::lower_bound(begin(),end(),Key,GetCompareObj()); }
 
         /// @brief Gets an iterator to the first element that compares greater than the key.
         /// @param Key The key to search for.
         /// @return Returns an iterator to the first element greater than the key specified,
         /// or the end iterator if no such match could be made.
         iterator upper_bound(const key_type& Key)
-            { return std::upper_bound(begin(),end(),Key,CompareObj); }
+            { return std::upper_bound(begin(),end(),Key,GetCompareObj()); }
         /// @brief Gets an iterator to the first element that compares greater than the key.
         /// @param Key The key to search for.
         /// @return Returns a const iterator to the first element greater than the key specified,
         /// or the end iterator if no such match could be made.
         const_iterator upper_bound(const key_type& Key) const
-            { return std::upper_bound(begin(),end(),Key,CompareObj); }
+            { return std::upper_bound(begin(),end(),Key,GetCompareObj()); }
         /// @brief Gets an iterator to the first element that compares greater than the key.
         /// @tparam alt_key An type not matching key_type but is still equivalent comparable.
         /// @param Key The key to search for.
@@ -562,7 +566,7 @@ namespace Mezzanine
         /// or the end iterator if no such match could be made.
         template<class alt_key, typename = std::enable_if_t<Is_Transparent<Compare,alt_key>::value>>
         iterator upper_bound(const alt_key& Key)
-            { return std::upper_bound(begin(),end(),Key,CompareObj); }
+            { return std::upper_bound(begin(),end(),Key,GetCompareObj()); }
         /// @brief Gets an iterator to the first element that compares greater than the key.
         /// @tparam alt_key An type not matching key_type but is still equivalent comparable.
         /// @param Key The key to search for.
@@ -570,7 +574,7 @@ namespace Mezzanine
         /// or the end iterator if no such match could be made.
         template<class alt_key, typename = std::enable_if_t<Is_Transparent<Compare,alt_key>::value>>
         const_iterator upper_bound(const alt_key& Key) const
-            { return std::upper_bound(begin(),end(),Key,CompareObj); }
+            { return std::upper_bound(begin(),end(),Key,GetCompareObj()); }
 
         ///////////////////////////////////////////////////////////////////////////////
         // Sequence Modifiers
@@ -619,14 +623,14 @@ namespace Mezzanine
                 InternalStorage.push_back(Val);
                 return InternalStorage.begin();
             }
-            if( Hint == begin() && CompareObj(Val,*Hint) ) {
+            if( Hint == begin() && GetCompareObj()(Val,*Hint) ) {
                 return InternalStorage.insert(begin(),Val);
             }
             const_iterator PrevIt = std::prev(Hint);
-            if( Hint == end() && CompareObj(*PrevIt,Val) ) {
+            if( Hint == end() && GetCompareObj()(*PrevIt,Val) ) {
                 return InternalStorage.insert(end(),Val);
             }
-            if( CompareObj(*PrevIt,Val) && CompareObj(Val,*Hint) ) {
+            if( GetCompareObj()(*PrevIt,Val) && GetCompareObj()(Val,*Hint) ) {
                 return InternalStorage.insert(Hint,Val);
             }
             // All sane shortcuts have failed, so ignore hint
@@ -645,14 +649,14 @@ namespace Mezzanine
                 InternalStorage.push_back( std::move(Val) );
                 return InternalStorage.begin();
             }
-            if( Hint == begin() && CompareObj(Val,*Hint) ) {
+            if( Hint == begin() && GetCompareObj()(Val,*Hint) ) {
                 return InternalStorage.insert( begin(), std::move(Val) );
             }
             const_iterator PrevIt = std::prev(Hint);
-            if( Hint == end() && CompareObj(*PrevIt,Val) ) {
+            if( Hint == end() && GetCompareObj()(*PrevIt,Val) ) {
                 return InternalStorage.insert( end(), std::move(Val) );
             }
-            if( CompareObj(*PrevIt,Val) && CompareObj(Val,*Hint) ) {
+            if( GetCompareObj()(*PrevIt,Val) && GetCompareObj()(Val,*Hint) ) {
                 return InternalStorage.insert( Hint, std::move(Val) );
             }
             // All sane shortcuts have failed, so ignore hint
@@ -718,7 +722,6 @@ namespace Mezzanine
         void swap(SelfType& Other)
         {
             InternalStorage.swap(Other.InternalStorage);
-            std::swap(CompareObj,Other.CompareObj);
         }
 
         /// @brief Removes a Key/Value pair in this container.

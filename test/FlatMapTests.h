@@ -63,43 +63,45 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
     using namespace Mezzanine;
 
     {//Construction
-        FlatMap<int,std::string> DefaultTest;
+        using ConstuctMapType = FlatMap<std::string,int>;
+        ConstuctMapType DefaultTest;
         TEST_EQUAL( "FlatMap()-Count/Empty", 0u, DefaultTest.size() );
         TEST_EQUAL( "FlatMap()-BeginMatchesEnd", true, DefaultTest.begin() == DefaultTest.end() );
 
-        FlatMap<int,std::string> InitializerTest = { {12,"Twelve"}, {5,"Five"}, {50,"Fifty"}, {22,"TwentyTwo"} };
-        FlatMap<int,std::string>::iterator InitIter = InitializerTest.begin();
-        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-Element1-First", 5, (*InitIter).first );
-        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-Element1-Second", "Five", (*InitIter).second );
+        ConstuctMapType InitializerTest = { {"Twelve",12}, {"Five",5}, {"Fifty",50}, {"TwentyTwo",22} };
+        ConstuctMapType::iterator InitIter = InitializerTest.begin();
+        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-Element1-First", "Fifty", (*InitIter).first );
+        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-Element1-Second", 50, (*InitIter).second );
         std::advance(InitIter,1);
-        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-Element2-First", 12, (*InitIter).first );
-        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-Element2-Second", "Twelve", (*InitIter).second );
+        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-Element2-First", "Five", (*InitIter).first );
+        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-Element2-Second", 5, (*InitIter).second );
         std::advance(InitIter,1);
-        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-Element3-First", 22, (*InitIter).first );
-        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-Element3-Second", "TwentyTwo", (*InitIter).second );
+        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-Element3-First", "Twelve", (*InitIter).first );
+        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-Element3-Second", 12, (*InitIter).second );
         std::advance(InitIter,1);
-        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-Element4-First", 50, (*InitIter).first );
-        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-Element4-Second", "Fifty", (*InitIter).second );
+        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-Element4-First", "TwentyTwo", (*InitIter).first );
+        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-Element4-Second", 22, (*InitIter).second );
         TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-ElementCount", 4u, InitializerTest.size() );
 
-        FlatMap<int,std::string> CopyTest(InitializerTest);
-        FlatMap<int,std::string>::iterator CopyIter = CopyTest.begin();
-        TEST_EQUAL( "FlatMap(const_SelfType&)-Element1-First", 5, (*CopyIter).first );
-        TEST_EQUAL( "FlatMap(const_SelfType&)-Element1-Second", "Five", (*CopyIter).second );
+        ConstuctMapType CopyTest(InitializerTest);
+        ConstuctMapType::iterator CopyIter = CopyTest.begin();
+        TEST_EQUAL( "FlatMap(const_SelfType&)-Element1-First", "Fifty", (*CopyIter).first );
+        TEST_EQUAL( "FlatMap(const_SelfType&)-Element1-Second", 50, (*CopyIter).second );
         std::advance(CopyIter,1);
-        TEST_EQUAL( "FlatMap(const_SelfType&)-Element2-First", 12, (*CopyIter).first );
-        TEST_EQUAL( "FlatMap(const_SelfType&)-Element2-Second", "Twelve", (*CopyIter).second );
+        TEST_EQUAL( "FlatMap(const_SelfType&)-Element2-First", "Five", (*CopyIter).first );
+        TEST_EQUAL( "FlatMap(const_SelfType&)-Element2-Second", 5, (*CopyIter).second );
         std::advance(CopyIter,1);
-        TEST_EQUAL( "FlatMap(const_SelfType&)-Element3-First", 22, (*CopyIter).first );
-        TEST_EQUAL( "FlatMap(const_SelfType&)-Element3-Second", "TwentyTwo", (*CopyIter).second );
+        TEST_EQUAL( "FlatMap(const_SelfType&)-Element3-First", "Twelve", (*CopyIter).first );
+        TEST_EQUAL( "FlatMap(const_SelfType&)-Element3-Second", 12, (*CopyIter).second );
         std::advance(CopyIter,1);
-        TEST_EQUAL( "FlatMap(const_SelfType&)-Element4-First", 50, (*CopyIter).first );
-        TEST_EQUAL( "FlatMap(const_SelfType&)-Element4-Second", "Fifty", (*CopyIter).second );
+        TEST_EQUAL( "FlatMap(const_SelfType&)-Element4-First", "TwentyTwo", (*CopyIter).first );
+        TEST_EQUAL( "FlatMap(const_SelfType&)-Element4-Second", 22, (*CopyIter).second );
         TEST_EQUAL( "FlatMap(const_SelfType&)-ElementCount", 4u, CopyTest.size() );
 
-        std::vector<std::pair<std::string,int>> RangeSourceTest = { {"Aardvark",5}, {"Zebra",21}, {"Lion",10}, {"Platypus",1} };
-        FlatMap<std::string,int> RangeDestTest(RangeSourceTest.begin(),RangeSourceTest.end());
-        FlatMap<std::string,int>::iterator RangeIter = RangeDestTest.begin();
+        using RangeVectorType = std::vector<ConstuctMapType::value_type>;
+        RangeVectorType RangeSourceTest = { {"Aardvark",5}, {"Zebra",21}, {"Lion",10}, {"Platypus",1} };
+        ConstuctMapType RangeDestTest(RangeSourceTest.begin(),RangeSourceTest.end());
+        ConstuctMapType::iterator RangeIter = RangeDestTest.begin();
         TEST_EQUAL( "FlatMap(InputIterator,InputIterator)-Element1-First", "Aardvark", (*RangeIter).first );
         TEST_EQUAL( "FlatMap(InputIterator,InputIterator)-Element1-Second", 5, (*RangeIter).second );
         std::advance(RangeIter,1);
@@ -113,32 +115,33 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         TEST_EQUAL( "FlatMap(InputIterator,InputIterator)-Element4-Second", 21, (*RangeIter).second );
         TEST_EQUAL( "FlatMap(InputIterator,InputIterator)-ElementCount", 4u, RangeDestTest.size() );
 
-        FlatMap<int,float> MoveSourceTest = { {27,13.5f}, {73,36.5f}, {15,7.5f}, {14,7.0f}, {99,49.5f} };
-        FlatMap<int,float> MoveDestTest( std::move(MoveSourceTest) );
-        FlatMap<int,float>::iterator MoveIter = MoveDestTest.begin();
-        TEST_EQUAL( "FlatMap(SelfType&&)-Element1-First", 14, (*MoveIter).first );
-        TEST_EQUAL_EPSILON( "FlatMap(SelfType&&)-Element1-Second", 7.0f, (*MoveIter).second );
+        ConstuctMapType MoveSourceTest = { {"Elephant",4}, {"Otter",12}, {"Panda",2}, {"Chimp",6}, {"Shark",8} };
+        ConstuctMapType MoveDestTest( std::move(MoveSourceTest) );
+        ConstuctMapType::iterator MoveIter = MoveDestTest.begin();
+        TEST_EQUAL( "FlatMap(SelfType&&)-Element1-First", "Chimp", (*MoveIter).first );
+        TEST_EQUAL( "FlatMap(SelfType&&)-Element1-Second", 6, (*MoveIter).second );
         std::advance(MoveIter,1);
-        TEST_EQUAL( "FlatMap(SelfType&&)-Element2-First", 15, (*MoveIter).first );
-        TEST_EQUAL_EPSILON( "FlatMap(SelfType&&)-Element2-Second", 7.5f, (*MoveIter).second );
+        TEST_EQUAL( "FlatMap(SelfType&&)-Element2-First", "Elephant", (*MoveIter).first );
+        TEST_EQUAL( "FlatMap(SelfType&&)-Element2-Second", 4, (*MoveIter).second );
         std::advance(MoveIter,1);
-        TEST_EQUAL( "FlatMap(SelfType&&)-Element3-First", 27, (*MoveIter).first );
-        TEST_EQUAL_EPSILON( "FlatMap(SelfType&&)-Element3-Second", 13.5f, (*MoveIter).second );
+        TEST_EQUAL( "FlatMap(SelfType&&)-Element3-First", "Otter", (*MoveIter).first );
+        TEST_EQUAL( "FlatMap(SelfType&&)-Element3-Second", 12, (*MoveIter).second );
         std::advance(MoveIter,1);
-        TEST_EQUAL( "FlatMap(SelfType&&)-Element4-First", 73, (*MoveIter).first );
-        TEST_EQUAL_EPSILON( "FlatMap(SelfType&&)-Element4-Second", 36.5f, (*MoveIter).second );
+        TEST_EQUAL( "FlatMap(SelfType&&)-Element4-First", "Panda", (*MoveIter).first );
+        TEST_EQUAL( "FlatMap(SelfType&&)-Element4-Second", 2, (*MoveIter).second );
         std::advance(MoveIter,1);
-        TEST_EQUAL( "FlatMap(SelfType&&)-Element5-First", 99, (*MoveIter).first );
-        TEST_EQUAL_EPSILON( "FlatMap(SelfType&&)-Element5-Second", 49.5f, (*MoveIter).second );
+        TEST_EQUAL( "FlatMap(SelfType&&)-Element5-First", "Shark", (*MoveIter).first );
+        TEST_EQUAL( "FlatMap(SelfType&&)-Element5-Second", 8, (*MoveIter).second );
         TEST_EQUAL( "FlatMap(SelfType&&)-ElementCount", 5u, MoveDestTest.size() );
     }//Construction
 
     {//Operators
-        FlatMap<int,std::string> CopyAssignSource = { {39,"39"}, {8,"8"}, {17,"17"} };
-        FlatMap<int,std::string> CopyAssignDest = { {123,"123"}, {234,"234"}, {345,"345"}, {456,"456"}, {567,"567"} };
+        using CopyAssignMapType = FlatMap<int,std::string>;
+        CopyAssignMapType CopyAssignSource = { {39,"39"}, {8,"8"}, {17,"17"} };
+        CopyAssignMapType CopyAssignDest = { {123,"123"}, {234,"234"}, {345,"345"}, {456,"456"}, {567,"567"} };
         TEST_EQUAL( "operator=(const_SelfType&)-Dest-InitialElementCount", 5u, CopyAssignDest.size() );
         CopyAssignDest = CopyAssignSource;
-        FlatMap<int,std::string>::iterator SourceCopyIter = CopyAssignSource.begin();
+        CopyAssignMapType::iterator SourceCopyIter = CopyAssignSource.begin();
         TEST_EQUAL( "operator=(const_SelfType&)-Source-Element1-First", 8, (*SourceCopyIter).first );
         TEST_EQUAL( "operator=(const_SelfType&)-Source-Element1-Second", "8", (*SourceCopyIter).second );
         std::advance(SourceCopyIter,1);
@@ -148,7 +151,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         TEST_EQUAL( "operator=(const_SelfType&)-Source-Element3-First", 39, (*SourceCopyIter).first );
         TEST_EQUAL( "operator=(const_SelfType&)-Source-Element3-Second", "39", (*SourceCopyIter).second );
         TEST_EQUAL( "operator=(const_SelfType&)-Source-ElementCount", 3u, CopyAssignSource.size() );
-        FlatMap<int,std::string>::iterator DestCopyIter = CopyAssignDest.begin();
+        CopyAssignMapType::iterator DestCopyIter = CopyAssignDest.begin();
         TEST_EQUAL( "operator=(const_SelfType&)-Dest-Element1-First", 8, (*DestCopyIter).first );
         TEST_EQUAL( "operator=(const_SelfType&)-Dest-Element1-Second", "8", (*DestCopyIter).second );
         std::advance(DestCopyIter,1);
@@ -159,12 +162,13 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         TEST_EQUAL( "operator=(const_SelfType&)-Dest-Element3-Second", "39", (*DestCopyIter).second );
         TEST_EQUAL( "operator=(const_SelfType&)-Dest-ElementCount", 3u, CopyAssignDest.size() );
 
-        FlatMap<int,float> MoveAssignSource = { {78,19.5f}, {96,24.0f}, {14,3.5f}, {32,8.0f} };
-        FlatMap<int,float> MoveAssignDest = { {12,3.0f}, {23,5.75f}, {34,8.5f} };
+        using MoveAssignMapType = FlatMap<int,float>;
+        MoveAssignMapType MoveAssignSource = { {78,19.5f}, {96,24.0f}, {14,3.5f}, {32,8.0f} };
+        MoveAssignMapType MoveAssignDest = { {12,3.0f}, {23,5.75f}, {34,8.5f} };
         TEST_EQUAL( "operator=(SelfType&&)-Dest-InitialElementCount", 3u, MoveAssignDest.size() );
         MoveAssignDest = std::move( MoveAssignSource );
         TEST_EQUAL( "operator=(SelfType&&)-Source-ElementCount/Empty", true, MoveAssignSource.empty() );
-        FlatMap<int,float>::iterator DestMoveIter = MoveAssignDest.begin();
+        MoveAssignMapType::iterator DestMoveIter = MoveAssignDest.begin();
         TEST_EQUAL( "operator=(SelfType&&)-Dest-Element1-First", 14, (*DestMoveIter).first );
         TEST_EQUAL_EPSILON( "operator=(SelfType&&)-Dest-Element1-Second", 3.5f, (*DestMoveIter).second );
         std::advance(DestMoveIter,1);
@@ -182,9 +186,10 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
     {//Allocator
         // This is a little bit awkward because default allocators are stateless and compare equal to all instances
         // of the same type.  Really, this test exists solely to verify "get_allocator()" exists on the map.
-        FlatMap<int,int> AllocTest;
+        using AllocMapType = FlatMap<int,int>;
+        AllocMapType AllocTest;
         TEST_EQUAL( "get_allocator()_const-MatchesStdAlloc",
-                    true, std::allocator<decltype(AllocTest)::value_type>() == AllocTest.get_allocator() );
+                    true, std::allocator<AllocMapType::value_type>() == AllocTest.get_allocator() );
     }//Allocator
 
     {//Iterators
@@ -213,9 +218,9 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         FirstMapType::iterator EndIter = TestMap.end();
         FirstMapType::const_iterator CEndIter = TestMap.cend();
         SecondMapType::const_iterator ConstEndIter = ConstTestMap.end();
-        TEST_EQUAL( "end()", 5u, EndIter - BeginIter );
-        TEST_EQUAL( "cend()_const", 5u, CEndIter - CBeginIter );
-        TEST_EQUAL( "end()_const", 4u, ConstEndIter - ConstBeginIter );
+        TEST_EQUAL( "end()", 5, EndIter - BeginIter );
+        TEST_EQUAL( "cend()_const", 5, CEndIter - CBeginIter );
+        TEST_EQUAL( "end()_const", 4, ConstEndIter - ConstBeginIter );
 
         FirstMapType::reverse_iterator BeginRevIter = TestMap.rbegin();
         FirstMapType::const_reverse_iterator CBeginRevIter = TestMap.crbegin();
@@ -230,18 +235,18 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         FirstMapType::reverse_iterator EndRevIter = TestMap.rend();
         FirstMapType::const_reverse_iterator CEndRevIter = TestMap.crend();
         SecondMapType::const_reverse_iterator ConstEndRevIter = ConstTestMap.rend();
-        TEST_EQUAL( "rend()", 5u, EndRevIter - BeginRevIter );
-        TEST_EQUAL( "crend()_const", 5u, CEndRevIter - CBeginRevIter );
-        TEST_EQUAL( "rend()_const", 4u, ConstEndRevIter - ConstBeginRevIter );
+        TEST_EQUAL( "rend()", 5, EndRevIter - BeginRevIter );
+        TEST_EQUAL( "crend()_const", 5, CEndRevIter - CBeginRevIter );
+        TEST_EQUAL( "rend()_const", 4, ConstEndRevIter - ConstBeginRevIter );
     }//Iterators
 
     {//Capacity
         // The max_size tests here are awkward as well, as the actual valid value is implementation defined.
         // So the tests here for max_size are solely meant to verify the method exists and doesn't give a
         // completely bogus value.
-        using TestMapType = FlatMap<int,float>;
-        TestMapType EmptyMap;
-        TestMapType FullMap = { {1,2.5f}, {3,7.5f}, {5,12.5f}, {7,17.5f} };
+        using CapacityMapType = FlatMap<int,float>;
+        CapacityMapType EmptyMap;
+        CapacityMapType FullMap = { {1,2.5f}, {3,7.5f}, {5,12.5f}, {7,17.5f} };
 
         TEST_EQUAL( "size()_const-Empty", size_t(0), EmptyMap.size() );
         TEST_EQUAL( "size()_const-Full", size_t(4), FullMap.size() );
@@ -268,9 +273,9 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
             operator float() const { return Val; }
         };
 
-        using TestMapType = FlatMap<std::string,SafeFloat>;
-        TestMapType AccessMap = { {"Dione",0.232f}, {"Enceladus",0.113f}, {"Iapetus",0.223f}, {"Mimas",0.064f} };
-        const TestMapType ConstMap = { {"Rhea",0.264f}, {"Tethys",0.146f}, {"Titan",1.352f} };
+        using AccessMapType = FlatMap<std::string,SafeFloat>;
+        AccessMapType AccessMap = { {"Dione",0.232f}, {"Enceladus",0.113f}, {"Iapetus",0.223f}, {"Mimas",0.064f} };
+        const AccessMapType ConstAccessMap = { {"Rhea",0.264f}, {"Tethys",0.146f}, {"Titan",1.352f} };
 
         TEST_EQUAL_EPSILON( "operator[](const_key_type&)-Check1", 0.064f, AccessMap[std::string("Mimas")] );
         TEST_EQUAL_EPSILON( "operator[](const_key_type&)-Check2", 0.223f, AccessMap[std::string("Iapetus")] );
@@ -284,52 +289,53 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         TEST_EQUAL_EPSILON( "at(const_key_type&)-Check3", 0.113f, AccessMap.at(std::string("Enceladus")) );
         TEST_EQUAL_EPSILON( "at(const_key_type&)-Check4", 0.232f, AccessMap.at(std::string("Dione")) );
 
-        TEST_EQUAL_EPSILON( "at(const_key_type&)_const-Check1", 1.352f, ConstMap.at("Titan") );
-        TEST_EQUAL_EPSILON( "at(const_key_type&)_const-Check2", 0.146f, ConstMap.at("Tethys") );
-        TEST_EQUAL_EPSILON( "at(const_key_type&)_const-Check3", 0.264f, ConstMap.at("Rhea") );
+        TEST_EQUAL_EPSILON( "at(const_key_type&)_const-Check1", 1.352f, ConstAccessMap.at("Titan") );
+        TEST_EQUAL_EPSILON( "at(const_key_type&)_const-Check2", 0.146f, ConstAccessMap.at("Tethys") );
+        TEST_EQUAL_EPSILON( "at(const_key_type&)_const-Check3", 0.264f, ConstAccessMap.at("Rhea") );
 
         TEST_THROW("at(const_key_type&)-Throw",
                    std::out_of_range,
                    [&AccessMap](){ AccessMap.at("Mars"); } );
         TEST_THROW("at(const_key_type&)_const-Throw",
                    std::out_of_range,
-                   [&ConstMap](){ ConstMap.at("Venus"); } );
+                   [&ConstAccessMap](){ ConstAccessMap.at("Venus"); } );
     }//Element Access
 
     {//Lookup
-        using TestMapType = FlatMap<std::string,std::string,std::less<>>;
-        using MapPairType = TestMapType::iterator_pair;
-        using ConstMapPairType = TestMapType::const_iterator_pair;
+        using LookupMapType = FlatMap<std::string,std::string,std::less<>>;
+        using MapPairType = LookupMapType::iterator_pair;
+        using ConstMapPairType = LookupMapType::const_iterator_pair;
+        using AltStringType = std::vector<char>;
 
-        TestMapType LookupMap = { {"Earth","Sol III"},
-                                  {"Jupiter","Sol V"},
-                                  {"Venus","Sol II"},
-                                  {"Mars","Sol IV"},
-                                  {"Mercury","Sol I"} };
-        TestMapType::iterator BeginIt = LookupMap.begin();
-        const TestMapType ConstLookupMap = { {"Uranus","Sol VII"},
-                                             {"Saturn","Sol VI"},
-                                             {"Pluto","Sol IX"},
-                                             {"Neptune","Sol VIII"} };
-        TestMapType::const_iterator ConstBeginIt = ConstLookupMap.begin();
-        auto GetPos = [BeginIt](const TestMapType::iterator MapIt) -> int {
+        LookupMapType LookupMap = { {"Earth","Sol III"},
+                                    {"Jupiter","Sol V"},
+                                    {"Venus","Sol II"},
+                                    {"Mars","Sol IV"},
+                                    {"Mercury","Sol I"} };
+        LookupMapType::iterator BeginIt = LookupMap.begin();
+        const LookupMapType ConstLookupMap = { {"Uranus","Sol VII"},
+                                               {"Saturn","Sol VI"},
+                                               {"Pluto","Sol IX"},
+                                               {"Neptune","Sol VIII"} };
+        LookupMapType::const_iterator ConstBeginIt = ConstLookupMap.begin();
+        auto GetPos = [BeginIt](const LookupMapType::iterator MapIt) -> int {
             return static_cast<int>( MapIt - BeginIt );
         };
-        auto GetConstPos = [ConstBeginIt](const TestMapType::const_iterator MapIt) -> int {
+        auto GetConstPos = [ConstBeginIt](const LookupMapType::const_iterator MapIt) -> int {
             return static_cast<int>( MapIt - ConstBeginIt );
         };
 
-        std::vector<char> MercuryAltKey = { 'M', 'e', 'r', 'c', 'u', 'r', 'y' };
-        std::vector<char> VenusAltKey = { 'V', 'e', 'n', 'u', 's' };
-        std::vector<char> EarthAltKey = { 'E', 'a', 'r', 't', 'h' };
-        std::vector<char> MarsAltKey = { 'M', 'a', 'r', 's' };
-        std::vector<char> JupiterAltKey = { 'J', 'u', 'p', 'i', 't', 'e', 'r' };
-        std::vector<char> SaturnAltKey = { 'S', 'a', 't', 'u', 'r', 'n' };
-        std::vector<char> UranusAltKey = { 'U', 'r', 'a', 'n', 'u', 's' };
-        std::vector<char> NeptuneAltKey = { 'N', 'e', 'p', 't', 'u', 'n', 'e' };
-        std::vector<char> PlutoAltKey = { 'P', 'l', 'u', 't', 'o' };
-        std::vector<char> AgniaAltKey = { 'A', 'g', 'n', 'i', 'a' };
-        std::vector<char> XeniaAltKey = { 'X', 'e', 'n', 'i', 'a' };
+        AltStringType MercuryAltKey = { 'M', 'e', 'r', 'c', 'u', 'r', 'y' };
+        AltStringType VenusAltKey = { 'V', 'e', 'n', 'u', 's' };
+        AltStringType EarthAltKey = { 'E', 'a', 'r', 't', 'h' };
+        AltStringType MarsAltKey = { 'M', 'a', 'r', 's' };
+        AltStringType JupiterAltKey = { 'J', 'u', 'p', 'i', 't', 'e', 'r' };
+        AltStringType SaturnAltKey = { 'S', 'a', 't', 'u', 'r', 'n' };
+        AltStringType UranusAltKey = { 'U', 'r', 'a', 'n', 'u', 's' };
+        AltStringType NeptuneAltKey = { 'N', 'e', 'p', 't', 'u', 'n', 'e' };
+        AltStringType PlutoAltKey = { 'P', 'l', 'u', 't', 'o' };
+        AltStringType AgniaAltKey = { 'A', 'g', 'n', 'i', 'a' };
+        AltStringType XeniaAltKey = { 'X', 'e', 'n', 'i', 'a' };
 
         TEST_EQUAL( "count(const_key_type&)_const-Pass", 1u, LookupMap.count("Earth") );
         TEST_EQUAL( "count(const_key_type&)_const-Fail", 0u, LookupMap.count("Pluto") );
@@ -435,21 +441,21 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
     }//Lookup
 
     {//Sequence Modifiers
-        using TestMapType = FlatMap<int,std::string>;
-        using TestMapValue = TestMapType::value_type;
-        using TestListType = std::list<TestMapValue>;
-        using TestInitListType = std::initializer_list<TestMapValue>;
-        using InsertPairResult = std::pair<TestMapType::iterator,bool>;
-        TestMapType EmptyMap;
+        using SequenceMapType = FlatMap<int,std::string>;
+        using SequenceMapValue = SequenceMapType::value_type;
+        using SequenceListType = std::list<SequenceMapValue>;
+        using SequenceInitListType = std::initializer_list<SequenceMapValue>;
+        using InsertPairResult = std::pair<SequenceMapType::iterator,bool>;
+        //SequenceMapType EmptyMap;
 
-        TestMapType CopyInsertMap = { {1,"One"}, {3,"Three"} };
-        TestMapValue NewCopyInsertValue(2,"Two");
-        TestMapValue OldCopyInsertValue(3,"Twelve");
+        SequenceMapType CopyInsertMap = { {1,"One"}, {3,"Three"} };
+        SequenceMapValue NewCopyInsertValue(2,"Two");
+        SequenceMapValue OldCopyInsertValue(3,"Twelve");
         TEST_EQUAL( "insert(const_value_type&)-BeforeCount",
                     2u, CopyInsertMap.size() );
         InsertPairResult NewCopyInsertResult = CopyInsertMap.insert(NewCopyInsertValue);
         InsertPairResult OldCopyInsertResult = CopyInsertMap.insert(OldCopyInsertValue);
-        TestMapType::iterator CopyInsertBegin = CopyInsertMap.begin();
+        SequenceMapType::iterator CopyInsertBegin = CopyInsertMap.begin();
         TEST_EQUAL( "insert(const_value_type&)-AfterCount",
                     3u, CopyInsertMap.size() );
         TEST_EQUAL( "insert(const_value_type&)-NewResult-First",
@@ -473,14 +479,14 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         TEST_EQUAL( "insert(const_value_type&)-Element3-Second",
                     "Three", ( CopyInsertBegin + 2 )->second );
 
-        TestMapType MoveInsertMap = { {4,"Four"}, {6,"Six"} };
-        TestMapValue NewMoveInsertValue(5,"Five");
-        TestMapValue OldMoveInsertValue(4,"Sixteen");
+        SequenceMapType MoveInsertMap = { {4,"Four"}, {6,"Six"} };
+        SequenceMapValue NewMoveInsertValue(5,"Five");
+        SequenceMapValue OldMoveInsertValue(4,"Sixteen");
         TEST_EQUAL( "insert(value_type&&)-BeforeCount",
                     2u, MoveInsertMap.size() );
         InsertPairResult NewMoveInsertResult = MoveInsertMap.insert( std::move(NewMoveInsertValue) );
         InsertPairResult OldMoveInsertResult = MoveInsertMap.insert( std::move(OldMoveInsertValue) );
-        TestMapType::iterator MoveInsertBegin = MoveInsertMap.begin();
+        SequenceMapType::iterator MoveInsertBegin = MoveInsertMap.begin();
         TEST_EQUAL( "insert(value_type&&)-AfterCount",
                     3u, MoveInsertMap.size() );
         TEST_EQUAL( "insert(value_type&&)-NewResult-First",
@@ -508,15 +514,15 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         TEST_EQUAL( "insert(value_type&&)-VerifyMove-Old",
                     false, OldMoveInsertValue.second.empty() );
 
-        TestMapType HintCopyInsertMap;
-        TestMapValue FirstCopyHintValue(1,"Mercury");
-        TestMapValue SecondCopyHintValue(2,"Venus");
-        TestMapValue ThirdCopyHintValue(3,"Earth");
-        TestMapValue FourthCopyHintValue(4,"Mars");
-        TestMapValue FifthCopyHintValue(5,"Asteroids");
-        TestMapValue FailCopyHintValue(3,"Earf");
-        TestMapType::iterator CopyHint = HintCopyInsertMap.begin();
-        TestMapType::iterator CopyHintResult = HintCopyInsertMap.insert(CopyHint,SecondCopyHintValue);
+        SequenceMapType HintCopyInsertMap;
+        SequenceMapValue FirstCopyHintValue(1,"Mercury");
+        SequenceMapValue SecondCopyHintValue(2,"Venus");
+        SequenceMapValue ThirdCopyHintValue(3,"Earth");
+        SequenceMapValue FourthCopyHintValue(4,"Mars");
+        SequenceMapValue FifthCopyHintValue(5,"Asteroids");
+        SequenceMapValue FailCopyHintValue(3,"Earf");
+        SequenceMapType::iterator CopyHint = HintCopyInsertMap.begin();
+        SequenceMapType::iterator CopyHintResult = HintCopyInsertMap.insert(CopyHint,SecondCopyHintValue);
         TEST_EQUAL( "insert(const_iterator,const_value_type&)-EmptyInsert-Position",
                     0, std::distance( HintCopyInsertMap.begin(), CopyHintResult ) );
         TEST_EQUAL( "insert(const_iterator,const_value_type&)-EmptyInsert-First",
@@ -587,15 +593,15 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         TEST_EQUAL( "insert(const_iterator,const_value_type&)-Element5-Second",
                     "Asteroids", ( HintCopyInsertMap.begin() + 4 )->second );
 
-        TestMapType HintMoveInsertMap;
-        TestMapValue FirstMoveHintValue(5,"Jupiter");
-        TestMapValue SecondMoveHintValue(6,"Saturn");
-        TestMapValue ThirdMoveHintValue(7,"Uranus");
-        TestMapValue FourthMoveHintValue(8,"Neptune");
-        TestMapValue FifthMoveHintValue(9,"Pluto");
-        TestMapValue FailMoveHintValue(9,"Planet X");
-        TestMapType::iterator MoveHint = HintMoveInsertMap.begin();
-        TestMapType::iterator MoveHintResult = HintMoveInsertMap.insert(MoveHint,std::move(ThirdMoveHintValue));
+        SequenceMapType HintMoveInsertMap;
+        SequenceMapValue FirstMoveHintValue(5,"Jupiter");
+        SequenceMapValue SecondMoveHintValue(6,"Saturn");
+        SequenceMapValue ThirdMoveHintValue(7,"Uranus");
+        SequenceMapValue FourthMoveHintValue(8,"Neptune");
+        SequenceMapValue FifthMoveHintValue(9,"Pluto");
+        SequenceMapValue FailMoveHintValue(9,"Planet X");
+        SequenceMapType::iterator MoveHint = HintMoveInsertMap.begin();
+        SequenceMapType::iterator MoveHintResult = HintMoveInsertMap.insert(MoveHint,std::move(ThirdMoveHintValue));
         TEST_EQUAL( "insert(const_iterator,value_type&&)-EmptyInsert-Position",
                     0, std::distance( HintMoveInsertMap.begin(), MoveHintResult ) );
         TEST_EQUAL( "insert(const_iterator,value_type&&)-EmptyInsert-First",
@@ -678,8 +684,8 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         TEST_EQUAL( "insert(const_iterator,value_type&&)-VerifyMove-Fail",
                     false, FailMoveHintValue.second.empty() );
 
-        TestListType RangeInsertList = { {2,"Zwei"}, {6,"Sechs"}, {7,"Seiben"} };
-        TestMapType RangeInsertMap = { {1,"Eins"}, {5,"Funf"}, {9,"Neun"} };
+        SequenceListType RangeInsertList = { {2,"Zwei"}, {6,"Sechs"}, {7,"Seiben"} };
+        SequenceMapType RangeInsertMap = { {1,"Eins"}, {5,"Funf"}, {9,"Neun"} };
         TEST_EQUAL( "insert(ItType,ItType)-BeforeCount",
                     3u, RangeInsertMap.size() );
         RangeInsertMap.insert(RangeInsertList.begin(),RangeInsertList.end());
@@ -710,8 +716,8 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         TEST_EQUAL( "insert(ItType,ItType)-Element6-Second",
                     "Neun", ( RangeInsertMap.begin() + 5 )->second );
 
-        TestMapType InitListInsertMap = { {50074,"Thalassa"}, {117646,"Proteus"} };
-        TestInitListType InsertInitList = { {73548,"Larissa"}, {5513818,"Nereid"}, {61953,"Galatea"} };
+        SequenceMapType InitListInsertMap = { {50074,"Thalassa"}, {117646,"Proteus"} };
+        SequenceInitListType InsertInitList = { {73548,"Larissa"}, {5513818,"Nereid"}, {61953,"Galatea"} };
         TEST_EQUAL( "insert(std::initializer_list<value_type>)-ConstructCount",
                     2u, InitListInsertMap.size() );
         InitListInsertMap.insert( InsertInitList );
@@ -753,7 +759,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element8-Second",
                     "Nereid", ( InitListInsertMap.begin() + 7 )->second );
 
-        TestMapType EmplaceMap = { {7,"Seven"}, {9,"Nine"} };
+        SequenceMapType EmplaceMap = { {7,"Seven"}, {9,"Nine"} };
         TEST_EQUAL( "emplace(ArgTypes&&...)-BeforeCount",
                     2u, EmplaceMap.size() );
         InsertPairResult NewEmplaceResult = EmplaceMap.emplace(8,"Eight");
@@ -781,15 +787,15 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         TEST_EQUAL( "emplace(ArgTypes&&...)-Element3-Second",
                     "Nine", ( EmplaceMap.begin() + 2 )->second );
 
-        TestMapType HintEmplaceMap;
-        //TestMapValue FirstEmplaceHintValue(129390,"Miranda");
-        //TestMapValue SecondEmplaceHintValue(191020,"Ariel");
-        //TestMapValue ThirdEmplaceHintValue(266300,"Umbriel");
-        //TestMapValue FourthEmplaceHintValue(435910,"Titania");
-        //TestMapValue FifthEmplaceHintValue(583520,"Oberon");
-        //TestMapValue FailEmplaceHintValue(129390,"Earf");
-        TestMapType::iterator EmplaceHint = HintEmplaceMap.begin();
-        TestMapType::iterator EmplaceHintResult = HintEmplaceMap.emplace_hint(EmplaceHint,191020,"Ariel");
+        SequenceMapType HintEmplaceMap;
+        //SequenceMapValue FirstEmplaceHintValue(129390,"Miranda");
+        //SequenceMapValue SecondEmplaceHintValue(191020,"Ariel");
+        //SequenceMapValue ThirdEmplaceHintValue(266300,"Umbriel");
+        //SequenceMapValue FourthEmplaceHintValue(435910,"Titania");
+        //SequenceMapValue FifthEmplaceHintValue(583520,"Oberon");
+        //SequenceMapValue FailEmplaceHintValue(129390,"Earf");
+        SequenceMapType::iterator EmplaceHint = HintEmplaceMap.begin();
+        SequenceMapType::iterator EmplaceHintResult = HintEmplaceMap.emplace_hint(EmplaceHint,191020,"Ariel");
         TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-EmptyInsert-Position",
                     0, std::distance( HintEmplaceMap.begin(), EmplaceHintResult ) );
         TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-EmptyInsert-First",
@@ -860,8 +866,8 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-Element5-Second",
                     "Oberon", ( HintEmplaceMap.begin() + 4 )->second );
 
-        TestMapType SwapSrcMap = { {10,"Ten"}, {20,"Twenty"}, {30,"Thirty"} };
-        TestMapType SwapDestMap = { {40,"Forty"}, {50,"Fifty"} };
+        SequenceMapType SwapSrcMap = { {10,"Ten"}, {20,"Twenty"}, {30,"Thirty"} };
+        SequenceMapType SwapDestMap = { {40,"Forty"}, {50,"Fifty"} };
         SwapDestMap.swap(SwapSrcMap);
         TEST_EQUAL( "swap(SelfType&)-SrcCount", 2u, SwapSrcMap.size() );
         TEST_EQUAL( "swap(SelfType&)-DestCount", 3u, SwapDestMap.size() );
@@ -876,17 +882,17 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         TEST_EQUAL( "swap(SelfType&)-DestMap-Element3-First", 30, ( SwapDestMap.begin() + 2 )->first  );
         TEST_EQUAL( "swap(SelfType&)-DestMap-Element3-Second", "Thirty", ( SwapDestMap.begin() + 2 )->second );
 
-        TestMapType EraseMap = { {4,"Cuatro"}, {3,"Tres"}, {2,"Dos"}, {1,"Uno"} };
+        SequenceMapType EraseMap = { {4,"Cuatro"}, {3,"Tres"}, {2,"Dos"}, {1,"Uno"} };
         TEST_EQUAL( "erase((const_)iterator)-BeforeSize",
                     4u, EraseMap.size() );
-        TestMapType::iterator FirstErase = EraseMap.begin() + 1;
-        TestMapType::iterator FirstEraseResult = EraseMap.erase(FirstErase);
+        SequenceMapType::iterator FirstErase = EraseMap.begin() + 1;
+        SequenceMapType::iterator FirstEraseResult = EraseMap.erase(FirstErase);
         TEST_EQUAL( "erase((const_)iterator)-AfterFirstEraseSize",
                     3u, EraseMap.size() );
         TEST_EQUAL( "erase((const_)iterator)-FirstEraseResultPosition",
                     1, std::distance( EraseMap.begin(), FirstEraseResult ) );
-        TestMapType::const_iterator SecondErase = EraseMap.begin() + 2;
-        TestMapType::const_iterator SecondEraseResult = EraseMap.erase(SecondErase);
+        SequenceMapType::const_iterator SecondErase = EraseMap.begin() + 2;
+        SequenceMapType::const_iterator SecondEraseResult = EraseMap.erase(SecondErase);
         TEST_EQUAL( "erase((const_)iterator)-AfterSecondEraseSize",
                     2u, EraseMap.size() );
         TEST_EQUAL( "erase((const_)iterator)-SecondEraseResultPosition",
@@ -900,10 +906,11 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         TEST_EQUAL( "erase((const_)iterator)-Element2-Second",
                     "Tres", ( EraseMap.begin() + 1 )->second );
 
-        TestMapType RangeEraseMap = { {15,"30"}, {30,"60"}, {45,"90"}, {60,"120"}, {75,"150"}, {90,"180"} };
+        SequenceMapType RangeEraseMap = { {15,"30"}, {30,"60"}, {45,"90"}, {60,"120"}, {75,"150"}, {90,"180"} };
+        SequenceMapType::iterator RangeEraseBegin = RangeEraseMap.begin();
         TEST_EQUAL( "erase(const_iterator,const_iterator)-BeforeCount",
                     6u, RangeEraseMap.size() );
-        TestMapType::iterator RangeRetIt = RangeEraseMap.erase(RangeEraseMap.begin() + 2,RangeEraseMap.begin() + 5);
+        SequenceMapType::iterator RangeRetIt = RangeEraseMap.erase(RangeEraseBegin + 2,RangeEraseBegin + 5);
         TEST_EQUAL( "erase(const_iterator,const_iterator)-AfterCount",
                     3u, RangeEraseMap.size() );
         TEST_EQUAL( "erase(const_iterator,const_iterator)-ReturnPosition",
@@ -921,7 +928,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         TEST_EQUAL( "erase(const_iterator,const_iterator)-Element3-Second",
                     "180", ( RangeEraseMap.begin() + 2 )->second );
 
-        TestMapType KeyEraseMap = { {7,"Sept"}, {6,"Six"}, {5,"Cinq"} };
+        SequenceMapType KeyEraseMap = { {7,"Sept"}, {6,"Six"}, {5,"Cinq"} };
         TEST_EQUAL( "erase(const_key_type&)-BeforeCount",
                     3u, KeyEraseMap.size() );
         TEST_EQUAL( "erase(const_key_type&)-Pass",
@@ -939,7 +946,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         TEST_EQUAL( "erase(const_key_type&)-Element2-Second",
                     "Sept", ( KeyEraseMap.begin() + 1 )->second );
 
-        TestMapType ClearMap = { {4,"Quatre"}, {3,"Trois"}, {2,"Deux"}, {1,"Un"} };
+        SequenceMapType ClearMap = { {4,"Quatre"}, {3,"Trois"}, {2,"Deux"}, {1,"Un"} };
         TEST_EQUAL( "clear()-BeforeCount", 4u, ClearMap.size() );
         ClearMap.clear();
         TEST_EQUAL( "clear()-Empty", true, ClearMap.empty() );
