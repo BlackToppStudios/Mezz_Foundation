@@ -63,76 +63,122 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
     using namespace Mezzanine;
 
     {//Construction
-        using ConstuctMapType = FlatMap<std::string,int>;
-        ConstuctMapType DefaultTest;
-        TEST_EQUAL( "FlatMap()-Count/Empty", 0u, DefaultTest.size() );
-        TEST_EQUAL( "FlatMap()-BeginMatchesEnd", true, DefaultTest.begin() == DefaultTest.end() );
+        using ConstructMapType = FlatMap<std::string,int>;
+        using ConstructValueType = ConstructMapType::value_type;
+        ConstructMapType DefaultTest;
+        TEST_EQUAL( "FlatMap()-Count/Empty",
+                    0u, DefaultTest.size() );
+        TEST_EQUAL( "FlatMap()-BeginMatchesEnd",
+                    true, DefaultTest.begin() == DefaultTest.end() );
 
-        ConstuctMapType InitializerTest = { {"Twelve",12}, {"Five",5}, {"Fifty",50}, {"TwentyTwo",22} };
-        ConstuctMapType::iterator InitIter = InitializerTest.begin();
-        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-Element1-First", "Fifty", (*InitIter).first );
-        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-Element1-Second", 50, (*InitIter).second );
+        ConstructValueType InitValueOne("Fifty",50);
+        ConstructValueType InitValueTwo("Five",5);
+        ConstructValueType InitValueThree("Twelve",12);
+        ConstructValueType InitValueFour("TwentyTwo",22);
+        ConstructMapType InitTest = { InitValueThree, InitValueTwo, InitValueOne, InitValueFour };
+        ConstructMapType::iterator InitIter = InitTest.begin();
+        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-Element1-First",
+                    InitValueOne.first, (*InitIter).first );
+        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-Element1-Second",
+                    InitValueOne.second, (*InitIter).second );
         std::advance(InitIter,1);
-        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-Element2-First", "Five", (*InitIter).first );
-        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-Element2-Second", 5, (*InitIter).second );
+        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-Element2-First",
+                    InitValueTwo.first, (*InitIter).first );
+        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-Element2-Second",
+                    InitValueTwo.second, (*InitIter).second );
         std::advance(InitIter,1);
-        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-Element3-First", "Twelve", (*InitIter).first );
-        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-Element3-Second", 12, (*InitIter).second );
+        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-Element3-First",
+                    InitValueThree.first, (*InitIter).first );
+        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-Element3-Second",
+                    InitValueThree.second, (*InitIter).second );
         std::advance(InitIter,1);
-        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-Element4-First", "TwentyTwo", (*InitIter).first );
-        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-Element4-Second", 22, (*InitIter).second );
-        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-ElementCount", 4u, InitializerTest.size() );
+        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-Element4-First",
+                    InitValueFour.first, (*InitIter).first );
+        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-Element4-Second",
+                    InitValueFour.second, (*InitIter).second );
+        TEST_EQUAL( "FlatMap(std::initializer_list<value_type>)-ElementCount",
+                    4u, InitTest.size() );
 
-        ConstuctMapType CopyTest(InitializerTest);
-        ConstuctMapType::iterator CopyIter = CopyTest.begin();
-        TEST_EQUAL( "FlatMap(const_SelfType&)-Element1-First", "Fifty", (*CopyIter).first );
-        TEST_EQUAL( "FlatMap(const_SelfType&)-Element1-Second", 50, (*CopyIter).second );
+        ConstructMapType CopyTest(InitTest);
+        ConstructMapType::iterator CopyIter = CopyTest.begin();
+        TEST_EQUAL( "FlatMap(const_SelfType&)-Element1-First",
+                    InitValueOne.first, (*CopyIter).first );
+        TEST_EQUAL( "FlatMap(const_SelfType&)-Element1-Second",
+                    InitValueOne.second, (*CopyIter).second );
         std::advance(CopyIter,1);
-        TEST_EQUAL( "FlatMap(const_SelfType&)-Element2-First", "Five", (*CopyIter).first );
-        TEST_EQUAL( "FlatMap(const_SelfType&)-Element2-Second", 5, (*CopyIter).second );
+        TEST_EQUAL( "FlatMap(const_SelfType&)-Element2-First",
+                    InitValueTwo.first, (*CopyIter).first );
+        TEST_EQUAL( "FlatMap(const_SelfType&)-Element2-Second",
+                    InitValueTwo.second, (*CopyIter).second );
         std::advance(CopyIter,1);
-        TEST_EQUAL( "FlatMap(const_SelfType&)-Element3-First", "Twelve", (*CopyIter).first );
-        TEST_EQUAL( "FlatMap(const_SelfType&)-Element3-Second", 12, (*CopyIter).second );
+        TEST_EQUAL( "FlatMap(const_SelfType&)-Element3-First",
+                    InitValueThree.first, (*CopyIter).first );
+        TEST_EQUAL( "FlatMap(const_SelfType&)-Element3-Second",
+                    InitValueThree.second, (*CopyIter).second );
         std::advance(CopyIter,1);
-        TEST_EQUAL( "FlatMap(const_SelfType&)-Element4-First", "TwentyTwo", (*CopyIter).first );
-        TEST_EQUAL( "FlatMap(const_SelfType&)-Element4-Second", 22, (*CopyIter).second );
-        TEST_EQUAL( "FlatMap(const_SelfType&)-ElementCount", 4u, CopyTest.size() );
+        TEST_EQUAL( "FlatMap(const_SelfType&)-Element4-First",
+                    InitValueFour.first, (*CopyIter).first );
+        TEST_EQUAL( "FlatMap(const_SelfType&)-Element4-Second",
+                    InitValueFour.second, (*CopyIter).second );
+        TEST_EQUAL( "FlatMap(const_SelfType&)-ElementCount",
+                    4u, CopyTest.size() );
 
-        using RangeVectorType = std::vector<ConstuctMapType::value_type>;
-        RangeVectorType RangeSourceTest = { {"Aardvark",5}, {"Zebra",21}, {"Lion",10}, {"Platypus",1} };
-        ConstuctMapType RangeDestTest(RangeSourceTest.begin(),RangeSourceTest.end());
-        ConstuctMapType::iterator RangeIter = RangeDestTest.begin();
-        TEST_EQUAL( "FlatMap(InputIterator,InputIterator)-Element1-First", "Aardvark", (*RangeIter).first );
-        TEST_EQUAL( "FlatMap(InputIterator,InputIterator)-Element1-Second", 5, (*RangeIter).second );
+        using RangeVectorType = std::vector<ConstructMapType::value_type>;
+        ConstructValueType RangeValueOne("Aardvark",5);
+        ConstructValueType RangeValueTwo("Lion",10);
+        ConstructValueType RangeValueThree("Platypus",1);
+        ConstructValueType RangeValueFour("Zebra",21);
+        RangeVectorType RangeSourceTest = { RangeValueOne, RangeValueFour, RangeValueTwo, RangeValueThree };
+        ConstructMapType RangeDestTest(RangeSourceTest.begin(),RangeSourceTest.end());
+        ConstructMapType::iterator RangeIter = RangeDestTest.begin();
+        TEST_EQUAL( "FlatMap(InputIterator,InputIterator)-Element1-First",
+                    RangeValueOne.first, (*RangeIter).first );
+        TEST_EQUAL( "FlatMap(InputIterator,InputIterator)-Element1-Second",
+                    RangeValueOne.second, (*RangeIter).second );
         std::advance(RangeIter,1);
-        TEST_EQUAL( "FlatMap(InputIterator,InputIterator)-Element2-First", "Lion", (*RangeIter).first );
-        TEST_EQUAL( "FlatMap(InputIterator,InputIterator)-Element2-Second", 10, (*RangeIter).second );
+        TEST_EQUAL( "FlatMap(InputIterator,InputIterator)-Element2-First",
+                    RangeValueTwo.first, (*RangeIter).first );
+        TEST_EQUAL( "FlatMap(InputIterator,InputIterator)-Element2-Second",
+                    RangeValueTwo.second, (*RangeIter).second );
         std::advance(RangeIter,1);
-        TEST_EQUAL( "FlatMap(InputIterator,InputIterator)-Element3-First", "Platypus", (*RangeIter).first );
-        TEST_EQUAL( "FlatMap(InputIterator,InputIterator)-Element3-Second", 1, (*RangeIter).second );
+        TEST_EQUAL( "FlatMap(InputIterator,InputIterator)-Element3-First",
+                    RangeValueThree.first, (*RangeIter).first );
+        TEST_EQUAL( "FlatMap(InputIterator,InputIterator)-Element3-Second",
+                    RangeValueThree.second, (*RangeIter).second );
         std::advance(RangeIter,1);
-        TEST_EQUAL( "FlatMap(InputIterator,InputIterator)-Element4-First", "Zebra", (*RangeIter).first );
-        TEST_EQUAL( "FlatMap(InputIterator,InputIterator)-Element4-Second", 21, (*RangeIter).second );
-        TEST_EQUAL( "FlatMap(InputIterator,InputIterator)-ElementCount", 4u, RangeDestTest.size() );
+        TEST_EQUAL( "FlatMap(InputIterator,InputIterator)-Element4-First",
+                    RangeValueFour.first, (*RangeIter).first );
+        TEST_EQUAL( "FlatMap(InputIterator,InputIterator)-Element4-Second",
+                    RangeValueFour.second, (*RangeIter).second );
+        TEST_EQUAL( "FlatMap(InputIterator,InputIterator)-ElementCount",
+                    4u, RangeDestTest.size() );
 
-        ConstuctMapType MoveSourceTest = { {"Elephant",4}, {"Otter",12}, {"Panda",2}, {"Chimp",6}, {"Shark",8} };
-        ConstuctMapType MoveDestTest( std::move(MoveSourceTest) );
-        ConstuctMapType::iterator MoveIter = MoveDestTest.begin();
-        TEST_EQUAL( "FlatMap(SelfType&&)-Element1-First", "Chimp", (*MoveIter).first );
-        TEST_EQUAL( "FlatMap(SelfType&&)-Element1-Second", 6, (*MoveIter).second );
+        //ConstructMapType MoveSourceTest = { {"Elephant",4}, {"Otter",12}, {"Panda",2}, {"Chimp",6}, {"Shark",8} };
+        ConstructMapType MoveDestTest( std::move(RangeDestTest) );
+        ConstructMapType::iterator MoveIter = MoveDestTest.begin();
+        TEST_EQUAL( "FlatMap(SelfType&&)-Element1-First",
+                    RangeValueOne.first, (*MoveIter).first );
+        TEST_EQUAL( "FlatMap(SelfType&&)-Element1-Second",
+                    RangeValueOne.second, (*MoveIter).second );
         std::advance(MoveIter,1);
-        TEST_EQUAL( "FlatMap(SelfType&&)-Element2-First", "Elephant", (*MoveIter).first );
-        TEST_EQUAL( "FlatMap(SelfType&&)-Element2-Second", 4, (*MoveIter).second );
+        TEST_EQUAL( "FlatMap(SelfType&&)-Element2-First",
+                    RangeValueTwo.first, (*MoveIter).first );
+        TEST_EQUAL( "FlatMap(SelfType&&)-Element2-Second",
+                    RangeValueTwo.second, (*MoveIter).second );
         std::advance(MoveIter,1);
-        TEST_EQUAL( "FlatMap(SelfType&&)-Element3-First", "Otter", (*MoveIter).first );
-        TEST_EQUAL( "FlatMap(SelfType&&)-Element3-Second", 12, (*MoveIter).second );
+        TEST_EQUAL( "FlatMap(SelfType&&)-Element3-First",
+                    RangeValueThree.first, (*MoveIter).first );
+        TEST_EQUAL( "FlatMap(SelfType&&)-Element3-Second",
+                    RangeValueThree.second, (*MoveIter).second );
         std::advance(MoveIter,1);
-        TEST_EQUAL( "FlatMap(SelfType&&)-Element4-First", "Panda", (*MoveIter).first );
-        TEST_EQUAL( "FlatMap(SelfType&&)-Element4-Second", 2, (*MoveIter).second );
-        std::advance(MoveIter,1);
-        TEST_EQUAL( "FlatMap(SelfType&&)-Element5-First", "Shark", (*MoveIter).first );
-        TEST_EQUAL( "FlatMap(SelfType&&)-Element5-Second", 8, (*MoveIter).second );
-        TEST_EQUAL( "FlatMap(SelfType&&)-ElementCount", 5u, MoveDestTest.size() );
+        TEST_EQUAL( "FlatMap(SelfType&&)-Element4-First",
+                    RangeValueFour.first, (*MoveIter).first );
+        TEST_EQUAL( "FlatMap(SelfType&&)-Element4-Second",
+                    RangeValueFour.second, (*MoveIter).second );
+        TEST_EQUAL( "FlatMap(SelfType&&)-ElementCount",
+                    4u, MoveDestTest.size() );
+        TEST_EQUAL( "FlatMap(SelfType&&)-SourceEmpty",
+                    true, RangeDestTest.empty() );
     }//Construction
 
     {//Operators
@@ -266,7 +312,6 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
             SafeFloat(const SafeFloat& New) = default;
             SafeFloat(SafeFloat&& New) = default;
             SafeFloat(const float New) : Val(New) {  }
-            ~SafeFloat() = default;
 
             SafeFloat& operator=(const SafeFloat& Other) = default;
             SafeFloat& operator=(SafeFloat&& Other) = default;
