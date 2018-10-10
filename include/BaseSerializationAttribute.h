@@ -41,6 +41,9 @@
 #ifndef Mezz_Foundation_BaseSerializationAttribute_h
 #define Mezz_Foundation_BaseSerializationAttribute_h
 
+/// @file
+/// @brief This defines an attribute class to be use in the serialization system.
+
 // Some headers we don't want swig to see.
 #ifndef SWIG
     #include "DataTypes.h"
