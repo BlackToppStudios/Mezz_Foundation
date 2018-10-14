@@ -74,17 +74,31 @@ class BaseSerializationBackEnd
 {
 
 public:
+
     // Scheme type
-    typedef SerializationSchemeType SerializationScheme;
+    using SerializationScheme               = SerializationSchemeType;
 
     // Primitive types
-    typedef typename SerializationScheme::NodeCount                 NodeCount;
+    using NodeCount                         = typename SerializationScheme::NodeCount;
 
     // Tree type heiarchy types.
-    typedef typename SerializationScheme::SerializationAttribute    SerializationAttribute;
-    typedef typename SerializationScheme::SerializationBackEnd      SerializationBackEnd;
-    typedef typename SerializationScheme::SerializationNode         SerializationNode;
-    typedef typename SerializationScheme::SerializationRootNode     SerializationRootNode;
+    using SerializationAttribute            = typename SerializationScheme::SerializationAttribute;
+    using SerializationBackEnd              = typename SerializationScheme::SerializationBackEnd;
+    using SerializationNode                 = typename SerializationScheme::SerializationNode;
+    using SerializationRootNode             = typename SerializationScheme::SerializationRootNode;
+
+    // Old Version of this boilerplate
+//    // Scheme type
+//    typedef SerializationSchemeType SerializationScheme;
+
+//    // Primitive types
+//    typedef typename SerializationScheme::NodeCount                 NodeCount;
+
+//    // Tree type heiarchy types.
+//    typedef typename SerializationScheme::SerializationAttribute    SerializationAttribute;
+//    typedef typename SerializationScheme::SerializationBackEnd      SerializationBackEnd;
+//    typedef typename SerializationScheme::SerializationNode         SerializationNode;
+//    typedef typename SerializationScheme::SerializationRootNode     SerializationRootNode;
 
     // end type boilerplate
 

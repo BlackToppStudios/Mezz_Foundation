@@ -55,16 +55,16 @@ template <typename SerializationSchemeType>
 class BaseSerializationNode {
 public:
     // Scheme type
-    typedef SerializationSchemeType SerializationScheme;
+    using SerializationScheme               = SerializationSchemeType;
 
     // Primitive types
-    typedef typename SerializationScheme::NodeCount                 NodeCount;
+    using NodeCount                         = typename SerializationScheme::NodeCount;
 
     // Tree type heiarchy types.
-    typedef typename SerializationScheme::SerializationAttribute    SerializationAttribute;
-    typedef typename SerializationScheme::SerializationBackEnd      SerializationBackEnd;
-    typedef typename SerializationScheme::SerializationNode         SerializationNode;
-    typedef typename SerializationScheme::SerializationRootNode     SerializationRootNode;
+    using SerializationAttribute            = typename SerializationScheme::SerializationAttribute;
+    using SerializationBackEnd              = typename SerializationScheme::SerializationBackEnd;
+    using SerializationNode                 = typename SerializationScheme::SerializationNode;
+    using SerializationRootNode             = typename SerializationScheme::SerializationRootNode;
 
     // end type boilerplate
 
