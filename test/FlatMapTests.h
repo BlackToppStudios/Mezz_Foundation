@@ -319,24 +319,49 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         };
 
         using AccessMapType = FlatMap<std::string,SafeFloat>;
-        AccessMapType AccessMap = { {"Dione",0.232f}, {"Enceladus",0.113f}, {"Iapetus",0.223f}, {"Mimas",0.064f} };
-        const AccessMapType ConstAccessMap = { {"Rhea",0.264f}, {"Tethys",0.146f}, {"Titan",1.352f} };
+        using AccessMapValue = AccessMapType::value_type;
 
-        TEST_EQUAL_EPSILON( "operator[](const_key_type&)-Check1", 0.064f, AccessMap[std::string("Mimas")] );
-        TEST_EQUAL_EPSILON( "operator[](const_key_type&)-Check2", 0.223f, AccessMap[std::string("Iapetus")] );
-        TEST_EQUAL_EPSILON( "operator[](const_key_type&)-Check3", 0.113f, AccessMap[std::string("Enceladus")] );
-        TEST_EQUAL_EPSILON( "operator[](const_key_type&)-Check4", 0.232f, AccessMap[std::string("Dione")] );
+        AccessMapValue AccessValueOne("Dione",0.232f);
+        AccessMapValue AccessValueTwo("Enceladus",0.113f);
+        AccessMapValue AccessValueThree("Iapetus",0.223f);
+        AccessMapValue AccessValueFour("Mimas",0.064f);
+        AccessMapType AccessMap = { AccessValueOne, AccessValueTwo, AccessValueThree, AccessValueFour };
+        AccessMapValue ConstAccessValueOne("Rhea",0.264f);
+        AccessMapValue ConstAccessValueTwo("Tethys",0.146f);
+        AccessMapValue ConstAccessValueThree("Titan",1.352f);
+        const AccessMapType ConstAccessMap = { ConstAccessValueOne, ConstAccessValueTwo, ConstAccessValueThree };
 
-        TEST_EQUAL_EPSILON( "operator[](const_key_type&)-Insert", 0.0f, AccessMap["Vacuum"] );
+        TEST_EQUAL_EPSILON( "operator[](const_key_type&)-Check1",
+                            0.064f, AccessMap[AccessValueFour.first] );
+        TEST_EQUAL_EPSILON( "operator[](const_key_type&)-Check2",
+                            0.223f, AccessMap[std::move(AccessValueThree.first)] );
+        TEST_EQUAL_EPSILON( "operator[](const_key_type&)-Check3",
+                            0.113f, AccessMap[AccessValueTwo.first] );
+        TEST_EQUAL_EPSILON( "operator[](const_key_type&)-Check4",
+                            0.232f, AccessMap[std::move(AccessValueOne.first)] );
 
-        TEST_EQUAL_EPSILON( "at(const_key_type&)-Check1", 0.064f, AccessMap.at(std::string("Mimas")) );
-        TEST_EQUAL_EPSILON( "at(const_key_type&)-Check2", 0.223f, AccessMap.at(std::string("Iapetus")) );
-        TEST_EQUAL_EPSILON( "at(const_key_type&)-Check3", 0.113f, AccessMap.at(std::string("Enceladus")) );
-        TEST_EQUAL_EPSILON( "at(const_key_type&)-Check4", 0.232f, AccessMap.at(std::string("Dione")) );
+        std::string CopyInsertKey("Vacuum");
+        TEST_EQUAL_EPSILON( "operator[](const_key_type&)-Insert",
+                            0.0f, AccessMap[CopyInsertKey] );
+        std::string MoveInsertKey("LeafBlower");
+        TEST_EQUAL_EPSILON( "operator[](key_type&&)-Insert",
+                            0.0f, AccessMap[std::move(MoveInsertKey)] );
 
-        TEST_EQUAL_EPSILON( "at(const_key_type&)_const-Check1", 1.352f, ConstAccessMap.at("Titan") );
-        TEST_EQUAL_EPSILON( "at(const_key_type&)_const-Check2", 0.146f, ConstAccessMap.at("Tethys") );
-        TEST_EQUAL_EPSILON( "at(const_key_type&)_const-Check3", 0.264f, ConstAccessMap.at("Rhea") );
+        TEST_EQUAL_EPSILON( "at(const_key_type&)-Check1",
+                            0.064f, AccessMap.at(AccessValueFour.first) );
+        TEST_EQUAL_EPSILON( "at(const_key_type&)-Check2",
+                            0.223f, AccessMap.at(AccessValueThree.first) );
+        TEST_EQUAL_EPSILON( "at(const_key_type&)-Check3",
+                            0.113f, AccessMap.at(AccessValueTwo.first) );
+        TEST_EQUAL_EPSILON( "at(const_key_type&)-Check4",
+                            0.232f, AccessMap.at(AccessValueOne.first) );
+
+        TEST_EQUAL_EPSILON( "at(const_key_type&)_const-Check1",
+                            1.352f, ConstAccessMap.at(ConstAccessValueThree.first) );
+        TEST_EQUAL_EPSILON( "at(const_key_type&)_const-Check2",
+                            0.146f, ConstAccessMap.at(ConstAccessValueTwo.first) );
+        TEST_EQUAL_EPSILON( "at(const_key_type&)_const-Check3",
+                            0.264f, ConstAccessMap.at(ConstAccessValueOne.first) );
 
         TEST_THROW("at(const_key_type&)-Throw",
                    std::out_of_range,
