@@ -623,10 +623,11 @@ namespace Mezzanine
                 InternalStorage.push_back(Val);
                 return InternalStorage.begin();
             }
-            if( Hint == begin() && GetCompareObj()(Val,*Hint) ) {
+            Boole HintIsBegin = Hint == begin();
+            if( HintIsBegin && GetCompareObj()(Val,*Hint) ) {
                 return InternalStorage.insert(begin(),Val);
             }
-            const_iterator PrevIt = std::prev(Hint);
+            const_iterator PrevIt = ( HintIsBegin ? Hint : std::prev(Hint) );
             if( Hint == end() && GetCompareObj()(*PrevIt,Val) ) {
                 return InternalStorage.insert(end(),Val);
             }
@@ -649,10 +650,11 @@ namespace Mezzanine
                 InternalStorage.push_back( std::move(Val) );
                 return InternalStorage.begin();
             }
-            if( Hint == begin() && GetCompareObj()(Val,*Hint) ) {
+            Boole HintIsBegin = Hint == begin();
+            if( HintIsBegin && GetCompareObj()(Val,*Hint) ) {
                 return InternalStorage.insert( begin(), std::move(Val) );
             }
-            const_iterator PrevIt = std::prev(Hint);
+            const_iterator PrevIt = ( HintIsBegin ? Hint : std::prev(Hint) );
             if( Hint == end() && GetCompareObj()(*PrevIt,Val) ) {
                 return InternalStorage.insert( end(), std::move(Val) );
             }
