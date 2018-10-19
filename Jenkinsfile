@@ -51,6 +51,7 @@ pipeline {
                         checkout scm
                         sh 'mkdir -p build-debug'
                         dir('build-debug') { sh """
+                            hostname &&
                             export MEZZ_PACKAGE_DIR=/home/pi/Code/ &&
                             cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
                             ninja &&
@@ -207,6 +208,7 @@ pipeline {
                         checkout scm
                         sh 'mkdir -p build-release'
                         dir('build-release') { sh """
+                            hostname &&
                             export MEZZ_PACKAGE_DIR=/home/pi/Code/ &&
                             cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
                             ninja &&
