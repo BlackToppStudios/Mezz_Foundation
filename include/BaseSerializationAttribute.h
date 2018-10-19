@@ -74,7 +74,7 @@ public:
 
     // end type boilerplate
 
-    //virtual Boole IsNormalNode() const = 0;
+    virtual ~BaseSerializationAttribute() = default;
 //    virtual SerializationNode GetRootNode() = 0;
 //    virtual SerializationNode GetParentNode() = 0;
 

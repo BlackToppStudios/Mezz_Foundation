@@ -68,6 +68,8 @@ public:
 
     // end type boilerplate
 
+    virtual ~BaseSerializationNode() = default;
+
 //    virtual SerializationRootNode GetRootNode() = 0;
 //    virtual SerializationScheme::SerializationNode GetParentNode() = 0;
 };

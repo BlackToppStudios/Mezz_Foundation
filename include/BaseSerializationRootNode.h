@@ -72,7 +72,10 @@ public:
 
     // end type boilerplate
 
+    virtual ~BaseSerializationRootNode() = default;
+
     //virtual SerializationNode GetAsNode() { return *this; }
+    virtual String SerializeToString() = 0;
 
 };
 

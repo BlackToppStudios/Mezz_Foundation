@@ -102,6 +102,9 @@ public:
 
     // end type boilerplate
 
+    virtual ~BaseSerializationBackEnd() = default;
+
+    /// @brief Create an empty Hierarchy
     virtual SerializationRootNode CreateRootNode() = 0;
 
 };
