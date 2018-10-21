@@ -383,7 +383,7 @@ namespace Mezzanine
         {
             iterator InsertIt = lower_bound(Key);
             if( InsertIt == end() ) { // Doesn't exist, everything is lower so insert at end
-                InternalStorage.push_back( std::make_pair(Key,mapped_type()) );
+                InternalStorage.push_back( std::make_pair(std::move(Key),mapped_type()) );
                 return InternalStorage.back().second;
             }
             if( !key_compare()(Key,(*InsertIt).first) ) { // Exact match
@@ -588,7 +588,7 @@ namespace Mezzanine
         std::pair<iterator,Boole> insert(const value_type& Val)
         {
             iterator FoundIt = lower_bound(Val.first);
-            if( FoundIt != end() && (*FoundIt).first == Val.first ) {
+            if( FoundIt != end() && !key_compare()(Val.first,(*FoundIt).first) ) {
                 return std::make_pair(FoundIt,false);
             }else{
                 iterator InsertIt = InternalStorage.insert(FoundIt,Val);
@@ -604,7 +604,7 @@ namespace Mezzanine
         std::pair<iterator,Boole> insert(value_type&& Val)
         {
             iterator FoundIt = lower_bound(Val.first);
-            if( FoundIt != end() && (*FoundIt).first == Val.first ) {
+            if( FoundIt != end() && !key_compare()(Val.first,(*FoundIt).first) ) {
                 return std::make_pair(FoundIt,false);
             }else{
                 iterator InsertIt = InternalStorage.insert( FoundIt, std::move(Val) );

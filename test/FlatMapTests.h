@@ -340,13 +340,13 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         TEST_EQUAL_EPSILON( "operator[](const_key_type&)-Check4",
                             0.232f, AccessMap[std::move(AccessValueOne.first)] );
 
-        std::string CopyEndInsertKey("Vacuum");
+        std::string CopyEndInsertKey("Stone");
         TEST_EQUAL_EPSILON( "operator[](const_key_type&)-EndInsert",
                             0.0f, AccessMap[CopyEndInsertKey] );
         std::string CopyMiddleInsertKey("Fork");
         TEST_EQUAL_EPSILON( "operator[](const_key_type&)-MiddleInsert",
                             0.0f, AccessMap[CopyMiddleInsertKey] );
-        std::string MoveEndInsertKey("Stone");
+        std::string MoveEndInsertKey("Vacuum");
         TEST_EQUAL_EPSILON( "operator[](key_type&&)-EndInsert",
                             0.0f, AccessMap[std::move(MoveEndInsertKey)] );
         std::string MoveMiddleInsertKey("LeafBlower");
