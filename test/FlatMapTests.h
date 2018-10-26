@@ -56,11 +56,26 @@ namespace std {
         { return std::lexicographical_compare(AltKey.begin(),AltKey.end(),Str.begin(),Str.end()); }
     bool operator<(const std::string& Str, const std::vector<char>& AltKey)
         { return std::lexicographical_compare(Str.begin(),Str.end(),AltKey.begin(),AltKey.end()); }
-}
+}//*/
 
 DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
 {
     using namespace Mezzanine;
+
+    // Tiny struct to ensure zero initialization in all contexts.
+    struct SafeFloat
+    {
+        float Val{0.0f};
+
+        SafeFloat() = default;
+        SafeFloat(const SafeFloat& New) = default;
+        SafeFloat(SafeFloat&& New) = default;
+        SafeFloat(const float New) : Val(New) {  }
+
+        SafeFloat& operator=(const SafeFloat& Other) = default;
+        SafeFloat& operator=(SafeFloat&& Other) = default;
+        operator float() const { return Val; }
+    };
 
     {//Construction
         using ConstructMapType = FlatMap<std::string,int>;
@@ -182,12 +197,13 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
     }//Construction
 
     {//Operators
-        using CopyAssignMapType = FlatMap<int,std::string>;
-        CopyAssignMapType CopyAssignSource = { {39,"39"}, {8,"8"}, {17,"17"} };
-        CopyAssignMapType CopyAssignDest = { {123,"123"}, {234,"234"}, {345,"345"}, {456,"456"}, {567,"567"} };
+        using OperatorMapType = FlatMap<int,std::string>;
+
+        OperatorMapType CopyAssignSource = { {39,"39"}, {8,"8"}, {17,"17"} };
+        OperatorMapType CopyAssignDest = { {123,"123"}, {234,"234"}, {345,"345"}, {456,"456"}, {567,"567"} };
         TEST_EQUAL( "operator=(const_SelfType&)-Dest-InitialElementCount", 5u, CopyAssignDest.size() );
         CopyAssignDest = CopyAssignSource;
-        CopyAssignMapType::iterator SourceCopyIter = CopyAssignSource.begin();
+        OperatorMapType::iterator SourceCopyIter = CopyAssignSource.begin();
         TEST_EQUAL( "operator=(const_SelfType&)-Source-Element1-First", 8, (*SourceCopyIter).first );
         TEST_EQUAL( "operator=(const_SelfType&)-Source-Element1-Second", "8", (*SourceCopyIter).second );
         std::advance(SourceCopyIter,1);
@@ -197,7 +213,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         TEST_EQUAL( "operator=(const_SelfType&)-Source-Element3-First", 39, (*SourceCopyIter).first );
         TEST_EQUAL( "operator=(const_SelfType&)-Source-Element3-Second", "39", (*SourceCopyIter).second );
         TEST_EQUAL( "operator=(const_SelfType&)-Source-ElementCount", 3u, CopyAssignSource.size() );
-        CopyAssignMapType::iterator DestCopyIter = CopyAssignDest.begin();
+        OperatorMapType::iterator DestCopyIter = CopyAssignDest.begin();
         TEST_EQUAL( "operator=(const_SelfType&)-Dest-Element1-First", 8, (*DestCopyIter).first );
         TEST_EQUAL( "operator=(const_SelfType&)-Dest-Element1-Second", "8", (*DestCopyIter).second );
         std::advance(DestCopyIter,1);
@@ -208,31 +224,30 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         TEST_EQUAL( "operator=(const_SelfType&)-Dest-Element3-Second", "39", (*DestCopyIter).second );
         TEST_EQUAL( "operator=(const_SelfType&)-Dest-ElementCount", 3u, CopyAssignDest.size() );
 
-        using MoveAssignMapType = FlatMap<int,float>;
-        MoveAssignMapType MoveAssignSource = { {78,19.5f}, {96,24.0f}, {14,3.5f}, {32,8.0f} };
-        MoveAssignMapType MoveAssignDest = { {12,3.0f}, {23,5.75f}, {34,8.5f} };
+        OperatorMapType MoveAssignSource = { {78,"19.5"}, {96,"24.0"}, {14,"3.5"}, {32,"8.0"} };
+        OperatorMapType MoveAssignDest = { {12,"3.0"}, {23,"5.75"}, {34,"8.5"} };
         TEST_EQUAL( "operator=(SelfType&&)-Dest-InitialElementCount", 3u, MoveAssignDest.size() );
         MoveAssignDest = std::move( MoveAssignSource );
         TEST_EQUAL( "operator=(SelfType&&)-Source-ElementCount/Empty", true, MoveAssignSource.empty() );
-        MoveAssignMapType::iterator DestMoveIter = MoveAssignDest.begin();
+        OperatorMapType::iterator DestMoveIter = MoveAssignDest.begin();
         TEST_EQUAL( "operator=(SelfType&&)-Dest-Element1-First", 14, (*DestMoveIter).first );
-        TEST_EQUAL_EPSILON( "operator=(SelfType&&)-Dest-Element1-Second", 3.5f, (*DestMoveIter).second );
+        TEST_EQUAL( "operator=(SelfType&&)-Dest-Element1-Second", "3.5", (*DestMoveIter).second );
         std::advance(DestMoveIter,1);
         TEST_EQUAL( "operator=(SelfType&&)-Dest-Element2-First", 32, (*DestMoveIter).first );
-        TEST_EQUAL_EPSILON( "operator=(SelfType&&)-Dest-Element2-Second", 8.0f, (*DestMoveIter).second );
+        TEST_EQUAL( "operator=(SelfType&&)-Dest-Element2-Second", "8.0", (*DestMoveIter).second );
         std::advance(DestMoveIter,1);
         TEST_EQUAL( "operator=(SelfType&&)-Dest-Element3-First", 78, (*DestMoveIter).first );
-        TEST_EQUAL_EPSILON( "operator=(SelfType&&)-Dest-Element3-Second", 19.5f, (*DestMoveIter).second );
+        TEST_EQUAL( "operator=(SelfType&&)-Dest-Element3-Second", "19.5", (*DestMoveIter).second );
         std::advance(DestMoveIter,1);
         TEST_EQUAL( "operator=(SelfType&&)-Dest-Element4-First", 96, (*DestMoveIter).first );
-        TEST_EQUAL_EPSILON( "operator=(SelfType&&)-Dest-Element4-Second", 24.0f, (*DestMoveIter).second );
+        TEST_EQUAL( "operator=(SelfType&&)-Dest-Element4-Second", "24.0", (*DestMoveIter).second );
         TEST_EQUAL( "operator=(SelfType&&)-Dest-ElementCount", 4u, MoveAssignDest.size() );
     }//Operators
 
     {//Allocator
         // This is a little bit awkward because default allocators are stateless and compare equal to all instances
         // of the same type.  Really, this test exists solely to verify "get_allocator()" exists on the map.
-        using AllocMapType = FlatMap<int,int>;
+        using AllocMapType = FlatMap<int,std::string>;
         AllocMapType AllocTest;
         TEST_EQUAL( "get_allocator()_const-MatchesStdAlloc",
                     true, std::allocator<AllocMapType::value_type>() == AllocTest.get_allocator() );
@@ -240,7 +255,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
 
     {//Iterators
         using FirstMapType = FlatMap<std::string,int>;
-        using SecondMapType = FlatMap<std::string,float>;
+        using SecondMapType = FlatMap<std::string,SafeFloat>;
         FirstMapType TestMap = { {"Nix",48694},
                                  {"Hydra",64738},
                                  {"Charon",17536},
@@ -290,34 +305,25 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         // The max_size tests here are awkward as well, as the actual valid value is implementation defined.
         // So the tests here for max_size are solely meant to verify the method exists and doesn't give a
         // completely bogus value.
-        using CapacityMapType = FlatMap<int,float>;
+        using CapacityMapType = FlatMap<int,std::string>;
         CapacityMapType EmptyMap;
-        CapacityMapType FullMap = { {1,2.5f}, {3,7.5f}, {5,12.5f}, {7,17.5f} };
+        CapacityMapType FullMap = { {1,"2.5"}, {3,"7.5"}, {5,"12.5"}, {7,"17.5"} };
 
-        TEST_EQUAL( "size()_const-Empty", size_t(0), EmptyMap.size() );
-        TEST_EQUAL( "size()_const-Full", size_t(4), FullMap.size() );
-        TEST_EQUAL( "max_size()_const-Empty", true, size_t(1000000) < EmptyMap.max_size() );
-        TEST_EQUAL( "max_size()_const-Full", true, size_t(1000000) < FullMap.max_size() );
-        TEST_EQUAL( "empty()_const-Empty", true, EmptyMap.empty() );
-        TEST_EQUAL( "empty()_const-Full", false, FullMap.empty() );
+        TEST_EQUAL( "size()_const-Empty",
+                    size_t(0), EmptyMap.size() );
+        TEST_EQUAL( "size()_const-Full",
+                    size_t(4), FullMap.size() );
+        TEST_EQUAL( "max_size()_const-Empty",
+                    true, size_t(1000000) < EmptyMap.max_size() );
+        TEST_EQUAL( "max_size()_const-Full",
+                    true, size_t(1000000) < FullMap.max_size() );
+        TEST_EQUAL( "empty()_const-Empty",
+                    true, EmptyMap.empty() );
+        TEST_EQUAL( "empty()_const-Full",
+                    false, FullMap.empty() );
     }//Capacity
 
     {//Element Access
-        // Tiny struct to ensure zero initialization in all contexts.
-        struct SafeFloat
-        {
-            float Val{0.0f};
-
-            SafeFloat() = default;
-            SafeFloat(const SafeFloat& New) = default;
-            SafeFloat(SafeFloat&& New) = default;
-            SafeFloat(const float New) : Val(New) {  }
-
-            SafeFloat& operator=(const SafeFloat& Other) = default;
-            SafeFloat& operator=(SafeFloat&& Other) = default;
-            operator float() const { return Val; }
-        };
-
         using AccessMapType = FlatMap<std::string,SafeFloat>;
         using AccessMapValue = AccessMapType::value_type;
 
@@ -413,10 +419,14 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         AltStringType AgniaAltKey = { 'A', 'g', 'n', 'i', 'a' };
         AltStringType XeniaAltKey = { 'X', 'e', 'n', 'i', 'a' };
 
-        TEST_EQUAL( "count(const_key_type&)_const-Pass", 1u, LookupMap.count("Earth") );
-        TEST_EQUAL( "count(const_key_type&)_const-Fail", 0u, LookupMap.count("Pluto") );
-        TEST_EQUAL( "count(const_alt_key&)_const-Pass", 1u, LookupMap.count(EarthAltKey) );
-        TEST_EQUAL( "count(const_alt_key&)_const-Fail", 0u, LookupMap.count(PlutoAltKey) );
+        TEST_EQUAL( "count(const_key_type&)_const-Pass",
+                    1u, LookupMap.count("Earth") );
+        TEST_EQUAL( "count(const_key_type&)_const-Fail",
+                    0u, LookupMap.count("Pluto") );
+        TEST_EQUAL( "count(const_alt_key&)_const-Pass",
+                    1u, LookupMap.count(EarthAltKey) );
+        TEST_EQUAL( "count(const_alt_key&)_const-Fail",
+                    0u, LookupMap.count(PlutoAltKey) );
 
         TEST_EQUAL( "find(const_key_type&)-Pass",
                     4, GetPos( LookupMap.find("Venus") ) );
@@ -435,10 +445,14 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         TEST_EQUAL( "find(const_alt_key&)_const-Fail",
                     4, GetConstPos( ConstLookupMap.find(MercuryAltKey) ) );
 
-        TEST_EQUAL( "contains(const_key_type&)_const-Pass", true, ConstLookupMap.contains("Pluto") );
-        TEST_EQUAL( "contains(const_key_type&)_const-Fail", false, ConstLookupMap.contains("Mars") );
-        TEST_EQUAL( "contains(const_alt_key&)_const-Pass", true, ConstLookupMap.contains(PlutoAltKey) );
-        TEST_EQUAL( "contains(const_alt_key&)_const-Fail", false, ConstLookupMap.contains(MarsAltKey) );
+        TEST_EQUAL( "contains(const_key_type&)_const-Pass",
+                    true, ConstLookupMap.contains("Pluto") );
+        TEST_EQUAL( "contains(const_key_type&)_const-Fail",
+                    false, ConstLookupMap.contains("Mars") );
+        TEST_EQUAL( "contains(const_alt_key&)_const-Pass",
+                    true, ConstLookupMap.contains(PlutoAltKey) );
+        TEST_EQUAL( "contains(const_alt_key&)_const-Fail",
+                    false, ConstLookupMap.contains(MarsAltKey) );
 
         MapPairType PairRet = LookupMap.equal_range("Mars");
         TEST_EQUAL( "equal_range(const_key_type&)-Pass-First",
@@ -518,514 +532,602 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
 
     {//Sequence Modifiers
         using SequenceMapType = FlatMap<int,std::string>;
+        using SequenceMapIter = SequenceMapType::iterator;
         using SequenceMapValue = SequenceMapType::value_type;
         using SequenceListType = std::list<SequenceMapValue>;
         using SequenceInitListType = std::initializer_list<SequenceMapValue>;
-        using InsertPairResult = std::pair<SequenceMapType::iterator,bool>;
-        //SequenceMapType EmptyMap;
+        using InsertPairResult = std::pair<SequenceMapIter,bool>;
 
-        SequenceMapType CopyInsertMap = { {1,"One"}, {3,"Three"} };
-        SequenceMapValue NewCopyInsertValue(2,"Two");
-        SequenceMapValue OldCopyInsertValue(3,"Twelve");
-        TEST_EQUAL( "insert(const_value_type&)-BeforeCount",
-                    2u, CopyInsertMap.size() );
-        InsertPairResult NewCopyInsertResult = CopyInsertMap.insert(NewCopyInsertValue);
-        InsertPairResult OldCopyInsertResult = CopyInsertMap.insert(OldCopyInsertValue);
-        SequenceMapType::iterator CopyInsertBegin = CopyInsertMap.begin();
-        TEST_EQUAL( "insert(const_value_type&)-AfterCount",
-                    3u, CopyInsertMap.size() );
-        TEST_EQUAL( "insert(const_value_type&)-NewResult-First",
-                    1, std::distance( CopyInsertBegin, NewCopyInsertResult.first ) );
-        TEST_EQUAL( "insert(const_value_type&)-NewResult-Second",
-                    true, NewCopyInsertResult.second );
-        TEST_EQUAL( "insert(const_value_type&)-OldResult-First",
-                    2, std::distance( CopyInsertBegin, OldCopyInsertResult.first ) );
-        TEST_EQUAL( "insert(const_value_type&)-OldResult-Second",
-                    false, OldCopyInsertResult.second );
-        TEST_EQUAL( "insert(const_value_type&)-Element1-First",
-                    1, CopyInsertBegin->first );
-        TEST_EQUAL( "insert(const_value_type&)-Element1-Second",
-                    "One", CopyInsertBegin->second );
-        TEST_EQUAL( "insert(const_value_type&)-Element2-First",
-                    2, ( CopyInsertBegin + 1 )->first );
-        TEST_EQUAL( "insert(const_value_type&)-Element2-Second",
-                    "Two", ( CopyInsertBegin + 1 )->second );
-        TEST_EQUAL( "insert(const_value_type&)-Element3-First",
-                    3, ( CopyInsertBegin + 2 )->first );
-        TEST_EQUAL( "insert(const_value_type&)-Element3-Second",
-                    "Three", ( CopyInsertBegin + 2 )->second );
+        {// Sequence Modifiers - Copy Insert
+            const SequenceMapValue CopyInsertValueOne(1,"One");
+            const SequenceMapValue CopyInsertValueTwo(2,"Two");
+            const SequenceMapValue CopyInsertValueThree(3,"Three");
+            const SequenceMapValue FailCopyInsertValue(3,"Twelve");
+            SequenceMapType CopyInsertMap = { CopyInsertValueOne, CopyInsertValueThree };
+            TEST_EQUAL( "insert(const_value_type&)-BeforeCount",
+                        2u, CopyInsertMap.size() );
+            InsertPairResult NewCopyInsertResult = CopyInsertMap.insert(CopyInsertValueTwo);
+            InsertPairResult OldCopyInsertResult = CopyInsertMap.insert(FailCopyInsertValue);
+            SequenceMapIter CopyInsertBegin = CopyInsertMap.begin();
+            TEST_EQUAL( "insert(const_value_type&)-AfterCount",
+                        3u, CopyInsertMap.size() );
+            TEST_EQUAL( "insert(const_value_type&)-NewResult-First",
+                        1, std::distance( CopyInsertBegin, NewCopyInsertResult.first ) );
+            TEST_EQUAL( "insert(const_value_type&)-NewResult-Second",
+                        true, NewCopyInsertResult.second );
+            TEST_EQUAL( "insert(const_value_type&)-OldResult-First",
+                        2, std::distance( CopyInsertBegin, OldCopyInsertResult.first ) );
+            TEST_EQUAL( "insert(const_value_type&)-OldResult-Second",
+                        false, OldCopyInsertResult.second );
+            TEST_EQUAL( "insert(const_value_type&)-Element1-First",
+                        CopyInsertValueOne.first, CopyInsertBegin->first );
+            TEST_EQUAL( "insert(const_value_type&)-Element1-Second",
+                        CopyInsertValueOne.second, CopyInsertBegin->second );
+            TEST_EQUAL( "insert(const_value_type&)-Element2-First",
+                        CopyInsertValueTwo.first, ( CopyInsertBegin + 1 )->first );
+            TEST_EQUAL( "insert(const_value_type&)-Element2-Second",
+                        CopyInsertValueTwo.second, ( CopyInsertBegin + 1 )->second );
+            TEST_EQUAL( "insert(const_value_type&)-Element3-First",
+                        CopyInsertValueThree.first, ( CopyInsertBegin + 2 )->first );
+            TEST_EQUAL( "insert(const_value_type&)-Element3-Second",
+                        CopyInsertValueThree.second, ( CopyInsertBegin + 2 )->second );
+        }// Sequence Modifiers - Copy Insert
 
-        SequenceMapType MoveInsertMap = { {4,"Four"}, {6,"Six"} };
-        SequenceMapValue NewMoveInsertValue(5,"Five");
-        SequenceMapValue OldMoveInsertValue(4,"Sixteen");
-        TEST_EQUAL( "insert(value_type&&)-BeforeCount",
-                    2u, MoveInsertMap.size() );
-        InsertPairResult NewMoveInsertResult = MoveInsertMap.insert( std::move(NewMoveInsertValue) );
-        InsertPairResult OldMoveInsertResult = MoveInsertMap.insert( std::move(OldMoveInsertValue) );
-        SequenceMapType::iterator MoveInsertBegin = MoveInsertMap.begin();
-        TEST_EQUAL( "insert(value_type&&)-AfterCount",
-                    3u, MoveInsertMap.size() );
-        TEST_EQUAL( "insert(value_type&&)-NewResult-First",
-                    1, std::distance( MoveInsertBegin, NewMoveInsertResult.first ) );
-        TEST_EQUAL( "insert(value_type&&)-NewResult-Second",
-                    true, NewMoveInsertResult.second );
-        TEST_EQUAL( "insert(value_type&&)-OldResult-First",
-                    0, std::distance( MoveInsertBegin, OldMoveInsertResult.first ) );
-        TEST_EQUAL( "insert(value_type&&)-OldResult-Second",
-                    false, OldMoveInsertResult.second );
-        TEST_EQUAL( "insert(value_type&&)-Element1-First",
-                    4, MoveInsertBegin->first );
-        TEST_EQUAL( "insert(value_type&&)-Element1-Second",
-                    "Four", MoveInsertBegin->second );
-        TEST_EQUAL( "insert(value_type&&)-Element2-First",
-                    5, ( MoveInsertBegin + 1 )->first );
-        TEST_EQUAL( "insert(value_type&&)-Element2-Second",
-                    "Five", ( MoveInsertBegin + 1 )->second );
-        TEST_EQUAL( "insert(value_type&&)-Element3-First",
-                    6, ( MoveInsertBegin + 2 )->first );
-        TEST_EQUAL( "insert(value_type&&)-Element3-Second",
-                    "Six", ( MoveInsertBegin + 2 )->second );
-        TEST_EQUAL( "insert(value_type&&)-VerifyMove-New",
-                    true, NewMoveInsertValue.second.empty() );
-        TEST_EQUAL( "insert(value_type&&)-VerifyMove-Old",
-                    false, OldMoveInsertValue.second.empty() );
+        {// Sequence Modifiers - Move Insert
+            SequenceMapValue MoveInsertValueFour(4,"Four");
+            SequenceMapValue MoveInsertValueFive(5,"Five");
+            SequenceMapValue MoveInsertValueSix(6,"Six");
+            SequenceMapValue FailMoveInsertValue(4,"Sixteen");
+            SequenceMapType MoveInsertMap = { MoveInsertValueFour, MoveInsertValueSix };
+            TEST_EQUAL( "insert(value_type&&)-BeforeCount",
+                        2u, MoveInsertMap.size() );
+            InsertPairResult NewMoveInsertResult = MoveInsertMap.insert( std::move(MoveInsertValueFive) );
+            InsertPairResult OldMoveInsertResult = MoveInsertMap.insert( std::move(FailMoveInsertValue) );
+            SequenceMapIter MoveInsertBegin = MoveInsertMap.begin();
+            TEST_EQUAL( "insert(value_type&&)-AfterCount",
+                        3u, MoveInsertMap.size() );
+            TEST_EQUAL( "insert(value_type&&)-NewResult-First",
+                        1, std::distance( MoveInsertBegin, NewMoveInsertResult.first ) );
+            TEST_EQUAL( "insert(value_type&&)-NewResult-Second",
+                        true, NewMoveInsertResult.second );
+            TEST_EQUAL( "insert(value_type&&)-OldResult-First",
+                        0, std::distance( MoveInsertBegin, OldMoveInsertResult.first ) );
+            TEST_EQUAL( "insert(value_type&&)-OldResult-Second",
+                        false, OldMoveInsertResult.second );
+            TEST_EQUAL( "insert(value_type&&)-Element1-First",
+                        MoveInsertValueFour.first, MoveInsertBegin->first );
+            TEST_EQUAL( "insert(value_type&&)-Element1-Second",
+                        "Four", MoveInsertBegin->second );
+            TEST_EQUAL( "insert(value_type&&)-Element2-First",
+                        MoveInsertValueFive.first, ( MoveInsertBegin + 1 )->first );
+            TEST_EQUAL( "insert(value_type&&)-Element2-Second",
+                        "Five", ( MoveInsertBegin + 1 )->second );
+            TEST_EQUAL( "insert(value_type&&)-Element3-First",
+                        MoveInsertValueSix.first, ( MoveInsertBegin + 2 )->first );
+            TEST_EQUAL( "insert(value_type&&)-Element3-Second",
+                        "Six", ( MoveInsertBegin + 2 )->second );
+            TEST_EQUAL( "insert(value_type&&)-VerifyMove-New",
+                        true, MoveInsertValueFive.second.empty() );
+            TEST_EQUAL( "insert(value_type&&)-VerifyMove-Old",
+                        false, FailMoveInsertValue.second.empty() );
+        }// Sequence Modifiers - Move Insert
 
-        SequenceMapType HintCopyInsertMap;
-        SequenceMapValue FirstCopyHintValue(1,"Mercury");
-        SequenceMapValue SecondCopyHintValue(2,"Venus");
-        SequenceMapValue ThirdCopyHintValue(3,"Earth");
-        SequenceMapValue FourthCopyHintValue(4,"Mars");
-        SequenceMapValue FifthCopyHintValue(5,"Asteroids");
-        SequenceMapValue FailCopyHintValue(3,"Earf");
-        SequenceMapType::iterator CopyHint = HintCopyInsertMap.begin();
-        SequenceMapType::iterator CopyHintResult = HintCopyInsertMap.insert(CopyHint,SecondCopyHintValue);
-        TEST_EQUAL( "insert(const_iterator,const_value_type&)-EmptyInsert-Position",
-                    0, std::distance( HintCopyInsertMap.begin(), CopyHintResult ) );
-        TEST_EQUAL( "insert(const_iterator,const_value_type&)-EmptyInsert-First",
-                    2, CopyHintResult->first );
-        TEST_EQUAL( "insert(const_iterator,const_value_type&)-EmptyInsert-Second",
-                    "Venus", CopyHintResult->second );
-        CopyHint = HintCopyInsertMap.begin();
-        CopyHintResult = HintCopyInsertMap.insert(CopyHint,FirstCopyHintValue);
-        TEST_EQUAL( "insert(const_iterator,const_value_type&)-BeginInsert-Position",
-                    0, std::distance( HintCopyInsertMap.begin(), CopyHintResult ) );
-        TEST_EQUAL( "insert(const_iterator,const_value_type&)-BeginInsert-First",
-                    1, CopyHintResult->first );
-        TEST_EQUAL( "insert(const_iterator,const_value_type&)-BeginInsert-Second",
-                    "Mercury", CopyHintResult->second );
-        CopyHint = HintCopyInsertMap.end();
-        CopyHintResult = HintCopyInsertMap.insert(CopyHint,FifthCopyHintValue);
-        TEST_EQUAL( "insert(const_iterator,const_value_type&)-EndInsert-Position",
-                    2, std::distance( HintCopyInsertMap.begin(), CopyHintResult ) );
-        TEST_EQUAL( "insert(const_iterator,const_value_type&)-EndInsert-First",
-                    5, CopyHintResult->first );
-        TEST_EQUAL( "insert(const_iterator,const_value_type&)-EndInsert-Second",
-                    "Asteroids", CopyHintResult->second );
-        CopyHint = HintCopyInsertMap.begin() + 2;
-        CopyHintResult = HintCopyInsertMap.insert(CopyHint,ThirdCopyHintValue);
-        TEST_EQUAL( "insert(const_iterator,const_value_type&)-MiddleInsert-Position",
-                    2, std::distance( HintCopyInsertMap.begin(), CopyHintResult ) );
-        TEST_EQUAL( "insert(const_iterator,const_value_type&)-MiddleInsert-First",
-                    3, CopyHintResult->first );
-        TEST_EQUAL( "insert(const_iterator,const_value_type&)-MiddleInsert-Second",
-                    "Earth", CopyHintResult->second );
-        CopyHint = HintCopyInsertMap.begin();
-        CopyHintResult = HintCopyInsertMap.insert(CopyHint,FourthCopyHintValue);
-        TEST_EQUAL( "insert(const_iterator,const_value_type&)-FallBackInsert-Position",
-                    3, std::distance( HintCopyInsertMap.begin(), CopyHintResult ) );
-        TEST_EQUAL( "insert(const_iterator,const_value_type&)-FallBackInsert-First",
-                    4, CopyHintResult->first);
-        TEST_EQUAL( "insert(const_iterator,const_value_type&)-FallBackInsert-Second",
-                    "Mars", CopyHintResult->second );
-        CopyHint = HintCopyInsertMap.begin() + 2;
-        CopyHintResult = HintCopyInsertMap.insert(CopyHint,FailCopyHintValue);
-        TEST_EQUAL( "insert(const_iterator,const_value_type&)-FailInsert-Position",
-                    2, std::distance( HintCopyInsertMap.begin(), CopyHintResult ) );
-        TEST_EQUAL( "insert(const_iterator,const_value_type&)-FailInsert-First",
-                    3, CopyHintResult->first );
-        TEST_EQUAL( "insert(const_iterator,const_value_type&)-FailInsert-Second",
-                    "Earth", CopyHintResult->second );
-        // Sequence check the entire container
-        TEST_EQUAL( "insert(const_iterator,const_value_type&)-FinalSize",
-                    5u, HintCopyInsertMap.size() );
-        TEST_EQUAL( "insert(const_iterator,const_value_type&)-Element1-First",
-                    1, HintCopyInsertMap.begin()->first );
-        TEST_EQUAL( "insert(const_iterator,const_value_type&)-Element1-Second",
-                    "Mercury", HintCopyInsertMap.begin()->second );
-        TEST_EQUAL( "insert(const_iterator,const_value_type&)-Element2-First",
-                    2, ( HintCopyInsertMap.begin() + 1 )->first );
-        TEST_EQUAL( "insert(const_iterator,const_value_type&)-Element2-Second",
-                    "Venus", ( HintCopyInsertMap.begin() + 1 )->second );
-        TEST_EQUAL( "insert(const_iterator,const_value_type&)-Element3-First",
-                    3, ( HintCopyInsertMap.begin() + 2 )->first );
-        TEST_EQUAL( "insert(const_iterator,const_value_type&)-Element3-Second",
-                    "Earth", ( HintCopyInsertMap.begin() + 2 )->second );
-        TEST_EQUAL( "insert(const_iterator,const_value_type&)-Element4-First",
-                    4, ( HintCopyInsertMap.begin() + 3 )->first );
-        TEST_EQUAL( "insert(const_iterator,const_value_type&)-Element4-Second",
-                    "Mars", ( HintCopyInsertMap.begin() + 3 )->second );
-        TEST_EQUAL( "insert(const_iterator,const_value_type&)-Element5-First",
-                    5, ( HintCopyInsertMap.begin() + 4 )->first );
-        TEST_EQUAL( "insert(const_iterator,const_value_type&)-Element5-Second",
-                    "Asteroids", ( HintCopyInsertMap.begin() + 4 )->second );
+        {// Sequence Modifiers - Hint Copy Insert
+            SequenceMapType HintCopyInsertMap;
+            const SequenceMapValue CopyHintValueOne(1,"Mercury");
+            const SequenceMapValue CopyHintValueTwo(2,"Venus");
+            const SequenceMapValue CopyHintValueThree(3,"Earth");
+            const SequenceMapValue CopyHintValueFour(4,"Mars");
+            const SequenceMapValue CopyHintValueFive(5,"Asteroids");
+            const SequenceMapValue FailCopyHintValue(3,"Earf");
+            SequenceMapIter CopyHint = HintCopyInsertMap.begin();
+            SequenceMapIter CopyHintResult = HintCopyInsertMap.insert(CopyHint,CopyHintValueTwo);
+            TEST_EQUAL( "insert(const_iterator,const_value_type&)-EmptyInsert-Position",
+                        0, std::distance( HintCopyInsertMap.begin(), CopyHintResult ) );
+            TEST_EQUAL( "insert(const_iterator,const_value_type&)-EmptyInsert-First",
+                        CopyHintValueTwo.first, CopyHintResult->first );
+            TEST_EQUAL( "insert(const_iterator,const_value_type&)-EmptyInsert-Second",
+                        CopyHintValueTwo.second, CopyHintResult->second );
+            CopyHint = HintCopyInsertMap.begin();
+            CopyHintResult = HintCopyInsertMap.insert(CopyHint,CopyHintValueOne);
+            TEST_EQUAL( "insert(const_iterator,const_value_type&)-BeginInsert-Position",
+                        0, std::distance( HintCopyInsertMap.begin(), CopyHintResult ) );
+            TEST_EQUAL( "insert(const_iterator,const_value_type&)-BeginInsert-First",
+                        CopyHintValueOne.first, CopyHintResult->first );
+            TEST_EQUAL( "insert(const_iterator,const_value_type&)-BeginInsert-Second",
+                        CopyHintValueOne.second, CopyHintResult->second );
+            CopyHint = HintCopyInsertMap.end();
+            CopyHintResult = HintCopyInsertMap.insert(CopyHint,CopyHintValueFive);
+            TEST_EQUAL( "insert(const_iterator,const_value_type&)-EndInsert-Position",
+                        2, std::distance( HintCopyInsertMap.begin(), CopyHintResult ) );
+            TEST_EQUAL( "insert(const_iterator,const_value_type&)-EndInsert-First",
+                        CopyHintValueFive.first, CopyHintResult->first );
+            TEST_EQUAL( "insert(const_iterator,const_value_type&)-EndInsert-Second",
+                        CopyHintValueFive.second, CopyHintResult->second );
+            CopyHint = HintCopyInsertMap.begin() + 2;
+            CopyHintResult = HintCopyInsertMap.insert(CopyHint,CopyHintValueThree);
+            TEST_EQUAL( "insert(const_iterator,const_value_type&)-MiddleInsert-Position",
+                        2, std::distance( HintCopyInsertMap.begin(), CopyHintResult ) );
+            TEST_EQUAL( "insert(const_iterator,const_value_type&)-MiddleInsert-First",
+                        CopyHintValueThree.first, CopyHintResult->first );
+            TEST_EQUAL( "insert(const_iterator,const_value_type&)-MiddleInsert-Second",
+                        CopyHintValueThree.second, CopyHintResult->second );
+            CopyHint = HintCopyInsertMap.begin();
+            CopyHintResult = HintCopyInsertMap.insert(CopyHint,CopyHintValueFour);
+            TEST_EQUAL( "insert(const_iterator,const_value_type&)-FallBackInsert-Position",
+                        3, std::distance( HintCopyInsertMap.begin(), CopyHintResult ) );
+            TEST_EQUAL( "insert(const_iterator,const_value_type&)-FallBackInsert-First",
+                        CopyHintValueFour.first, CopyHintResult->first);
+            TEST_EQUAL( "insert(const_iterator,const_value_type&)-FallBackInsert-Second",
+                        CopyHintValueFour.second, CopyHintResult->second );
+            CopyHint = HintCopyInsertMap.begin() + 2;
+            CopyHintResult = HintCopyInsertMap.insert(CopyHint,FailCopyHintValue);
+            TEST_EQUAL( "insert(const_iterator,const_value_type&)-FailInsert-Position",
+                        2, std::distance( HintCopyInsertMap.begin(), CopyHintResult ) );
+            TEST_EQUAL( "insert(const_iterator,const_value_type&)-FailInsert-First",
+                        CopyHintValueThree.first, CopyHintResult->first );
+            TEST_EQUAL( "insert(const_iterator,const_value_type&)-FailInsert-Second",
+                        CopyHintValueThree.second, CopyHintResult->second );
+            // Sequence check the entire container
+            TEST_EQUAL( "insert(const_iterator,const_value_type&)-FinalSize",
+                        5u, HintCopyInsertMap.size() );
+            TEST_EQUAL( "insert(const_iterator,const_value_type&)-Element1-First",
+                        CopyHintValueOne.first, HintCopyInsertMap.begin()->first );
+            TEST_EQUAL( "insert(const_iterator,const_value_type&)-Element1-Second",
+                        CopyHintValueOne.second, HintCopyInsertMap.begin()->second );
+            TEST_EQUAL( "insert(const_iterator,const_value_type&)-Element2-First",
+                        CopyHintValueTwo.first, ( HintCopyInsertMap.begin() + 1 )->first );
+            TEST_EQUAL( "insert(const_iterator,const_value_type&)-Element2-Second",
+                        CopyHintValueTwo.second, ( HintCopyInsertMap.begin() + 1 )->second );
+            TEST_EQUAL( "insert(const_iterator,const_value_type&)-Element3-First",
+                        CopyHintValueThree.first, ( HintCopyInsertMap.begin() + 2 )->first );
+            TEST_EQUAL( "insert(const_iterator,const_value_type&)-Element3-Second",
+                        CopyHintValueThree.second, ( HintCopyInsertMap.begin() + 2 )->second );
+            TEST_EQUAL( "insert(const_iterator,const_value_type&)-Element4-First",
+                        CopyHintValueFour.first, ( HintCopyInsertMap.begin() + 3 )->first );
+            TEST_EQUAL( "insert(const_iterator,const_value_type&)-Element4-Second",
+                        CopyHintValueFour.second, ( HintCopyInsertMap.begin() + 3 )->second );
+            TEST_EQUAL( "insert(const_iterator,const_value_type&)-Element5-First",
+                        CopyHintValueFive.first, ( HintCopyInsertMap.begin() + 4 )->first );
+            TEST_EQUAL( "insert(const_iterator,const_value_type&)-Element5-Second",
+                        CopyHintValueFive.second, ( HintCopyInsertMap.begin() + 4 )->second );
+        }// Sequence Modifiers - Hint Copy Insert
 
-        SequenceMapType HintMoveInsertMap;
-        SequenceMapValue FirstMoveHintValue(5,"Jupiter");
-        SequenceMapValue SecondMoveHintValue(6,"Saturn");
-        SequenceMapValue ThirdMoveHintValue(7,"Uranus");
-        SequenceMapValue FourthMoveHintValue(8,"Neptune");
-        SequenceMapValue FifthMoveHintValue(9,"Pluto");
-        SequenceMapValue FailMoveHintValue(9,"Planet X");
-        SequenceMapType::iterator MoveHint = HintMoveInsertMap.begin();
-        SequenceMapType::iterator MoveHintResult = HintMoveInsertMap.insert(MoveHint,std::move(ThirdMoveHintValue));
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-EmptyInsert-Position",
-                    0, std::distance( HintMoveInsertMap.begin(), MoveHintResult ) );
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-EmptyInsert-First",
-                    7, MoveHintResult->first );
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-EmptyInsert-Second",
-                    "Uranus", MoveHintResult->second );
-        MoveHint = HintMoveInsertMap.begin();
-        MoveHintResult = HintMoveInsertMap.insert(MoveHint,std::move(FirstMoveHintValue));
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-BeginInsert-Position",
-                    0, std::distance( HintMoveInsertMap.begin(), MoveHintResult ) );
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-BeginInsert-First",
-                    5, MoveHintResult->first );
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-BeginInsert-Second",
-                    "Jupiter", MoveHintResult->second );
-        MoveHint = HintMoveInsertMap.end();
-        MoveHintResult = HintMoveInsertMap.insert(MoveHint,std::move(FourthMoveHintValue));
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-EndInsert-Position",
-                    2, std::distance( HintMoveInsertMap.begin(), MoveHintResult ) );
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-EndInsert-First",
-                    8, MoveHintResult->first );
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-EndInsert-Second",
-                    "Neptune", MoveHintResult->second );
-        MoveHint = HintMoveInsertMap.begin() + 1;
-        MoveHintResult = HintMoveInsertMap.insert(MoveHint,std::move(SecondMoveHintValue));
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-MiddleInsert-Position",
-                    1, std::distance( HintMoveInsertMap.begin(), MoveHintResult ) );
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-MiddleInsert-First",
-                    6, MoveHintResult->first );
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-MiddleInsert-Second",
-                    "Saturn", MoveHintResult->second );
-        MoveHint = HintMoveInsertMap.begin();
-        MoveHintResult = HintMoveInsertMap.insert(MoveHint,std::move(FifthMoveHintValue));
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-FallBackInsert-Position",
-                    4, std::distance( HintMoveInsertMap.begin(), MoveHintResult ) );
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-FallBackInsert-First",
-                    9, MoveHintResult->first );
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-FallBackInsert-Second",
-                    "Pluto", MoveHintResult->second );
-        MoveHint = HintMoveInsertMap.begin() + 4;
-        MoveHintResult = HintMoveInsertMap.insert(MoveHint,std::move(FailMoveHintValue));
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-FailInsert-Position",
-                    4, std::distance( HintMoveInsertMap.begin(), MoveHintResult ) );
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-FailInsert-First",
-                    9, MoveHintResult->first );
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-FailInsert-Second",
-                    "Pluto", MoveHintResult->second );
-        // Sequence check the entire container
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-FinalSize",
-                    5u, HintMoveInsertMap.size() );
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-Element1-First",
-                    5, HintMoveInsertMap.begin()->first );
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-Element1-Second",
-                    "Jupiter",HintMoveInsertMap.begin()->second );
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-Element2-First",
-                    6, ( HintMoveInsertMap.begin() + 1 )->first );
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-Element2-Second",
-                    "Saturn", ( HintMoveInsertMap.begin() + 1 )->second );
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-Element3-First",
-                    7, ( HintMoveInsertMap.begin() + 2 )->first );
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-Element3-Second",
-                    "Uranus", ( HintMoveInsertMap.begin() + 2 )->second );
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-Element4-First",
-                    8, ( HintMoveInsertMap.begin() + 3 )->first );
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-Element4-Second",
-                    "Neptune", ( HintMoveInsertMap.begin() + 3 )->second );
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-Element5-First",
-                    9, ( HintMoveInsertMap.begin() + 4 )->first );
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-Element5-Second",
-                    "Pluto", ( HintMoveInsertMap.begin() + 4 )->second );
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-VerifyMove-First",
-                    true, FirstMoveHintValue.second.empty() );
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-VerifyMove-Second",
-                    true, SecondMoveHintValue.second.empty() );
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-VerifyMove-Third",
-                    true, ThirdMoveHintValue.second.empty() );
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-VerifyMove-Fourth",
-                    true, FourthMoveHintValue.second.empty() );
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-VerifyMove-Fifth",
-                    true, FifthMoveHintValue.second.empty() );
-        TEST_EQUAL( "insert(const_iterator,value_type&&)-VerifyMove-Fail",
-                    false, FailMoveHintValue.second.empty() );
+        {// Sequence Modifiers - Hint Move Insert
+            SequenceMapType HintMoveInsertMap;
+            SequenceMapValue MoveHintValueFive(5,"Jupiter");
+            SequenceMapValue MoveHintValueSix(6,"Saturn");
+            SequenceMapValue MoveHintValueSeven(7,"Uranus");
+            SequenceMapValue MoveHintValueEight(8,"Neptune");
+            SequenceMapValue MoveHintValueNine(9,"Pluto");
+            SequenceMapValue FailMoveHintValue(9,"Planet X");
+            SequenceMapIter MoveHint = HintMoveInsertMap.begin();
+            SequenceMapIter MoveHintResult = HintMoveInsertMap.insert(MoveHint,std::move(MoveHintValueSeven));
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-EmptyInsert-Position",
+                        0, std::distance( HintMoveInsertMap.begin(), MoveHintResult ) );
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-EmptyInsert-First",
+                        MoveHintValueSeven.first, MoveHintResult->first );
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-EmptyInsert-Second",
+                        "Uranus", MoveHintResult->second );
+            MoveHint = HintMoveInsertMap.begin();
+            MoveHintResult = HintMoveInsertMap.insert(MoveHint,std::move(MoveHintValueFive));
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-BeginInsert-Position",
+                        0, std::distance( HintMoveInsertMap.begin(), MoveHintResult ) );
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-BeginInsert-First",
+                        MoveHintValueFive.first, MoveHintResult->first );
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-BeginInsert-Second",
+                        "Jupiter", MoveHintResult->second );
+            MoveHint = HintMoveInsertMap.end();
+            MoveHintResult = HintMoveInsertMap.insert(MoveHint,std::move(MoveHintValueEight));
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-EndInsert-Position",
+                        2, std::distance( HintMoveInsertMap.begin(), MoveHintResult ) );
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-EndInsert-First",
+                        MoveHintValueEight.first, MoveHintResult->first );
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-EndInsert-Second",
+                        "Neptune", MoveHintResult->second );
+            MoveHint = HintMoveInsertMap.begin() + 1;
+            MoveHintResult = HintMoveInsertMap.insert(MoveHint,std::move(MoveHintValueSix));
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-MiddleInsert-Position",
+                        1, std::distance( HintMoveInsertMap.begin(), MoveHintResult ) );
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-MiddleInsert-First",
+                        MoveHintValueSix.first, MoveHintResult->first );
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-MiddleInsert-Second",
+                        "Saturn", MoveHintResult->second );
+            MoveHint = HintMoveInsertMap.begin();
+            MoveHintResult = HintMoveInsertMap.insert(MoveHint,std::move(MoveHintValueNine));
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-FallBackInsert-Position",
+                        4, std::distance( HintMoveInsertMap.begin(), MoveHintResult ) );
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-FallBackInsert-First",
+                        MoveHintValueNine.first, MoveHintResult->first );
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-FallBackInsert-Second",
+                        "Pluto", MoveHintResult->second );
+            MoveHint = HintMoveInsertMap.begin() + 4;
+            MoveHintResult = HintMoveInsertMap.insert(MoveHint,std::move(FailMoveHintValue));
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-FailInsert-Position",
+                        4, std::distance( HintMoveInsertMap.begin(), MoveHintResult ) );
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-FailInsert-First",
+                        MoveHintValueNine.first, MoveHintResult->first );
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-FailInsert-Second",
+                        "Pluto", MoveHintResult->second );
+            // Sequence check the entire container
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-FinalSize",
+                        5u, HintMoveInsertMap.size() );
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-Element1-First",
+                        MoveHintValueFive.first, HintMoveInsertMap.begin()->first );
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-Element1-Second",
+                        "Jupiter",HintMoveInsertMap.begin()->second );
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-Element2-First",
+                        MoveHintValueSix.first, ( HintMoveInsertMap.begin() + 1 )->first );
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-Element2-Second",
+                        "Saturn", ( HintMoveInsertMap.begin() + 1 )->second );
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-Element3-First",
+                        MoveHintValueSeven.first, ( HintMoveInsertMap.begin() + 2 )->first );
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-Element3-Second",
+                        "Uranus", ( HintMoveInsertMap.begin() + 2 )->second );
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-Element4-First",
+                        MoveHintValueEight.first, ( HintMoveInsertMap.begin() + 3 )->first );
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-Element4-Second",
+                        "Neptune", ( HintMoveInsertMap.begin() + 3 )->second );
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-Element5-First",
+                        MoveHintValueNine.first, ( HintMoveInsertMap.begin() + 4 )->first );
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-Element5-Second",
+                        "Pluto", ( HintMoveInsertMap.begin() + 4 )->second );
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-VerifyMove-First",
+                        true, MoveHintValueFive.second.empty() );
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-VerifyMove-Second",
+                        true, MoveHintValueSix.second.empty() );
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-VerifyMove-Third",
+                        true, MoveHintValueSeven.second.empty() );
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-VerifyMove-Fourth",
+                        true, MoveHintValueEight.second.empty() );
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-VerifyMove-Fifth",
+                        true, MoveHintValueNine.second.empty() );
+            TEST_EQUAL( "insert(const_iterator,value_type&&)-VerifyMove-Fail",
+                        false, FailMoveHintValue.second.empty() );
+        }// Sequence Modifiers - Hint Move Insert
 
-        SequenceListType RangeInsertList = { {2,"Zwei"}, {6,"Sechs"}, {7,"Seiben"} };
-        SequenceMapType RangeInsertMap = { {1,"Eins"}, {5,"Funf"}, {9,"Neun"} };
-        TEST_EQUAL( "insert(ItType,ItType)-BeforeCount",
-                    3u, RangeInsertMap.size() );
-        RangeInsertMap.insert(RangeInsertList.begin(),RangeInsertList.end());
-        TEST_EQUAL( "insert(ItType,ItType)-AfterCount",
-                    6u, RangeInsertMap.size() );
-        TEST_EQUAL( "insert(ItType,ItType)-Element1-First",
-                    1, RangeInsertMap.begin()->first );
-        TEST_EQUAL( "insert(ItType,ItType)-Element1-Second",
-                    "Eins", RangeInsertMap.begin()->second );
-        TEST_EQUAL( "insert(ItType,ItType)-Element2-First",
-                    2, ( RangeInsertMap.begin() + 1 )->first );
-        TEST_EQUAL( "insert(ItType,ItType)-Element2-Second",
-                    "Zwei", ( RangeInsertMap.begin() + 1 )->second );
-        TEST_EQUAL( "insert(ItType,ItType)-Element3-First",
-                    5, ( RangeInsertMap.begin() + 2 )->first );
-        TEST_EQUAL( "insert(ItType,ItType)-Element3-Second",
-                    "Funf", ( RangeInsertMap.begin() + 2 )->second );
-        TEST_EQUAL( "insert(ItType,ItType)-Element4-First",
-                    6, ( RangeInsertMap.begin() + 3 )->first );
-        TEST_EQUAL( "insert(ItType,ItType)-Element4-Second",
-                    "Sechs", ( RangeInsertMap.begin() + 3 )->second );
-        TEST_EQUAL( "insert(ItType,ItType)-Element5-First",
-                    7, ( RangeInsertMap.begin() + 4 )->first );
-        TEST_EQUAL( "insert(ItType,ItType)-Element5-Second",
-                    "Seiben", ( RangeInsertMap.begin() + 4 )->second );
-        TEST_EQUAL( "insert(ItType,ItType)-Element6-First",
-                    9, ( RangeInsertMap.begin() + 5 )->first );
-        TEST_EQUAL( "insert(ItType,ItType)-Element6-Second",
-                    "Neun", ( RangeInsertMap.begin() + 5 )->second );
+        {// Sequence Modifiers - Range Insert
+            const SequenceMapValue RangeInsertValueOne(1,"Eins");
+            const SequenceMapValue RangeInsertValueTwo(2,"Zwei");
+            const SequenceMapValue RangeInsertValueFive(5,"Funf");
+            const SequenceMapValue RangeInsertValueSix(6,"Sechs");
+            const SequenceMapValue RangeInsertValueSeven(7,"Seiben");
+            const SequenceMapValue RangeInsertValueNine(9,"Neun");
+            SequenceListType RangeInsertList = { RangeInsertValueTwo, RangeInsertValueSix, RangeInsertValueSeven };
+            SequenceMapType RangeInsertMap = { RangeInsertValueOne, RangeInsertValueFive, RangeInsertValueNine };
+            TEST_EQUAL( "insert(ItType,ItType)-BeforeCount",
+                        3u, RangeInsertMap.size() );
+            RangeInsertMap.insert(RangeInsertList.begin(),RangeInsertList.end());
+            TEST_EQUAL( "insert(ItType,ItType)-AfterCount",
+                        6u, RangeInsertMap.size() );
+            TEST_EQUAL( "insert(ItType,ItType)-Element1-First",
+                        RangeInsertValueOne.first, RangeInsertMap.begin()->first );
+            TEST_EQUAL( "insert(ItType,ItType)-Element1-Second",
+                        RangeInsertValueOne.second, RangeInsertMap.begin()->second );
+            TEST_EQUAL( "insert(ItType,ItType)-Element2-First",
+                        RangeInsertValueTwo.first, ( RangeInsertMap.begin() + 1 )->first );
+            TEST_EQUAL( "insert(ItType,ItType)-Element2-Second",
+                        RangeInsertValueTwo.second, ( RangeInsertMap.begin() + 1 )->second );
+            TEST_EQUAL( "insert(ItType,ItType)-Element3-First",
+                        RangeInsertValueFive.first, ( RangeInsertMap.begin() + 2 )->first );
+            TEST_EQUAL( "insert(ItType,ItType)-Element3-Second",
+                        RangeInsertValueFive.second, ( RangeInsertMap.begin() + 2 )->second );
+            TEST_EQUAL( "insert(ItType,ItType)-Element4-First",
+                        RangeInsertValueSix.first, ( RangeInsertMap.begin() + 3 )->first );
+            TEST_EQUAL( "insert(ItType,ItType)-Element4-Second",
+                        RangeInsertValueSix.second, ( RangeInsertMap.begin() + 3 )->second );
+            TEST_EQUAL( "insert(ItType,ItType)-Element5-First",
+                        RangeInsertValueSeven.first, ( RangeInsertMap.begin() + 4 )->first );
+            TEST_EQUAL( "insert(ItType,ItType)-Element5-Second",
+                        RangeInsertValueSeven.second, ( RangeInsertMap.begin() + 4 )->second );
+            TEST_EQUAL( "insert(ItType,ItType)-Element6-First",
+                        RangeInsertValueNine.first, ( RangeInsertMap.begin() + 5 )->first );
+            TEST_EQUAL( "insert(ItType,ItType)-Element6-Second",
+                        RangeInsertValueNine.second, ( RangeInsertMap.begin() + 5 )->second );
+        }// Sequence Modifiers - Range Insert
 
-        SequenceMapType InitListInsertMap = { {50074,"Thalassa"}, {117646,"Proteus"} };
-        SequenceInitListType InsertInitList = { {73548,"Larissa"}, {5513818,"Nereid"}, {61953,"Galatea"} };
-        TEST_EQUAL( "insert(std::initializer_list<value_type>)-ConstructCount",
-                    2u, InitListInsertMap.size() );
-        InitListInsertMap.insert( InsertInitList );
-        TEST_EQUAL( "insert(std::initializer_list<value_type>)-ExplicitInsertCount",
-                    5u, InitListInsertMap.size() );
-        InitListInsertMap.insert( { {52526,"Despina"}, {48227,"Naiad"}, {354759,"Triton"} } );
-        TEST_EQUAL( "insert(std::initializer_list<value_type>)-ImplicitInsertCount",
-                    8u, InitListInsertMap.size() );
-        TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element1-First",
-                    48227, InitListInsertMap.begin()->first );
-        TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element1-Second",
-                    "Naiad", InitListInsertMap.begin()->second );
-        TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element2-First",
-                    50074, ( InitListInsertMap.begin() + 1 )->first );
-        TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element2-Second",
-                    "Thalassa", ( InitListInsertMap.begin() + 1 )->second );
-        TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element3-First",
-                    52526, ( InitListInsertMap.begin() + 2 )->first );
-        TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element3-Second",
-                    "Despina", ( InitListInsertMap.begin() + 2 )->second );
-        TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element4-First",
-                    61953, ( InitListInsertMap.begin() + 3 )->first );
-        TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element4-Second",
-                    "Galatea", ( InitListInsertMap.begin() + 3 )->second );
-        TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element5-First",
-                    73548, ( InitListInsertMap.begin() + 4 )->first );
-        TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element5-Second",
-                    "Larissa", ( InitListInsertMap.begin() + 4 )->second );
-        TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element6-First",
-                    117646, ( InitListInsertMap.begin() + 5 )->first );
-        TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element6-Second",
-                    "Proteus", ( InitListInsertMap.begin() + 5 )->second );
-        TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element7-First",
-                    354759, ( InitListInsertMap.begin() + 6 )->first );
-        TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element7-Second",
-                    "Triton", ( InitListInsertMap.begin() + 6 )->second );
-        TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element8-First",
-                    5513818, ( InitListInsertMap.begin() + 7 )->first );
-        TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element8-Second",
-                    "Nereid", ( InitListInsertMap.begin() + 7 )->second );
+        {// Sequence Modifiers - Initialization List Insert
+            const SequenceMapValue InitListInsertValueOne(48227,"Naiad");
+            const SequenceMapValue InitListInsertValueTwo(50074,"Thalassa");
+            const SequenceMapValue InitListInsertValueThree(52526,"Despina");
+            const SequenceMapValue InitListInsertValueFour(61953,"Galatea");
+            const SequenceMapValue InitListInsertValueFive(73548,"Larissa");
+            const SequenceMapValue InitListInsertValueSix(117646,"Proteus");
+            const SequenceMapValue InitListInsertValueSeven(354759,"Triton");
+            const SequenceMapValue InitListInsertValueEight(5513818,"Nereid");
+            SequenceMapType InitListInsertMap = { InitListInsertValueTwo,
+                                                  InitListInsertValueSix };
+            SequenceInitListType InsertInitList = { InitListInsertValueFive,
+                                                    InitListInsertValueEight,
+                                                    InitListInsertValueFour };
+            TEST_EQUAL( "insert(std::initializer_list<value_type>)-ConstructCount",
+                        2u, InitListInsertMap.size() );
+            InitListInsertMap.insert( InsertInitList );
+            TEST_EQUAL( "insert(std::initializer_list<value_type>)-ExplicitInsertCount",
+                        5u, InitListInsertMap.size() );
+            InitListInsertMap.insert( { InitListInsertValueThree,
+                                        InitListInsertValueOne,
+                                        InitListInsertValueSeven } );
+            TEST_EQUAL( "insert(std::initializer_list<value_type>)-ImplicitInsertCount",
+                        8u, InitListInsertMap.size() );
+            TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element1-First",
+                        InitListInsertValueOne.first, InitListInsertMap.begin()->first );
+            TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element1-Second",
+                        InitListInsertValueOne.second, InitListInsertMap.begin()->second );
+            TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element2-First",
+                        InitListInsertValueTwo.first, ( InitListInsertMap.begin() + 1 )->first );
+            TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element2-Second",
+                        InitListInsertValueTwo.second, ( InitListInsertMap.begin() + 1 )->second );
+            TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element3-First",
+                        InitListInsertValueThree.first, ( InitListInsertMap.begin() + 2 )->first );
+            TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element3-Second",
+                        InitListInsertValueThree.second, ( InitListInsertMap.begin() + 2 )->second );
+            TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element4-First",
+                        InitListInsertValueFour.first, ( InitListInsertMap.begin() + 3 )->first );
+            TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element4-Second",
+                        InitListInsertValueFour.second, ( InitListInsertMap.begin() + 3 )->second );
+            TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element5-First",
+                        InitListInsertValueFive.first, ( InitListInsertMap.begin() + 4 )->first );
+            TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element5-Second",
+                        InitListInsertValueFive.second, ( InitListInsertMap.begin() + 4 )->second );
+            TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element6-First",
+                        InitListInsertValueSix.first, ( InitListInsertMap.begin() + 5 )->first );
+            TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element6-Second",
+                        InitListInsertValueSix.second, ( InitListInsertMap.begin() + 5 )->second );
+            TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element7-First",
+                        InitListInsertValueSeven.first, ( InitListInsertMap.begin() + 6 )->first );
+            TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element7-Second",
+                        InitListInsertValueSeven.second, ( InitListInsertMap.begin() + 6 )->second );
+            TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element8-First",
+                        InitListInsertValueEight.first, ( InitListInsertMap.begin() + 7 )->first );
+            TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element8-Second",
+                        InitListInsertValueEight.second, ( InitListInsertMap.begin() + 7 )->second );
+        }// Sequence Modifiers - Initialization List Insert
 
-        SequenceMapType EmplaceMap = { {7,"Seven"}, {9,"Nine"} };
-        TEST_EQUAL( "emplace(ArgTypes&&...)-BeforeCount",
-                    2u, EmplaceMap.size() );
-        InsertPairResult NewEmplaceResult = EmplaceMap.emplace(8,"Eight");
-        InsertPairResult OldEmplaceResult = EmplaceMap.emplace(7,"Fourteen");
-        TEST_EQUAL( "emplace(ArgTypes&&...)-AfterCount",
-                    3u, EmplaceMap.size() );
-        TEST_EQUAL( "emplace(ArgTypes&&...)-NewResult-First",
-                    1, std::distance( EmplaceMap.begin(), NewEmplaceResult.first ) );
-        TEST_EQUAL( "emplace(ArgTypes&&...)-NewResult-Second",
-                    true, NewEmplaceResult.second );
-        TEST_EQUAL( "emplace(ArgTypes&&...)-OldResult-First",
-                    0, std::distance( EmplaceMap.begin(), OldEmplaceResult.first ) );
-        TEST_EQUAL( "emplace(ArgTypes&&...)-OldResult-Second",
-                    false, OldEmplaceResult.second );
-        TEST_EQUAL( "emplace(ArgTypes&&...)-Element1-First",
-                    7, EmplaceMap.begin()->first );
-        TEST_EQUAL( "emplace(ArgTypes&&...)-Element1-Second",
-                    "Seven", EmplaceMap.begin()->second );
-        TEST_EQUAL( "emplace(ArgTypes&&...)-Element2-First",
-                    8, ( EmplaceMap.begin() + 1 )->first );
-        TEST_EQUAL( "emplace(ArgTypes&&...)-Element2-Second",
-                    "Eight", ( EmplaceMap.begin() + 1 )->second );
-        TEST_EQUAL( "emplace(ArgTypes&&...)-Element3-First",
-                    9, ( EmplaceMap.begin() + 2 )->first );
-        TEST_EQUAL( "emplace(ArgTypes&&...)-Element3-Second",
-                    "Nine", ( EmplaceMap.begin() + 2 )->second );
+        {// Sequence Modifiers - Emplace
+            const SequenceMapValue EmplaceValueSeven(7,"Seven");
+            const SequenceMapValue EmplaceValueEight(8,"Eight");
+            const SequenceMapValue EmplaceValueNine(9,"Nine");
+            const SequenceMapValue FailEmplaceValue(7,"Fourteen");
+            SequenceMapType EmplaceMap = { EmplaceValueSeven, EmplaceValueNine };
+            TEST_EQUAL( "emplace(ArgTypes&&...)-BeforeCount",
+                        2u, EmplaceMap.size() );
+            InsertPairResult NewEmplaceResult = EmplaceMap.emplace(EmplaceValueEight.first,EmplaceValueEight.second);
+            InsertPairResult OldEmplaceResult = EmplaceMap.emplace(FailEmplaceValue.first,FailEmplaceValue.second);
+            TEST_EQUAL( "emplace(ArgTypes&&...)-AfterCount",
+                        3u, EmplaceMap.size() );
+            TEST_EQUAL( "emplace(ArgTypes&&...)-NewResult-First",
+                        1, std::distance( EmplaceMap.begin(), NewEmplaceResult.first ) );
+            TEST_EQUAL( "emplace(ArgTypes&&...)-NewResult-Second",
+                        true, NewEmplaceResult.second );
+            TEST_EQUAL( "emplace(ArgTypes&&...)-OldResult-First",
+                        0, std::distance( EmplaceMap.begin(), OldEmplaceResult.first ) );
+            TEST_EQUAL( "emplace(ArgTypes&&...)-OldResult-Second",
+                        false, OldEmplaceResult.second );
+            TEST_EQUAL( "emplace(ArgTypes&&...)-Element1-First",
+                        EmplaceValueSeven.first, EmplaceMap.begin()->first );
+            TEST_EQUAL( "emplace(ArgTypes&&...)-Element1-Second",
+                        EmplaceValueSeven.second, EmplaceMap.begin()->second );
+            TEST_EQUAL( "emplace(ArgTypes&&...)-Element2-First",
+                        EmplaceValueEight.first, ( EmplaceMap.begin() + 1 )->first );
+            TEST_EQUAL( "emplace(ArgTypes&&...)-Element2-Second",
+                        EmplaceValueEight.second, ( EmplaceMap.begin() + 1 )->second );
+            TEST_EQUAL( "emplace(ArgTypes&&...)-Element3-First",
+                        EmplaceValueNine.first, ( EmplaceMap.begin() + 2 )->first );
+            TEST_EQUAL( "emplace(ArgTypes&&...)-Element3-Second",
+                        EmplaceValueNine.second, ( EmplaceMap.begin() + 2 )->second );
+        }// Sequence Modifiers - Emplace
 
-        SequenceMapType HintEmplaceMap;
-        //SequenceMapValue FirstEmplaceHintValue(129390,"Miranda");
-        //SequenceMapValue SecondEmplaceHintValue(191020,"Ariel");
-        //SequenceMapValue ThirdEmplaceHintValue(266300,"Umbriel");
-        //SequenceMapValue FourthEmplaceHintValue(435910,"Titania");
-        //SequenceMapValue FifthEmplaceHintValue(583520,"Oberon");
-        //SequenceMapValue FailEmplaceHintValue(129390,"Earf");
-        SequenceMapType::iterator EmplaceHint = HintEmplaceMap.begin();
-        SequenceMapType::iterator EmplaceHintResult = HintEmplaceMap.emplace_hint(EmplaceHint,191020,"Ariel");
-        TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-EmptyInsert-Position",
-                    0, std::distance( HintEmplaceMap.begin(), EmplaceHintResult ) );
-        TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-EmptyInsert-First",
-                    191020, EmplaceHintResult->first );
-        TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-EmptyInsert-Second",
-                    "Ariel", EmplaceHintResult->second );
-        EmplaceHint = HintEmplaceMap.begin();
-        EmplaceHintResult = HintEmplaceMap.emplace_hint(EmplaceHint,129390,"Miranda");
-        TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-BeginInsert-Position",
-                    0, std::distance( HintEmplaceMap.begin(), EmplaceHintResult ) );
-        TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-BeginInsert-First",
-                    129390, EmplaceHintResult->first );
-        TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-BeginInsert-Second",
-                    "Miranda", EmplaceHintResult->second );
-        EmplaceHint = HintEmplaceMap.end();
-        EmplaceHintResult = HintEmplaceMap.emplace_hint(EmplaceHint,583520,"Oberon");
-        TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-EndInsert-Position",
-                    2, std::distance( HintEmplaceMap.begin(), EmplaceHintResult ) );
-        TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-EndInsert-First",
-                    583520, EmplaceHintResult->first );
-        TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-EndInsert-Second",
-                    "Oberon", EmplaceHintResult->second );
-        EmplaceHint = HintEmplaceMap.begin() + 2;
-        EmplaceHintResult = HintEmplaceMap.emplace_hint(EmplaceHint,266300,"Umbriel");
-        TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-MiddleInsert-Position",
-                    2, std::distance( HintEmplaceMap.begin(), EmplaceHintResult ) );
-        TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-MiddleInsert-First",
-                    266300, EmplaceHintResult->first );
-        TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-MiddleInsert-Second",
-                    "Umbriel", EmplaceHintResult->second );
-        EmplaceHint = HintEmplaceMap.begin();
-        EmplaceHintResult = HintEmplaceMap.emplace_hint(EmplaceHint,435910,"Titania");
-        TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-FallBackInsert-Position",
-                    3, std::distance( HintEmplaceMap.begin(), EmplaceHintResult ) );
-        TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-FallBackInsert-First",
-                    435910, EmplaceHintResult->first );
-        TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-FallBackInsert-Second",
-                    "Titania", EmplaceHintResult->second );
-        EmplaceHint = HintEmplaceMap.begin() + 2;
-        EmplaceHintResult = HintEmplaceMap.emplace_hint(EmplaceHint,129390,"Earf");
-        TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-FailInsert-Position",
-                    0, std::distance( HintEmplaceMap.begin(), EmplaceHintResult ) );
-        TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-FailInsert-First",
-                    129390, EmplaceHintResult->first );
-        TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-FailInsert-Second",
-                    "Miranda", EmplaceHintResult->second );
-        // Sequence check the entire container
-        TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-FinalSize",
-                    5u, HintEmplaceMap.size() );
-        TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-Element1-First",
-                    129390, HintEmplaceMap.begin()->first );
-        TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-Element1-Second",
-                    "Miranda", HintEmplaceMap.begin()->second );
-        TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-Element2-First",
-                    191020, ( HintEmplaceMap.begin() + 1 )->first );
-        TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-Element2-Second",
-                    "Ariel", ( HintEmplaceMap.begin() + 1 )->second );
-        TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-Element3-First",
-                    266300, ( HintEmplaceMap.begin() + 2 )->first );
-        TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-Element3-Second",
-                    "Umbriel", ( HintEmplaceMap.begin() + 2 )->second );
-        TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-Element4-First",
-                    435910, ( HintEmplaceMap.begin() + 3 )->first );
-        TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-Element4-Second",
-                    "Titania", ( HintEmplaceMap.begin() + 3 )->second );
-        TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-Element5-First",
-                    583520, ( HintEmplaceMap.begin() + 4 )->first );
-        TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-Element5-Second",
-                    "Oberon", ( HintEmplaceMap.begin() + 4 )->second );
+        {// Sequence Modifiers - Hint Emplace
+            SequenceMapType HintEmplaceMap;
+            //SequenceMapValue FirstEmplaceHintValue(129390,"Miranda");
+            //SequenceMapValue SecondEmplaceHintValue(191020,"Ariel");
+            //SequenceMapValue ThirdEmplaceHintValue(266300,"Umbriel");
+            //SequenceMapValue FourthEmplaceHintValue(435910,"Titania");
+            //SequenceMapValue FifthEmplaceHintValue(583520,"Oberon");
+            //SequenceMapValue FailEmplaceHintValue(129390,"Earf");
+            SequenceMapType::iterator EmplaceHint = HintEmplaceMap.begin();
+            SequenceMapType::iterator EmplaceHintResult = HintEmplaceMap.emplace_hint(EmplaceHint,191020,"Ariel");
+            TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-EmptyInsert-Position",
+                        0, std::distance( HintEmplaceMap.begin(), EmplaceHintResult ) );
+            TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-EmptyInsert-First",
+                        191020, EmplaceHintResult->first );
+            TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-EmptyInsert-Second",
+                        "Ariel", EmplaceHintResult->second );
+            EmplaceHint = HintEmplaceMap.begin();
+            EmplaceHintResult = HintEmplaceMap.emplace_hint(EmplaceHint,129390,"Miranda");
+            TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-BeginInsert-Position",
+                        0, std::distance( HintEmplaceMap.begin(), EmplaceHintResult ) );
+            TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-BeginInsert-First",
+                        129390, EmplaceHintResult->first );
+            TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-BeginInsert-Second",
+                        "Miranda", EmplaceHintResult->second );
+            EmplaceHint = HintEmplaceMap.end();
+            EmplaceHintResult = HintEmplaceMap.emplace_hint(EmplaceHint,583520,"Oberon");
+            TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-EndInsert-Position",
+                        2, std::distance( HintEmplaceMap.begin(), EmplaceHintResult ) );
+            TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-EndInsert-First",
+                        583520, EmplaceHintResult->first );
+            TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-EndInsert-Second",
+                        "Oberon", EmplaceHintResult->second );
+            EmplaceHint = HintEmplaceMap.begin() + 2;
+            EmplaceHintResult = HintEmplaceMap.emplace_hint(EmplaceHint,266300,"Umbriel");
+            TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-MiddleInsert-Position",
+                        2, std::distance( HintEmplaceMap.begin(), EmplaceHintResult ) );
+            TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-MiddleInsert-First",
+                        266300, EmplaceHintResult->first );
+            TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-MiddleInsert-Second",
+                        "Umbriel", EmplaceHintResult->second );
+            EmplaceHint = HintEmplaceMap.begin();
+            EmplaceHintResult = HintEmplaceMap.emplace_hint(EmplaceHint,435910,"Titania");
+            TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-FallBackInsert-Position",
+                        3, std::distance( HintEmplaceMap.begin(), EmplaceHintResult ) );
+            TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-FallBackInsert-First",
+                        435910, EmplaceHintResult->first );
+            TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-FallBackInsert-Second",
+                        "Titania", EmplaceHintResult->second );
+            EmplaceHint = HintEmplaceMap.begin() + 2;
+            EmplaceHintResult = HintEmplaceMap.emplace_hint(EmplaceHint,129390,"Earf");
+            TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-FailInsert-Position",
+                        0, std::distance( HintEmplaceMap.begin(), EmplaceHintResult ) );
+            TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-FailInsert-First",
+                        129390, EmplaceHintResult->first );
+            TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-FailInsert-Second",
+                        "Miranda", EmplaceHintResult->second );
+            // Sequence check the entire container
+            TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-FinalSize",
+                        5u, HintEmplaceMap.size() );
+            TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-Element1-First",
+                        129390, HintEmplaceMap.begin()->first );
+            TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-Element1-Second",
+                        "Miranda", HintEmplaceMap.begin()->second );
+            TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-Element2-First",
+                        191020, ( HintEmplaceMap.begin() + 1 )->first );
+            TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-Element2-Second",
+                        "Ariel", ( HintEmplaceMap.begin() + 1 )->second );
+            TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-Element3-First",
+                        266300, ( HintEmplaceMap.begin() + 2 )->first );
+            TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-Element3-Second",
+                        "Umbriel", ( HintEmplaceMap.begin() + 2 )->second );
+            TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-Element4-First",
+                        435910, ( HintEmplaceMap.begin() + 3 )->first );
+            TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-Element4-Second",
+                        "Titania", ( HintEmplaceMap.begin() + 3 )->second );
+            TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-Element5-First",
+                        583520, ( HintEmplaceMap.begin() + 4 )->first );
+            TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-Element5-Second",
+                        "Oberon", ( HintEmplaceMap.begin() + 4 )->second );
+        }// Sequence Modifiers - Hint Emplace
 
-        SequenceMapType SwapSrcMap = { {10,"Ten"}, {20,"Twenty"}, {30,"Thirty"} };
-        SequenceMapType SwapDestMap = { {40,"Forty"}, {50,"Fifty"} };
-        SwapDestMap.swap(SwapSrcMap);
-        TEST_EQUAL( "swap(SelfType&)-SrcCount", 2u, SwapSrcMap.size() );
-        TEST_EQUAL( "swap(SelfType&)-DestCount", 3u, SwapDestMap.size() );
-        TEST_EQUAL( "swap(SelfType&)-SrcMap-Element1-First", 40, SwapSrcMap.begin()->first );
-        TEST_EQUAL( "swap(SelfType&)-SrcMap-Element1-Second", "Forty", SwapSrcMap.begin()->second );
-        TEST_EQUAL( "swap(SelfType&)-SrcMap-Element2-First", 50, ( SwapSrcMap.begin() + 1 )->first );
-        TEST_EQUAL( "swap(SelfType&)-SrcMap-Element2-Second", "Fifty", ( SwapSrcMap.begin() + 1 )->second );
-        TEST_EQUAL( "swap(SelfType&)-DestMap-Element1-First", 10, SwapDestMap.begin()->first );
-        TEST_EQUAL( "swap(SelfType&)-DestMap-Element1-Second", "Ten", SwapDestMap.begin()->second );
-        TEST_EQUAL( "swap(SelfType&)-DestMap-Element2-First", 20, ( SwapDestMap.begin() + 1 )->first );
-        TEST_EQUAL( "swap(SelfType&)-DestMap-Element2-Second", "Twenty", ( SwapDestMap.begin() + 1 )->second );
-        TEST_EQUAL( "swap(SelfType&)-DestMap-Element3-First", 30, ( SwapDestMap.begin() + 2 )->first  );
-        TEST_EQUAL( "swap(SelfType&)-DestMap-Element3-Second", "Thirty", ( SwapDestMap.begin() + 2 )->second );
+        {// Sequence Modifiers - Swap
+            const SequenceMapValue SwapValueTen(10,"Ten");
+            const SequenceMapValue SwapValueTwenty(20,"Twenty");
+            const SequenceMapValue SwapValueThirty(30,"Thirty");
+            const SequenceMapValue SwapValueFourty(40,"Forty");
+            const SequenceMapValue SwapValueFifty(50,"Fifty");
+            SequenceMapType SwapSrcMap = { SwapValueTen, SwapValueTwenty, SwapValueThirty };
+            SequenceMapType SwapDestMap = { SwapValueFourty, SwapValueFifty };
+            SwapDestMap.swap(SwapSrcMap);
+            TEST_EQUAL( "swap(SelfType&)-SrcCount",
+                        2u, SwapSrcMap.size() );
+            TEST_EQUAL( "swap(SelfType&)-DestCount",
+                        3u, SwapDestMap.size() );
+            TEST_EQUAL( "swap(SelfType&)-SrcMap-Element1-First",
+                        SwapValueFourty.first, SwapSrcMap.begin()->first );
+            TEST_EQUAL( "swap(SelfType&)-SrcMap-Element1-Second",
+                        SwapValueFourty.second, SwapSrcMap.begin()->second );
+            TEST_EQUAL( "swap(SelfType&)-SrcMap-Element2-First",
+                        SwapValueFifty.first, ( SwapSrcMap.begin() + 1 )->first );
+            TEST_EQUAL( "swap(SelfType&)-SrcMap-Element2-Second",
+                        SwapValueFifty.second, ( SwapSrcMap.begin() + 1 )->second );
+            TEST_EQUAL( "swap(SelfType&)-DestMap-Element1-First",
+                        SwapValueTen.first, SwapDestMap.begin()->first );
+            TEST_EQUAL( "swap(SelfType&)-DestMap-Element1-Second",
+                        SwapValueTen.second, SwapDestMap.begin()->second );
+            TEST_EQUAL( "swap(SelfType&)-DestMap-Element2-First",
+                        SwapValueTwenty.first, ( SwapDestMap.begin() + 1 )->first );
+            TEST_EQUAL( "swap(SelfType&)-DestMap-Element2-Second",
+                        SwapValueTwenty.second, ( SwapDestMap.begin() + 1 )->second );
+            TEST_EQUAL( "swap(SelfType&)-DestMap-Element3-First",
+                        SwapValueThirty.first, ( SwapDestMap.begin() + 2 )->first  );
+            TEST_EQUAL( "swap(SelfType&)-DestMap-Element3-Second",
+                        SwapValueThirty.second, ( SwapDestMap.begin() + 2 )->second );
+        }// Sequence Modifiers - Swap
 
-        SequenceMapType EraseMap = { {4,"Cuatro"}, {3,"Tres"}, {2,"Dos"}, {1,"Uno"} };
-        TEST_EQUAL( "erase((const_)iterator)-BeforeSize",
-                    4u, EraseMap.size() );
-        SequenceMapType::iterator FirstErase = EraseMap.begin() + 1;
-        SequenceMapType::iterator FirstEraseResult = EraseMap.erase(FirstErase);
-        TEST_EQUAL( "erase((const_)iterator)-AfterFirstEraseSize",
-                    3u, EraseMap.size() );
-        TEST_EQUAL( "erase((const_)iterator)-FirstEraseResultPosition",
-                    1, std::distance( EraseMap.begin(), FirstEraseResult ) );
-        SequenceMapType::const_iterator SecondErase = EraseMap.begin() + 2;
-        SequenceMapType::const_iterator SecondEraseResult = EraseMap.erase(SecondErase);
-        TEST_EQUAL( "erase((const_)iterator)-AfterSecondEraseSize",
-                    2u, EraseMap.size() );
-        TEST_EQUAL( "erase((const_)iterator)-SecondEraseResultPosition",
-                    2, std::distance( EraseMap.cbegin(), SecondEraseResult ) );
-        TEST_EQUAL( "erase((const_)iterator)-Element1-First",
-                    1, EraseMap.begin()->first );
-        TEST_EQUAL( "erase((const_)iterator)-Element1-Second",
-                    "Uno", EraseMap.begin()->second );
-        TEST_EQUAL( "erase((const_)iterator)-Element2-First",
-                    3, ( EraseMap.begin() + 1 )->first );
-        TEST_EQUAL( "erase((const_)iterator)-Element2-Second",
-                    "Tres", ( EraseMap.begin() + 1 )->second );
+        {// Sequence Modifiers - Erase
+            const SequenceMapValue EraseValueOne(1,"Uno");
+            const SequenceMapValue EraseValueTwo(2,"Dos");
+            const SequenceMapValue EraseValueThree(3,"Tres");
+            const SequenceMapValue EraseValueFour(4,"Cuatro");
+            SequenceMapType EraseMap = { EraseValueFour, EraseValueThree, EraseValueTwo, EraseValueOne };
+            TEST_EQUAL( "erase((const_)iterator)-BeforeSize",
+                        4u, EraseMap.size() );
+            SequenceMapType::iterator FirstErase = EraseMap.begin() + 1;
+            SequenceMapType::iterator FirstEraseResult = EraseMap.erase(FirstErase);
+            TEST_EQUAL( "erase((const_)iterator)-AfterFirstEraseSize",
+                        3u, EraseMap.size() );
+            TEST_EQUAL( "erase((const_)iterator)-FirstEraseResultPosition",
+                        1, std::distance( EraseMap.begin(), FirstEraseResult ) );
+            SequenceMapType::const_iterator SecondErase = EraseMap.begin() + 2;
+            SequenceMapType::const_iterator SecondEraseResult = EraseMap.erase(SecondErase);
+            TEST_EQUAL( "erase((const_)iterator)-AfterSecondEraseSize",
+                        2u, EraseMap.size() );
+            TEST_EQUAL( "erase((const_)iterator)-SecondEraseResultPosition",
+                        2, std::distance( EraseMap.cbegin(), SecondEraseResult ) );
+            TEST_EQUAL( "erase((const_)iterator)-Element1-First",
+                        EraseValueOne.first, EraseMap.begin()->first );
+            TEST_EQUAL( "erase((const_)iterator)-Element1-Second",
+                        EraseValueOne.second, EraseMap.begin()->second );
+            TEST_EQUAL( "erase((const_)iterator)-Element2-First",
+                        EraseValueThree.first, ( EraseMap.begin() + 1 )->first );
+            TEST_EQUAL( "erase((const_)iterator)-Element2-Second",
+                        EraseValueThree.second, ( EraseMap.begin() + 1 )->second );
+        }// Sequence Modifiers - Erase
 
-        SequenceMapType RangeEraseMap = { {15,"30"}, {30,"60"}, {45,"90"}, {60,"120"}, {75,"150"}, {90,"180"} };
-        SequenceMapType::iterator RangeEraseBegin = RangeEraseMap.begin();
-        TEST_EQUAL( "erase(const_iterator,const_iterator)-BeforeCount",
-                    6u, RangeEraseMap.size() );
-        SequenceMapType::iterator RangeRetIt = RangeEraseMap.erase(RangeEraseBegin + 2,RangeEraseBegin + 5);
-        TEST_EQUAL( "erase(const_iterator,const_iterator)-AfterCount",
-                    3u, RangeEraseMap.size() );
-        TEST_EQUAL( "erase(const_iterator,const_iterator)-ReturnPosition",
-                    2, std::distance( RangeEraseMap.begin(), RangeRetIt ) );
-        TEST_EQUAL( "erase(const_iterator,const_iterator)-Element1-First",
-                    15, RangeEraseMap.begin()->first );
-        TEST_EQUAL( "erase(const_iterator,const_iterator)-Element1-Second",
-                    "30", RangeEraseMap.begin()->second );
-        TEST_EQUAL( "erase(const_iterator,const_iterator)-Element2-First",
-                    30, ( RangeEraseMap.begin() + 1 )->first );
-        TEST_EQUAL( "erase(const_iterator,const_iterator)-Element2-Second",
-                    "60", ( RangeEraseMap.begin() + 1 )->second );
-        TEST_EQUAL( "erase(const_iterator,const_iterator)-Element3-First",
-                    90, ( RangeEraseMap.begin() + 2 )->first );
-        TEST_EQUAL( "erase(const_iterator,const_iterator)-Element3-Second",
-                    "180", ( RangeEraseMap.begin() + 2 )->second );
+        {// Sequence Modifiers - RangeErase
+            const SequenceMapValue RangeEraseValueFifteen(15,"30");
+            const SequenceMapValue RangeEraseValueThirty(30,"60");
+            const SequenceMapValue RangeEraseValueFourtyFive(45,"90");
+            const SequenceMapValue RangeEraseValueSixty(60,"120");
+            const SequenceMapValue RangeEraseValueSeventyFive(75,"150");
+            const SequenceMapValue RangeEraseValueNinty(90,"180");
+            SequenceMapType RangeEraseMap = { RangeEraseValueFifteen,
+                                              RangeEraseValueThirty,
+                                              RangeEraseValueFourtyFive,
+                                              RangeEraseValueSixty,
+                                              RangeEraseValueSeventyFive,
+                                              RangeEraseValueNinty };
+            SequenceMapType::iterator RangeEraseBegin = RangeEraseMap.begin();
+            TEST_EQUAL( "erase(const_iterator,const_iterator)-BeforeCount",
+                        6u, RangeEraseMap.size() );
+            SequenceMapType::iterator RangeRetIt = RangeEraseMap.erase(RangeEraseBegin + 2,RangeEraseBegin + 5);
+            TEST_EQUAL( "erase(const_iterator,const_iterator)-AfterCount",
+                        3u, RangeEraseMap.size() );
+            TEST_EQUAL( "erase(const_iterator,const_iterator)-ReturnPosition",
+                        2, std::distance( RangeEraseMap.begin(), RangeRetIt ) );
+            TEST_EQUAL( "erase(const_iterator,const_iterator)-Element1-First",
+                        RangeEraseValueFifteen.first, RangeEraseMap.begin()->first );
+            TEST_EQUAL( "erase(const_iterator,const_iterator)-Element1-Second",
+                        RangeEraseValueFifteen.second, RangeEraseMap.begin()->second );
+            TEST_EQUAL( "erase(const_iterator,const_iterator)-Element2-First",
+                        RangeEraseValueThirty.first, ( RangeEraseMap.begin() + 1 )->first );
+            TEST_EQUAL( "erase(const_iterator,const_iterator)-Element2-Second",
+                        RangeEraseValueThirty.second, ( RangeEraseMap.begin() + 1 )->second );
+            TEST_EQUAL( "erase(const_iterator,const_iterator)-Element3-First",
+                        RangeEraseValueNinty.first, ( RangeEraseMap.begin() + 2 )->first );
+            TEST_EQUAL( "erase(const_iterator,const_iterator)-Element3-Second",
+                        RangeEraseValueNinty.second, ( RangeEraseMap.begin() + 2 )->second );
+        }// Sequence Modifiers - RangeErase
 
-        SequenceMapType KeyEraseMap = { {7,"Sept"}, {6,"Six"}, {5,"Cinq"} };
-        TEST_EQUAL( "erase(const_key_type&)-BeforeCount",
-                    3u, KeyEraseMap.size() );
-        TEST_EQUAL( "erase(const_key_type&)-Pass",
-                    1u, KeyEraseMap.erase(6) );
-        TEST_EQUAL( "erase(const_key_type&)-AfterCount",
-                    2u, KeyEraseMap.size() );
-        TEST_EQUAL( "erase(const_key_type&)-Fail",
-                    0u, KeyEraseMap.erase(9) );
-        TEST_EQUAL( "erase(const_key_type&)-Element1-First",
-                    5, KeyEraseMap.begin()->first );
-        TEST_EQUAL( "erase(const_key_type&)-Element1-Second",
-                    "Cinq", KeyEraseMap.begin()->second );
-        TEST_EQUAL( "erase(const_key_type&)-Element2-First",
-                    7, ( KeyEraseMap.begin() + 1 )->first );
-        TEST_EQUAL( "erase(const_key_type&)-Element2-Second",
-                    "Sept", ( KeyEraseMap.begin() + 1 )->second );
+        {// Sequence Modifiers - Key Erase
+            const SequenceMapValue KeyEraseValueFive(5,"Cinq");
+            const SequenceMapValue KeyEraseValueSix(6,"Six");
+            const SequenceMapValue KeyEraseValueSeven(7,"Sept");
+            SequenceMapType KeyEraseMap = { KeyEraseValueSeven, KeyEraseValueSix, KeyEraseValueFive };
+            TEST_EQUAL( "erase(const_key_type&)-BeforeCount",
+                        3u, KeyEraseMap.size() );
+            TEST_EQUAL( "erase(const_key_type&)-Pass",
+                        1u, KeyEraseMap.erase(KeyEraseValueSix.first) );
+            TEST_EQUAL( "erase(const_key_type&)-AfterCount",
+                        2u, KeyEraseMap.size() );
+            TEST_EQUAL( "erase(const_key_type&)-Fail",
+                        0u, KeyEraseMap.erase(9) );
+            TEST_EQUAL( "erase(const_key_type&)-Element1-First",
+                        KeyEraseValueFive.first, KeyEraseMap.begin()->first );
+            TEST_EQUAL( "erase(const_key_type&)-Element1-Second",
+                        KeyEraseValueFive.second, KeyEraseMap.begin()->second );
+            TEST_EQUAL( "erase(const_key_type&)-Element2-First",
+                        KeyEraseValueSeven.first, ( KeyEraseMap.begin() + 1 )->first );
+            TEST_EQUAL( "erase(const_key_type&)-Element2-Second",
+                        KeyEraseValueSeven.second, ( KeyEraseMap.begin() + 1 )->second );
+        }// Sequence Modifiers - Key Erase
 
-        SequenceMapType ClearMap = { {4,"Quatre"}, {3,"Trois"}, {2,"Deux"}, {1,"Un"} };
-        TEST_EQUAL( "clear()-BeforeCount", 4u, ClearMap.size() );
-        ClearMap.clear();
-        TEST_EQUAL( "clear()-Empty", true, ClearMap.empty() );
+        {// Sequence Modifiers - Clear
+            SequenceMapType ClearMap = { {4,"Quatre"}, {3,"Trois"}, {2,"Deux"}, {1,"Un"} };
+            TEST_EQUAL( "clear()-BeforeCount", 4u, ClearMap.size() );
+            ClearMap.clear();
+            TEST_EQUAL( "clear()-Empty", true, ClearMap.empty() );
+        }// Sequence Modifiers - Clear
     }//Sequence Modifiers
 }
 

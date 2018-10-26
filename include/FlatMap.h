@@ -635,8 +635,7 @@ namespace Mezzanine
                 return InternalStorage.insert(Hint,Val);
             }
             // All sane shortcuts have failed, so ignore hint
-            std::pair<iterator,Boole> Ret = insert(Val);
-            return Ret.first;
+            return insert(Val).first;
         }
         /// @brief Inserts a new Key/Value pair if no such key already exists with a hit of where to insert.
         /// @param Hint An iterator to the element that will follow the newly inserted element.
@@ -662,8 +661,7 @@ namespace Mezzanine
                 return InternalStorage.insert( Hint, std::move(Val) );
             }
             // All sane shortcuts have failed, so ignore hint
-            std::pair<iterator,Boole> Ret = insert( std::move(Val) );
-            return Ret.first;
+            return insert( std::move(Val) ).first;
         }
         /// @brief Inserts a range of elements into the container.
         /// @tparam ItType The deduced iterator type defining the range to be inserted.
