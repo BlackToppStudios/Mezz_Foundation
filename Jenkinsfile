@@ -34,7 +34,7 @@ pipeline {
                         sh 'mkdir -p build-debug'
                         dir('build-debug') { sh """
                             export PATH='$PATH:/usr/local/bin/' &&
-                            cmake -E env CXXFLAGS="-fno-var-tracking-assignments" cmake -G"Xcode" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
+                            cmake -E env CXXFLAGS="-fno-var-tracking" cmake -G"Xcode" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
                             cmake --build . &&
                            ./Foundation_Tester xml
                         """ }
@@ -70,7 +70,7 @@ pipeline {
                         checkout scm
                         sh 'mkdir -p build-debug'
                         dir('build-debug') { sh """
-                            cmake -E env CXXFLAGS="-fno-var-tracking-assignments" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
+                            cmake -E env CXXFLAGS="-fno-var-tracking" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
                             ninja  &&
                             ./Foundation_Tester xml
                          """ }
@@ -87,7 +87,7 @@ pipeline {
                         checkout scm
                         sh 'mkdir -p build-debug'
                         dir('build-debug') { sh """
-                            cmake -E env CXXFLAGS="-fno-var-tracking-assignments" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
+                            cmake -E env CXXFLAGS="-fno-var-tracking" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
                             ninja &&
                             node Foundation_Tester.js NoThreads
                         """ }
@@ -191,7 +191,7 @@ pipeline {
                         sh 'mkdir -p build-release'
                         dir('build-release') { sh """
                             export PATH='$PATH:/usr/local/bin/' &&
-                            cmake -E env CXXFLAGS="-fno-var-tracking-assignments" cmake -G"Xcode" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
+                            cmake -E env CXXFLAGS="-fno-var-tracking" cmake -G"Xcode" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
                             cmake --build . &&
                            ./Foundation_Tester xml
                         """ }
@@ -227,7 +227,7 @@ pipeline {
                         checkout scm
                         sh 'mkdir -p build-release'
                         dir('build-release') { sh """
-                            cmake -E env CXXFLAGS="-fno-var-tracking-assignments" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
+                            cmake -E env CXXFLAGS="-fno-var-tracking" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
                             ninja  &&
                             ./Foundation_Tester xml
                          """ }
@@ -244,7 +244,7 @@ pipeline {
                         checkout scm
                         sh 'mkdir -p build-release'
                         dir('build-release') { sh """
-                            cmake -E env CXXFLAGS="-fno-var-tracking-assignments" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
+                            cmake -E env CXXFLAGS="-fno-var-tracking" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
                             ninja &&
                             node Foundation_Tester.js NoThreads
                         """ }
