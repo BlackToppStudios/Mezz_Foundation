@@ -87,7 +87,7 @@ pipeline {
                         checkout scm
                         sh 'mkdir -p build-debug'
                         dir('build-debug') { sh """
-                            cmake -E env EMCC_DEBUG=2 CXXFLAGS="-fno-var-tracking -s TOTAL_MEMORY=268435456 -s WASM=1" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
+                            cmake -E env EMCC_DEBUG=2 CXXFLAGS="-fno-var-tracking -s TOTAL_MEMORY=2147483648 -s WASM=1" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
                             ninja &&
                             node Foundation_Tester.js NoThreads
                         """ }
@@ -244,7 +244,7 @@ pipeline {
                         checkout scm
                         sh 'mkdir -p build-release'
                         dir('build-release') { sh """
-                            cmake -E env EMCC_DEBUG=2 CXXFLAGS="-fno-var-tracking -s TOTAL_MEMORY=268435456 -s WASM=1" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
+                            cmake -E env EMCC_DEBUG=2 CXXFLAGS="-fno-var-tracking -s TOTAL_MEMORY=2147483648 -s WASM=1" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
                             ninja &&
                             node Foundation_Tester.js NoThreads
                         """ }
