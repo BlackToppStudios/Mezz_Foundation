@@ -38,26 +38,25 @@
    John Blackwood - makoenergy02@gmail.com
 */
 
-#ifndef Mezz_Foundation_BaseSerializationRootNode_h
-#define Mezz_Foundation_BaseSerializationRootNode_h
+#ifndef Mezz_Foundation_BaseSerializationInternalImplementation_h
+#define Mezz_Foundation_BaseSerializationInternalImplementation_h
 
 // Some headers we don't want swig to see.
 #ifndef SWIG
     #include "DataTypes.h"
 #endif
 
-
-
 namespace Mezzanine {
 
-/// @brief A handle for working with the root of a serialization heirarchy.
-/// @details This is intended to house code and logic that would affect a whole hiearchy but not
-/// multiple hiearchies ( for code affecting multiple hiearchies see @ref BaseSerializationBackEnd
-/// ). This does not provide normal facilities for navigaiting the serialization hiearchy.
+/// @brief
+/// @details
 ///
 template <typename SerializationSchemeType>
-class BaseSerializationRootNode {
+class BaseSerializationInternalImplementation
+{
+
 public:
+
     // Scheme type
     using SerializationScheme               = SerializationSchemeType;
 
@@ -71,20 +70,15 @@ public:
     using SerializationBackEnd              = typename SerializationScheme::SerializationBackEnd;
     using SerializationNode                 = typename SerializationScheme::SerializationNode;
     using SerializationRootNode             = typename SerializationScheme::SerializationRootNode;
-
     // end type boilerplate
 
-    virtual ~BaseSerializationRootNode() = default;
-
-    //virtual SerializationNode GetAsNode() { return *this; }
-    virtual String SerializeToString() = 0;
-
-    virtual void AddChildNode(SerializationString NodeName) = 0;
-    virtual void AddChildNode(SerializationNode Mode) = 0;
+    virtual ~BaseSerializationInternalImplementation() = default;
 
 
 };
 
+
 } // \Mezzanine Namespace
 
 #endif //_logging_h
+

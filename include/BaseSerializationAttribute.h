@@ -65,9 +65,11 @@ public:
 
     // Primitive types
     using NodeCount                         = typename SerializationScheme::NodeCount;
+    using SerializationString               = typename SerializationScheme::SerializationString;
 
     // Tree type heiarchy types.
     using SerializationAttribute            = typename SerializationScheme::SerializationAttribute;
+    using SerializationInternal             = typename SerializationScheme::SerializationInternalImplementation;
     using SerializationBackEnd              = typename SerializationScheme::SerializationBackEnd;
     using SerializationNode                 = typename SerializationScheme::SerializationNode;
     using SerializationRootNode             = typename SerializationScheme::SerializationRootNode;
