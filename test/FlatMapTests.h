@@ -572,7 +572,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
             TEST_EQUAL( "insert(const_value_type&)-Element3-Second",
                         CopyInsertValueThree.second, ( CopyInsertBegin + 2 )->second );
         }// Sequence Modifiers - Copy Insert
-/*
+
         {// Sequence Modifiers - Move Insert
             SequenceMapValue MoveInsertValueFour(4,"Four");
             SequenceMapValue MoveInsertValueFive(5,"Five");
@@ -611,7 +611,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
             TEST_EQUAL( "insert(value_type&&)-VerifyMove-Old",
                         false, FailMoveInsertValue.second.empty() );
         }// Sequence Modifiers - Move Insert
-
+/*
         {// Sequence Modifiers - Hint Copy Insert
             SequenceMapType HintCopyInsertMap;
             const SequenceMapValue CopyHintValueOne(1,"Mercury");
