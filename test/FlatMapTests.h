@@ -917,7 +917,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
             TEST_EQUAL( "emplace(ArgTypes&&...)-Element3-Second",
                         EmplaceValueNine.second, ( EmplaceMap.begin() + 2 )->second );
         }// Sequence Modifiers - Emplace
-/*
+
         {// Sequence Modifiers - Hint Emplace
             SequenceMapType HintEmplaceMap;
             //SequenceMapValue FirstEmplaceHintValue(129390,"Miranda");
@@ -998,7 +998,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
             TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-Element5-Second",
                         "Oberon", ( HintEmplaceMap.begin() + 4 )->second );
         }// Sequence Modifiers - Hint Emplace
-
+/*
         {// Sequence Modifiers - Swap
             const SequenceMapValue SwapValueTen(10,"Ten");
             const SequenceMapValue SwapValueTwenty(20,"Twenty");
