@@ -535,7 +535,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         using SequenceMapIter = SequenceMapType::iterator;
         using SequenceMapValue = SequenceMapType::value_type;
         using SequenceListType = std::list<SequenceMapValue>;
-        //using SequenceInitListType = std::initializer_list<SequenceMapValue>;
+        using SequenceInitListType = std::initializer_list<SequenceMapValue>;
         using InsertPairResult = std::pair<SequenceMapIter,bool>;
 
         {// Sequence Modifiers - Copy Insert
@@ -825,7 +825,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
             TEST_EQUAL( "insert(ItType,ItType)-Element6-Second",
                         RangeInsertValueNine.second, ( RangeInsertMap.begin() + 5 )->second );
         }// Sequence Modifiers - Range Insert
-/*
+
         {// Sequence Modifiers - Initialization List Insert
             const SequenceMapValue InitListInsertValueOne(48227,"Naiad");
             const SequenceMapValue InitListInsertValueTwo(50074,"Thalassa");
@@ -883,7 +883,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
             TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element8-Second",
                         InitListInsertValueEight.second, ( InitListInsertMap.begin() + 7 )->second );
         }// Sequence Modifiers - Initialization List Insert
-
+/*
         {// Sequence Modifiers - Emplace
             const SequenceMapValue EmplaceValueSeven(7,"Seven");
             const SequenceMapValue EmplaceValueEight(8,"Eight");
