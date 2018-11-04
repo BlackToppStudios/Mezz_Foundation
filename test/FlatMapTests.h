@@ -529,7 +529,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         TEST_EQUAL( "upper_bound(const_alt_key&)_const-End",
                     4, GetConstPos( ConstLookupMap.upper_bound(XeniaAltKey) ) );
     }//Lookup
-/*
+
     {//Sequence Modifiers
         using SequenceMapType = FlatMap<int,std::string>;
         using SequenceMapIter = SequenceMapType::iterator;
@@ -572,7 +572,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
             TEST_EQUAL( "insert(const_value_type&)-Element3-Second",
                         CopyInsertValueThree.second, ( CopyInsertBegin + 2 )->second );
         }// Sequence Modifiers - Copy Insert
-
+/*
         {// Sequence Modifiers - Move Insert
             SequenceMapValue MoveInsertValueFour(4,"Four");
             SequenceMapValue MoveInsertValueFive(5,"Five");
@@ -1127,8 +1127,8 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
             TEST_EQUAL( "clear()-BeforeCount", 4u, ClearMap.size() );
             ClearMap.clear();
             TEST_EQUAL( "clear()-Empty", true, ClearMap.empty() );
-        }// Sequence Modifiers - Clear
-    }//Sequence Modifiers */
+        }// Sequence Modifiers - Clear */
+    }//Sequence Modifiers
 }
 
 #endif
