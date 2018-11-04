@@ -16,7 +16,8 @@ pipeline {
                         checkout scm
                         sh 'mkdir -p build-debug'
                         dir('build-debug') { sh """
-                            cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
+                            hostname &&
+                            cmake -E env CXXFLAGS="-fno-var-tracking-assignments" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
                             ninja &&
                             ./Foundation_Tester xml
                         """ }
@@ -33,8 +34,9 @@ pipeline {
                         checkout scm
                         sh 'mkdir -p build-debug'
                         dir('build-debug') { sh """
+                            hostname &&
                             export PATH='$PATH:/usr/local/bin/' &&
-                            cmake -G"Xcode" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
+                            cmake -E env CXXFLAGS="-fno-var-tracking" cmake -G"Xcode" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
                             cmake --build . &&
                            ./Foundation_Tester xml
                         """ }
@@ -53,7 +55,7 @@ pipeline {
                         dir('build-debug') { sh """
                             hostname &&
                             export MEZZ_PACKAGE_DIR=/home/pi/Code/ &&
-                            cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
+                            cmake -E env CXXFLAGS="-fno-var-tracking-assignments" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
                             ninja &&
                             ./Foundation_Tester xml
                          """ }
@@ -70,7 +72,8 @@ pipeline {
                         checkout scm
                         sh 'mkdir -p build-debug'
                         dir('build-debug') { sh """
-                            cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
+                            hostname &&
+                            cmake -E env CXXFLAGS="-fno-var-tracking" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
                             ninja  &&
                             ./Foundation_Tester xml
                          """ }
@@ -87,7 +90,8 @@ pipeline {
                         checkout scm
                         sh 'mkdir -p build-debug'
                         dir('build-debug') { sh """
-                            cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
+                            hostname &&
+                            cmake -E env EMCC_DEBUG=2 CXXFLAGS="-fno-var-tracking -s WASM=1" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
                             ninja &&
                             node Foundation_Tester.js NoThreads
                         """ }
@@ -100,7 +104,8 @@ pipeline {
                         checkout scm
                         sh 'mkdir -p build-debug'
                         dir('build-debug') { sh """
-                            cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
+                            hostname &&
+                            cmake -E env CXXFLAGS="-fno-var-tracking-assignments" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
                             ninja &&
                             ./Foundation_Tester xml
                         """ }
@@ -117,7 +122,8 @@ pipeline {
                         checkout scm
                         bat 'if not exist "build-debug" mkdir build-debug'
                         dir('build-debug') {
-                            bat 'cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF'
+                            bat 'hostname'
+                            bat 'cmake -E env CXXFLAGS="-fno-var-tracking-assignments" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF'
                             bat 'ninja'
                             bat 'Foundation_Tester xml'
                         }
@@ -134,7 +140,8 @@ pipeline {
                         checkout scm
                         bat 'if not exist "build-debug" mkdir build-debug'
                         dir('build-debug') {
-                            bat 'cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF'
+                            bat 'hostname'
+                            bat 'cmake -E env CXXFLAGS="-fno-var-tracking-assignments" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF'
                             bat 'ninja'
                             bat 'Foundation_Tester xml'
                         }
@@ -151,6 +158,7 @@ pipeline {
                         checkout scm
                         bat 'if not exist "build-debug" mkdir build-debug'
                         dir('build-debug') {
+                            bat 'hostname'
                             bat '"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat" x86_amd64 && cmake -G"Visual Studio 15 2017 Win64" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF'
                             bat 'cmake --build .'
                             bat 'Foundation_Tester xml'
@@ -173,7 +181,8 @@ pipeline {
                         checkout scm
                         sh 'mkdir -p build-release'
                         dir('build-release') { sh """
-                            cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
+                            hostname &&
+                            cmake -E env CXXFLAGS="-fno-var-tracking-assignments" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
                             ninja &&
                             ./Foundation_Tester xml
                         """ }
@@ -190,8 +199,9 @@ pipeline {
                         checkout scm
                         sh 'mkdir -p build-release'
                         dir('build-release') { sh """
+                            hostname &&
                             export PATH='$PATH:/usr/local/bin/' &&
-                            cmake -G"Xcode" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
+                            cmake -E env CXXFLAGS="-fno-var-tracking" cmake -G"Xcode" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
                             cmake --build . &&
                            ./Foundation_Tester xml
                         """ }
@@ -210,7 +220,7 @@ pipeline {
                         dir('build-release') { sh """
                             hostname &&
                             export MEZZ_PACKAGE_DIR=/home/pi/Code/ &&
-                            cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
+                            cmake -E env CXXFLAGS="-fno-var-tracking-assignments" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
                             ninja &&
                             ./Foundation_Tester xml
                          """ }
@@ -227,7 +237,8 @@ pipeline {
                         checkout scm
                         sh 'mkdir -p build-release'
                         dir('build-release') { sh """
-                            cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
+                            hostname &&
+                            cmake -E env CXXFLAGS="-fno-var-tracking" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
                             ninja  &&
                             ./Foundation_Tester xml
                          """ }
@@ -244,7 +255,8 @@ pipeline {
                         checkout scm
                         sh 'mkdir -p build-release'
                         dir('build-release') { sh """
-                            cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
+                            hostname &&
+                            cmake -E env EMCC_DEBUG=2 CXXFLAGS="-fno-var-tracking -s WASM=1" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
                             ninja &&
                             node Foundation_Tester.js NoThreads
                         """ }
@@ -257,7 +269,8 @@ pipeline {
                         checkout scm
                         sh 'mkdir -p build-release'
                         dir('build-release') { sh """
-                            cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
+                            hostname &&
+                            cmake -E env CXXFLAGS="-fno-var-tracking-assignments" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
                             ninja &&
                             ./Foundation_Tester xml
                         """ }
@@ -274,7 +287,8 @@ pipeline {
                         checkout scm
                         bat 'if not exist "build-release" mkdir build-release'
                         dir('build-release') {
-                            bat 'cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF'
+                            bat 'hostname'
+                            bat 'cmake -E env CXXFLAGS="-fno-var-tracking-assignments" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF'
                             bat 'ninja'
                             bat 'Foundation_Tester xml'
                         }
@@ -291,7 +305,8 @@ pipeline {
                         checkout scm
                         bat 'if not exist "build-release" mkdir build-release'
                         dir('build-release') {
-                            bat 'cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF'
+                            bat 'hostname'
+                            bat 'cmake -E env CXXFLAGS="-fno-var-tracking-assignments" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF'
                             bat 'ninja'
                             bat 'Foundation_Tester xml'
                         }
@@ -308,6 +323,7 @@ pipeline {
                         checkout scm
                         bat 'if not exist "build-release" mkdir build-release'
                         dir('build-release') {
+                            bat 'hostname'
                             bat '"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat" x86_amd64 && cmake -G"Visual Studio 15 2017 Win64" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF'
                             bat 'cmake --build .'
                             bat 'Foundation_Tester xml'
