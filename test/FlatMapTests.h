@@ -529,7 +529,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         TEST_EQUAL( "upper_bound(const_alt_key&)_const-End",
                     4, GetConstPos( ConstLookupMap.upper_bound(XeniaAltKey) ) );
     }//Lookup
-
+/*
     {//Sequence Modifiers
         using SequenceMapType = FlatMap<int,std::string>;
         using SequenceMapIter = SequenceMapType::iterator;
@@ -1128,7 +1128,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
             ClearMap.clear();
             TEST_EQUAL( "clear()-Empty", true, ClearMap.empty() );
         }// Sequence Modifiers - Clear
-    }//Sequence Modifiers
+    }//Sequence Modifiers */
 }
 
 #endif
