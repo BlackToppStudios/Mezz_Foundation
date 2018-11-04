@@ -534,7 +534,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         using SequenceMapType = FlatMap<int,std::string>;
         using SequenceMapIter = SequenceMapType::iterator;
         using SequenceMapValue = SequenceMapType::value_type;
-        //using SequenceListType = std::list<SequenceMapValue>;
+        using SequenceListType = std::list<SequenceMapValue>;
         //using SequenceInitListType = std::initializer_list<SequenceMapValue>;
         using InsertPairResult = std::pair<SequenceMapIter,bool>;
 
