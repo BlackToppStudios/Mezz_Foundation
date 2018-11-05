@@ -536,7 +536,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         using SequenceMapValue = SequenceMapType::value_type;
         //using SequenceListType = std::list<SequenceMapValue>;
         //using SequenceInitListType = std::initializer_list<SequenceMapValue>;
-        //using InsertPairResult = std::pair<SequenceMapIter,bool>;
+        using InsertPairResult = std::pair<SequenceMapIter,bool>;
 /*
         {// Sequence Modifiers - Copy Insert
             const SequenceMapValue CopyInsertValueOne(1,"One");
