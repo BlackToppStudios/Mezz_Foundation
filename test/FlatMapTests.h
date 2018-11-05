@@ -1033,7 +1033,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
             TEST_EQUAL( "swap(SelfType&)-DestMap-Element3-Second",
                         SwapValueThirty.second, ( SwapDestMap.begin() + 2 )->second );
         }// Sequence Modifiers - Swap
-/*
+
         {// Sequence Modifiers - Erase
             const SequenceMapValue EraseValueOne(1,"Uno");
             const SequenceMapValue EraseValueTwo(2,"Dos");
