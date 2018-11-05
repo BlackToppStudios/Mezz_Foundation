@@ -532,12 +532,12 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
 
     {//Sequence Modifiers
         using SequenceMapType = FlatMap<int,std::string>;
-        using SequenceMapIter = SequenceMapType::iterator;
+        //using SequenceMapIter = SequenceMapType::iterator;
         using SequenceMapValue = SequenceMapType::value_type;
-        using SequenceListType = std::list<SequenceMapValue>;
-        using SequenceInitListType = std::initializer_list<SequenceMapValue>;
-        using InsertPairResult = std::pair<SequenceMapIter,bool>;
-
+        //using SequenceListType = std::list<SequenceMapValue>;
+        //using SequenceInitListType = std::initializer_list<SequenceMapValue>;
+        //using InsertPairResult = std::pair<SequenceMapIter,bool>;
+/*
         {// Sequence Modifiers - Copy Insert
             const SequenceMapValue CopyInsertValueOne(1,"One");
             const SequenceMapValue CopyInsertValueTwo(2,"Two");
@@ -998,7 +998,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
             TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-Element5-Second",
                         "Oberon", ( HintEmplaceMap.begin() + 4 )->second );
         }// Sequence Modifiers - Hint Emplace
-
+*/
         {// Sequence Modifiers - Swap
             const SequenceMapValue SwapValueTen(10,"Ten");
             const SequenceMapValue SwapValueTwenty(20,"Twenty");
