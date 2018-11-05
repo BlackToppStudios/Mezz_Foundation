@@ -95,7 +95,6 @@ CreateCoverageTarget(${FoundationLib} "${FoundationSourceFiles}")
 
 AddTestFile("BitFieldToolsTests.h")
 AddTestFile("FlatMapTests.h")
-AddTestFile("FlatMapSequenceTests.h")
 AddTestFile("ManagedArrayTests.h")
 AddTestFile("SortedManagedArrayTests.h")
 AddTestFile("StaticAnyTests.h")
