@@ -883,7 +883,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
             TEST_EQUAL( "insert(std::initializer_list<value_type>)-Element8-Second",
                         InitListInsertValueEight.second, ( InitListInsertMap.begin() + 7 )->second );
         }// Sequence Modifiers - Initialization List Insert
-
+*/
         {// Sequence Modifiers - Emplace
             const SequenceMapValue EmplaceValueSeven(7,"Seven");
             const SequenceMapValue EmplaceValueEight(8,"Eight");
@@ -917,7 +917,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
             TEST_EQUAL( "emplace(ArgTypes&&...)-Element3-Second",
                         EmplaceValueNine.second, ( EmplaceMap.begin() + 2 )->second );
         }// Sequence Modifiers - Emplace
-*/
+
         {// Sequence Modifiers - Hint Emplace
             SequenceMapType HintEmplaceMap;
             //SequenceMapValue FirstEmplaceHintValue(129390,"Miranda");
