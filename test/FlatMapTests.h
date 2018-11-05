@@ -61,7 +61,7 @@ namespace std {
 DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
 {
     using namespace Mezzanine;
-
+/*
     // Tiny struct to ensure zero initialization in all contexts.
     struct SafeFloat
     {
@@ -76,7 +76,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         SafeFloat& operator=(SafeFloat&& Other) = default;
         operator float() const { return Val; }
     };
-/*
+
     {//Construction
         using ConstructMapType = FlatMap<std::string,int>;
         using ConstructValueType = ConstructMapType::value_type;
