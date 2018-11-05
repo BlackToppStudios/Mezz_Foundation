@@ -84,17 +84,7 @@ public:
     virtual ~FlatMapTests() override = default;
     virtual Mezzanine::String Name() const override
         { return "FlatMap"; }
-    virtual void operator ()() override
-    {
-        TestConstruction();
-        TestOperators();
-        TestAllocator();
-        TestIterators();
-        TestCapacity();
-        TestElementAccess();
-        TestLookup();
-        TestSequenceModifiers();
-    }
+    virtual void operator ()() override;
 
     void TestConstruction();
     void TestOperators();
@@ -134,6 +124,18 @@ public:
     void TestKeyErase();
     void TestClear();
 };
+
+void FlatMapTests::operator()()
+{
+    TestConstruction();
+    TestOperators();
+    TestAllocator();
+    TestIterators();
+    TestCapacity();
+    TestElementAccess();
+    TestLookup();
+    TestSequenceModifiers();
+}
 
 void FlatMapTests::TestConstruction()
 {//Construction
