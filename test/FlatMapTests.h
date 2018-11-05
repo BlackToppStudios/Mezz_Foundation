@@ -61,7 +61,7 @@ namespace std {
 DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
 {
     using namespace Mezzanine;
-/*
+
     // Tiny struct to ensure zero initialization in all contexts.
     struct SafeFloat
     {
@@ -529,7 +529,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         TEST_EQUAL( "upper_bound(const_alt_key&)_const-End",
                     4, GetConstPos( ConstLookupMap.upper_bound(XeniaAltKey) ) );
     }//Lookup
-*/
+
     {//Sequence Modifiers
         using SequenceMapType = FlatMap<int,std::string>;
         using SequenceMapIter = SequenceMapType::iterator;
