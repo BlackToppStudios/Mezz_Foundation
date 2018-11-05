@@ -532,7 +532,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
 
     {//Sequence Modifiers
         using SequenceMapType = FlatMap<int,std::string>;
-        //using SequenceMapIter = SequenceMapType::iterator;
+        using SequenceMapIter = SequenceMapType::iterator;
         using SequenceMapValue = SequenceMapType::value_type;
         //using SequenceListType = std::list<SequenceMapValue>;
         //using SequenceInitListType = std::initializer_list<SequenceMapValue>;
@@ -917,7 +917,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
             TEST_EQUAL( "emplace(ArgTypes&&...)-Element3-Second",
                         EmplaceValueNine.second, ( EmplaceMap.begin() + 2 )->second );
         }// Sequence Modifiers - Emplace
-
+*/
         {// Sequence Modifiers - Hint Emplace
             SequenceMapType HintEmplaceMap;
             //SequenceMapValue FirstEmplaceHintValue(129390,"Miranda");
@@ -926,8 +926,8 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
             //SequenceMapValue FourthEmplaceHintValue(435910,"Titania");
             //SequenceMapValue FifthEmplaceHintValue(583520,"Oberon");
             //SequenceMapValue FailEmplaceHintValue(129390,"Earf");
-            SequenceMapType::iterator EmplaceHint = HintEmplaceMap.begin();
-            SequenceMapType::iterator EmplaceHintResult = HintEmplaceMap.emplace_hint(EmplaceHint,191020,"Ariel");
+            SequenceMapIter EmplaceHint = HintEmplaceMap.begin();
+            SequenceMapIter EmplaceHintResult = HintEmplaceMap.emplace_hint(EmplaceHint,191020,"Ariel");
             TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-EmptyInsert-Position",
                         0, std::distance( HintEmplaceMap.begin(), EmplaceHintResult ) );
             TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-EmptyInsert-First",
@@ -998,7 +998,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
             TEST_EQUAL( "emplace_hint(const_iterator,ArgTypes&&...)-Element5-Second",
                         "Oberon", ( HintEmplaceMap.begin() + 4 )->second );
         }// Sequence Modifiers - Hint Emplace
-*/
+
         {// Sequence Modifiers - Swap
             const SequenceMapValue SwapValueTen(10,"Ten");
             const SequenceMapValue SwapValueTwenty(20,"Twenty");
@@ -1077,10 +1077,10 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
                                               RangeEraseValueSixty,
                                               RangeEraseValueSeventyFive,
                                               RangeEraseValueNinty };
-            SequenceMapType::iterator RangeEraseBegin = RangeEraseMap.begin();
+            SequenceMapIter RangeEraseBegin = RangeEraseMap.begin();
             TEST_EQUAL( "erase(const_iterator,const_iterator)-BeforeCount",
                         6u, RangeEraseMap.size() );
-            SequenceMapType::iterator RangeRetIt = RangeEraseMap.erase(RangeEraseBegin + 2,RangeEraseBegin + 5);
+            SequenceMapIter RangeRetIt = RangeEraseMap.erase(RangeEraseBegin + 2,RangeEraseBegin + 5);
             TEST_EQUAL( "erase(const_iterator,const_iterator)-AfterCount",
                         3u, RangeEraseMap.size() );
             TEST_EQUAL( "erase(const_iterator,const_iterator)-ReturnPosition",
