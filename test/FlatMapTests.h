@@ -76,7 +76,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         SafeFloat& operator=(SafeFloat&& Other) = default;
         operator float() const { return Val; }
     };
-
+/*
     {//Construction
         using ConstructMapType = FlatMap<std::string,int>;
         using ConstructValueType = ConstructMapType::value_type;
@@ -529,7 +529,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         TEST_EQUAL( "upper_bound(const_alt_key&)_const-End",
                     4, GetConstPos( ConstLookupMap.upper_bound(XeniaAltKey) ) );
     }//Lookup
-
+*/
     {//Sequence Modifiers
         using SequenceMapType = FlatMap<int,std::string>;
         using SequenceMapIter = SequenceMapType::iterator;
@@ -537,7 +537,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
         using SequenceListType = std::list<SequenceMapValue>;
         using SequenceInitListType = std::initializer_list<SequenceMapValue>;
         using InsertPairResult = std::pair<SequenceMapIter,bool>;
-/*
+
         {// Sequence Modifiers - Copy Insert
             const SequenceMapValue CopyInsertValueOne(1,"One");
             const SequenceMapValue CopyInsertValueTwo(2,"Two");
@@ -611,7 +611,7 @@ DEFAULT_TEST_GROUP(FlatMapTests,FlatMap)
             TEST_EQUAL( "insert(value_type&&)-VerifyMove-Old",
                         false, FailMoveInsertValue.second.empty() );
         }// Sequence Modifiers - Move Insert
-*/
+
         {// Sequence Modifiers - Hint Copy Insert
             SequenceMapType HintCopyInsertMap;
             const SequenceMapValue CopyHintValueOne(1,"Mercury");
