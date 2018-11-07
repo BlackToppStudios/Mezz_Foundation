@@ -7,19 +7,19 @@ matrix:
     - os: osx
       compiler: clang
       env: BUILD_TYPE=Debug
-      env: CXX_FLAGS=-fno-var-tracking
+      env: CXXFLAGS=-fno-var-tracking
     - os: osx
       compiler: gcc
       env: BUILD_TYPE=Debug
-      env: CXX_FLAGS=-fno-var-tracking
+      env: CXXFLAGS=-fno-var-tracking
     - os: osx
       compiler: clang
       env: BUILD_TYPE=Release
-      env: CXX_FLAGS=-fno-var-tracking
+      env: CXXFLAGS=-fno-var-tracking
     - os: osx
       compiler: gcc
       env: BUILD_TYPE=Release
-      env: CXX_FLAGS=-fno-var-tracking
+      env: CXXFLAGS=-fno-var-tracking
 
 before_script:
   - mkdir build
