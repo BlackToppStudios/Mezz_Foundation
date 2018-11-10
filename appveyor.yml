@@ -8,8 +8,10 @@ environment:
   matrix:
   - GENERATOR: MinGW Makefiles
     CompilerPath: C:\msys64\mingw32\bin
+    CXXFLAGS: -fno-var-tracking-assignments
   - GENERATOR: MinGW Makefiles
     CompilerPath: C:\msys64\mingw64\bin
+    CXXFLAGS: -fno-var-tracking-assignments
   - GENERATOR: Visual Studio 15 2017 Win64
 
 configuration:

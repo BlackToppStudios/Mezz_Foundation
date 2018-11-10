@@ -41,7 +41,7 @@
 
 namespace Mezzanine
 {
-    /// @brief Search throught an iterator range and return the desired iterator.
+    /// @brief Search through an iterator range and return the desired iterator.
     /// @details Thanks to stack overflow and their CC-by-SA license which is written permission to
     /// use this.
     /// http://stackoverflow.com/questions/446296/where-can-i-get-a-useful-c-binary-search-algorithm
@@ -53,7 +53,7 @@ namespace Mezzanine
     /// @tparam T The type of the value the iterator points to.
     /// @tparam Compare A functor that accepts two parameters of type to
     /// @return The end iterator if nothing was found or the iterator found by value.
-    template<typename Iter, typename T, typename Compare >
+    template<typename Iter, typename T, typename Compare>
     Iter binary_find(Iter begin, Iter end, const T& val, Compare Comparer)
     {
         // Finds the lower bound in at most log(last - first) + 1 comparisons
@@ -67,7 +67,7 @@ namespace Mezzanine
         }
     }
 
-    /// @brief Search throught an iterator range and return the desired iterator.
+    /// @brief Search through an iterator range and return the desired iterator.
     /// @details This uses the operator< to perform searches and matching for the contained item.
     /// @n
     /// Thanks to stack overflow and their CC-by-SA license which is written permission to
