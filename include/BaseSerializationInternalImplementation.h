@@ -57,22 +57,39 @@ class BaseSerializationInternalImplementation
 
 public:
 
-    // Scheme type
-    using SerializationScheme               = SerializationSchemeType;
+    // Scheme type.
+    using SerializationScheme       = SerializationSchemeType;
 
-    // Primitive types
-    using NodeCount                         = typename SerializationScheme::NodeCount;
-    using SerializationString               = typename SerializationScheme::SerializationString;
+    // Primitive types.
+    using NodeCount                 = typename SerializationScheme::NodeCount;
+    using SerializationString       = typename SerializationScheme::SerializationString;
 
     // Tree type heiarchy types.
-    using SerializationAttribute            = typename SerializationScheme::SerializationAttribute;
-    using SerializationInternal             = typename SerializationScheme::SerializationInternalImplementation;
-    using SerializationBackEnd              = typename SerializationScheme::SerializationBackEnd;
-    using SerializationNode                 = typename SerializationScheme::SerializationNode;
-    using SerializationRootNode             = typename SerializationScheme::SerializationRootNode;
-    // end type boilerplate
+    using SerializationAttribute    = typename SerializationScheme::SerializationAttribute;
+    using SerializationInternal     = typename SerializationScheme::SerializationInternalImplementation;
+    using SerializationBackEnd      = typename SerializationScheme::SerializationBackEnd;
+    using SerializationNode         = typename SerializationScheme::SerializationNode;
+    using SerializationRootNode     = typename SerializationScheme::SerializationRootNode;
+
+    // Internal Implementations to hide.
+    using SerializationInternalImplementation =
+        typename SerializationScheme::SerializationInternalImplementation;
+    using SerializationAttributeInternalImplementation =
+        typename SerializationScheme::SerializationAttributeInternalImplementation;
+    using SerializationBackEndInternalImplementation =
+        typename SerializationScheme::SerializationBackEndInternalImplementation;
+    using SerializationNodeInternalImplementation =
+        typename SerializationScheme::SerializationNodeInternalImplementation;
+    using SerializationRootNodeInternalImplementation =
+        typename SerializationScheme::SerializationRootNodeInternalImplementation;
+
+    // end type boilerplate.
 
     virtual ~BaseSerializationInternalImplementation() = default;
+
+    //virtual std::shared_ptr<SerializationAttributeInternalImplementation> AsAttributeImplementation() const = 0;
+    //virtual SerializationAttributeInternalImplementation AsAttributeImplementation() const = 0;
+    //virtual std::shared_ptr<SerializationRootNodeInternalImplementation> AsRootNodeImplementation() const = 0;
 
 
 };

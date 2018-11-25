@@ -54,10 +54,10 @@ namespace Mezzanine {
 template <typename SerializationSchemeType>
 class BaseSerializationNode {
 public:
-    // Scheme type
+    // Scheme type.
     using SerializationScheme               = SerializationSchemeType;
 
-    // Primitive types
+    // Primitive types.
     using NodeCount                         = typename SerializationScheme::NodeCount;
     using SerializationString               = typename SerializationScheme::SerializationString;
 
@@ -68,7 +68,19 @@ public:
     using SerializationNode                 = typename SerializationScheme::SerializationNode;
     using SerializationRootNode             = typename SerializationScheme::SerializationRootNode;
 
-    // end type boilerplate
+    // Internal Implementations to hide.
+    using SerializationInternalImplementation =
+        typename SerializationScheme::SerializationInternalImplementation;
+    using SerializationAttributeInternalImplementation =
+        typename SerializationScheme::SerializationAttributeInternalImplementation;
+    using SerializationBackEndInternalImplementation =
+        typename SerializationScheme::SerializationBackEndInternalImplementation;
+    using SerializationNodeInternalImplementation =
+        typename SerializationScheme::SerializationNodeInternalImplementation;
+    using SerializationRootNodeInternalImplementation =
+        typename SerializationScheme::SerializationRootNodeInternalImplementation;
+
+    // end type boilerplate.
 
     virtual ~BaseSerializationNode() = default;
 

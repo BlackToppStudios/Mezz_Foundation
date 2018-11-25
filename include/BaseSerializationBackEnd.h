@@ -55,10 +55,11 @@ namespace Mezzanine {
 ///
 ///
 /// The serialization system uses types:
+///    - @ref BaseSerializationAttribute
 ///    - @ref BaseSerializationBackEnd
+///    - @ref BaseSerializationInternalImplementation
 ///    - @ref BaseSerializationRootNode
 ///    - @ref BaseSerializationNode
-///    - @ref BaseSerializationAttribute
 ///
 ///
 /// Each one of these refers to a thin pointer to some underlying system.
@@ -75,10 +76,10 @@ class BaseSerializationBackEnd
 
 public:
 
-    // Scheme type
+    // Scheme type.
     using SerializationScheme               = SerializationSchemeType;
 
-    // Primitive types
+    // Primitive types.
     using NodeCount                         = typename SerializationScheme::NodeCount;
     using SerializationString               = typename SerializationScheme::SerializationString;
 
@@ -88,20 +89,20 @@ public:
     using SerializationBackEnd              = typename SerializationScheme::SerializationBackEnd;
     using SerializationNode                 = typename SerializationScheme::SerializationNode;
     using SerializationRootNode             = typename SerializationScheme::SerializationRootNode;
-    // Old Version of this boilerplate
-//    // Scheme type
-//    typedef SerializationSchemeType SerializationScheme;
 
-//    // Primitive types
-//    typedef typename SerializationScheme::NodeCount                 NodeCount;
+    // Internal Implementations to hide.
+    using SerializationInternalImplementation =
+        typename SerializationScheme::SerializationInternalImplementation;
+    using SerializationAttributeInternalImplementation =
+        typename SerializationScheme::SerializationAttributeInternalImplementation;
+    using SerializationBackEndInternalImplementation =
+        typename SerializationScheme::SerializationBackEndInternalImplementation;
+    using SerializationNodeInternalImplementation =
+        typename SerializationScheme::SerializationNodeInternalImplementation;
+    using SerializationRootNodeInternalImplementation =
+        typename SerializationScheme::SerializationRootNodeInternalImplementation;
 
-//    // Tree type heiarchy types.
-//    typedef typename SerializationScheme::SerializationAttribute    SerializationAttribute;
-//    typedef typename SerializationScheme::SerializationBackEnd      SerializationBackEnd;
-//    typedef typename SerializationScheme::SerializationNode         SerializationNode;
-//    typedef typename SerializationScheme::SerializationRootNode     SerializationRootNode;
-
-    // end type boilerplate
+    // end type boilerplate.
 
     virtual ~BaseSerializationBackEnd() = default;
 
