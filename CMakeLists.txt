@@ -72,6 +72,8 @@ IncludeJagatiPackage("Test")
 # Source files
 message(STATUS "Determining Source Files.")
 
+AddHeaderFile("Base64.h")
+AddHeaderFile("BinaryBuffer.h")
 AddHeaderFile("BinaryFind.h")
 AddHeaderFile("BitFieldTools.h")
 AddHeaderFile("FlatMap.h")
@@ -82,6 +84,8 @@ AddHeaderFile("StreamLogging.h")
 AddHeaderFile("Version.h")
 ShowList("Header Files:" "\t" "${FoundationHeaderFiles}")
 
+AddSourceFile("Base64.cpp")
+AddSourceFile("BinaryBuffer.cpp")
 AddSourceFile("StreamLogging.cpp")
 ShowList("Source Files:" "\t" "${FoundationSourceFiles}")
 
@@ -93,6 +97,8 @@ ShowList("Doxygen Input Files:" "\t" "${FoundationDoxFiles}")
 AddJagatiLibrary()
 CreateCoverageTarget(${FoundationLib} "${FoundationSourceFiles}")
 
+AddTestFile("Base64Tests.h")
+AddTestFile("BinaryBufferTests.h")
 AddTestFile("BitFieldToolsTests.h")
 AddTestFile("FlatMapTests.h")
 AddTestFile("ManagedArrayTests.h")
