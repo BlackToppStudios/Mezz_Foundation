@@ -406,6 +406,7 @@ namespace Mezzanine
         }
 
         /// @brief Inserts a range of elements into the array (via copying).
+        /// @tparam InputIterator The iterator type pointing to elements that will be inserted.
         /// @param Pos A const iterator to the position the range will be inserted.
         /// @param First An iterator to the first element in the range to be inserted.
         /// @param Last An iterator to one passed the last element in the range to be inserted.
@@ -423,7 +424,9 @@ namespace Mezzanine
             if( ToInsert > 0 ) {
                 DifferenceType ToMoveConstruct = end() - Pos;
                 DifferenceType ToCopyConstruct = ( ToInsert > ToMoveConstruct ? ToInsert - ToMoveConstruct : 0 );
-                //DifferenceType ToCopy = ToInsert - ToCopyConstruct;
+
+                SAVE_WARNING_STATE
+                SUPPRESS_GCC_WARNING("-Wstrict-overflow")
 
                 iterator InitTarget = end() + ToInsert - 1;
                 for(  ; ToMoveConstruct > 0 ; --ToMoveConstruct, --InitTarget )
@@ -431,6 +434,8 @@ namespace Mezzanine
 
                 for(  ; ToCopyConstruct > 0 ; --ToCopyConstruct, --InitTarget )
                     { Create( InitTarget, *(--Last) ); }
+
+                RESTORE_WARNING_STATE
 
                 std::copy(First,Last,Ret);
                 UsedSpace += static_cast<size_t>( ToInsert );
