@@ -69,14 +69,12 @@ namespace Mezzanine
         using iterator = typename StorageVector::iterator;
         /// @brief Type of const random access iterator. Invalidated on all insertions.
         using const_iterator = typename StorageVector::const_iterator;
-        /// @brief Type of mutable reverse iterator for random access. Invalidated on all
-        /// insertions.
+        /// @brief Type of mutable reverse iterator for random access. Invalidated on all insertions.
         using reverse_iterator = typename StorageVector::reverse_iterator;
-        /// @brief Type of const reverse iterator for random access. Invalidated on all
-        /// insertions.
+        /// @brief Type of const reverse iterator for random access. Invalidated on all insertions.
         using const_reverse_iterator = typename StorageVector::const_reverse_iterator;
     private:
-        /// @internal The actual vector that does most of the interesting work.
+        /// @brief The actual vector that does most of the interesting work.
         StorageVector InternalStorage;
     public:
         /// @brief Class constructor.
@@ -161,18 +159,16 @@ namespace Mezzanine
         const_reverse_iterator crend() const noexcept
             { return InternalStorage.crend(); }
 
-        /// @brief Uses std::sort to sort this, might using something more special focus in the
-        /// future.
+        /// @brief Uses std::sort to sort this, might using something more special focus in the future.
         void sort()
             { std::sort(begin(),end(),Sorter()); }
 
-        /// @brief How many items are stored in this?
+        /// @brief Number of items stored in this container.
         /// @return Some integer type, likely unsigned indicating how many items this stores.
         size_type size() const noexcept
             { return InternalStorage.size(); }
 
-        /// @brief Since this container has no array-like concept this inserts the item where
-        /// it needs to go.
+        /// @brief Since this container has no array-like concept this inserts the item where it needs to go.
         /// @details This has all the potential allocation slow downs of push_back
         /// and costs of finding the required place to insert. This sorts the whole container after
         /// adding items, so calling this after for a many additions is really slow, use
@@ -186,7 +182,7 @@ namespace Mezzanine
         }
 
         /// @brief Add several items at once efficiently.
-        /// @details Sorts only once so is much faster than add(),
+        /// @details Sorts only once so is much faster than add().
         /// @tparam ForeignIterator The type of the the iterator of the other container, must
         /// be at least a forward iterator.
         /// @param OtherBegin An iterator to the start of the other range to be copied.
@@ -194,26 +190,26 @@ namespace Mezzanine
         template<class ForeignIterator>
         void add_range(ForeignIterator OtherBegin, ForeignIterator OtherEnd)
         {
-            for(; OtherBegin!=OtherEnd; OtherBegin++)
+            for(; OtherBegin != OtherEnd; OtherBegin++)
                 { InternalStorage.push_back(*OtherBegin); }
             sort();
         }
 
         /// @brief Get an item in the vector, operates in fast constant time with no bounds checking.
-        /// @param Index A 0 based index.
+        /// @param Index Position of the element to retrieve.
         /// @return A reference to the stored item in the container. If the value is changed
         /// then SortedVector::sort should be called.
         ElementType& operator[] (size_t Index) noexcept
             { return InternalStorage[Index]; }
         /// @brief Get an item in the vector, operates in fast constant time with no bounds checking.
-        /// @param Index A 0 based index.
+        /// @param Index Position of the element to retrieve.
         /// @return A const reference to the stored item in the container.
         const ElementType& operator[] (size_t Index) const noexcept
             { return InternalStorage[Index]; }
         /// @brief Gets the element at the specified index.
         /// @exception If the index specified is greater than the current number of stored elements,
         /// a std::out_of_range exception will be thrown.
-        /// @param Index A 0 based index.
+        /// @param Index Position of the element to retrieve.
         /// @return Returns a reference to the element at the specified index.
         ElementType& at(size_t Index)
         {
@@ -225,7 +221,7 @@ namespace Mezzanine
         /// @brief Gets the element at the specified index.
         /// @exception If the index specified is greater than the current number of stored elements,
         /// a std::out_of_range exception will be thrown.
-        /// @param Index A 0 based index.
+        /// @param Index Position of the element to retrieve.
         /// @return Returns a const reference to the element at the specified index.
         const ElementType& at(size_t Index) const
         {
@@ -236,14 +232,14 @@ namespace Mezzanine
         }
 
         /// @brief Get and iterator to a specific item, operates in fast logarithmic time.
-        /// @param value the item to get the location of.
+        /// @param value The item to get the location of.
         /// @return A mutable iterator to an item, can be adjusted by random access.
-        iterator find(ElementType value)
+        iterator find(const ElementType& value)
             { return binary_find(begin(),end(),value,Sorter()); }
         /// @brief Get and interator to a specific item, operates in fast logarithmic time.
-        /// @param value the item to get the location of.
+        /// @param value The item to get the location of.
         /// @return A const iterator to an item, can be adjusted by random access.
-        const_iterator find(ElementType value) const
+        const_iterator find(const ElementType& value) const
             { return binary_find(begin(),end(),value,Sorter()); }
 
         /// @brief A convenience method for invoking std::find_if with all the elements of this container.
@@ -266,7 +262,7 @@ namespace Mezzanine
         /// @brief Does the item exist in this vector?
         /// @param value The item in question.
         /// @return True if present false otherwise.
-        Boole contains(ElementType value) const
+        Boole contains(const ElementType& value) const
             { return std::binary_search(begin(),end(),value); }
 
         /// @brief Empty the Vector discarding all data.
@@ -274,7 +270,7 @@ namespace Mezzanine
             { InternalStorage.clear(); }
         /// @brief Allocate enough space for the specified quantity of items
         /// @param new_capacity The amount of items to be ready to store.
-        void reserve( size_type new_capacity )
+        void reserve(size_type new_capacity)
             { InternalStorage.reserve(new_capacity); }
         /// @brief How many items can this store before requiring an allocation.
         size_type capacity() const noexcept
@@ -287,13 +283,13 @@ namespace Mezzanine
         /// @brief Remove an item indicated by the iterator.
         /// @param position An iterator pointing to the item to remove.
         /// @return An iterator to one after the erased item.
-        iterator erase( iterator position )
+        iterator erase(iterator position)
             { return InternalStorage.erase(position); }
         /// @brief Remove items indicated by an iterator range.
         /// @param first An iterator pointing to the first item to be erased.
         /// @param last An iterator pointer to one past the last item to be erased.
         /// @return An iterator to one after the erased item.
-        iterator erase( iterator first, iterator last )
+        iterator erase(iterator first, iterator last)
             { return InternalStorage.erase(first, last); }
     };//SortedVector
 } //Mezzanine

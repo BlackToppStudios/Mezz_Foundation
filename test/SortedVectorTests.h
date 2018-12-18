@@ -113,7 +113,7 @@ DEFAULT_TEST_GROUP(SortedVectorTests,SortedVector)
 
     {//Operators
         SortedVector<int> CopyAssignSource = { 1, 3, 5, 7, 9 };
-        SortedVector<int> CopyAssignDest = { 0, 0, 0, 0, 0, 0 };
+        SortedVector<int> CopyAssignDest;
         CopyAssignDest = CopyAssignSource;
         TEST_EQUAL("operator=(const_SortedVector&)-SourceSize",size_t(5),CopyAssignSource.size());
         TEST_EQUAL("operator=(const_SortedVector&)-DestSize",size_t(5),CopyAssignDest.size());
@@ -129,7 +129,7 @@ DEFAULT_TEST_GROUP(SortedVectorTests,SortedVector)
         TEST_EQUAL("operator=(const_SortedVector&)-DestElement5",9,CopyAssignDest[4]);
 
         SortedVector<int> MoveAssignSource = { 0, 1, 3, 5, 7, 9 };
-        SortedVector<int> MoveAssignDest = { 0, 0, 0, 0, 0 };
+        SortedVector<int> MoveAssignDest;
         MoveAssignDest = std::move( MoveAssignSource );
         TEST_EQUAL("operator=(SortedVector&&)-DestSize",size_t(6),MoveAssignDest.size());
         TEST_EQUAL("operator=(SortedVector&&)-DestElement1",0,MoveAssignDest[0]);
@@ -273,7 +273,7 @@ DEFAULT_TEST_GROUP(SortedVectorTests,SortedVector)
         TEST_EQUAL("add()-Element4",10,ModifierVector[3]);
         TEST_EQUAL("add()-Element5",50,ModifierVector[4]);
 
-        std::vector<int> AddRangeTest = { 2, 11 };
+        std::vector<int> AddRangeTest = { 11, 2 };
         ModifierVector.add_range(AddRangeTest.begin(),AddRangeTest.end());
 
         TEST_EQUAL("add_range()-size",size_t(7),ModifierVector.size());
