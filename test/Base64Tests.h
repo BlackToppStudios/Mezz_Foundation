@@ -384,15 +384,15 @@ AUTOMATIC_TEST_GROUP(Base64Tests,Base64)
         TEST_EQUAL( "EncodeRawBuffer(const_UInt8*,const_SizeType,Char8*,const_SizeType)-Gettysburg-ContentMatch",
                     true,String(AddressEncodeBuf,AddressEncodeBufSize) == GettysburgAddressBase64 );
 
-        BinaryBuffer TestBuffer1Base64 = std::move( Base64::Decode(Test1Base64) );
+        BinaryBuffer TestBuffer1Base64 = Base64::Decode(Test1Base64);
         const char* TestBuffer1BinaryPtr = reinterpret_cast<char*>(TestBuffer1Base64.Binary);
         TEST_EQUAL( "Decode(const_String&)-First",
                     Test1String,String(TestBuffer1BinaryPtr,TestBuffer1Base64.Size) );
-        BinaryBuffer TestBuffer2Base64 = std::move( Base64::Decode(Test2Base64) );
+        BinaryBuffer TestBuffer2Base64 = Base64::Decode(Test2Base64);
         const char* TestBuffer2BinaryPtr = reinterpret_cast<char*>(TestBuffer2Base64.Binary);
         TEST_EQUAL( "Decode(const_String&)-Second",
                     Test2String,String(TestBuffer2BinaryPtr,TestBuffer2Base64.Size) );
-        BinaryBuffer TestBuffer3Base64 = std::move( Base64::Decode(Test3Base64) );
+        BinaryBuffer TestBuffer3Base64 = Base64::Decode(Test3Base64);
         const char* TestBuffer3BinaryPtr = reinterpret_cast<char*>(TestBuffer3Base64.Binary);
         TEST_EQUAL( "Decode(const_String&)-Third",
                     Test3String,String(TestBuffer3BinaryPtr,TestBuffer3Base64.Size) );

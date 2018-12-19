@@ -44,6 +44,8 @@
 #include "BinaryBuffer.h"
 #include "Base64.h"
 
+#include <cstring>
+
 namespace Mezzanine
 {
     ///////////////////////////////////////////////////////////////////////////////

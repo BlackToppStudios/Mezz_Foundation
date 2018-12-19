@@ -42,7 +42,6 @@
 /// @brief The implementation of some tools for making working with binary stuff easier.
 
 #include "Base64.h"
-#include "exception.h"
 
 /*
  * Some of the following functions and 1 variable were taken from http://www.adp-gmbh.ch/cpp/common/base64.html

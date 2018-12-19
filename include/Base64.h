@@ -37,8 +37,8 @@
    Joseph Toppi - toppij@gmail.com
    John Blackwood - makoenergy02@gmail.com
 */
-#ifndef _Mezz_Foundation_Base64_h
-#define _Mezz_Foundation_Base64_h
+#ifndef Mezz_Foundation_Base64_h
+#define Mezz_Foundation_Base64_h
 
 #ifndef SWIG
     #include "DataTypes.h"
