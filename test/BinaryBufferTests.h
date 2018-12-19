@@ -37,8 +37,8 @@
    Joseph Toppi - toppij@gmail.com
    John Blackwood - makoenergy02@gmail.com
 */
-#ifndef _Mezz_Foundation_BinaryBufferTests_h
-#define _Mezz_Foundation_BinaryBufferTests_h
+#ifndef Mezz_Foundation_BinaryBufferTests_h
+#define Mezz_Foundation_BinaryBufferTests_h
 
 /// @file
 /// @brief This file tests the functionality of the BinaryBuffer class.

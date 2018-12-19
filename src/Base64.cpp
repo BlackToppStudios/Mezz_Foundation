@@ -100,7 +100,7 @@ namespace
     /// @brief Convenience method for getting the index of a Base64 character in the main string.
     /// @param ToCheck The Base64 character to check for.
     /// @return Returns the Index in "Base64Chars" the character is at.
-    UInt8 GetBase64IndexNoCheck(const UInt8 ToCheck)
+    UInt8 GetBase64IndexNoCheck(const Char8 ToCheck)
     {
         return static_cast<UInt8>( Base64Chars.find(ToCheck) );
     }

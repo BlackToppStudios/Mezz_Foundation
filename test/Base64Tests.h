@@ -37,8 +37,8 @@
    Joseph Toppi - toppij@gmail.com
    John Blackwood - makoenergy02@gmail.com
 */
-#ifndef _Mezz_Foundation_Base64Tests_h
-#define _Mezz_Foundation_Base64Tests_h
+#ifndef Mezz_Foundation_Base64Tests_h
+#define Mezz_Foundation_Base64Tests_h
 
 /// @file
 /// @brief This file tests the functionality of Base64 encoding/decoding and support functions.
@@ -65,6 +65,7 @@ static const Mezzanine::String Base64Chars =
 SAVE_WARNING_STATE
 SUPPRESS_GCC_WARNING("-Wstrict-overflow")
 SUPPRESS_GCC_WARNING("-Wconversion")
+SUPPRESS_VC_WARNING(4267)
 
 // Code change to Match BTS naming conventions and formatting
 // Copyright information in Base64.cpp

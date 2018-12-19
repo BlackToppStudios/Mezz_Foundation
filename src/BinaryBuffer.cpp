@@ -58,7 +58,7 @@ namespace Mezzanine
             this->Binary = new Byte[this->Size * sizeof(Byte)];
             memcpy(this->Binary,Other.Binary,this->Size * sizeof(Byte));
         }else{
-            this->Binary = 0;
+            this->Binary = nullptr;
         }
     }
 
