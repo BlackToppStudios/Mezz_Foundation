@@ -211,7 +211,6 @@ namespace Base64 {
     BinaryBuffer Decode(const String& Encoded)
     {
         BinaryBuffer Ret( PredictBinarySize(Encoded) );
-        Ret.CreateBuffer();
         DecodeRawBuffer( Encoded.c_str(),Encoded.length(), Ret.Binary, Ret.Size );
         return Ret;
     }
@@ -219,7 +218,7 @@ namespace Base64 {
     SizeType DecodeRawBuffer(const Char8* SrcBytes, const SizeType SrcLength,
                              UInt8* DestBytes, const SizeType DestLength)
     {
-        if( PredictBinarySize(SrcBytes,SrcLength) < DestLength ) {
+        if( PredictBinarySize(SrcBytes,SrcLength) > DestLength ) {
             throw std::invalid_argument("Destination Buffer too small to hold decoded Base64.");
             //MEZZ_EXCEPTION(ExceptionBase::PARAMETERS_EXCEPTION,"Destination Buffer too small to hold decoded Base64.");
         }
@@ -248,15 +247,17 @@ namespace Base64 {
             Second = GetBase64IndexNoCheck( *(Progress + 1) );
             Third = ( *(Progress + 2) == '=' ? 0 : GetBase64IndexNoCheck( *(Progress + 2) ) );
 
+            SizeType IterationWrites = 2;
             *(DestBytes + BytesWritten + 0) = static_cast<UInt8>( (First << 2) + ( (Second & 0x30) >> 4 ) );
             *(DestBytes + BytesWritten + 1) = static_cast<UInt8>( ( (Second & 0xf) << 4 ) + ( (Third & 0x3c) >> 2 ) );
 
             if( *(Progress + 3) != '=' ) {
                 Fourth = GetBase64IndexNoCheck( *(Progress + 3) );
                 *(DestBytes + BytesWritten + 2) = static_cast<UInt8>( ( (Third & 0x3) << 6 ) + Fourth );
+                IterationWrites += 1;
             }
 
-            BytesWritten += 3;
+            BytesWritten += IterationWrites;
             Progress += 4;
         }
 

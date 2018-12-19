@@ -86,14 +86,14 @@ AUTOMATIC_TEST_GROUP(BinaryBufferTests,BinaryBuffer)
         *(TestBuf + 5) = '\0';
 
         BinaryBuffer OwnershipTest(TestBuf,6);
-        TEST_EQUAL("BinaryBuffer(UInt8*,const_Whole)-Binary",
+        TEST_EQUAL("BinaryBuffer(UInt8*,const_SizeType)-Binary",
                    true,OwnershipTest.Binary == TestBuf);
-        TEST_EQUAL("BinaryBuffer(UInt8*,const_Whole)-Size",
+        TEST_EQUAL("BinaryBuffer(UInt8*,const_SizeType)-Size",
                    6u,OwnershipTest.Size);
 
         BinaryBuffer CopyTest(OwnershipTest);
         TEST_EQUAL("BinaryBuffer(const_BinaryBuffer&)-Binary",
-                   0u,BufferCompare(CopyTest.Binary,"Test.",6));
+                   true,BufferCompare(CopyTest.Binary,"Test.",6));
         TEST_EQUAL("BinaryBuffer(const_BinaryBuffer&)-Size",
                    6u,CopyTest.Size);
 
@@ -103,20 +103,20 @@ AUTOMATIC_TEST_GROUP(BinaryBufferTests,BinaryBuffer)
         TEST_EQUAL("BinaryBuffer(BinaryBuffer&&)-SrcSize",
                    0u,CopyTest.Size);
         TEST_EQUAL("BinaryBuffer(BinaryBuffer&&)-DestBinary",
-                   0u,BufferCompare(MoveTest.Binary,"Test.",6));
+                   true,BufferCompare(MoveTest.Binary,"Test.",6));
         TEST_EQUAL("BinaryBuffer(BinaryBuffer&&)-DestSize",
                    6u,MoveTest.Size);
 
         BinaryBuffer SizeTest(12);
-        TEST_EQUAL("BinaryBuffer(const_Whole)-Binary",
-                   NullByte,SizeTest.Binary);
-        TEST_EQUAL("BinaryBuffer(const_Whole)-Size",
-                   12u,CopyTest.Size);
+        TEST_EQUAL("BinaryBuffer(const_SizeType)-Binary",
+                   true,SizeTest.Binary != nullptr);
+        TEST_EQUAL("BinaryBuffer(const_SizeType)-Size",
+                   12u,SizeTest.Size);
 
         String TestParam("Longer Test.");
         BinaryBuffer StringTest(TestParam);
         TEST_EQUAL("BinaryBuffer(const_String&)-Binary",
-                   0u,BufferCompare(StringTest.Binary,"Longer Test.",13));
+                   true,BufferCompare(StringTest.Binary,"Longer Test.",12));
         TEST_EQUAL("BinaryBuffer(const_String&)-Size",
                    12u,StringTest.Size);
     }//Construction
@@ -127,11 +127,11 @@ AUTOMATIC_TEST_GROUP(BinaryBufferTests,BinaryBuffer)
         BinaryBuffer CopyDest;
         CopyDest = CopySrc;
         TEST_EQUAL("operator=(const_BinaryBuffer&)-SrcBinary",
-                   0u,BufferCompare(CopySrc.Binary,"Copy Test.",11));
+                   true,BufferCompare(CopySrc.Binary,"Copy Test.",10));
         TEST_EQUAL("operator=(const_BinaryBuffer&)-SrcSize",
                    CopyTestStr.size(),CopySrc.Size);
         TEST_EQUAL("operator=(const_BinaryBuffer&)-DestBinary",
-                   0u,BufferCompare(CopyDest.Binary,"Copy Test.",11));
+                   true,BufferCompare(CopyDest.Binary,"Copy Test.",10));
         TEST_EQUAL("operator=(const_BinaryBuffer&)-DestSize",
                    CopyTestStr.size(),CopyDest.Size);
 
@@ -144,7 +144,7 @@ AUTOMATIC_TEST_GROUP(BinaryBufferTests,BinaryBuffer)
         TEST_EQUAL("operator=(BinaryBuffer&&)-SrcSize",
                    0u,MoveSrc.Size);
         TEST_EQUAL("operator=(BinaryBuffer&&)-DestBinary",
-                   0u,BufferCompare(MoveDest.Binary,"Move Test.",11));
+                   true,BufferCompare(MoveDest.Binary,"Move Test.",10));
         TEST_EQUAL("operator=(BinaryBuffer&&)-DestSize",
                    MoveTestStr.size(),MoveDest.Size);
 
@@ -158,19 +158,19 @@ AUTOMATIC_TEST_GROUP(BinaryBufferTests,BinaryBuffer)
                    0u,SegmentBase.Size);
         SegmentBase += FirstSegment;
         TEST_EQUAL("operator+=(const_BinaryBuffer&)-FirstBinary",
-                   0u,BufferCompare(SegmentBase.Binary,"First Segment.",16));
+                   true,BufferCompare(SegmentBase.Binary,"First Segment.",14));
         TEST_EQUAL("operator+=(const_BinaryBuffer&)-FirstSize",
                    14u,SegmentBase.Size);
         SegmentBase += SecondSegment;
         TEST_EQUAL("operator+=(const_BinaryBuffer&)-SecondBinary",
-                   0u,BufferCompare(SegmentBase.Binary,"First Segment. Second Segment.",32));
+                   true,BufferCompare(SegmentBase.Binary,"First Segment. Second Segment.",30));
         TEST_EQUAL("operator+=(const_BinaryBuffer&)-SecondSize",
                    30u,SegmentBase.Size);
         SegmentBase += ThirdSegment;
         TEST_EQUAL("operator+=(const_BinaryBuffer&)-ThirdBinary",
-                   0u,BufferCompare(SegmentBase.Binary,"First Segment. Second Segment. Third Segment.",47));
+                   true,BufferCompare(SegmentBase.Binary,"First Segment. Second Segment. Third Segment.",45));
         TEST_EQUAL("operator+=(const_BinaryBuffer&)-ThirdSize",
-                   42u,SegmentBase.Size);
+                   45u,SegmentBase.Size);
 
         TEST_THROW("operator=(const_BinaryBuffer&)-Throw",
                    std::invalid_argument,
@@ -185,44 +185,45 @@ AUTOMATIC_TEST_GROUP(BinaryBufferTests,BinaryBuffer)
         BinaryBuffer AccessBuffer(AccessString);
         const BinaryBuffer ConstAccessBuffer(AccessString);
 
-        TEST_EQUAL("operator[](const_Whole)-First",
-                   'W',AccessBuffer[1]);
-        TEST_EQUAL("operator[](const_Whole)-Second",
-                   'o',AccessBuffer[2]);
-        TEST_EQUAL("operator[](const_Whole)-Third",
-                   'N',AccessBuffer[3]);
+        TEST_EQUAL("operator[](const_SizeType)-First",
+                   'W',AccessBuffer[0]);
+        TEST_EQUAL("operator[](const_SizeType)-Second",
+                   'o',AccessBuffer[1]);
+        TEST_EQUAL("operator[](const_SizeType)-Third",
+                   'N',AccessBuffer[2]);
 
-        TEST_EQUAL("operator[](const_Whole)_const-First",
-                   'd',ConstAccessBuffer[4]);
-        TEST_EQUAL("operator[](const_Whole)_const-Second",
-                   'E',ConstAccessBuffer[5]);
-        TEST_EQUAL("operator[](const_Whole)_const-Third",
-                   'r',ConstAccessBuffer[6]);
+        TEST_EQUAL("operator[](const_SizeType)_const-First",
+                   'd',ConstAccessBuffer[3]);
+        TEST_EQUAL("operator[](const_SizeType)_const-Second",
+                   'E',ConstAccessBuffer[4]);
+        TEST_EQUAL("operator[](const_SizeType)_const-Third",
+                   'r',ConstAccessBuffer[5]);
 
-        TEST_EQUAL("at(const_Whole)-First",
-                   'w',AccessBuffer.at(8));
-        TEST_EQUAL("at(const_Whole)-Second",
-                   'O',AccessBuffer.at(9));
-        TEST_EQUAL("at(const_Whole)-Third",
-                   'r',AccessBuffer.at(10));
+        TEST_EQUAL("at(const_SizeType)-First",
+                   'w',AccessBuffer.at(7));
+        TEST_EQUAL("at(const_SizeType)-Second",
+                   'O',AccessBuffer.at(8));
+        TEST_EQUAL("at(const_SizeType)-Third",
+                   'r',AccessBuffer.at(9));
 
-        TEST_EQUAL("at(const_Whole)_const-First",
-                   'L',ConstAccessBuffer.at(11));
-        TEST_EQUAL("at(const_Whole)_const-Second",
-                   'd',ConstAccessBuffer.at(12));
-        TEST_EQUAL("at(const_Whole)_const-Third",
-                   '!',ConstAccessBuffer.at(13));
+        TEST_EQUAL("at(const_SizeType)_const-First",
+                   'L',ConstAccessBuffer.at(10));
+        TEST_EQUAL("at(const_SizeType)_const-Second",
+                   'd',ConstAccessBuffer.at(11));
+        TEST_EQUAL("at(const_SizeType)_const-Third",
+                   '!',ConstAccessBuffer.at(12));
 
-        TEST_THROW("at(const_Whole)-Throw",
+        TEST_THROW("at(const_SizeType)-Throw",
                    std::out_of_range,
                    [&AccessBuffer](){ UInt8 Char = AccessBuffer.at(1000); std::cerr << Char; });
-        TEST_THROW("at(const_Whole)_const-Throw",
+        TEST_THROW("at(const_SizeType)_const-Throw",
                    std::out_of_range,
                    [&ConstAccessBuffer](){ UInt8 Char = ConstAccessBuffer.at(1000); std::cerr << Char; });
     }//Element Access
 
     {//Utility
-        BinaryBuffer CreateTest(10);
+        BinaryBuffer CreateTest;
+        CreateTest.Size = 10;
         TEST_EQUAL("CreateBuffer()-Before-Binary",
                    NullByte,CreateTest.Binary);
         TEST_EQUAL("CreateBuffer()-Before-Size",
@@ -234,31 +235,31 @@ AUTOMATIC_TEST_GROUP(BinaryBufferTests,BinaryBuffer)
                    10u,CreateTest.Size);
 
         CreateTest.DeleteBuffer(100);
-        TEST_EQUAL("DeleteBuffer(const_Whole)-100-Binary",
+        TEST_EQUAL("DeleteBuffer(const_SizeType)-100-Binary",
                    NullByte,CreateTest.Binary);
-        TEST_EQUAL("DeleteBuffer(const_Whole)-100-Size",
+        TEST_EQUAL("DeleteBuffer(const_SizeType)-100-Size",
                    100u,CreateTest.Size);
         CreateTest.DeleteBuffer();
-        TEST_EQUAL("DeleteBuffer(const_Whole)-Default-Binary",
+        TEST_EQUAL("DeleteBuffer(const_SizeType)-Default-Binary",
                    NullByte,CreateTest.Binary);
-        TEST_EQUAL("DeleteBuffer(const_Whole)-Default-Size",
+        TEST_EQUAL("DeleteBuffer(const_SizeType)-Default-Size",
                    0u,CreateTest.Size);
 
         BinaryBuffer InitialLine(String("Initial Line."));
         BinaryBuffer NextLine(String(" Next Line."));
         BinaryBuffer LastLine(String(" Last Line."));
-        TEST_EQUAL("Concatenate(const_Byte*,const_Whole)-Init-Binary",
-                   0u,BufferCompare(InitialLine.Binary,"Initial Line.",14));
-        TEST_EQUAL("Concatenate(const_Byte*,const_Whole)-Init-Size",
+        TEST_EQUAL("Concatenate(const_Byte*,const_SizeType)-Init-Binary",
+                   true,BufferCompare(InitialLine.Binary,"Initial Line.",13));
+        TEST_EQUAL("Concatenate(const_Byte*,const_SizeType)-Init-Size",
                    13u,InitialLine.Size);
         InitialLine.Concatenate(NextLine.Binary,NextLine.Size);
-        TEST_EQUAL("Concatenate(const_Byte*,const_Whole)-Binary",
-                   0u,BufferCompare(InitialLine.Binary,"Initial Line. Next Line.",25));
-        TEST_EQUAL("Concatenate(const_Byte*,const_Whole)-Size",
+        TEST_EQUAL("Concatenate(const_Byte*,const_SizeType)-Binary",
+                   true,BufferCompare(InitialLine.Binary,"Initial Line. Next Line.",24));
+        TEST_EQUAL("Concatenate(const_Byte*,const_SizeType)-Size",
                    24u,InitialLine.Size);
         InitialLine.Concatenate(LastLine);
         TEST_EQUAL("Concatenate(const_BinaryBuffer&)-Binary",
-                   0u,BufferCompare(InitialLine.Binary,"Initial Line. Next Line. Last Line.",36));
+                   true,BufferCompare(InitialLine.Binary,"Initial Line. Next Line. Last Line.",35));
         TEST_EQUAL("Concatenate(const_BinaryBuffer&)-Size",
                    35u,InitialLine.Size);
 

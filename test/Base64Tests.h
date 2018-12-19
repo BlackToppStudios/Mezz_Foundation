@@ -329,26 +329,26 @@ AUTOMATIC_TEST_GROUP(Base64Tests,Base64)
 
     {//Size Prediction
         TEST_EQUAL( "PredictBinarySize(const_String&)-First",
-                    Test1String.size(), Base64::PredictBinarySize(Test1Base64) );
+                    Test1String.size(),Base64::PredictBinarySize(Test1Base64) );
         TEST_EQUAL( "PredictBinarySize(const_String&)-Second",
-                    Test2String.size(), Base64::PredictBinarySize(Test2Base64) );
+                    Test2String.size(),Base64::PredictBinarySize(Test2Base64) );
         TEST_EQUAL( "PredictBinarySize(const_String&)-Third",
-                    Test3String.size(), Base64::PredictBinarySize(Test3Base64) );
+                    Test3String.size(),Base64::PredictBinarySize(Test3Base64) );
         TEST_EQUAL( "PredictBinarySize(const_String&)-Unicode",
-                    UnicodeString.size(), Base64::PredictBinarySize(UnicodeBase64) );
+                    UnicodeString.size(),Base64::PredictBinarySize(UnicodeBase64) );
         TEST_EQUAL( "PredictBinarySize(const_String&)-Gettysburg",
-                    GettysburgAddress.size(), Base64::PredictBinarySize(GettysburgAddressBase64) );
+                    GettysburgAddress.size(),Base64::PredictBinarySize(GettysburgAddressBase64) );
 
         TEST_EQUAL( "PredictBase64Size(const_SizeType)-First",
-                    Test1Base64.size(), Base64::PredictBase64Size(Test1String.length()) );
+                    Test1Base64.size(),Base64::PredictBase64Size(Test1String.length()) );
         TEST_EQUAL( "PredictBase64Size(const_SizeType)-Second",
-                    Test2Base64.size(), Base64::PredictBase64Size(Test2String.length()) );
+                    Test2Base64.size(),Base64::PredictBase64Size(Test2String.length()) );
         TEST_EQUAL( "PredictBase64Size(const_SizeType)-Third",
-                    Test3Base64.size(), Base64::PredictBase64Size(Test3String.length()) );
+                    Test3Base64.size(),Base64::PredictBase64Size(Test3String.length()) );
         TEST_EQUAL( "PredictBase64Size(const_SizeType)-Unicode",
-                    UnicodeBase64.size(), Base64::PredictBase64Size(UnicodeString.length()) );
+                    UnicodeBase64.size(),Base64::PredictBase64Size(UnicodeString.length()) );
         TEST_EQUAL( "PredictBase64Size(const_SizeType)-Gettysburg",
-                    GettysburgAddressBase64.size(), Base64::PredictBase64Size(GettysburgAddress.length()) );
+                    GettysburgAddressBase64.size(),Base64::PredictBase64Size(GettysburgAddress.length()) );
     }//Size Prediction
 
     {//Encode and Decode
@@ -356,13 +356,13 @@ AUTOMATIC_TEST_GROUP(Base64Tests,Base64)
 
         BinaryBuffer TestBuffer1(Test1String);
         TEST_EQUAL( "Encode(const_BinaryBuffer&)-First",
-                    Test1Base64, Base64::Encode(TestBuffer1) );
+                    Test1Base64,Base64::Encode(TestBuffer1) );
         BinaryBuffer TestBuffer2(Test2String);
         TEST_EQUAL( "Encode(const_BinaryBuffer&)-Second",
-                    Test2Base64, Base64::Encode(TestBuffer2) );
+                    Test2Base64,Base64::Encode(TestBuffer2) );
         BinaryBuffer TestBuffer3(Test3String);
         TEST_EQUAL( "Encode(const_BinaryBuffer&)-Third",
-                    Test3Base64, Base64::Encode(TestBuffer3) );
+                    Test3Base64,Base64::Encode(TestBuffer3) );
 
         const SizeType UnicodeEncodeBufSize = Base64::PredictBase64Size( UnicodeString.length() );
         Char8* UnicodeEncodeBuf = new Char8[UnicodeEncodeBufSize];
@@ -370,9 +370,9 @@ AUTOMATIC_TEST_GROUP(Base64Tests,Base64)
         BytesWritten = Base64::EncodeRawBuffer(UnicodeStrBuf,UnicodeString.length(),
                                                UnicodeEncodeBuf,UnicodeEncodeBufSize);
         TEST_EQUAL( "EncodeRawBuffer(const_UInt8*,const_SizeType,Char8*,const_SizeType)-Unicode-BytesWritten",
-                    UnicodeEncodeBufSize, BytesWritten );
+                    UnicodeEncodeBufSize,BytesWritten );
         TEST_EQUAL( "EncodeRawBuffer(const_UInt8*,const_SizeType,Char8*,const_SizeType)-Unicode-Content",
-                    UnicodeBase64, String(UnicodeEncodeBuf,UnicodeEncodeBufSize) );
+                    true,String(UnicodeEncodeBuf,UnicodeEncodeBufSize) == UnicodeBase64 );
 
         const SizeType AddressEncodeBufSize = Base64::PredictBase64Size( GettysburgAddress.length() );
         Char8* AddressEncodeBuf = new Char8[AddressEncodeBufSize];
@@ -380,40 +380,40 @@ AUTOMATIC_TEST_GROUP(Base64Tests,Base64)
         BytesWritten = Base64::EncodeRawBuffer(AddressStrBuf,GettysburgAddress.length(),
                                                AddressEncodeBuf,AddressEncodeBufSize);
         TEST_EQUAL( "EncodeRawBuffer(const_UInt8*,const_SizeType,Char8*,const_SizeType)-Gettysburg-BytesWritten",
-                    AddressEncodeBufSize, BytesWritten );
-        TEST_EQUAL( "EncodeRawBuffer(const_UInt8*,const_SizeType,Char8*,const_SizeType)-Gettysburg-Content",
-                    GettysburgAddressBase64, String(AddressEncodeBuf,AddressEncodeBufSize) );
+                    AddressEncodeBufSize,BytesWritten );
+        TEST_EQUAL( "EncodeRawBuffer(const_UInt8*,const_SizeType,Char8*,const_SizeType)-Gettysburg-ContentMatch",
+                    true,String(AddressEncodeBuf,AddressEncodeBufSize) == GettysburgAddressBase64 );
 
         BinaryBuffer TestBuffer1Base64 = std::move( Base64::Decode(Test1Base64) );
         const char* TestBuffer1BinaryPtr = reinterpret_cast<char*>(TestBuffer1Base64.Binary);
         TEST_EQUAL( "Decode(const_String&)-First",
-                    Test1String, String(TestBuffer1BinaryPtr,TestBuffer1Base64.Size) );
+                    Test1String,String(TestBuffer1BinaryPtr,TestBuffer1Base64.Size) );
         BinaryBuffer TestBuffer2Base64 = std::move( Base64::Decode(Test2Base64) );
         const char* TestBuffer2BinaryPtr = reinterpret_cast<char*>(TestBuffer2Base64.Binary);
         TEST_EQUAL( "Decode(const_String&)-Second",
-                    Test2String, String(TestBuffer2BinaryPtr,TestBuffer2Base64.Size) );
+                    Test2String,String(TestBuffer2BinaryPtr,TestBuffer2Base64.Size) );
         BinaryBuffer TestBuffer3Base64 = std::move( Base64::Decode(Test3Base64) );
         const char* TestBuffer3BinaryPtr = reinterpret_cast<char*>(TestBuffer3Base64.Binary);
         TEST_EQUAL( "Decode(const_String&)-Third",
-                    Test3String, String(TestBuffer3BinaryPtr,TestBuffer3Base64.Size) );
+                    Test3String,String(TestBuffer3BinaryPtr,TestBuffer3Base64.Size) );
 
-        const SizeType UnicodeDecodeBufSize = Base64::PredictBase64Size( UnicodeBase64.length() );
+        const SizeType UnicodeDecodeBufSize = Base64::PredictBinarySize( UnicodeBase64 );
         UInt8* UnicodeDecodeBuf = new UInt8[UnicodeDecodeBufSize];
         BytesWritten = Base64::DecodeRawBuffer(UnicodeBase64.c_str(),UnicodeBase64.length(),
                                                UnicodeDecodeBuf,UnicodeDecodeBufSize);
         TEST_EQUAL( "DecodeRawBuffer(const_Char8*,const_SizeType,UInt8*,const_SizeType)-Unicode-BytesWritten",
-                    UnicodeDecodeBufSize, BytesWritten );
+                    UnicodeDecodeBufSize,BytesWritten );
         TEST_EQUAL( "DecodeRawBuffer(const_Char8*,const_SizeType,UInt8*,const_SizeType)-Unicode-Content",
-                    UnicodeString, String(reinterpret_cast<char*>(UnicodeDecodeBuf),UnicodeDecodeBufSize) );
+                    true,String(reinterpret_cast<char*>(UnicodeDecodeBuf),UnicodeDecodeBufSize) == UnicodeString );
 
-        const SizeType AddressDecodeBufSize = Base64::PredictBase64Size( GettysburgAddressBase64.length() );
+        const SizeType AddressDecodeBufSize = Base64::PredictBinarySize( GettysburgAddressBase64 );
         UInt8* AddressDecodeBuf = new UInt8[AddressDecodeBufSize];
         BytesWritten = Base64::DecodeRawBuffer(GettysburgAddressBase64.c_str(),GettysburgAddressBase64.length(),
                                                AddressDecodeBuf,AddressDecodeBufSize);
         TEST_EQUAL( "DecodeRawBuffer(const_Char8*,const_SizeType,UInt8*,const_SizeType)-Gettysburg-BytesWritten",
-                    AddressDecodeBufSize, BytesWritten );
+                    AddressDecodeBufSize,BytesWritten );
         TEST_EQUAL( "DecodeRawBuffer(const_Char8*,const_SizeType,UInt8*,const_SizeType)-Gettysburg-Content",
-                    GettysburgAddress, String(reinterpret_cast<char*>(AddressDecodeBuf),AddressDecodeBufSize) );
+                    true,String(reinterpret_cast<char*>(AddressDecodeBuf),AddressDecodeBufSize) == GettysburgAddress );
 
         delete[] UnicodeEncodeBuf;
         delete[] AddressEncodeBuf;
@@ -431,7 +431,7 @@ AUTOMATIC_TEST_GROUP(Base64Tests,Base64)
         String OutputS; //To prevent optimizing this whole chunk away.
         BinaryBuffer OutputB; //To prevent optimizing this whole chunk away.
 
-        TestLog << "Benchmarking this for the sake of performance is dumb and I know it. "
+        TestLog << "\nBenchmarking this for the sake of performance is dumb and I know it. "
                 << "This is not performance sensitive code, I just wanted to test my ability to "
                 << "gauge subtle non-optimal performance in code when I saw it.\n\n";
 
@@ -462,7 +462,7 @@ AUTOMATIC_TEST_GROUP(Base64Tests,Base64)
                 << "..." << OutputS.substr(OutputS.size() - 20,20) << "\n";
 
         TestLog << "The new decoding algorithm takes about "
-                << double( ( BTSDecodeTime * 1000) / (ReneDecodeTime) ) / 10 << "% as long as the original.\n";
+                << double( ( BTSDecodeTime * 1000) / (ReneDecodeTime) ) / 10 << "% as long as the original.\n\n";
 
         TEST_WARN( "DecodeTime", BTSDecodeTime < ReneDecodeTime );
 

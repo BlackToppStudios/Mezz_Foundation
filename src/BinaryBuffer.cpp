@@ -74,12 +74,9 @@ namespace Mezzanine
         {  }
 
     BinaryBuffer::BinaryBuffer(Byte* BinaryPointer, const SizeType PredeterminedSize) :
+        Binary(BinaryPointer != nullptr ? BinaryPointer : new Byte[PredeterminedSize]),
         Size(PredeterminedSize)
-    {
-        if( BinaryPointer ) {
-            this->Binary = new Byte[PredeterminedSize];
-        }
-    }
+        {  }
 
     BinaryBuffer::BinaryBuffer(const String& DataString)
     {
@@ -157,6 +154,7 @@ namespace Mezzanine
 
     void BinaryBuffer::CreateBuffer()
     {
+        this->DeleteBuffer(this->Size);
         if( this->Size != 0 ) {
             this->Binary = new Byte[this->Size * sizeof(Byte)];
         }else{

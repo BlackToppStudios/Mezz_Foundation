@@ -103,7 +103,8 @@ namespace Mezzanine
         /// @param PredeterminedSize The size to set on creation.
         BinaryBuffer(Byte* BinaryPointer, const SizeType PredeterminedSize);
         /// @brief String Constructor.
-        /// @details Performs exactly one allocation of the amount required to store the String.
+        /// @details Performs exactly one allocation of the amount required to store the String NOT including
+        /// the null terminator.
         /// @param DataString The String to be copied into this buffer.
         explicit BinaryBuffer(const String& DataString);
         /// @brief Class Destructor
@@ -160,7 +161,7 @@ namespace Mezzanine
 
         /// @brief This will create a buffer with size matching the this->Size and point this->Binary to that Buffer.
         /// @exception If this buffers size is currently set at zero, a std::length_error exception will be thrown.
-        /// @warning This does not delete an old buffer, delete that before calling this.
+        /// @warning This will delete any existing buffer prior to creating the new one.  Use with caution.
         void CreateBuffer();
         /// @brief Deletes whatever Binary points at and assigns Size to 0.
         /// @param NewSize If you don't want to just clear the buffer, but rather want to set size to a value and set a new size, you can do that with this.
