@@ -45,10 +45,8 @@
 
 /*
  * Some of the following functions and 1 variable were taken from http://www.adp-gmbh.ch/cpp/common/base64.html
- * for the functions IsBase64(unsigned char c),  Base64Encode(UInt8 const* BytesToEncode, unsigned int Length),
- *     Base64Decode(String const& EncodedString) and Base64Chars and maybe a few others in this file or the
- *     tests for this file
- * with written permission as follows.
+ * and modified from their original versions to match BTS styling and flexibility with written permission as
+ * follows.
 
 
    Copyright (C) 2004-2008 René Nyffenegger
@@ -79,11 +77,16 @@ namespace
 {
     using namespace Mezzanine;
     // Code change to Match BTS naming conventions and formatting
-    /// @brief A convenience constant containing all of the valid Base64 characters.
-    static const String Base64Chars =
-                 "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                 "abcdefghijklmnopqrstuvwxyz"
-                 "0123456789+/";
+    /// @brief A convenience method to get a String containing all of the valid Base64 characters.
+    /// @return Returns a const reference to the String containing all valid Base64 characters.
+    const String& GetBase64Chars()
+    {
+        static const String Base64Chars =
+                     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                     "abcdefghijklmnopqrstuvwxyz"
+                     "0123456789+/";
+        return Base64Chars;
+    }
 
     /// @brief A variant of the one parameter IsBase64 method used by the Base64::DecodeRawBuffer.
     /// @param First The first character to check.
@@ -91,7 +94,7 @@ namespace
     /// @param Third The third character to check.
     /// @param Fourth The fourth character to check.
     /// @return Returns true if any of the provided characters are not Base64, false if they are all valid Base64.
-    Boole IsNotBase64(const UInt8 First, const UInt8 Second, const UInt8 Third, const UInt8 Fourth)
+    Boole IsNotBase64(const Char8 First, const Char8 Second, const Char8 Third, const Char8 Fourth)
     {
         return !Base64::IsBase64(First) || !Base64::IsBase64(Second) ||
                !Base64::IsBase64(Third) || !Base64::IsBase64(Fourth);
@@ -102,14 +105,14 @@ namespace
     /// @return Returns the Index in "Base64Chars" the character is at.
     UInt8 GetBase64IndexNoCheck(const Char8 ToCheck)
     {
-        return static_cast<UInt8>( Base64Chars.find(ToCheck) );
+        return static_cast<UInt8>( GetBase64Chars().find(ToCheck) );
     }
 }
 
 namespace Mezzanine {
 namespace Base64 {
     // Code change to Match BTS naming conventions and formatting
-    Boole IsBase64(const UInt8 ToCheck)
+    Boole IsBase64(const Char8 ToCheck)
         { return (isalnum(ToCheck) || (ToCheck == '+') || (ToCheck == '/') || (ToCheck == '=')); }
 
     SizeType PredictBinarySize(const String& EncodedString)
@@ -168,7 +171,7 @@ namespace Base64 {
 
                 for( i = 0 ; i < 4 ; i++ )
                 {
-                    *(DestBytes + BytesWritten) = Base64Chars[char_array_4[i]];
+                    *(DestBytes + BytesWritten) = GetBase64Chars()[char_array_4[i]];
                     BytesWritten++;
                 }
                 i = 0;
@@ -191,7 +194,7 @@ namespace Base64 {
 
             for( j = 0 ; j < i + 1 ; j++ )
             {
-                *(DestBytes + BytesWritten) = Base64Chars[char_array_4[j]];
+                *(DestBytes + BytesWritten) = GetBase64Chars()[char_array_4[j]];
                 BytesWritten++;
             }
 

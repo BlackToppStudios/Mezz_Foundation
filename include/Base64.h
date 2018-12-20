@@ -50,7 +50,7 @@ namespace Base64 {
     /// @brief Checks to see if a character a valid Base64 character.
     /// @param ToCheck The character to check if it is valid Base64.
     /// @return Returns true if the character could be part of Base64 text, false otherwise.
-    Boole MEZZ_LIB IsBase64(const UInt8 ToCheck);
+    Boole MEZZ_LIB IsBase64(const Char8 ToCheck);
 
     /// @brief From an encoded string get the exact size of the decode binary in bytes.
     /// @remarks The binary is about 3/4 of the base64 size, but that can be off by just enough to
