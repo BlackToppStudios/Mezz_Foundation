@@ -47,6 +47,15 @@
 
 #include "Base64.h"
 
+// This ought to be replaced with "SUPPRESS_ALL_WARNINGS" when that becomes available.
+// This is reference code from other people and we're not responsible for it, in fact
+// we're benchmarking this against the code we ARE responsible for.
+SAVE_WARNING_STATE
+SUPPRESS_GCC_WARNING("-Wstrict-overflow")
+SUPPRESS_GCC_WARNING("-Wconversion")
+SUPPRESS_CLANG_WARNING("-Wexit-time-destructors")
+SUPPRESS_VC_WARNING(4267)
+
 // Forward declares for the functions defined in this file because GCC is picky about this.
 Mezzanine::String ReneBase64Encode(Mezzanine::UInt8 const* BytesToEncode, unsigned int Length);
 Mezzanine::String ReneBase64Decode(Mezzanine::String const& EncodedString);
@@ -58,14 +67,6 @@ static const Mezzanine::String Base64Chars =
              "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
              "abcdefghijklmnopqrstuvwxyz"
              "0123456789+/";
-
-// This ought to be replaced with "SUPPRESS_ALL_WARNINGS" when that becomes available.
-// This is reference code from other people and we're not responsible for it, in fact
-// we're benchmarking this against the code we ARE responsible for.
-SAVE_WARNING_STATE
-SUPPRESS_GCC_WARNING("-Wstrict-overflow")
-SUPPRESS_GCC_WARNING("-Wconversion")
-SUPPRESS_VC_WARNING(4267)
 
 // Code change to Match BTS naming conventions and formatting
 // Copyright information in Base64.cpp
