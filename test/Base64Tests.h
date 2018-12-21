@@ -53,6 +53,7 @@
 SAVE_WARNING_STATE
 SUPPRESS_GCC_WARNING("-Wstrict-overflow")
 SUPPRESS_GCC_WARNING("-Wconversion")
+SUPPRESS_CLANG_WARNING("-Wglobal-constructors")
 SUPPRESS_CLANG_WARNING("-Wexit-time-destructors")
 SUPPRESS_VC_WARNING(4267)
 
