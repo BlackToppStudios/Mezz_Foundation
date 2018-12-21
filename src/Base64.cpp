@@ -76,6 +76,10 @@
 namespace
 {
     using namespace Mezzanine;
+
+    SAVE_WARNING_STATE
+    SUPPRESS_CLANG_WARNING("-Wexit-time-destructors")
+
     // Code change to Match BTS naming conventions and formatting
     /// @brief A convenience method to get a String containing all of the valid Base64 characters.
     /// @return Returns a const reference to the String containing all valid Base64 characters.
@@ -87,6 +91,8 @@ namespace
                      "0123456789+/";
         return Base64Chars;
     }
+
+    RESTORE_WARNING_STATE
 
     /// @brief A variant of the one parameter IsBase64 method used by the Base64::DecodeRawBuffer.
     /// @param First The first character to check.
