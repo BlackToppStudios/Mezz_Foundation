@@ -120,7 +120,12 @@ namespace Mezzanine {
 namespace Base64 {
     // Code change to Match BTS naming conventions and formatting
     Boole IsBase64(const Char8 ToCheck)
-        { return (isalnum(ToCheck) || (ToCheck == '+') || (ToCheck == '/') || (ToCheck == '=')); }
+    {
+        return ( ( ToCheck >= 'A' && ToCheck <= 'Z' ) ||
+                 ( ToCheck >= 'a' && ToCheck <= 'z' ) ||
+                 ( ToCheck >= '0' && ToCheck <= '9' ) ||
+                 ( ToCheck == '+' ) || ( ToCheck == '/' ) || ( ToCheck == '=' ) );
+    }
 
     SizeType PredictBinarySize(const String& EncodedString)
         { return PredictBinarySize(EncodedString.c_str(),EncodedString.size()); }
