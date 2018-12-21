@@ -78,6 +78,7 @@ namespace
     using namespace Mezzanine;
 
     SAVE_WARNING_STATE
+    SUPPRESS_CLANG_WARNING("-Wglobal-constructors")
     SUPPRESS_CLANG_WARNING("-Wexit-time-destructors")
 
     // Code change to Match BTS naming conventions and formatting
