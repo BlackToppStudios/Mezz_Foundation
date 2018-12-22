@@ -259,16 +259,20 @@ namespace Base64 {
 
             First = GetBase64IndexNoCheck( *(Progress + 0) );
             Second = GetBase64IndexNoCheck( *(Progress + 1) );
-            Third = ( *(Progress + 2) == '=' ? 0 : GetBase64IndexNoCheck( *(Progress + 2) ) );
 
-            SizeType IterationWrites = 2;
+            SizeType IterationWrites = 1;
             *(DestBytes + BytesWritten + 0) = static_cast<UInt8>( (First << 2) + ( (Second & 0x30) >> 4 ) );
-            *(DestBytes + BytesWritten + 1) = static_cast<UInt8>( ( (Second & 0xf) << 4 ) + ( (Third & 0x3c) >> 2 ) );
 
-            if( *(Progress + 3) != '=' ) {
-                Fourth = GetBase64IndexNoCheck( *(Progress + 3) );
-                *(DestBytes + BytesWritten + 2) = static_cast<UInt8>( ( (Third & 0x3) << 6 ) + Fourth );
+            if( *(Progress + 2) != '=' ) {
+                Third = GetBase64IndexNoCheck( *(Progress + 2) );
+                *(DestBytes + BytesWritten + 1) = static_cast<UInt8>( ((Second & 0xf) << 4) + ((Third & 0x3c) >> 2) );
                 IterationWrites += 1;
+
+                if( *(Progress + 3) != '=' ) {
+                    Fourth = GetBase64IndexNoCheck( *(Progress + 3) );
+                    *(DestBytes + BytesWritten + 2) = static_cast<UInt8>( ( (Third & 0x3) << 6 ) + Fourth );
+                    IterationWrites += 1;
+                }
             }
 
             BytesWritten += IterationWrites;
