@@ -332,15 +332,20 @@ AUTOMATIC_TEST_GROUP(Base64Tests,Base64)
 
     {//Size Prediction
         TEST_EQUAL( "PredictBinarySize(const_String&)-First",
-                    Test1String.size(),Base64::PredictBinarySize(Test1Base64) );
+                    Test1String.size(),Base64::PredictBinarySize(Test1Base64.c_str(),Test1Base64.length()) );
         TEST_EQUAL( "PredictBinarySize(const_String&)-Second",
-                    Test2String.size(),Base64::PredictBinarySize(Test2Base64) );
+                    Test2String.size(),Base64::PredictBinarySize(Test2Base64.c_str(),Test2Base64.length()) );
         TEST_EQUAL( "PredictBinarySize(const_String&)-Third",
-                    Test3String.size(),Base64::PredictBinarySize(Test3Base64) );
+                    Test3String.size(),Base64::PredictBinarySize(Test3Base64.c_str(),Test3Base64.length()) );
         TEST_EQUAL( "PredictBinarySize(const_String&)-Unicode",
                     UnicodeString.size(),Base64::PredictBinarySize(UnicodeBase64) );
         TEST_EQUAL( "PredictBinarySize(const_String&)-Gettysburg",
                     GettysburgAddress.size(),Base64::PredictBinarySize(GettysburgAddressBase64) );
+
+        const char* FailStr = "lol";
+        TEST_THROW( "PredictBinarySize(const_SizeType)-Throw",
+                    std::invalid_argument,
+                    [FailStr](){ std::cerr << Base64::PredictBinarySize(FailStr,3); } );
 
         TEST_EQUAL( "PredictBase64Size(const_SizeType)-First",
                     Test1Base64.size(),Base64::PredictBase64Size(Test1String.length()) );
@@ -387,6 +392,15 @@ AUTOMATIC_TEST_GROUP(Base64Tests,Base64)
         TEST_EQUAL( "EncodeRawBuffer(const_UInt8*,const_SizeType,Char8*,const_SizeType)-Gettysburg-ContentMatch",
                     true,String(AddressEncodeBuf,AddressEncodeBufSize) == GettysburgAddressBase64 );
 
+        auto EncodeThrowFunct = [] () {
+            BinaryBuffer ThrowBuf(10);
+            std::unique_ptr<char[]> ThrowStr(new char[4]);
+            std::cerr << Base64::EncodeRawBuffer(ThrowBuf.Binary,ThrowBuf.Size,ThrowStr.get(),4);
+        }
+        TEST_THROW( "EncodeRawBuffer(const_UInt8*,const_SizeType,Char8*,const_SizeType)-Throw-SmallDest",
+                    std::invalid_argument,
+                    EncodeThrowFunct );
+
         BinaryBuffer TestBuffer1Base64 = Base64::Decode(Test1Base64);
         const char* TestBuffer1BinaryPtr = reinterpret_cast<char*>(TestBuffer1Base64.Binary);
         TEST_EQUAL( "Decode(const_String&)-First",
@@ -417,6 +431,33 @@ AUTOMATIC_TEST_GROUP(Base64Tests,Base64)
                     AddressDecodeBufSize,BytesWritten );
         TEST_EQUAL( "DecodeRawBuffer(const_Char8*,const_SizeType,UInt8*,const_SizeType)-Gettysburg-Content",
                     true,String(reinterpret_cast<char*>(AddressDecodeBuf),AddressDecodeBufSize) == GettysburgAddress );
+
+        auto DecodeThrowOneFunct = [] () {
+            BinaryBuffer ThrowBuf(2);
+            String ThrowStr("Longer Than Two.");
+            std::cerr << Base64::DecodeRawBuffer(ThrowStr.c_str(),ThrowStr.length(),ThrowBuf.Binary,ThrowBuf.Size);
+        }
+        TEST_THROW( "DecodeRawBuffer(const_Char8*,const_SizeType,UInt8*,const_SizeType)-Throw-SmallDest",
+                    std::invalid_argument,
+                    DecodeThrowOneFunct );
+
+        auto DecodeThrowTwoFunct = [] () {
+            BinaryBuffer ThrowBuf(16);
+            String ThrowStr("Fourteen Chars");
+            std::cerr << Base64::DecodeRawBuffer(ThrowStr.c_str(),ThrowStr.length(),ThrowBuf.Binary,ThrowBuf.Size);
+        }
+        TEST_THROW( "DecodeRawBuffer(const_Char8*,const_SizeType,UInt8*,const_SizeType)-Throw-NotMultipleOfFour",
+                    std::invalid_argument,
+                    DecodeThrowTwoFunct );
+
+        auto DecodeThrowThreeFunct = [] () {
+            BinaryBuffer ThrowBuf(4);
+            String ThrowStr("VG@zdA==");
+            std::cerr << Base64::DecodeRawBuffer(ThrowStr.c_str(),ThrowStr.length(),ThrowBuf.Binary,ThrowBuf.Size);
+        }
+        TEST_THROW( "DecodeRawBuffer(const_Char8*,const_SizeType,UInt8*,const_SizeType)-Throw-NotBase64",
+                    std::range_error,
+                    DecodeThrowThreeFunct );
 
         delete[] UnicodeEncodeBuf;
         delete[] AddressEncodeBuf;

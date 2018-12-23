@@ -49,7 +49,7 @@ namespace Mezzanine
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     /// @brief A way to store and pass raw binary buffers. For example: compiled bytecode.
     /// @details Originally intended for use with ScriptCompilable as a basic way to store and pass bytecode around.
-    /// This deletes the passed binary on destruction. To prevent this behavior set the Binary pointer to null prior
+    /// This deletes the stored buffer on destruction. To prevent this behavior set the Binary pointer to null prior
     /// to destruction.
     /// @n @n
     /// This is designed to be fairly minimalistic but passing by value causes the buffer to be copied.
@@ -59,8 +59,7 @@ namespace Mezzanine
     /// This will tend to not allocate memory unless an operation on it is specified that it does so.
     /// @n @n
     /// Whenever this needs to allocate memory it will use the Size member for determining the amount to allocate.
-    /// If that is 0 an InvalidStateException exception is thrown. Bounds checking, if performed, only occurs when
-    /// MEZZ_DEBUG is enabled.
+    /// If that is 0 an std::invalid_argument exception is thrown.
     ///////////////////////////////////////
     class MEZZ_LIB BinaryBuffer
     {
@@ -90,6 +89,8 @@ namespace Mezzanine
         /// @param Other The other buffer to be copied.
         BinaryBuffer(const BinaryBuffer& Other);
         /// @brief Move Constructor.
+        /// @details This will perform a simple move of the Binary and Size from the Other BinaryBuffer and
+        /// set it's members to their defaults (Binary:nullptr, Size:0).
         /// @param Other The other buffer to be moved.
         BinaryBuffer(BinaryBuffer&& Other);
         /// @brief Allocating Constructor,
@@ -117,11 +118,16 @@ namespace Mezzanine
 
         /// @brief Copy Assignment Operator.
         /// @exception If attempting to self-assign, this will throw a std::invalid_argument exception.
+        /// @details Allocates identical amount of memory as other buffer then copies the other buffer into
+        /// the allocated space. Each BinaryBuffer retains ownership of their respective buffers.
         /// @param Other The other buffer to be copied.
         /// @return Returns a reference to this.
         BinaryBuffer& operator=(const BinaryBuffer& Other);
         /// @brief Move Assignment Operator.
         /// @exception If attempting to self-assign, this will throw a std::invalid_argument exception.
+        /// @details This will first deallocate any buffer currently allocated in this and then perform a simple
+        /// move of the Binary and Size from the Other BinaryBuffer and set it's members to their defaults
+        /// (Binary:nullptr, Size:0).
         /// @param Other The other buffer to be moved.
         /// @return Returns a reference to this.
         BinaryBuffer& operator=(BinaryBuffer&& Other);
@@ -163,8 +169,8 @@ namespace Mezzanine
         /// @exception If this buffers size is currently set at zero, a std::length_error exception will be thrown.
         /// @warning This will delete any existing buffer prior to creating the new one.  Use with caution.
         void CreateBuffer();
-        /// @brief Deletes whatever Binary points at and assigns Size to 0.
-        /// @param NewSize If you don't want to just clear the buffer, but rather want to set size to a value and set a new size, you can do that with this.
+        /// @brief Deletes the existing internal buffer (if one is initialized).
+        /// @param NewSize Sets the size variable after the buffer is deleted, making this ready to call CreateBuffer.
         void DeleteBuffer(const SizeType NewSize = 0);
 
         /// @brief Append another group of arbitrary data onto this one.

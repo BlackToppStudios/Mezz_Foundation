@@ -122,6 +122,8 @@ AUTOMATIC_TEST_GROUP(BinaryBufferTests,BinaryBuffer)
     }//Construction
 
     {//Operators
+        BinaryBuffer EmptyBuffer;
+
         String CopyTestStr("Copy Test.");
         BinaryBuffer CopySrc(CopyTestStr);
         BinaryBuffer CopyDest;
@@ -134,6 +136,11 @@ AUTOMATIC_TEST_GROUP(BinaryBufferTests,BinaryBuffer)
                    true,BufferCompare(CopyDest.Binary,"Copy Test.",10));
         TEST_EQUAL("operator=(const_BinaryBuffer&)-DestSize",
                    CopyTestStr.size(),CopyDest.Size);
+        CopyDest = EmptyBuffer;
+        TEST_EQUAL("operator=(const_BinaryBuffer&)-DestBinary-EmptyCopy",
+                   NullByte,CopyDest.Binary);
+        TEST_EQUAL("operator=(const_BinaryBuffer&)-DestSize-EmptyCopy",
+                   0u,CopyDest.Size);
 
         String MoveTestStr("Move Test.");
         BinaryBuffer MoveSrc(MoveTestStr);
@@ -177,7 +184,7 @@ AUTOMATIC_TEST_GROUP(BinaryBufferTests,BinaryBuffer)
                    [&CopyDest](){ CopyDest = CopyDest; });
         TEST_THROW("operator=(BinaryBuffer&&)-Throw",
                    std::invalid_argument,
-                   [&MoveDest](){ MoveDest = MoveDest; });
+                   [&MoveDest](){ MoveDest = std::move(MoveDest); });
     }//Operators
 
     {//Element Access
@@ -233,6 +240,11 @@ AUTOMATIC_TEST_GROUP(BinaryBufferTests,BinaryBuffer)
                    true,CreateTest.Binary != nullptr);
         TEST_EQUAL("CreateBuffer()-After-Size",
                    10u,CreateTest.Size);
+
+        BinaryBuffer CreateThrowTest;
+        TEST_THROW("CreateBuffer()-Throw",
+                   std::length_error,
+                   [&](){ CreateThrowTest.CreateBuffer(); });
 
         CreateTest.DeleteBuffer(100);
         TEST_EQUAL("DeleteBuffer(const_SizeType)-100-Binary",

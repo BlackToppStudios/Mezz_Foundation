@@ -57,8 +57,6 @@ namespace Mezzanine
         if( Other.Size && Other.Binary ) {
             this->Binary = new Byte[this->Size * sizeof(Byte)];
             memcpy(this->Binary,Other.Binary,this->Size * sizeof(Byte));
-        }else{
-            this->Binary = nullptr;
         }
     }
 
@@ -189,7 +187,12 @@ namespace Mezzanine
         { this->Concatenate(Other.Binary, Other.Size); }
 
     String BinaryBuffer::ToString() const
-        { return String( reinterpret_cast<char*>(this->Binary), this->Size * sizeof(Byte) ); }
+    {
+        if( this->Binary != nullptr && this->Size > 0 ) {
+            return String( reinterpret_cast<char*>(this->Binary), this->Size * sizeof(Byte) );
+        }
+        return String();
+    }
 
     SizeType BinaryBuffer::GetSize() const noexcept
         { return this->Size; }
