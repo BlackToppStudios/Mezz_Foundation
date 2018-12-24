@@ -69,12 +69,12 @@ namespace Mezzanine
     }
 
     BinaryBuffer::BinaryBuffer(const SizeType PredeterminedSize) :
-        Binary(new Byte[PredeterminedSize]),
+        Binary(new Byte[PredeterminedSize * sizeof(Byte)]),
         Size(PredeterminedSize)
         {  }
 
     BinaryBuffer::BinaryBuffer(Byte* BinaryPointer, const SizeType PredeterminedSize) :
-        Binary(BinaryPointer != nullptr ? BinaryPointer : new Byte[PredeterminedSize]),
+        Binary(BinaryPointer != nullptr ? BinaryPointer : new Byte[PredeterminedSize * sizeof(Byte)]),
         Size(PredeterminedSize)
         {  }
 
@@ -93,28 +93,20 @@ namespace Mezzanine
 
     BinaryBuffer& BinaryBuffer::operator=(const BinaryBuffer& Other)
     {
-        if( Other.Binary == this->Binary ) {
-            throw std::invalid_argument("Attempted a self assignment of a BinaryBuffer.");
+        Byte* CopyBinary = nullptr;
+        if( Other.Binary != nullptr && Other.Size > 0 ) {
+            CopyBinary = new Byte[Other.Size * sizeof(Byte)];
+            memcpy(CopyBinary,Other.Binary,Other.Size * sizeof(Byte));
         }
-        this->DeleteBuffer(Other.Size);
-        if( Other.Size && Other.Binary ) {
-            this->CreateBuffer();
-            memcpy(this->Binary,Other.Binary,this->Size * sizeof(Byte));
-        }else{
-            this->Binary = nullptr;
-        }
+        this->Binary = CopyBinary;
+        this->Size = Other.Size;
         return *this;
     }
 
     BinaryBuffer& BinaryBuffer::operator=(BinaryBuffer&& Other)
     {
-        if( Other.Binary == this->Binary ) {
-            throw std::invalid_argument("Attempted a self assignment of a BinaryBuffer.");
-        }
-        this->DeleteBuffer(Other.Size);
-        this->Binary = std::move(Other.Binary);
-        Other.Binary = nullptr;
-        Other.Size = 0;
+        std::swap(this->Binary,Other.Binary);
+        std::swap(this->Size,Other.Size);
         return *this;
     }
 

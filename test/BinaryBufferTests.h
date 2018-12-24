@@ -178,13 +178,6 @@ AUTOMATIC_TEST_GROUP(BinaryBufferTests,BinaryBuffer)
                    true,BufferCompare(SegmentBase.Binary,"First Segment. Second Segment. Third Segment.",45));
         TEST_EQUAL("operator+=(const_BinaryBuffer&)-ThirdSize",
                    45u,SegmentBase.Size);
-
-        TEST_THROW("operator=(const_BinaryBuffer&)-Throw",
-                   std::invalid_argument,
-                   [&CopyDest](){ CopyDest = CopyDest; });
-        TEST_THROW("operator=(BinaryBuffer&&)-Throw",
-                   std::invalid_argument,
-                   [&MoveDest](){ MoveDest = std::move(MoveDest); });
     }//Operators
 
     {//Element Access
