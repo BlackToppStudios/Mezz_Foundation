@@ -52,7 +52,8 @@ namespace Mezzanine {
 /// @details Any logic required to navigate the serialization hiearchy or enter content to specific
 /// nodes should go here.
 template <typename SerializationSchemeType>
-class BaseSerializationNode {
+class BaseSerializationNode
+{
 public:
     // Scheme type.
     using SerializationScheme               = SerializationSchemeType;
@@ -63,7 +64,20 @@ public:
 
     // Tree type heiarchy types.
     using SerializationAttribute            = typename SerializationScheme::SerializationAttribute;
-    using SerializationInternal             = typename SerializationScheme::SerializationInternalImplementation;
+    using SerializationBackEnd              = typename SerializationScheme::SerializationBackEnd;
+    using SerializationNode                 = typename SerializationScheme::SerializationNode;
+    using SerializationRootNode             = typename SerializationScheme::SerializationRootNode;
+/*
+    // Scheme type.
+    using SerializationScheme               = SerializationSchemeType;
+
+    // Primitive types.
+    using NodeCount                         = typename SerializationScheme::NodeCount;
+    using SerializationString               = typename SerializationScheme::SerializationString;
+
+    // Tree type heiarchy types.
+    using SerializationAttribute            = typename SerializationScheme::SerializationAttribute;
+//    using SerializationInternal             = typename SerializationScheme::SerializationInternalImplementation;
     using SerializationBackEnd              = typename SerializationScheme::SerializationBackEnd;
     using SerializationNode                 = typename SerializationScheme::SerializationNode;
     using SerializationRootNode             = typename SerializationScheme::SerializationRootNode;
@@ -79,12 +93,12 @@ public:
         typename SerializationScheme::SerializationNodeInternalImplementation;
     using SerializationRootNodeInternalImplementation =
         typename SerializationScheme::SerializationRootNodeInternalImplementation;
-
+*/
     // end type boilerplate.
 
     virtual ~BaseSerializationNode() = default;
 
-//    virtual SerializationRootNode GetRootNode() = 0;
+    virtual SerializationRootNode GetRootNode() = 0;
 //    virtual SerializationScheme::SerializationNode GetParentNode() = 0;
 };
 

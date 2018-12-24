@@ -74,7 +74,6 @@ message(STATUS "Determining Source Files.")
 
 AddHeaderFile("BaseSerializationAttribute.h")
 AddHeaderFile("BaseSerializationBackEnd.h")
-AddHeaderFile("BaseSerializationInternalImplementation.h")
 AddHeaderFile("BaseSerializationNode.h")
 AddHeaderFile("BaseSerializationRootNode.h")
 AddHeaderFile("BinaryFind.h")

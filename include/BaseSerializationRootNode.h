@@ -67,7 +67,21 @@ public:
 
     // Tree type heiarchy types.
     using SerializationAttribute            = typename SerializationScheme::SerializationAttribute;
-    using SerializationInternal             = typename SerializationScheme::SerializationInternalImplementation;
+    using SerializationBackEnd              = typename SerializationScheme::SerializationBackEnd;
+    using SerializationNode                 = typename SerializationScheme::SerializationNode;
+    using SerializationRootNode             = typename SerializationScheme::SerializationRootNode;
+
+    /*
+    // Scheme type.
+    using SerializationScheme               = SerializationSchemeType;
+
+    // Primitive types.
+    using NodeCount                         = typename SerializationScheme::NodeCount;
+    using SerializationString               = typename SerializationScheme::SerializationString;
+
+    // Tree type heiarchy types.
+    using SerializationAttribute            = typename SerializationScheme::SerializationAttribute;
+//    using SerializationInternal             = typename SerializationScheme::SerializationInternalImplementation;
     using SerializationBackEnd              = typename SerializationScheme::SerializationBackEnd;
     using SerializationNode                 = typename SerializationScheme::SerializationNode;
     using SerializationRootNode             = typename SerializationScheme::SerializationRootNode;
@@ -83,17 +97,18 @@ public:
         typename SerializationScheme::SerializationNodeInternalImplementation;
     using SerializationRootNodeInternalImplementation =
         typename SerializationScheme::SerializationRootNodeInternalImplementation;
-
+*/
     // end type boilerplate.
 
     virtual ~BaseSerializationRootNode() = default;
-
-    //virtual SerializationNode GetAsNode() { return *this; }
     virtual String SerializeToString() = 0;
+/*
+    //virtual SerializationNode GetAsNode() { return *this; }
+
 
     virtual void AddChildNode(SerializationString NodeName) = 0;
     virtual void AddChildNode(SerializationNode Mode) = 0;
-
+*/
 
 };
 
