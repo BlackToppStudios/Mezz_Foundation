@@ -122,7 +122,7 @@ Mezzanine::String ReneBase64Encode(Mezzanine::UInt8 const* BytesToEncode, unsign
 // Copyright information in Base64.cpp
 /// @brief A reference implementation of Base64 decoding as provide by Rene.
 /// @param EncodedString The String to be decoded as provided by ReneBase64Encode()
-/// @ref A string Containing the resulting binary.
+/// @return A string Containing the resulting binary.
 Mezzanine::String ReneBase64Decode(Mezzanine::String const& EncodedString)
 {
     int in_len = EncodedString.size();
