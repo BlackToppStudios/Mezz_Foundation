@@ -272,6 +272,8 @@ AUTOMATIC_TEST_GROUP(BinaryBufferTests,BinaryBuffer)
         BinaryBuffer StringTest(FifteenLetters);
         TEST_EQUAL("ToString()_const",
                    true,StringTest.ToString() == FifteenLetters);
+        TEST_EQUAL("ToString()_const-Empty",
+                   String(),BinaryBuffer().ToString());
         TEST_EQUAL("GetSize()_const",
                    16u,StringTest.GetSize());
     }//Utility

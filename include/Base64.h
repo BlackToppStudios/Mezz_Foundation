@@ -45,6 +45,12 @@
     #include "BinaryBuffer.h"
 #endif
 
+/// @namespace Base64
+/// @brief A collection of tools for the encoding and decoding between binary and Base64.
+/// @remarks The methods covered here presume the underlying encoding of the text it receives
+/// is ASCII compatible (UTF-8 works). Should a different encoding be used for any reason
+/// assumptions made by these methods won't work and won't encode/decode valid Base64.
+
 namespace Mezzanine {
 namespace Base64 {
     /// @brief Checks to see if a character a valid Base64 character.
