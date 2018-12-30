@@ -31,8 +31,8 @@
    Joseph Toppi - toppij@gmail.com
    John Blackwood - makoenergy02@gmail.com
 */
-#ifndef MEZZ_TEST_SortedManagedArray_h
-#define MEZZ_TEST_SortedManagedArray_h
+#ifndef Mezz_Foundation_SortedManagedArrayTests_h
+#define Mezz_Foundation_SortedManagedArrayTests_h
 
 /// @file
 /// @brief This file tests the functionality of the SortedManagedArray class.
