@@ -106,18 +106,18 @@ namespace Mezzanine
     {  };
 
     /// @brief Convenience value for is_static_any.
-    // @tparam ElementType The type to check whether or not it is a StaticAny.
+    /// @tparam ElementType The type to check whether or not it is a StaticAny.
     /// @details This is a shorthand way to retrieve the value behind a is_static_any that can
     /// be used by SFINAE.
     template<typename ElementType>
-    constexpr Boole is_static_any_v = is_static_any<ElementType>::value;
+    constexpr inline Boole is_static_any_v = is_static_any<ElementType>::value;
 
     /// @brief Convenience value for is_static_any_decayed.
-    // @tparam ElementType The type to be decayed and checked whether or not it is a StaticAny.
+    /// @tparam ElementType The type to be decayed and checked whether or not it is a StaticAny.
     /// @details This is a shorthand way to retrieve the value behind a is_static_any_decayed that can
     /// be used by SFINAE.
     template<typename ElementType>
-    constexpr Boole is_static_any_decayed_v = is_static_any_decayed<ElementType>::value;
+    constexpr inline Boole is_static_any_decayed_v = is_static_any_decayed<ElementType>::value;
 
     /// @brief A namespace for utilities that facilitate the operation of the StaticAny.
     namespace StaticAnyHelpers
