@@ -22,7 +22,6 @@ pipeline {
                             export CODECOV_TOKEN="e946b501-1d85-4afa-9697-587d647917c7" &&
                             bash <(curl -s https://codecov.io/bash)
                         """ }
-                        """ }
                     }
                     post {
                         always {
