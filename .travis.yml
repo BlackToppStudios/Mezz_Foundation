@@ -17,6 +17,7 @@ before_script:
   - mkdir build
   - cd build
   - cmake -E env CXXFLAGS="-fno-var-tracking" cmake -G"Xcode" .. -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=ON
+  - cmake -E env CXXFLAGS="-fno-var-tracking" cmake -G"Xcode" .. -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=ON
 
 script:
   - cmake --build .
