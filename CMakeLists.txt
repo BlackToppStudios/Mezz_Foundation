@@ -57,7 +57,6 @@ ef4ec99ce149e87cff846f2eb7d0558d5d94f4006b963bfbc36ef897013179563335d5ea57767"
         CACHE STRING "Check that when the Jagati is downloaded the right one is used (for consistency and security).")
     set(JAGATI_Url "https://raw.githubusercontent.com/BlackToppStudios/Jagati/0.27.4/Jagati.cmake"
         CACHE STRING "Where to download the Jagati from.")
-        CACHE STRING "Where to download the Jagati from.")
     file(DOWNLOAD "${JAGATI_Url}" "${JAGATI_File}" EXPECTED_HASH SHA512=${JAGATI_Checksum})
 endif(JAGATI_Download)
 include("${JAGATI_File}")
