@@ -109,13 +109,13 @@ namespace Mezzanine
     /// @details This is a shorthand way to retrieve the value behind a is_static_any that can
     /// be used by SFINAE.
     template<typename ElementType>
-    inline constexpr Boole is_static_any_v = is_static_any<ElementType>::value;
+    constexpr Boole is_static_any_v = is_static_any<ElementType>::value;
 
     /// @brief Convenience value for is_static_any_decayed.
     /// @details This is a shorthand way to retrieve the value behind a is_static_any_decayed that can
     /// be used by SFINAE.
     template<typename ElementType>
-    inline constexpr Boole is_static_any_decayed_v = is_static_any_decayed<ElementType>::value;
+    constexpr Boole is_static_any_decayed_v = is_static_any_decayed<ElementType>::value;
 
     /// @brief A namespace for utilities that facilitate the operation of the StaticAny.
     namespace StaticAnyHelpers
