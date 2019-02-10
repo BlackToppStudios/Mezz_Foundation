@@ -1,5 +1,5 @@
 sudo: required
-dist: trusty
+dist: xenial
 language: cpp
 
 matrix:
@@ -9,23 +9,15 @@ matrix:
       env: BUILD_TYPE=Debug
       env: CXXFLAGS=-fno-var-tracking
     - os: osx
-      compiler: gcc
-      env: BUILD_TYPE=Debug
-      env: CXXFLAGS=-fno-var-tracking
-    - os: osx
       compiler: clang
-      env: BUILD_TYPE=Release
-      env: CXXFLAGS=-fno-var-tracking
-    - os: osx
-      compiler: gcc
       env: BUILD_TYPE=Release
       env: CXXFLAGS=-fno-var-tracking
 
 before_script:
   - mkdir build
   - cd build
-  - cmake -E env CXXFLAGS="-fno-var-tracking" cmake -G"Xcode" .. -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DCMAKE_CXX_FLAGS="$CXX_FLAGS" -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=ON
-  - cmake -E env CXXFLAGS="-fno-var-tracking" cmake -G"Xcode" .. -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DCMAKE_CXX_FLAGS="$CXX_FLAGS" -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=ON
+  - cmake -E env CXXFLAGS="-fno-var-tracking" cmake -G"Xcode" .. -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=ON
+  - cmake -E env CXXFLAGS="-fno-var-tracking" cmake -G"Xcode" .. -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=ON
 
 script:
   - cmake --build .

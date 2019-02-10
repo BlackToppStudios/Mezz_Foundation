@@ -27,6 +27,24 @@ pipeline {
                         }
                     }
                 }
+                stage('MacOSAir') {
+                    agent { label "MacOSAir" }
+                    steps {
+                        checkout scm
+                        sh 'mkdir -p build-debug'
+                        dir('build-debug') { sh """
+                            export PATH='$PATH:/usr/local/bin/' &&
+                            cmake -E env CXXFLAGS="-fno-var-tracking" cmake -G"Xcode" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
+                            cmake --build . &&
+                           ./Foundation_Tester xml
+                        """ }
+                    }
+                    post {
+                        always {
+                            junit "build-debug/**/Mezz*.xml"
+                        }
+                    }
+                }
                 stage('MacOSSierra') {
                     agent { label "MacOSSierra" }
                     steps {
@@ -176,6 +194,24 @@ pipeline {
                             cmake -E env CXXFLAGS="-fno-var-tracking-assignments" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
                             ninja &&
                             ./Foundation_Tester xml
+                        """ }
+                    }
+                    post {
+                        always {
+                            junit "build-release/**/Mezz*.xml"
+                        }
+                    }
+                }
+                stage('MacOSAir') {
+                    agent { label "MacOSAir" }
+                    steps {
+                        checkout scm
+                        sh 'mkdir -p build-release'
+                        dir('build-release') { sh """
+                            export PATH='$PATH:/usr/local/bin/' &&
+                            cmake -E env CXXFLAGS="-fno-var-tracking" cmake -G"Xcode" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
+                            cmake --build . &&
+                           ./Foundation_Tester xml
                         """ }
                     }
                     post {
