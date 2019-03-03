@@ -44,7 +44,7 @@
 
 
 /// @file
-/// @brief
+/// @brief This has all the heavy lifting for the command line parsing.
 
 namespace Mezzanine
 {
