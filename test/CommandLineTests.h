@@ -70,7 +70,7 @@ DEFAULT_TEST_GROUP(CommandLineTests, CommandLine)
             "--long",
             "trailing",
             "-wtfbbq",
-            0
+            nullptr
         };
         char** ArgV = const_cast<char**>(ArgValueArray);
         const int ArgC = 5;
@@ -164,7 +164,7 @@ DEFAULT_TEST_GROUP(CommandLineTests, CommandLine)
             "--long",
             "trailing",
             "-wtfbbq",
-            0
+            nullptr
         };
         char** ArgV = const_cast<char**>(ArgValueArray);
         const int ArgC = 5;
@@ -194,7 +194,7 @@ DEFAULT_TEST_GROUP(CommandLineTests, CommandLine)
             "arg3",
             "-x",
             "arg4",
-            0
+            nullptr
         };
         char** ArgV = const_cast<char**>(ArgValueArray);
         const int ArgC = 8;
