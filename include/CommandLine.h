@@ -239,8 +239,8 @@ public:
     CommandLineArguments(CommandLineArguments&) = default;
     /// @brief Default move constructor.
     CommandLineArguments(CommandLineArguments&&) = default;
-    /// @brief Default virtual destructor
-    virtual ~CommandLineArguments() = default;
+    /// @brief Default non-virtual destructor, don't inherit form this.
+    ~CommandLineArguments() = default;
 
 private:
     /// @brief Get the name of the executable launched here.
