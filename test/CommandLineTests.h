@@ -41,13 +41,11 @@
 #define Mezz_Foundation_CommandLineTests_h
 
 /// @file
-/// @brief
+/// @brief Tests of the CommandLineArguments. The last few serve as decent examples as well.
 
 #include "MezzTest.h"
 
 #include "CommandLine.h"
-
-SAVE_WARNING_STATE
 
 DEFAULT_TEST_GROUP(CommandLineTests, CommandLine)
 {
@@ -213,6 +211,5 @@ DEFAULT_TEST_GROUP(CommandLineTests, CommandLine)
     }
 
 }
-RESTORE_WARNING_STATE
 
 #endif

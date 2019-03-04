@@ -52,15 +52,15 @@ namespace Mezzanine
 {
 
 /// @brief Represent an ordered collection of command line arguments as strings.
-using ArgVector = std::vector<Mezzanine::String>;
+using ArgVector = std::vector<String>;
 
 /// @brief A mapping of command line switches/flags onto possible argument vectors for those flags.
-using ArgMap = Mezzanine::FlatMap<Mezzanine::String, ArgVector>;
+using ArgMap = Mezzanine::FlatMap<String, ArgVector>;
 
 /// @brief This token is used to prefix arguments/flags on the command line.
 const char ArgToken = '-';
 
-/// @brief Convey nain args into a vector with no semantic changes
+/// @brief Convey main args into a vector with no semantic changes
 /// @param ArgCount The count of arguments as given to main.
 /// @param Arguments The "Argument Vector" as given to main.
 /// @return An ArgVector with a 1 to 1 conversion of the inputs without opinions in parsing or tokenizing.
@@ -69,12 +69,12 @@ ArgVector MEZZ_LIB VectorizeArgs(int ArgCount,  char** Arguments);
 /// @brief An opinionated way to split grouped single letter args into multiple short arguments
 /// @param DirtyArg A single arg prepended with '-' that should be split.
 /// @return An array of single character args, "-zxf" would yield {"-z", "-x", "-f"}.
-ArgVector MEZZ_LIB TokenizeShortArg(const Mezzanine::String& DirtyArg);
+ArgVector MEZZ_LIB TokenizeShortArg(const String& DirtyArg);
 
 /// @brief Break a single token into numerous tokens if they are all short args.
 /// @param DirtyArg A group of short args like "-a" or "-rf"
 /// @return An ArgVector with short tokens for each long token like ["-a"] or ["-r", "-f"]
-ArgVector MEZZ_LIB TokenizeSingleArg(const Mezzanine::String& DirtyArg);
+ArgVector MEZZ_LIB TokenizeSingleArg(const String& DirtyArg);
 
 /// @brief Break any amount of argument tokens into smaller argument tokens
 /// @param DirtyArgs A vector of arguments that might include some arguments stuck together.
@@ -97,8 +97,12 @@ ArgMap MEZZ_LIB MapArgumentParameters(const ArgVector& DirtyArgs);
 /// {
 ///      const CommandLineArguments Parsed(ArgC, ArgV);
 /// @endcode
+/// After this the instannce of CommandLineArguments has only readable members, every member is const and nothing is
+/// mutable. This is to insure that if accidents cause compilation errors and allow confidence that uses of this that
+/// compile are likely to be correct (or at least only wrong because of runtime logic errors like indexing errors).
+/// @n @n
 /// This tries to look a little like typical GNU command line arguments. This handles "long"
-/// argument that start with "--" like "--all" and this handles "short" arguments that start with "-" like "-a and
+/// arguments that start with "--" like "--all" and this handles "short" arguments that start with "-" like "-a and
 /// combined short forms like "-rf".
 /// @n @n
 /// This also handles arguments without a "-" prefix by presuming they are parameters for previous arguments. Many
@@ -121,7 +125,8 @@ ArgMap MEZZ_LIB MapArgumentParameters(const ArgVector& DirtyArgs);
 /// illustrated as possible initializer lists:
 /// @n @n
 ///
-/// Short arguments are broken up, and long arguments are not. Short arguments have one "-", long have two:
+/// Short arguments are broken up, and long arguments are not. Short arguments have one ArgToken ("-"), long have two
+/// ArgTokens:
 /// @n @n
 ///    foo.exe -sf --long
 /// @n @n
@@ -179,7 +184,7 @@ ArgMap MEZZ_LIB MapArgumentParameters(const ArgVector& DirtyArgs);
 ///     foo.exe -a arg1 -pa arg2 arg3 -x arg4
 /// @n @n
 ///     {
-///         { "-a", {"arg1", "arg2"}, "arg3"} },
+///         { "-a", {"arg1", "arg2", "arg3"} },
 ///         { "-p", {} },
 ///         { "-x", {"arg4"} }
 ///     }
@@ -212,7 +217,7 @@ class MEZZ_LIB CommandLineArguments
 {
 public:
     /// @brief The command used to invokd the executable.
-    const Mezzanine::String ExecutableCommand;
+    const String ExecutableCommand;
 
     /// @brief The arguments parsed with the command GNU semantics included.
     const Mezzanine::ArgMap Arguments;
@@ -223,12 +228,26 @@ public:
     /// @param ArgValues The Argument Vector or Argument Values from Main.
     CommandLineArguments(int ArgCount,  char** ArgValues);
 
+    /// @brief Not default constructible. because that is non-sense for a read only class.
+    CommandLineArguments() = delete;
+    /// @brief Not Assignable by value. because that is non-sense for a read only class.
+    void operator=(CommandLineArguments&) = delete;
+    /// @brief Not Assignable by move. because that is non-sense for a read only class.
+    void operator=(CommandLineArguments&&) = delete;
+
+    /// @brief Default copy constructor.
+    CommandLineArguments(CommandLineArguments&) = default;
+    /// @brief Default move constructor.
+    CommandLineArguments(CommandLineArguments&&) = default;
+    /// @brief Default virtual destructor
+    virtual ~CommandLineArguments() = default;
+
 private:
     /// @brief Get the name of the executable launched here.
     /// @param ArgCount The count of args from main.
     /// @param ArgValues The Argument Vector or Argument Values from Main.
     /// @return The Executable or an empty string.
-    Mezzanine::String ExecutableFromArgV(int ArgCount,  char** ArgValues) const;
+    String ExecutableFromArgV(int ArgCount,  char** ArgValues) const;
 
     /// @brief Parse all the args except for the executable name
     /// @param ArgCount The count of args from main.

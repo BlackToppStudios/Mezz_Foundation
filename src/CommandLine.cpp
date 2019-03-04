@@ -65,7 +65,7 @@ ArgVector TokenizeShortArg(const String& DirtyArg)
 
     ArgVector results;
     for(String::const_iterator Iter=DirtyArg.cbegin()+1; DirtyArg.cend()!=Iter; Iter++)
-        { results.push_back( Mezzanine::String("") + ArgToken + *Iter ); }
+        { results.push_back( String("") + ArgToken + *Iter ); }
     return results;
 }
 
