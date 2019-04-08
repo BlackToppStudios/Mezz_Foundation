@@ -114,14 +114,16 @@ ArgMap MEZZ_LIB MapArgumentParameters(const ArgVector& DirtyArgs);
 /// as "-tfw" are treated the same as long as there are no trailing parameters for those arguments.
 /// @n @n
 /// This converts all arguments to keys in a map with a value of a vector of their parameters. Consider this command:
-/// @n @n
+/// @code
 ///     foo.exe -s
-/// @n @n
+/// @endcode
+///
 /// This would store "foo.exe" in the data member ExecutableCommand and turns the arg into a dictionary with one key,
 /// "-s", and that key would have an empty vector for a value. As an std::initializer_list it might look like:
-/// @n @n
+/// @code
 ///     { {"-s", {} }
-/// @n @n
+/// @endcode
+///
 /// The following examples have the same executable command and but would make slightly different data structures and
 /// are illustrated as possible initializer lists:
 /// @n @n
@@ -131,8 +133,9 @@ ArgMap MEZZ_LIB MapArgumentParameters(const ArgVector& DirtyArgs);
 /// @code
 ///    foo.exe -sf --long
 /// @endcode
+///
 /// Which would yield a structure like the following when parsed with this:
-/// @n @n
+/// @code
 ///     {
 ///         { "--long", {} },
 ///         { "-s",     {} },
