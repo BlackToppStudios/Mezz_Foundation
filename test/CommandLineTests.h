@@ -199,15 +199,15 @@ DEFAULT_TEST_GROUP(CommandLineTests, CommandLine)
 
         const CommandLineArguments Parsed(ArgC, ArgV);
 
-        TEST_EQUAL("multipleParams - ExecutableCommand",    String("foo.exe"),   Parsed.ExecutableCommand);
-        TEST_EQUAL("multipleParams - ArgCount",     size_t(3),          Parsed.Arguments.size());
-        TEST_EQUAL("multipleParams - x",            size_t(1),          Parsed.Arguments.at("-x").size());
-        TEST_EQUAL("multipleParams - p",            size_t(0),          Parsed.Arguments.at("-p").size());
-        TEST_EQUAL("multipleParams - z",            size_t(3),          Parsed.Arguments.at("-a").size());
-        TEST_EQUAL("multipleParams - x1",           String("arg4"),     Parsed.Arguments.at("-x").at(0));
-        TEST_EQUAL("multipleParams - a1",           String("arg1"),     Parsed.Arguments.at("-a").at(0));
-        TEST_EQUAL("multipleParams - a2",           String("arg2"),     Parsed.Arguments.at("-a").at(1));
-        TEST_EQUAL("multipleParams - a3",           String("arg3"),     Parsed.Arguments.at("-a").at(2));
+        TEST_EQUAL("multipleParams - ExecutableCommand",    String("foo.exe"),  Parsed.ExecutableCommand);
+        TEST_EQUAL("multipleParams - ArgCount",             size_t(3),          Parsed.Arguments.size());
+        TEST_EQUAL("multipleParams - x",                    size_t(1),          Parsed.Arguments.at("-x").size());
+        TEST_EQUAL("multipleParams - p",                    size_t(0),          Parsed.Arguments.at("-p").size());
+        TEST_EQUAL("multipleParams - z",                    size_t(3),          Parsed.Arguments.at("-a").size());
+        TEST_EQUAL("multipleParams - x1",                   String("arg4"),     Parsed.Arguments.at("-x").at(0));
+        TEST_EQUAL("multipleParams - a1",                   String("arg1"),     Parsed.Arguments.at("-a").at(0));
+        TEST_EQUAL("multipleParams - a2",                   String("arg2"),     Parsed.Arguments.at("-a").at(1));
+        TEST_EQUAL("multipleParams - a3",                   String("arg3"),     Parsed.Arguments.at("-a").at(2));
     }
 
 }
