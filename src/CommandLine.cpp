@@ -119,7 +119,7 @@ ArgMap MapArgumentParameters(const ArgVector& DirtyArgs)
 CommandLineArguments::CommandLineArguments(int ArgCount, char** ArgValues) :
     ExecutableCommand(ExecutableFromArgV(ArgCount,ArgValues)),
     Arguments(ArgsFromArgV(ArgCount,ArgValues))
-{ }
+    { }
 
 String CommandLineArguments::ExecutableFromArgV(int ArgCount, char** ArgValues) const
     { return (ArgCount && ArgValues && ArgValues[0]) ? ArgValues[0] : ""; }

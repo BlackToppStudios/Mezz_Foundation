@@ -41,7 +41,7 @@
 #define Mezz_Foundation_CommandLine_h
 
 /// @file
-/// @brief a small set of tools for parsing command line arguments.
+/// @brief A small set of tools for parsing command line arguments.
 
 #ifndef SWIG
     #include "DataTypes.h"
@@ -60,7 +60,7 @@ using ArgMap = Mezzanine::FlatMap<String, ArgVector>;
 /// @brief This token is used to prefix arguments/flags on the command line.
 const char ArgToken = '-';
 
-/// @brief Convey main args into a vector with no semantic changes
+/// @brief Convert main args into a vector with no semantic changes
 /// @param ArgCount The count of arguments as given to main.
 /// @param Arguments The "Argument Vector" as given to main.
 /// @return An ArgVector with a 1 to 1 conversion of the inputs without opinions in parsing or tokenizing.
@@ -72,7 +72,7 @@ ArgVector MEZZ_LIB VectorizeArgs(int ArgCount,  char** Arguments);
 ArgVector MEZZ_LIB TokenizeShortArg(const String& DirtyArg);
 
 /// @brief Break a single token into numerous tokens if they are all short args.
-/// @param DirtyArg A group of short args like "-a" or "-rf"
+/// @param DirtyArg A potential group of short args like "-a" or "-rf"
 /// @return An ArgVector with short tokens for each long token like ["-a"] or ["-r", "-f"]
 ArgVector MEZZ_LIB TokenizeSingleArg(const String& DirtyArg);
 
@@ -86,9 +86,9 @@ ArgVector MEZZ_LIB TokenizeArgVector(const ArgVector& DirtyArgs);
 /// @return A Map of flags/switchs starting with "-" onto a vector of things without these prefixes.
 ArgMap MEZZ_LIB MapArgumentParameters(const ArgVector& DirtyArgs);
 
-/// @brief A collection of arguments and possible following flags.
-/// @details This is a simple container for storing for command line arguments after parsing them in a mildly
-/// opinionated but common way.
+/// @brief A collection of arguments and possible associated flags.
+/// @details This is a simple container for storing command line arguments after parsing them in an opinionated but
+/// common way.
 /// @n @n
 /// This accepts the Argument Count (commonly argc) and Argument Vector/Values(argv) in the constructor as they are
 /// passed into main.
@@ -98,7 +98,7 @@ ArgMap MEZZ_LIB MapArgumentParameters(const ArgVector& DirtyArgs);
 ///      const CommandLineArguments Parsed(ArgC, ArgV);
 /// @endcode
 /// After this the instannce of CommandLineArguments has only readable members, every member is const and nothing is
-/// mutable. This is to insure that if accidents cause compilation errors and allow confidence that uses of this that
+/// mutable. This is to insure that accidents cause compilation errors and allows confidence that use of this that
 /// compile are likely to be correct (or at least only wrong because of runtime logic errors like indexing errors).
 /// @n @n
 /// This tries to look a little like typical GNU command line arguments. This handles "long"
@@ -107,10 +107,11 @@ ArgMap MEZZ_LIB MapArgumentParameters(const ArgVector& DirtyArgs);
 /// @n @n
 /// This also handles arguments without a "-" prefix by presuming they are parameters for previous arguments. Many
 /// arguments need additional information to specify some behavior. Consider a potential zip command, it might accept a
-/// "--file" flag to indicate the name of the zip file to work with.
+/// "--file" flag to indicate the name of the zip file to work with. This could parse this syntax like this
+/// "myZipCommand --file fileToWork.zip".
 /// @n @n
 /// This makes no further guarantees about preserving the order arguments are passed in. For example "-wtf" is the same
-/// as "-tfw" are treated the same.
+/// as "-tfw" are treated the same as long as there are no trailing parameters for those arguments.
 /// @n @n
 /// This converts all arguments to keys in a map with a value of a vector of their parameters. Consider this command:
 /// @n @n
@@ -121,41 +122,54 @@ ArgMap MEZZ_LIB MapArgumentParameters(const ArgVector& DirtyArgs);
 /// @n @n
 ///     { {"-s", {} }
 /// @n @n
-/// All of these examples have the same executable command and but would make slightly data structures and are
-/// illustrated as possible initializer lists:
+/// The following examples have the same executable command and but would make slightly different data structures and
+/// are illustrated as possible initializer lists:
 /// @n @n
 ///
 /// Short arguments are broken up, and long arguments are not. Short arguments have one ArgToken ("-"), long have two
-/// ArgTokens:
-/// @n @n
+/// ArgTokens. Consider this example:
+/// @code
 ///    foo.exe -sf --long
+/// @endcode
+/// Which would yield a structure like the following when parsed with this:
 /// @n @n
 ///     {
 ///         { "--long", {} },
 ///         { "-s",     {} },
 ///         { "-w",     {} }
 ///     }
-/// @n @n
+/// @endcode
+///
+/// Here are some of the things you can do with this parsed structure:
 /// @code{.cpp}
 /// int main(int ArgC, char** ArgV)
 /// {
 ///      const CommandLineArguments Parsed(ArgC, ArgV);
 ///      std::cout
 ///         << Parsed.ExecutableCommand // foo.exe
-///         << Parsed.Arguments.at("--long").size() // 0
+///         << Parsed.Arguments.at("--long").size() // 0 but it does exist so no exception from #at.
 ///         << Parsed.Arguments.contains("-s"); // true
 /// @endcode
 ///
-/// Items following arguments with not "-" are treating as parameters to the argument they follow.
-/// @n @n
+/// Items following arguments with not "-" are treating as parameters to the argument they follow. These examples will
+/// use this command line:
+/// @code
 ///    foo.exe -s --long trailing -w trailing_short
-/// @n @n
+/// @endcode
+///
+/// In the produced data structure each arugument is paired with a collection of its parameters. He we can see that
+/// "trailing" in a collection attached to "--long" and "trailing_short" is attached to "-s":
+///
+/// @code
 ///     {
 ///         { "-s",     {} },
 ///         { "--long", {"trailing"} },
 ///         { "-w",     {"trailing_short"} }
 ///     }
-/// @n @n
+/// @endcode
+/// These are store as vector like objects in the structure that is produced after parsing. These can be referenced
+/// by operator[] or the #at member function like in the following example:
+///
 /// @code{.cpp}
 /// int main(int ArgC, char** ArgV)
 /// {
@@ -165,10 +179,14 @@ ArgMap MEZZ_LIB MapArgumentParameters(const ArgVector& DirtyArgs);
 ///         << Parsed.Arguments.at("-w").at(0); // trailing_short
 /// @endcode
 ///
-/// Multiple arguments of the same kind are mapped onto the same key,
-/// @n @n
+/// Multiple arguments of the same name are mapped onto the same key, so this command line with 6 short argument is
+/// actually mapped onto a parsed structure with 5 because "-b" is entered twice:
+/// @code
 ///    foo.exe -wtfbbq
-/// @n @n
+/// @endcode
+///
+/// Here we can see that there is no way to no about the duplicate "-b"
+/// @code
 ///     {
 ///         { "-w",     {} },
 ///         { "-t",     {} },
@@ -176,34 +194,41 @@ ArgMap MEZZ_LIB MapArgumentParameters(const ArgVector& DirtyArgs);
 ///         { "-b",     {} },
 ///         { "-q",     {} }
 ///     }
-/// @n @n
+/// @endcode
 ///
 /// If you pass multiple arguments with "-" they keeping appending to that vector in the resulting map even if that
 /// argument is passed multiple times on the command line:
-/// @n @n
+/// @code
 ///     foo.exe -a arg1 -pa arg2 arg3 -x arg4
-/// @n @n
+/// @endcode
+///
+/// Because the same name is "-a" is used multiple times it get arg1, arg2, and arg3:
+/// @code
 ///     {
 ///         { "-a", {"arg1", "arg2", "arg3"} },
 ///         { "-p", {} },
 ///         { "-x", {"arg4"} }
 ///     }
-/// @n @n
+/// @endcode
+///
 /// @code{.cpp}
 /// int main(int ArgC, char** ArgV)
 /// {
 ///      const CommandLineArguments Parsed(ArgC, ArgV);
 ///      std::cout
-///         << Parsed.Arguments.at("-a").at(0)  // arg1
-///         << Parsed.Arguments.at("-a").at(1)  // arg2
-///         << Parsed.Arguments.at("-a").at(2)  // arg3
-///         << Parsed.Arguments.at("-x").at(0)  // arg4
+///         << Parsed.Arguments.at("-a").at(0)  // arg1 on -a
+///         << Parsed.Arguments.at("-a").at(1)  // arg2 on -a
+///         << Parsed.Arguments.at("-a").at(2)  // arg3 on -a
+///         << Parsed.Arguments.at("-x").at(0)  // arg4 on *-x*
 /// @endcode
 ///
-/// All of together might look like:
-/// @n @n
+/// A single command line using all of together might look like:
+/// @code
 ///    foo.exe -s --long trailing -wtfbbq suace --long arg2
-/// @n @n
+/// @endcode
+///
+/// Which would yield the following data structure:
+/// @code
 ///     {
 ///         { "-s",     {} },
 ///         { "--long", {"trailing", "arg2"} },
@@ -213,6 +238,7 @@ ArgMap MEZZ_LIB MapArgumentParameters(const ArgVector& DirtyArgs);
 ///         { "-b",     {} },
 ///         { "-q",     {"sauce"} }
 ///     }
+/// @endcode
 class MEZZ_LIB CommandLineArguments
 {
 public:
