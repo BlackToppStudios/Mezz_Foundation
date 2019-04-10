@@ -242,6 +242,15 @@ ArgMap MEZZ_LIB MapArgumentParameters(const ArgVector& DirtyArgs);
 ///         { "-q",     {"sauce"} }
 ///     }
 /// @endcode
+///
+/// Once You have created a CommandLineArguments instance it is immutable. This makes it safe to expose the members more
+/// directly as long as your code refers to types Mezzanine::CommandLineArguments, Mezzanine::ArgMap, or
+/// Mezzanine::ArgVector and not their underlying types. Referring directly to the underlying types will break your
+/// build when we change the underlying types, which we might do for the sake of efficiency, performance or features.
+/// @n @n
+/// When you refer to an ArgVector you can use it in as if it were an std::vector<String>, at present it is an
+/// std::vector<String>. When you refer to an ArgMap std::map<String, Mezzanine::ArgVector>, and at present it actually
+/// is a Mezzanine::FlatMap<String, ArgVector>;
 class MEZZ_LIB CommandLineArguments
 {
 public:
