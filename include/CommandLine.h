@@ -260,12 +260,12 @@ public:
     /// @brief Not default constructible. because that is non-sense for a read only class.
     CommandLineArguments() = delete;
     /// @brief Not Assignable by value. because that is non-sense for a read only class.
-    void operator=(CommandLineArguments&) = delete;
+    void operator=(const CommandLineArguments&) = delete;
     /// @brief Not Assignable by move. because that is non-sense for a read only class.
     void operator=(CommandLineArguments&&) = delete;
 
     /// @brief Default copy constructor.
-    CommandLineArguments(CommandLineArguments&) = default;
+    CommandLineArguments(const CommandLineArguments&) = default;
     /// @brief Default move constructor.
     CommandLineArguments(CommandLineArguments&&) = default;
     /// @brief Default non-virtual destructor, don't inherit form this.
