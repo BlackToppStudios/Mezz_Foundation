@@ -52,10 +52,10 @@ if(NOT JAGATI_Download)
     option(JAGATI_Download "Should the Jagati be downloaded automatically" ON)
 endif(NOT JAGATI_Download)
 if(JAGATI_Download)
-    set(JAGATI_Checksum "5417802bf9150088c086df70453e091b060b6d03edf005f90dd\
-a39b504906f76bffa0dbcc02248597e536beceed7dc90c8c582aae9f4a98447efdf8d609b23c0"
+    set(JAGATI_Checksum "a2043610a5e0d315f0e268b9aa42bdd2819ed6e20a6f1f88cfa\
+ef4ec99ce149e87cff846f2eb7d0558d5d94f4006b963bfbc36ef897013179563335d5ea57767"
         CACHE STRING "Check that when the Jagati is downloaded the right one is used (for consistency and security).")
-    set(JAGATI_Url "https://raw.githubusercontent.com/BlackToppStudios/Jagati/0.25.1/Jagati.cmake"
+    set(JAGATI_Url "https://raw.githubusercontent.com/BlackToppStudios/Jagati/0.27.4/Jagati.cmake"
         CACHE STRING "Where to download the Jagati from.")
     file(DOWNLOAD "${JAGATI_Url}" "${JAGATI_File}" EXPECTED_HASH SHA512=${JAGATI_Checksum})
 endif(JAGATI_Download)
@@ -72,9 +72,12 @@ IncludeJagatiPackage("Test")
 # Source files
 message(STATUS "Determining Source Files.")
 
+AddHeaderFile("Base64.h")
+AddHeaderFile("BinaryBuffer.h")
 AddHeaderFile("BinaryFind.h")
 AddHeaderFile("BitFieldTools.h")
 AddHeaderFile("CountedPtr.h")
+AddHeaderFile("CommandLine.h")
 AddHeaderFile("FlatMap.h")
 AddHeaderFile("ManagedArray.h")
 AddHeaderFile("SortedManagedArray.h")
@@ -84,6 +87,9 @@ AddHeaderFile("StreamLogging.h")
 AddHeaderFile("Version.h")
 ShowList("Header Files:" "\t" "${FoundationHeaderFiles}")
 
+AddSourceFile("Base64.cpp")
+AddSourceFile("BinaryBuffer.cpp")
+AddSourceFile("CommandLine.cpp")
 AddSourceFile("StreamLogging.cpp")
 ShowList("Source Files:" "\t" "${FoundationSourceFiles}")
 
@@ -95,8 +101,11 @@ ShowList("Doxygen Input Files:" "\t" "${FoundationDoxFiles}")
 AddJagatiLibrary()
 CreateCoverageTarget(${FoundationLib} "${FoundationSourceFiles}")
 
+AddTestFile("Base64Tests.h")
+AddTestFile("BinaryBufferTests.h")
 AddTestFile("BitFieldToolsTests.h")
 AddTestFile("CountedPtrTests.h")
+AddTestFile("CommandLineTests.h")
 AddTestFile("FlatMapTests.h")
 AddTestFile("ManagedArrayTests.h")
 AddTestFile("SortedManagedArrayTests.h")

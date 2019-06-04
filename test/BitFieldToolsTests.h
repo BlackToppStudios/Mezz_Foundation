@@ -37,8 +37,8 @@
    Joseph Toppi - toppij@gmail.com
    John Blackwood - makoenergy02@gmail.com
 */
-#ifndef Mezz_Test_BitFieldTools_h
-#define Mezz_Test_BitFieldTools_h
+#ifndef Mezz_Foundation_BitFieldToolsTests_h
+#define Mezz_Foundation_BitFieldToolsTests_h
 
 /// @file
 /// @brief A Simple tests for Stream logging tools

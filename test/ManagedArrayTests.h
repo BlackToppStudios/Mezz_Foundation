@@ -37,8 +37,8 @@
    Joseph Toppi - toppij@gmail.com
    John Blackwood - makoenergy02@gmail.com
 */
-#ifndef Mezz_Test_ManagedArray_h
-#define Mezz_Test_ManagedArray_h
+#ifndef Mezz_Foundation_ManagedArrayTests_h
+#define Mezz_Foundation_ManagedArrayTests_h
 
 /// @file
 /// @brief This file tests the functionality of the ManagedArray class.

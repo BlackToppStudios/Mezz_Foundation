@@ -40,9 +40,9 @@ CMakeLists.txt.user*
 *.so
 *.so.*
 
-# Mac OS X spotlight
+# File Browsers
 .DS_Store
-
+.directory
 
 # Ignore libincludes mercurial files
 .hg*
