@@ -391,7 +391,7 @@ namespace Mezzanine
             if( ReferenceCounter ) {
                 if( ReferenceCounter->DecrementReferenceCount() == 0 ) {
                     delete ReferenceCounter;
-                    ReferenceCounter = 0;
+                    ReferenceCounter = nullptr;
                 }
             }
         }
@@ -485,7 +485,7 @@ namespace Mezzanine
         /// @brief Returns true if this pointer points to something.
         /// @warning Without C++11 this can accidentally be cast to a Boole and do silly things.
         operator Boole() const noexcept
-            { return 0 != ReferenceCounter; }
+            { return nullptr != ReferenceCounter; }
 
         ///////////////////////////////////////////////////////////////////////////////
         // Manipulation/Query
