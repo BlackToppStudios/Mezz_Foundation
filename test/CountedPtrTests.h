@@ -57,17 +57,16 @@ namespace Mezzanine
         class FooExternal
         {
             public:
+                /// @brief A pointer to a bool to indicate whether the object's destructor has been called.
+                Boole* IsDestructed;
                 /// @brief A value to use for testing purposes.
                 Integer Value;
-
-                /// @brief A pointer a bool to indicate whether the object's destructor has been called.
-                Boole* IsDestructed;
 
                 /// @brief A constructor that allows setting the value.
                 /// @param DestructFlag Where to save destruction results.
                 /// @param Val A default value to use for testing.
                 explicit FooExternal(Boole* DestructFlag, Integer Val = 0)
-                    : Value(Val), IsDestructed(DestructFlag)
+                    : IsDestructed(DestructFlag), Value(Val)
                     {}
 
                 /// @brief A destructor that sets the target of IsDestructed to true.
@@ -77,6 +76,8 @@ namespace Mezzanine
                 }
         };
 
+        SAVE_WARNING_STATE
+        SUPPRESS_CLANG_WARNING("-Wvtable")
         /// @brief A class to point at that uses its own reference counting internal mechanism.
         class FooInternal
         {
@@ -85,17 +86,16 @@ namespace Mezzanine
                 Whole RefCount;
 
             public:
-                /// @brief A value to use for testing purposes.
-                Integer Value;
-
                 /// @brief A pointer a bool to indicate whether the object's destructor has been called.
                 Boole* IsDestructed;
+                /// @brief A value to use for testing purposes.
+                Integer Value;
 
                 /// @brief A constructor that allows setting the value.
                 /// @param DestructFlag Where to save destruction results.
                 /// @param Val A default value to use for testing.
                 explicit FooInternal(Boole* DestructFlag, Integer Val = 0)
-                    : RefCount(0), Value(Val), IsDestructed(DestructFlag)
+                    : RefCount(0), IsDestructed(DestructFlag), Value(Val)
                     {}
 
                 explicit FooInternal()
@@ -229,6 +229,8 @@ namespace Mezzanine
                 virtual ~CarTest()
                     {}
         };
+
+        RESTORE_WARNING_STATE
     } // End Testing Namespace
 
     using namespace CountedPtrTesting;
@@ -329,7 +331,7 @@ DEFAULT_TEST_GROUP(CountedPtrTests,CountedPtr)
         TEST_EQUAL("CountedPtr(CountedPtr&&)-OldPointer", Whole(0), PtrCopy.UseCount());
     }
 
-    { // Simple automated desctruction
+    { // Automated destruction
         Boole destructFlagExternal = false;
         Boole destructFlagInternal = false;
 
