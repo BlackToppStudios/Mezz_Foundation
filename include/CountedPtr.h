@@ -560,7 +560,6 @@ namespace Mezzanine
     /// @endcode
     /// @tparam ReturnPointer The type of pointer that the functions on the CountedPtr must return.
     /// @tparam OriginalPointer The actual type the CountedPtr is maintaining as a target.
-    /// @tparam CountedPointerCastingState Any value in the @ref CountedPointerCastingState to indicate kind of casting.
     /// @details For any case that uses CastNoneError including the default.
     template<typename ReturnPointer, typename OriginalPointer, CountedPointerCastingState>
     class CountedPtrCastImpl
