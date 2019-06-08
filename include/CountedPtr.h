@@ -285,7 +285,6 @@ namespace Mezzanine
     };
     */
 
-    /// @internal
     /// @brief This exists to conceal internal type detection mechanisms making internal
     /// and external reference counting different.
     namespace ReferenceCountAdjustment
@@ -545,7 +544,6 @@ namespace Mezzanine
             { return ReferenceCounter; }
     };
 
-    /// @internal
     /// @brief This is used as to determine how a CountedPtr performs casting between pointer types internally.
     /// @details The default implementation for internal casting in the CountedPtr.
     /// @n @n
@@ -565,7 +563,6 @@ namespace Mezzanine
     class CountedPtrCastImpl
     {
     public:
-        /// @internal
         /// @brief Do not use this cast.  Left empty to cause a compilation error if this is attempted.
         /// @return Not applicable as this should never be called.
         static ReturnPointer Cast(OriginalPointer)
@@ -573,7 +570,6 @@ namespace Mezzanine
         }
     };
 
-    /// @internal
     /// @brief An implementation of the CountedPtrCast that always returns the pointer passed,
     /// reached via CastNoneError in the ReferenceCountTraits of the target class.
     /// @tparam OriginalPointer The type of the original pointer and return value must match exactly.
@@ -583,7 +579,6 @@ namespace Mezzanine
     class CountedPtrCastImpl<OriginalPointer, OriginalPointer, CastNoneError>
     {
     public:
-        /// @internal
         /// @brief This literally does nothing and returns the value passed, so simple all but the dumbest compilers
         /// will optimize it away at compile time.
         /// @return Whatever was passed.
@@ -591,7 +586,6 @@ namespace Mezzanine
             { return Original; }
     };
 
-    /// @internal
     /// @brief An implementation of the CountedPtrCast that always returns 0 cast to the original pointer type.
     /// Reached by putting CastNoneReturnZero in the ReferenceCountTraits of the target class.
     /// @tparam ReturnPointer The type of pointer that the functions on the CountedPtr must return.
@@ -600,14 +594,12 @@ namespace Mezzanine
     class CountedPtrCastImpl<ReturnPointer, OriginalPointer, CastNoneReturnZero>
     {
     public:
-        /// @internal
         /// @brief This accepts a parameter solely for compatibility with other templates and always returns 0.
         /// @return Always 0
         static ReturnPointer Cast(OriginalPointer)
             { return ReturnPointer(0); }
     };
 
-    /// @internal
     /// @brief An implementation of the CountedPtrCast that casts the passed pointer. Reached by putting CastStatic in
     /// the ReferenceCountTraits of the target class.
     /// @tparam ReturnPointer The type of pointer that the functions on the CountedPtr must return.
@@ -616,7 +608,6 @@ namespace Mezzanine
     class CountedPtrCastImpl<ReturnPointer, OriginalPointer, CastImplicit>
     {
     public:
-        /// @internal
         /// @brief Simply static cast the passed pointer.
         /// @param Original The passed pointer.
         /// @return The pointer after the cast.
@@ -626,7 +617,6 @@ namespace Mezzanine
             { return static_cast<ReturnPointer>(Original); }
     };
 
-    /// @internal
     /// @brief An implementation of the CountedPtrCast that naively static casts the passed pointer. Reached by putting
     /// CastStatic in the ReferenceCountTraits of the target class.
     /// @tparam ReturnPointer The type of pointer that the functions on the CountedPtr must return.
@@ -635,7 +625,6 @@ namespace Mezzanine
     class CountedPtrCastImpl<ReturnPointer, OriginalPointer, CastStatic>
     {
     public:
-        /// @internal
         /// @brief Simply static cast the passed pointer.
         /// @param Original the passed pointer.
         /// @return The pointer after the cast.
@@ -645,7 +634,6 @@ namespace Mezzanine
             { return static_cast<ReturnPointer>(Original); }
     };
 
-    /// @internal
     /// @brief An implementation of the CountedPtrCast that naively dynamic casts the passed pointer. Reached by putting
     /// CastDynamic in the ReferenceCountTraits of the target class.
     /// @tparam ReturnPointer The type of pointer that the functions on the CountedPtr must return.
@@ -654,7 +642,6 @@ namespace Mezzanine
     class CountedPtrCastImpl<ReturnPointer, OriginalPointer, CastDynamic>
     {
     public:
-        /// @internal
         /// @brief Simply dynamic cast the passed pointer.
         /// @param Original The passed pointer.
         /// @return The pointer after the cast.
@@ -664,7 +651,6 @@ namespace Mezzanine
             { return dynamic_cast<ReturnPointer>(Original); }
     };
 
-    /// @internal
     /// @brief Used internally by CounterPtr to abstract away casts in the case where the return type would *NOT*
     /// match the input type.
     /// @tparam ReturnPointer The type of the pointer to target after using the Casting Strategy described in the
@@ -683,7 +669,6 @@ namespace Mezzanine
         return  CountedPtrCastImpl<ReturnPointer*,OriginalPointer*,ocast>::Cast(const_cast<OriginalPointer*>(Original));
     }
 
-    /// @internal
     /// @brief Used internally by CounterPtr to abstract away casts in the case where the return type
     /// would match the input type.
     /// @details This enforces the logic that cast should only be performed inside the CountedPtr when a
