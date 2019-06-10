@@ -149,7 +149,7 @@ namespace Mezzanine
 
                 /// @brief Get a pointer to the most derived type of this class.
                 /// @return A pointer for use with CountedPtrCast.
-                virtual FooDerived1* GetMostDerived()
+                virtual FooInternal* GetMostDerived()
                     { return this; }
         };
 
@@ -161,7 +161,7 @@ namespace Mezzanine
 
                 /// @brief Get a pointer to the most derived type of this class.
                 /// @return A pointer for use with CountedPtrCast.
-                virtual FooDerived2* GetMostDerived()
+                virtual FooInternal* GetMostDerived()
                     { return this; }
         };
 
@@ -173,7 +173,7 @@ namespace Mezzanine
 
                 /// @brief Get a pointer to the most derived type of this class.
                 /// @return A pointer for use with CountedPtrCast.
-                virtual FooDiamond* GetMostDerived()
+                virtual FooInternal* GetMostDerived()
                     { return this; }
         };
 
