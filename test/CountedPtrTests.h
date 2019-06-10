@@ -546,7 +546,7 @@ DEFAULT_TEST_GROUP(CountedPtrTests,CountedPtr)
 
         TEST_EQUAL("CountedPtrDynamicCast()-VehicleToCar", "Starting V6",CarPtrAfterDynamicCast->StartEngine());
         TEST_EQUAL("CountedPtrDynamicCast()-CarToVehicle", "Unknown Engine",VehiclePtrAfterDynamicCast->StartEngine());
-        TEST_EQUAL("CountedPtrDynamicCast()-CastFail", 0, CountedPtrDynamicCast<FooInternal>(CarPtr));
+        TEST_EQUAL("CountedPtrDynamicCast()-CastFail", false, CountedPtrDynamicCast<FooInternal>(CarPtr));
     }
 }
 
