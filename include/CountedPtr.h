@@ -118,7 +118,7 @@ namespace Mezzanine
     /// @details This exists to track the pointers to the managed object, and stores the single
     /// counter of existing references. Only one of these should be created for each group of
     /// pointers managing the same object.
-    /// @note It should be extremely rare to need to create one of these outside of pointer implemenation.
+    /// @note It should be extremely rare to need to create one of these outside of pointer implementation.
     ///////////////////////////////////////////////////////////////////////////////
     template<typename TypePointedTo>
     class ReferenceCount
@@ -204,7 +204,7 @@ namespace Mezzanine
         Whole GetReferenceCount() const
             { return RefCount; }
 
-        /// @brief Get a pointer to the most derived type of this class
+        /// @brief Get a pointer to the most derived type of this class.
         /// @return A pointer of the most derived type pointing to this.
         virtual IntrusiveRefCount* GetMostDerived()
             { return this; }
@@ -694,9 +694,9 @@ namespace Mezzanine
     /// @brief A compile time cast that uses static casting conversion of the underlying raw pointers but only works on
     /// internally reference count types
     /// @tparam ReturnType The type to be returned, must be specified
-    /// @tparam OtherPointerTargetType The type of the provided pointer, this can be inferred and should not be provided.
+    /// @tparam OtherPointerTargetType The provided pointer's type, this can be inferred and should not be provided.
     /// @param Original The pointer to convert.
-    /// @return Either a pointer of the desired or a compilation error
+    /// @return Either a pointer of the desired type or a compilation error
     template<typename ReturnType, typename OtherPointerTargetType>
     CountedPtr<ReturnType> CountedPtrStaticCast(CountedPtr<OtherPointerTargetType>& Original)
         { return CountedPtr<ReturnType>( static_cast<ReturnType*>( Original.GetReferenceCount() ) ); }
@@ -704,7 +704,7 @@ namespace Mezzanine
     /// @brief A Runtime cast that uses dynamic casting conversion of the underlying raw pointers but only works on
     /// internally reference count types
     /// @tparam ReturnType The type to be returned, must be specified.
-    /// @tparam OtherPointerTargetType The type of the provided pointer, this can be inferred and should not be provided.
+    /// @tparam OtherPointerTargetType The provided pointer's type, this can be inferred and should not be provided.
     /// @param Original The pointer to convert.
     /// @return Either a pointer of the desired or a 0 if casting is not possible.
     template<typename ReturnType, typename OtherPointerTargetType>
