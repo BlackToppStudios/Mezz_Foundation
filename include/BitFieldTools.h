@@ -46,27 +46,37 @@
     #include "DataTypes.h"
 #endif
 
-namespace Mezzanine {
+namespace Mezzanine
+{
+    /// @brief Convenience method for getting the value of the n-th bit.
+    /// @remarks This is useful for setting values on bit-fields.  A value of 0 returns 0,
+    /// a value of 1 returns 1, 2 returns 2, 3 returns 4, 4 returns 8, 5 returns 16, etc..
+    /// @param Bit The n-th bit to get the value of.  Range of 0-63.
+    /// @return Returns the value at the specified bit position.
+    constexpr UInt64 EnumBit(const UInt64 Bit)
+    {
+        return ( Bit == 0 ? 0 : 1 << ( Bit - 1 ) );
+    }
 
-    /// @brief a default type traits class for all class enums
+    /// @brief A default type traits class for all class enums.
     /// @tparam Enum A class enum of the type that this is reporting traits on.
     /// @details Defaults to not supporting the masking operators | and &.
     template<typename Enum>
     class BitMaskOperatorTraits
     {
-        public:
-            /// @brief Specializations that support the bit masking operator | and & should set this to true.
-            static const bool Supported = false;
+    public:
+        /// @brief Specializations that support the bit masking operator | and & should set this to true.
+        static const bool Supported = false;
     };
 
     /// @brief Implements the bitwise OR operator for enum classes that are bitfields.
     /// @tparam Enum A class enum of the type that this the operator|.
     /// @param Left The left hand operand to OR.
-    /// @param Right the righjt hand operand to OR.
+    /// @param Right The right hand operand to OR.
     /// @return Another instance of the class enum with all the bits in either.
     template<typename Enum>
-    typename std::enable_if<BitMaskOperatorTraits<Enum>::Supported, Enum>::type
-        operator| (Enum Left, Enum Right)
+    constexpr std::enable_if_t<BitMaskOperatorTraits<Enum>::Supported,Enum>
+        operator|(const Enum Left, const Enum Right)
     {
         using InternalType = typename std::underlying_type<Enum>::type;
         return static_cast<Enum> (
@@ -78,11 +88,11 @@ namespace Mezzanine {
     /// @brief Implements the bitwise AND operator for enum classes that are bitfields.
     /// @tparam Enum A class enum of the type that this the operator&.
     /// @param Left The left hand operand to AND.
-    /// @param Right the righjt hand operand to AND.
+    /// @param Right The right hand operand to AND.
     /// @return Another instance of the class enum with only the bits in both.
     template<typename Enum>
-    typename std::enable_if<BitMaskOperatorTraits<Enum>::Supported, Enum>::type
-        operator& (Enum Left, Enum Right)
+    constexpr std::enable_if_t<BitMaskOperatorTraits<Enum>::Supported,Enum>
+        operator&(const Enum Left, const Enum Right)
     {
         using InternalType = typename std::underlying_type<Enum>::type;
         return static_cast<Enum> (
