@@ -56,6 +56,7 @@ namespace Mezzanine
         SAVE_WARNING_STATE
         SUPPRESS_CLANG_WARNING("-Wweak-vtables")
         SUPPRESS_CLANG_WARNING("-Wpadded")
+        SUPPRESS_VC_WARNING(4435)
 
         /// @brief A class to point at
         class FooExternal
