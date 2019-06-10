@@ -536,10 +536,17 @@ DEFAULT_TEST_GROUP(CountedPtrTests,CountedPtr)
         CountedPtr<VehicleTest> CarPtr(Car);
 
         CountedPtr<CarTest> CarPtrAfterStaticCast = CountedPtrStaticCast<CarTest>(CarPtr);
-        TEST_EQUAL("CountedPtrStaticCast()", "Starting V6",CarPtrAfterStaticCast->StartEngine())
+        CountedPtr<VehicleTest> VehiclePtrAfterStaticCast = CountedPtrStaticCast<VehicleTest>(CarPtrAfterStaticCast);
+
+        TEST_EQUAL("CountedPtrStaticCast()-VehicleToCar", "Starting V6",CarPtrAfterStaticCast->StartEngine());
+        TEST_EQUAL("CountedPtrStaticCast()-CarToVehicle", "Unknown Engine",VehiclePtrAfterStaticCast->StartEngine());
 
         CountedPtr<CarTest> CarPtrAfterDynamicCast = CountedPtrDynamicCast<CarTest>(CarPtr);
-        TEST_EQUAL("CountedPtrDynamicCast()", "Starting V6",CarPtrAfterDynamicCast->StartEngine())
+        CountedPtr<VehicleTest> VehiclePtrAfterDynamicCast = CountedPtrDynamicCast<VehicleTest>(CarPtrAfterDynamicCast);
+
+        TEST_EQUAL("CountedPtrDynamicCast()-VehicleToCar", "Starting V6",CarPtrAfterDynamicCast->StartEngine());
+        TEST_EQUAL("CountedPtrDynamicCast()-CarToVehicle", "Unknown Engine",VehiclePtrAfterDynamicCast->StartEngine());
+        TEST_EQUAL("CountedPtrDynamicCast()-CastFail", 0, CountedPtrDynamicCast<FooInternal>(CarPtr));
     }
 }
 
