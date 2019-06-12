@@ -658,7 +658,7 @@ namespace Mezzanine {
             }else{
                 return RegisterMembers<Class>();
             }
-        }//*/
+        }
 
         /// @brief A convenience storage class for the tuple of registered member accessors of a given class.
         /// @tparam Class The class who's registered members will be stored.
@@ -675,9 +675,14 @@ namespace Mezzanine {
             static TupleType Members;
         };//MemberHolder
 
+        SAVE_WARNING_STATE
+        SUPPRESS_CLANG_WARNING("-Wglobal-constructors")
+
         // Static Initialization for MemberHolder static member.
         template<typename Class, typename Tuple>
         Tuple MemberHolder<Class,Tuple>::Members = GetMembers<Class>();//*/
+
+        RESTORE_WARNING_STATE
 
         /// @brief The actual implementation for the TupleForEach.
         /// @tparam Funct Deduced type for the callback that will be called for each member of the tuple.

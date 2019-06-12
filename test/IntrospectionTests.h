@@ -171,10 +171,10 @@ namespace IntrospectTest
 
     struct PackedStruct
     {
+        long double BigDoubleVar = 1.0l;
         std::string StringVar = "Hello";
         std::vector<SingleVarStruct> VectorVar = { {1}, {2} };
         std::map<std::string,unsigned int> MapVar = { {"First",1}, {"Second",2} };
-        long double BigDoubleVar = 1.0l;
         float ArrayVar[10];
         double DoubleVar = 1.0;
         long unsigned int BigUIntVar = 0;
