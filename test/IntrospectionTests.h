@@ -174,7 +174,7 @@ namespace IntrospectTest
         std::string StringVar = "Hello";
         std::vector<SingleVarStruct> VectorVar = { {1}, {2} };
         std::map<std::string,unsigned int> MapVar = { {"First",1}, {"Second",2} };
-        long double BigDoubleVar = 1.0;
+        long double BigDoubleVar = 1.0l;
         float ArrayVar[10];
         double DoubleVar = 1.0;
         long unsigned int BigUIntVar = 0;
@@ -288,14 +288,14 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
                    String("BigDoubleVar"),BigDoubleAccessor.GetName());
         TEST_EQUAL("MemberAccessor::GetTags()-BigDoubleVar",
                    MemberTags::None,BigDoubleAccessor.GetTags());
-        long double NewBigDoubleValue = 25.0;
-        TEST_EQUAL("MemberAccessor::SetValue(T)-BigDoubleVar-Before",
-                   1.0,PackedTest.BigDoubleVar);
+        long double NewBigDoubleValue = 25.0l;
+        TEST_EQUAL_EPSILON("MemberAccessor::SetValue(T)-BigDoubleVar-Before",
+                           1.0l,PackedTest.BigDoubleVar);
         BigDoubleAccessor.SetValue(PackedTest,NewBigDoubleValue);
-        TEST_EQUAL("MemberAccessor::SetValue(T)-BigDoubleVar-After",
-                   NewBigDoubleValue,PackedTest.BigDoubleVar);
-        TEST_EQUAL("MemberAccessor::GetValue()_const-BigDoubleVar",
-                   NewBigDoubleValue,BigDoubleAccessor.GetValue(PackedTest));//*/
+        TEST_EQUAL_EPSILON("MemberAccessor::SetValue(T)-BigDoubleVar-After",
+                           NewBigDoubleValue,PackedTest.BigDoubleVar);
+        TEST_EQUAL_EPSILON("MemberAccessor::GetValue()_const-BigDoubleVar",
+                           NewBigDoubleValue,BigDoubleAccessor.GetValue(PackedTest));//*/
 
         auto DoubleAccessor = MakeMemberAccessor("DoubleVar",&PackedStruct::DoubleVar);
         TEST_EQUAL("MemberAccessor::GetName()_const-DoubleVar",
@@ -303,13 +303,13 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
         TEST_EQUAL("MemberAccessor::GetTags()-DoubleVar",
                    MemberTags::None,DoubleAccessor.GetTags());
         double NewDoubleValue = 15.0;
-        TEST_EQUAL("MemberAccessor::SetValue(T)-DoubleVar-Before",
-                   1.0,PackedTest.DoubleVar);
+        TEST_EQUAL_EPSILON("MemberAccessor::SetValue(T)-DoubleVar-Before",
+                           1.0,PackedTest.DoubleVar);
         DoubleAccessor.SetValue(PackedTest,NewDoubleValue);
-        TEST_EQUAL("MemberAccessor::SetValue(T)-DoubleVar-After",
-                   NewDoubleValue,PackedTest.DoubleVar);
-        TEST_EQUAL("MemberAccessor::GetValue()_const-DoubleVar",
-                   NewDoubleValue,DoubleAccessor.GetValue(PackedTest));//*/
+        TEST_EQUAL_EPSILON("MemberAccessor::SetValue(T)-DoubleVar-After",
+                           NewDoubleValue,PackedTest.DoubleVar);
+        TEST_EQUAL_EPSILON("MemberAccessor::GetValue()_const-DoubleVar",
+                           NewDoubleValue,DoubleAccessor.GetValue(PackedTest));//*/
 
         auto BigUIntAccessor = MakeMemberAccessor<MemberTags::Generated>("BigUIntVar",&PackedStruct::BigUIntVar);
         TEST_EQUAL("MemberAccessor::GetName()_const-BigUIntVar",
@@ -331,13 +331,13 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
         TEST_EQUAL("MemberAccessor::GetTags()-FloatVar",
                    MemberTags::None,FloatAccessor.GetTags());
         float NewFloatValue = 5.0f;
-        TEST_EQUAL("MemberAccessor::SetValue(T)-FloatVar-Before",
-                   1.0f,PackedTest.FloatVar);
+        TEST_EQUAL_EPSILON("MemberAccessor::SetValue(T)-FloatVar-Before",
+                           1.0f,PackedTest.FloatVar);
         FloatAccessor.SetValue(PackedTest,NewFloatValue);
-        TEST_EQUAL("MemberAccessor::SetValue(T)-FloatVar-After",
-                   NewFloatValue,PackedTest.FloatVar);
-        TEST_EQUAL("MemberAccessor::GetValue()_const-FloatVar",
-                   NewFloatValue,FloatAccessor.GetValue(PackedTest));//*/
+        TEST_EQUAL_EPSILON("MemberAccessor::SetValue(T)-FloatVar-After",
+                           NewFloatValue,PackedTest.FloatVar);
+        TEST_EQUAL_EPSILON("MemberAccessor::GetValue()_const-FloatVar",
+                           NewFloatValue,FloatAccessor.GetValue(PackedTest));//*/
 
         auto UIntAccessor = MakeMemberAccessor<MemberTags::Local>("UIntVar",&PackedStruct::UIntVar);
         TEST_EQUAL("MemberAccessor::GetName()_const-UIntVar",
