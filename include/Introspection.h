@@ -132,8 +132,8 @@ namespace Mezzanine {
     /// @tparam MemberType The type to point to on ClassType.
     /// @tparam Num The number of elements that can be stored in the array.
     /// @pre MemberType needs to be a type that exists on ClassType.
-    template<class Object, class MemberType, size_t Num>
-    using MemberArrayPtrType = MemberType(Object::*)[Num];
+    template<class ClassType, class MemberType, size_t Num>
+    using MemberArrayPtrType = MemberType(ClassType::*)[Num];
 
     ///////////////////////////////////////////////////////////////////////////////
     // Method Types Deduction
@@ -324,6 +324,13 @@ namespace Mezzanine {
     template<typename Type, typename... TupleTypes>
     struct tuple_has_type<Type,std::tuple<TupleTypes...>> : std::disjunction<std::is_same<Type,TupleTypes>...>
         {  };
+
+    /*
+    template<typename... Tuples>
+    auto tuple_cat_unique(Tuples&&... ToCat)
+    {
+
+    }//*/
 
     ///////////////////////////////////////////////////////////////////////////////
     // MemberAccessor
@@ -555,8 +562,8 @@ namespace Mezzanine {
     /// @pre SetterMethod Preconditions are the same as what is stated in the @ref MemberAccessor docs.
     /// @pre GetterMethod Preconditions are the same as what is stated in the @ref MemberAccessor docs.
     /// @param Name The name of the member.
-    /// @param SetterMethod A member pointer to be used for assignment the member value.
-    /// @param GetterMethod A member pointer to be used to retrieve the member value.
+    /// @param Setter A member pointer to be used for assignment the member value.
+    /// @param Getter A member pointer to be used to retrieve the member value.
     /// @return Returns a new MemberAccessor initialized with the provided values.
     template<typename SetterMethod, typename GetterMethod>
     constexpr auto MakeMemberAccessor(const StringView Name, SetterMethod Setter, GetterMethod Getter)
@@ -568,8 +575,8 @@ namespace Mezzanine {
     /// @pre SetterMethod Preconditions are the same as what is stated in the @ref MemberAccessor docs.
     /// @pre GetterMethod Preconditions are the same as what is stated in the @ref MemberAccessor docs.
     /// @param Name The name of the member.
-    /// @param SetterMethod A member pointer to be used for assignment the member value.
-    /// @param GetterMethod A member pointer to be used to retrieve the member value.
+    /// @param Setter A member pointer to be used for assignment the member value.
+    /// @param Getter A member pointer to be used to retrieve the member value.
     /// @return Returns a new MemberAccessor initialized with the provided values.
     template<MemberTags Tags, typename SetterMethod, typename GetterMethod>
     constexpr auto MakeMemberAccessor(const StringView Name, SetterMethod Setter, GetterMethod Getter)
