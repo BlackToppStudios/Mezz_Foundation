@@ -446,6 +446,12 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
         TEST_EQUAL("GetRegisteredName()-vector",
                    StringView(""),GetRegisteredName<std::vector<int>>());
 
+        TEST_EQUAL("GetMemberCount()-BaseStruct",
+                   size_t(3),GetMemberCount<BaseStruct>());
+        TEST_EQUAL("GetMemberCount()-DerivedStructA",
+                   size_t(5),GetMemberCount<DerivedStructA>());
+        TEST_EQUAL("GetMemberCount()-DerivedStructB",
+                   size_t(5),GetMemberCount<DerivedStructB>());
         TEST_EQUAL("GetMemberCount()-DiamondStruct",
                    size_t(8),GetMemberCount<DiamondStruct>());
         TEST_EQUAL("GetMemberCount()-ContainerStruct",
@@ -454,26 +460,37 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
                    size_t(0),GetMemberCount<std::vector<int>>());
     }// Registration Query
 
-    {// GetMembers
+    {// (Get/Has)Members
         using BaseRegisterType = decltype(BaseStruct::RegisterMembers());
-        using BaseGetType = decltype(GetMembers<BaseStruct>());
+        using BaseGetType = std::decay_t<decltype(GetMembers<BaseStruct>())>;
         constexpr Boole BaseResult = std::is_same_v<BaseRegisterType,BaseGetType>;
-        //static_assert(std::is_same_v<BaseRegisterType,BaseGetType>,"");
-        TEST_EQUAL("GetMembers()-BaseStruct-Type",
+        TEST_EQUAL("GetMembers()-BaseStruct",
                    true,BaseResult);
 
         using ContainerRegisterType = decltype(RegisterMembers<ContainerStruct>());
-        using ContainerGetType = decltype(GetMembers<ContainerStruct>());
+        using ContainerGetType = std::decay_t<decltype(GetMembers<ContainerStruct>())>;
         constexpr Boole ContainerResult = std::is_same_v<ContainerRegisterType,ContainerGetType>;
-        //static_assert(std::is_same_v<ContainerRegisterType,ContainerGetType>,"");
-        TEST_EQUAL("GetMembers()-ContainerStruct-Type",
+        TEST_EQUAL("GetMembers()-ContainerStruct",
                    true,ContainerResult);
 
         using VectorGetType = decltype(GetMembers<std::vector<int>>());
         constexpr Boole VectorResult = std::is_same_v<std::tuple<>,VectorGetType>;
-        TEST_EQUAL("GetMembers()-vector-Type",
+        TEST_EQUAL("GetMembers()-vector",
                    false,VectorResult);//*/
-    }// GetMembers
+
+        TEST_EQUAL("HasMember()-BaseStruct-Pass",
+                   true,HasMember<BaseStruct>("IntVar"));
+        TEST_EQUAL("HasMember()-BaseStruct-Fail",
+                   false,HasMember<BaseStruct>("StringViewVar"));
+
+        TEST_EQUAL("HasMember()-ContainerStruct-Pass",
+                   true,HasMember<ContainerStruct>("VectorVar"));
+        TEST_EQUAL("HasMember()-ContainerStruct-Fail",
+                   false,HasMember<ContainerStruct>("MapVar"));
+
+        TEST_EQUAL("HasMember()-vector",
+                   false,HasMember<std::vector<int>>("Start"));//*/
+    }// (Get/Has)Members
 
     {// Do For Members
 

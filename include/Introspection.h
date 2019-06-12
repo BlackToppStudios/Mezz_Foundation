@@ -42,20 +42,23 @@
 
 #ifndef SWIG
     #include <tuple>
-    #include <cassert>
-    #include <experimental/type_traits>
     #include "DataTypes.h"
     #include "BitFieldTools.h"
 #endif
 
+#if __cplusplus <= 201703L
 // A hack to allow easier exposure to std::is_detected.  Delete this when we update to C++20.
+#ifndef SWIG
+    #include <experimental/type_traits>
+#endif
 namespace std
 {
     template<template<typename...> class Op, typename... Args>
-    using is_detected = std::experimental::fundamentals_v2::is_detected<Op,Args...>;
+    using is_detected = std::experimental::is_detected<Op,Args...>;
     template<template<typename...> class Op, typename... Args>
-    constexpr bool is_detected_v = std::experimental::fundamentals_v2::is_detected_v<Op,Args...>;
+    constexpr bool is_detected_v = std::experimental::is_detected_v<Op,Args...>;
 }
+#endif
 
 namespace Mezzanine {
 //namespace Introspection {
@@ -299,7 +302,7 @@ namespace Mezzanine {
     }
 
     ///////////////////////////////////////////////////////////////////////////////
-    // Tuple Checker
+    // Custom Tuple Type Traits and Utilities
 
     /// @brief A (dummy) type-trait for detecting if a tuple contains a given type.
     /// @tparam Type The type to check for.
