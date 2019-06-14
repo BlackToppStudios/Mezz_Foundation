@@ -81,8 +81,9 @@ namespace IntrospectTest
 
     struct DerivedStructA : virtual public BaseStruct
     {
-        int DerivedAIntVar = 0;
         double DerivedADoubleVar = 1.0;
+        int DerivedAIntVar = 0;
+        unsigned DerivedAUnsignedVar = 0;
 
         static StringView GetSerializableName()
             { return "DerivedStructA"; }
@@ -93,16 +94,18 @@ namespace IntrospectTest
             using SelfType = DerivedStructA;
 
             return MergeMembers( BaseStruct::RegisterMembers(), Members(
+                MakeMemberAccessor("DerivedADoubleVar",&SelfType::DerivedADoubleVar),
                 MakeMemberAccessor("DerivedAIntVar",&SelfType::DerivedAIntVar),
-                MakeMemberAccessor("DerivedADoubleVar",&SelfType::DerivedADoubleVar)
+                MakeMemberAccessor("DerivedAUnsignedVar",&SelfType::DerivedAUnsignedVar)
             ) );
         }
     };
 
     struct DerivedStructB : virtual public BaseStruct
     {
-        short DerivedBShortVar = 0;
         float DerivedBfloatVar = 1.0f;
+        short DerivedBShortVar = 0;
+        std::array<char,2> DerivedBCharArrayVar = {0,0};
 
         static StringView GetSerializableName()
             { return "DerivedStructB"; }
@@ -113,8 +116,9 @@ namespace IntrospectTest
             using SelfType = DerivedStructB;
 
             return MergeMembers( BaseStruct::RegisterMembers(), Members(
+                MakeMemberAccessor("DerivedBfloatVar",&SelfType::DerivedBfloatVar),
                 MakeMemberAccessor("DerivedBShortVar",&SelfType::DerivedBShortVar),
-                MakeMemberAccessor("DerivedBfloatVar",&SelfType::DerivedBfloatVar)
+                MakeMemberAccessor("DerivedBCharArrayVar",&SelfType::DerivedBCharArrayVar)
             ) );
         }
     };
@@ -468,11 +472,11 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
         TEST_EQUAL("GetMemberCount()-BaseStruct",
                    size_t(3),GetMemberCount<BaseStruct>());
         TEST_EQUAL("GetMemberCount()-DerivedStructA",
-                   size_t(5),GetMemberCount<DerivedStructA>());
+                   size_t(6),GetMemberCount<DerivedStructA>());
         TEST_EQUAL("GetMemberCount()-DerivedStructB",
-                   size_t(5),GetMemberCount<DerivedStructB>());
+                   size_t(6),GetMemberCount<DerivedStructB>());
         TEST_EQUAL("GetMemberCount()-DiamondStruct",
-                   size_t(8),GetMemberCount<DiamondStruct>());
+                   size_t(10),GetMemberCount<DiamondStruct>());
         TEST_EQUAL("GetMemberCount()-ContainerStruct",
                    size_t(2),GetMemberCount<ContainerStruct>());
         TEST_EQUAL("GetMemberCount()-vector",

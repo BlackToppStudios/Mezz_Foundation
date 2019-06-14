@@ -48,12 +48,9 @@
 
 #if __cplusplus <= 201703L
 // A hack to allow easier exposure to std::is_detected.  Delete this when we update to C++20.
-#ifndef SWIG
-    #include <experimental/type_traits>
-#endif
+#if defined(_MSC_VER) && !defined(__INTEL_COMPILER)
 namespace std
 {
-#if defined(_MSC_VRE) && !defined(__INTEL_COMPILER)
     // "MSVC is a good compiler" they said.
     // "No reason to use any other" they said.
     // I fart in their general direction.
@@ -91,14 +88,20 @@ namespace std
 
     template <class Default, template<class...> class Op, class... Args>
     using detected_or = detail::detector<Default, void, Op, Args...>;
-#else
+}
+#else // defined(_MSC_VER) && !defined(__INTEL_COMPILER)
+#ifndef SWIG
+    #include <experimental/type_traits>
+#endif
+namespace std
+{
     template<template<typename...> class Op, typename... Args>
     using is_detected = std::experimental::is_detected<Op,Args...>;
     template<template<typename...> class Op, typename... Args>
     constexpr bool is_detected_v = std::experimental::is_detected_v<Op,Args...>;
-#endif
 }
-#endif
+#endif // defined(_MSC_VER) && !defined(__INTEL_COMPILER)
+#endif // __cplusplus <= 201703L
 
 namespace Mezzanine {
 //namespace Introspection {
@@ -365,17 +368,27 @@ namespace Mezzanine {
     struct tuple_has_type<Type,std::tuple<TupleTypes...>> : std::disjunction<std::is_same<Type,TupleTypes>...>
         {  };
 
+    /// @brief "Loops" through the elements of a tuple to see if there are any repeats of the element at Idx.
+    /// @tparam Idx The index of the left hand element of the comparison.
+    /// @tparam Tuple The tuple type to be checked and have duplicates removed.
+    /// @tparam Idxs An index sequence of all the right hand elements of the comparison.
+    /// @param ToCat The tuple to check for duplicate types.
+    /// @return Returns a 1 element tuple if no duplicate is found, or a 0 element tuple if a duplicate is found.
     template<size_t Idx, class Tuple, size_t... Idxs>
     constexpr auto element_as_tuple(Tuple&& ToCat, std::index_sequence<Idxs...>)
     {
-        using T = std::remove_reference_t<Tuple>;
-        if constexpr( !( std::is_same_v<std::tuple_element_t<Idx,T>,std::tuple_element_t<Idxs,T>> || ... ) ) {
+        using NoRef = std::remove_reference_t<Tuple>;
+        if constexpr( !( std::is_same_v<std::tuple_element_t<Idx,NoRef>,std::tuple_element_t<Idxs,NoRef>> || ... ) ) {
             return std::forward_as_tuple( std::get<Idx>( std::forward<Tuple>(ToCat) ) );
         }else{
             return std::make_tuple();
         }
     }
-
+    /// @brief Removes duplicate types from a single std::tuple.
+    /// @tparam Tuple The tuple type to be checked and have duplicates removed.
+    /// @tparam Idxs An index sequence based on the number of elements to check.
+    /// @param ToCat The tuple to check for duplicate types.
+    /// @return Returns an std::tuple with duplicates elements of the parameter tuple removed.
     template<class Tuple, size_t... Idxs>
     constexpr auto tuple_cat_unique(Tuple&& ToCat, std::index_sequence<Idxs...>)
     {
@@ -383,11 +396,14 @@ namespace Mezzanine {
             element_as_tuple<Idxs>( std::forward<Tuple>(ToCat), std::make_index_sequence<Idxs>{} )...
         );
     }
-
+    /// @brief Similar to std::tuple_cat, but discards duplicate occurrences of types while concatenating.
+    /// @tparam Tuples The deduced collection of tuples to concatenate while removing duplicates.
+    /// @param ToCat A collection of tuples to concatenate together.
+    /// @return Returns an std::tuple containing only one of each element type from the parameter tuples.
     template<typename... Tuples>
-    auto tuple_cat_unique(Tuples&&... ToCat)
+    constexpr auto tuple_cat_unique(Tuples&&... ToCat)
     {
-        auto all = std::tuple_cat(std::forward<Tuples>(ToCat)...);
+        auto all = std::tuple_cat( std::forward<Tuples>(ToCat)... );
         return tuple_cat_unique( std::move(all), std::make_index_sequence<std::tuple_size_v<decltype(all)>>{} );
     }//*/
 
@@ -796,6 +812,12 @@ namespace Mezzanine {
     constexpr auto MergeMembers(TupleTypes&&... ToMerge)
         { return std::tuple_cat(std::forward<TupleTypes>(ToMerge)...); }
 
+    /// @brief This is the same as MergeMembers, but will discard duplicate types collected.
+    /// @tparam TupleTypes A collection of tuple types representing the class members to be merged.
+    /// @remarks This is intended for use with 1 or more tuples of MemberAccessor instances being passed
+    /// in, but no enforcement is made that that happens.  If any else is passed in something will break.
+    /// @param ToMerge A list of MemberAccessor tuples to be bundled together.
+    /// @return Returns a Tuple containing all the tuples merged into one bigger tuple without duplicate types.
     template<typename... TupleTypes>
     constexpr auto MergeMembersUnique(TupleTypes&&... ToMerge)
         { return tuple_cat_unique(std::forward<TupleTypes>(ToMerge)...); }
@@ -932,7 +954,7 @@ namespace Mezzanine {
     void SetMemberValue(Class& Obj, const StringView Name, ValueType&& Val)
     {
         DoForMember<Class,MemberType>(Name,
-            [&Obj, Val = std::forward<ValueType>(Val)](const auto& Member) {
+            [&Obj, &Val = std::forward<ValueType>(Val)] (const auto& Member) {
                 Member.SetValue(Obj,Val);
             }
         );
