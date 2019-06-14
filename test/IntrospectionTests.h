@@ -92,7 +92,7 @@ namespace IntrospectTest
             using namespace Mezzanine;
             using SelfType = DerivedStructA;
 
-            return std::tuple_cat( BaseStruct::RegisterMembers(), Members(
+            return MergeMembers( BaseStruct::RegisterMembers(), Members(
                 MakeMemberAccessor("DerivedAIntVar",&SelfType::DerivedAIntVar),
                 MakeMemberAccessor("DerivedADoubleVar",&SelfType::DerivedADoubleVar)
             ) );
@@ -112,7 +112,7 @@ namespace IntrospectTest
             using namespace Mezzanine;
             using SelfType = DerivedStructB;
 
-            return std::tuple_cat( BaseStruct::RegisterMembers(), Members(
+            return MergeMembers( BaseStruct::RegisterMembers(), Members(
                 MakeMemberAccessor("DerivedBShortVar",&SelfType::DerivedBShortVar),
                 MakeMemberAccessor("DerivedBfloatVar",&SelfType::DerivedBfloatVar)
             ) );
@@ -122,6 +122,20 @@ namespace IntrospectTest
     struct DiamondStruct final : public DerivedStructA, public DerivedStructB
     {
         std::string DiamondStringVar = "Hello";
+
+        static auto RegisterMembers()
+        {
+            using namespace Mezzanine;
+            using SelfType = DiamondStruct;
+
+            return MergeMembersUnique(
+                DerivedStructA::RegisterMembers(),
+                DerivedStructB::RegisterMembers(),
+                Members(
+                    MakeMemberAccessor("DiamondStringVar",&SelfType::DiamondStringVar)
+                )
+            );
+        }
     };
 
     struct SingleVarStruct
@@ -169,6 +183,9 @@ namespace IntrospectTest
             { return StringVar; }
     };
 
+    SAVE_WARNING_STATE
+    SUPPRESS_CLANG_WARNING("-Wpadded")
+
     struct PackedStruct
     {
         long double BigDoubleVar = 1.0l;
@@ -183,6 +200,8 @@ namespace IntrospectTest
         short UShortVar = 0;
         char CharVar = 'A';
     };
+
+    RESTORE_WARNING_STATE
 }
 
 namespace Mezzanine

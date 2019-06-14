@@ -53,10 +53,50 @@
 #endif
 namespace std
 {
+#if defined(_MSC_VRE) && !defined(__INTEL_COMPILER)
+    // "MSVC is a good compiler" they said.
+    // "No reason to use any other" they said.
+    // I fart in their general direction.
+    struct nonesuch
+    {
+        nonesuch() = delete;
+        ~nonesuch() = delete;
+        nonesuch(nonesuch const&) = delete;
+        void operator=(nonesuch const&) = delete;
+    };
+
+    namespace detail
+    {
+        template <class Default, class AlwaysVoid, template<class...> class Op, class... Args>
+        struct detector
+        {
+            using value_t = std::false_type;
+            using type = Default;
+        };
+
+        template <class Default, template<class...> class Op, class... Args>
+        struct detector<Default, std::void_t<Op<Args...>>, Op, Args...>
+        {
+            // Note that std::void_t is a C++17 feature
+            using value_t = std::true_type;
+            using type = Op<Args...>;
+        };
+    } // namespace detail
+
+    template <template<class...> class Op, class... Args>
+    using is_detected = typename detail::detector<nonesuch, void, Op, Args...>::value_t;
+
+    template <template<class...> class Op, class... Args>
+    using detected_t = typename detail::detector<nonesuch, void, Op, Args...>::type;
+
+    template <class Default, template<class...> class Op, class... Args>
+    using detected_or = detail::detector<Default, void, Op, Args...>;
+#else
     template<template<typename...> class Op, typename... Args>
     using is_detected = std::experimental::is_detected<Op,Args...>;
     template<template<typename...> class Op, typename... Args>
     constexpr bool is_detected_v = std::experimental::is_detected_v<Op,Args...>;
+#endif
 }
 #endif
 
@@ -325,11 +365,30 @@ namespace Mezzanine {
     struct tuple_has_type<Type,std::tuple<TupleTypes...>> : std::disjunction<std::is_same<Type,TupleTypes>...>
         {  };
 
-    /*
+    template<size_t Idx, class Tuple, size_t... Idxs>
+    constexpr auto element_as_tuple(Tuple&& ToCat, std::index_sequence<Idxs...>)
+    {
+        using T = std::remove_reference_t<Tuple>;
+        if constexpr( !( std::is_same_v<std::tuple_element_t<Idx,T>,std::tuple_element_t<Idxs,T>> || ... ) ) {
+            return std::forward_as_tuple( std::get<Idx>( std::forward<Tuple>(ToCat) ) );
+        }else{
+            return std::make_tuple();
+        }
+    }
+
+    template<class Tuple, size_t... Idxs>
+    constexpr auto tuple_cat_unique(Tuple&& ToCat, std::index_sequence<Idxs...>)
+    {
+        return std::tuple_cat(
+            element_as_tuple<Idxs>( std::forward<Tuple>(ToCat), std::make_index_sequence<Idxs>{} )...
+        );
+    }
+
     template<typename... Tuples>
     auto tuple_cat_unique(Tuples&&... ToCat)
     {
-
+        auto all = std::tuple_cat(std::forward<Tuples>(ToCat)...);
+        return tuple_cat_unique( std::move(all), std::make_index_sequence<std::tuple_size_v<decltype(all)>>{} );
     }//*/
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -726,6 +785,20 @@ namespace Mezzanine {
     template<typename... ArgTypes>
     constexpr auto Members(ArgTypes&&... Args)
         { return std::make_tuple(std::forward<ArgTypes>(Args)...); }
+
+    /// @brief Generates a tuple of class members from two or more classes.
+    /// @tparam TupleTypes A collection of tuple types representing the class members to be merged.
+    /// @remarks This is intended for use with 1 or more tuples of MemberAccessor instances being passed
+    /// in, but no enforcement is made that that happens.  If any else is passed in something will break.
+    /// @param ToMerge A list of MemberAccessor tuples to be bundled together.
+    /// @return Returns a Tuple containing all the tuples merged into one bigger tuple.
+    template<typename... TupleTypes>
+    constexpr auto MergeMembers(TupleTypes&&... ToMerge)
+        { return std::tuple_cat(std::forward<TupleTypes>(ToMerge)...); }
+
+    template<typename... TupleTypes>
+    constexpr auto MergeMembersUnique(TupleTypes&&... ToMerge)
+        { return tuple_cat_unique(std::forward<TupleTypes>(ToMerge)...); }
 
     /// @brief Checks to see if a class type has members registered.
     /// @tparam Class The class type to check.
