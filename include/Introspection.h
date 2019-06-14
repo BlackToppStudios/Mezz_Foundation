@@ -407,6 +407,9 @@ namespace Mezzanine {
         return tuple_cat_unique( std::move(all), std::make_index_sequence<std::tuple_size_v<decltype(all)>>{} );
     }//*/
 
+    SAVE_WARNING_STATE
+    SUPPRESS_VC_WARNING(4371)
+
     ///////////////////////////////////////////////////////////////////////////////
     // MemberAccessor
 
@@ -606,6 +609,8 @@ namespace Mezzanine {
         static constexpr MemberTags GetTags()
             { return Tags; }
     };//MemberAccessor
+
+    RESTORE_WARNING_STATE
 
     ///////////////////////////////////////////////////////////////////////////////
     // Making Member Accessors

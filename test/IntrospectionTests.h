@@ -105,7 +105,7 @@ namespace IntrospectTest
     {
         float DerivedBfloatVar = 1.0f;
         short DerivedBShortVar = 0;
-        std::array<char,2> DerivedBCharArrayVar = {0,0};
+        std::array<char,2> DerivedBCharArrayVar = { {0},{0} };
 
         static StringView GetSerializableName()
             { return "DerivedStructB"; }
