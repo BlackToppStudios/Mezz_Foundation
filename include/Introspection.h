@@ -672,7 +672,7 @@ namespace Mezzanine {
     /// system, except with actual MemberAccessor instances being passed into a call to Members.
     /// @return Returns a tuple of all the MemberAccessors needed to access the class being registered.
     template<typename Class>
-    inline auto RegisterMembers()
+    constexpr auto RegisterMembers()
         { return std::make_tuple(); }
 
     /// @brief Dummy implementation for registering class names.
@@ -732,7 +732,7 @@ namespace Mezzanine {
         /// run of a given application.
         /// @return Returns a tuple of member accessors registered with a given class type.
         template<typename Class>
-        decltype(auto) GetMembers()
+        constexpr decltype(auto) GetMembers()
         {
             if constexpr( HasRegisterMembers<Class>::value ) {
                 return Class::RegisterMembers();
@@ -767,32 +767,32 @@ namespace Mezzanine {
 
         /// @brief The actual implementation for the TupleForEach.
         /// @tparam Funct Deduced type for the callback that will be called for each member of the tuple.
-        /// @tparam ArgTypes Variadic template type for the members that will be passed into Funct.
-        /// @tparam Index A collection of indexes to build the index sequence with.
-        /// @param Callable The callback to be invoked for each member of the tuple.
-        /// @param Args The tuple of (presumably) member types that will be passed into the callback individually.
-        template<typename Funct, typename... ArgTypes, size_t... Index>
-        void TupleForEachIndex(Funct&& Callable, const std::tuple<ArgTypes...>& Args, std::index_sequence<Index...>)
-            { ( Callable(std::get<Index>(Args)), ... ); }
+        /// @tparam Members Variadic template type for the members that will be passed into Funct.
+        /// @tparam Idxs A collection of indexes to build the index sequence with.
+        /// @param ToCall The callback to be invoked for each member of the tuple.
+        /// @param Mems The tuple of (presumably) member types that will be passed into the callback individually.
+        template<typename Funct, typename... Members, size_t... Idxs>
+        constexpr void TupleForEachIdx(Funct&& ToCall,const std::tuple<Members...>& Mems,std::index_sequence<Idxs...>)
+            { ( ToCall(std::get<Idxs>(Mems)), ... ); }
 
         /// @brief A ForEach implementation for the types and members of a tuple.
         /// @tparam Funct Deduced type for the callback that will be called for each member of the tuple.
-        /// @tparam ArgTypes Variadic template type for the members that will be passed into Funct.
-        /// @param Callable The callback to be invoked for each member of the tuple.
-        /// @param Args The tuple of (presumably) member types that will be passed into the callback individually.
-        template<typename Funct, typename... ArgTypes>
-        void TupleForEach(Funct&& Callable, const std::tuple<ArgTypes...>& Args)
-            { TupleForEachIndex(std::forward<Funct>(Callable),Args,std::index_sequence_for<ArgTypes...>{}); }
+        /// @tparam Members Variadic template type for the members that will be passed into Funct.
+        /// @param ToCall The callback to be invoked for each member of the tuple.
+        /// @param Mems The tuple of (presumably) member types that will be passed into the callback individually.
+        template<typename Funct, typename... Members>
+        constexpr void TupleForEach(Funct&& ToCall, const std::tuple<Members...>& Mems)
+            { TupleForEachIdx(std::forward<Funct>(ToCall),Mems,std::index_sequence_for<Members...>{}); }
 
         /// @brief Specialization implementation for an empty tuple.
         /// @remarks This method is a no-op.
         /// @tparam Funct Deduced type for the callback that won't be invoked.
-        /// @tparam ArgTypes Variadic template type that ought to be empty if this implementation is being used.
-        /// @param Callable The callback that won't be invoked.
-        /// @param Args An empty tuple.
-        template<typename Funct, typename... ArgTypes>
-        void TupleForEach(Funct&& Callable, const std::tuple<>& Args)
-            { (void)Callable;  (void)Args; }
+        /// @tparam Members Variadic template type that ought to be empty if this implementation is being used.
+        /// @param ToCall The callback that won't be invoked.
+        /// @param Mems An empty tuple.
+        template<typename Funct, typename... Members>
+        constexpr void TupleForEach(Funct&& ToCall, const std::tuple<>& Mems)
+            { (void)ToCall;  (void)Mems; }
     }//IntrospectionHelpers
 
     ///////////////////////////////////////////////////////////////////////////////

@@ -268,7 +268,7 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
         TEST_EQUAL("MemberAccessor::GetValue()_const-VectorVar-Size",
                    NewVectorValue.size(),VectorAccessor.GetValue(PackedTest).size());
         TEST_EQUAL("MemberAccessor::GetValue()_const-VectorVar-Element1",
-                   NewVectorValue[1],VectorAccessor.GetValue(PackedTest)[1]);//*/
+                   NewVectorValue[0],VectorAccessor.GetValue(PackedTest)[0]);//*/
 
         auto MapAccessor = MakeMemberAccessor<MemberTags::Local>("MapVar",&PackedStruct::MapVar);
         TEST_EQUAL("MemberAccessor::GetName()_const-MapVar",
