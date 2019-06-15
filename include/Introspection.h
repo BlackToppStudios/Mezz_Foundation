@@ -381,6 +381,7 @@ namespace Mezzanine {
         if constexpr( !( std::is_same_v<std::tuple_element_t<Idx,NoRef>,std::tuple_element_t<Idxs,NoRef>> || ... ) ) {
             return std::forward_as_tuple( std::get<Idx>( std::forward<Tuple>(ToCat) ) );
         }else{
+            (void)ToCat;
             return std::make_tuple();
         }
     }
