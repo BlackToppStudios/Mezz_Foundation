@@ -73,8 +73,8 @@ namespace IntrospectTest
 
             return Members(
                 MakeMemberAccessor("IntVar",&SelfType::IntVar),
-                MakeMemberAccessor("FloatVar",&SelfType::FloatVar),
-                MakeMemberAccessor("UIntVar",&SelfType::StringVar)
+                MakeMemberAccessor("FloatVar",&SelfType::SetFloatVar,&SelfType::GetFloatVar),
+                MakeMemberAccessor("StringVar",&SelfType::StringVar)
             );
         }
     };
@@ -126,6 +126,9 @@ namespace IntrospectTest
     struct DiamondStruct final : public DerivedStructA, public DerivedStructB
     {
         std::string DiamondStringVar = "Hello";
+
+        static StringView GetSerializableName()
+            { return "DiamondStruct"; }
 
         static auto RegisterMembers()
         {
@@ -499,7 +502,7 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
         using VectorGetType = decltype(GetMembers<std::vector<int>>());
         constexpr Boole VectorResult = std::is_same_v<std::tuple<>,VectorGetType>;
         TEST_EQUAL("GetMembers()-vector",
-                   false,VectorResult);//*/
+                   false,VectorResult);
 
         TEST_EQUAL("HasMember()-BaseStruct-Pass",
                    true,HasMember<BaseStruct>("IntVar"));
@@ -512,24 +515,59 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
                    false,HasMember<ContainerStruct>("MapVar"));
 
         TEST_EQUAL("HasMember()-vector",
-                   false,HasMember<std::vector<int>>("Start"));//*/
+                   false,HasMember<std::vector<int>>("Start"));
     }// (Get/Has)Members
 
     {// Do For Members
+        DiamondStruct TestStruct;
+        TestStruct.DiamondStringVar = "Goodbye";
 
+        size_t SlowMemberCount = 0;
+        DoForAllMembers<DiamondStruct>( [&](const auto& Member) {
+            ++SlowMemberCount;  (void)Member;
+        } );
+        TEST_EQUAL("DoForAllMembers-DiamondStruct",
+                   size_t(10),SlowMemberCount);
+
+        std::string StrMemberValue;
+        DoForMember<DiamondStruct,std::string>( "DiamondStringVar", [&](const auto& Member) {
+            StrMemberValue = Member.GetValue(TestStruct);
+        } );
+        TEST_EQUAL("DoForMember-DiamondStruct-DiamondStringVar",
+                   std::string("Goodbye"),StrMemberValue);//*/
     }// Do For Members
 
-    {// (Get/Set)MemberValue/SingleVarStruct
-        UInt32 OldVal = 50;
-        SingleVarStruct TestStruct(OldVal);
+    {// (Get/Set)MemberValue
+        UInt32 FirstOldVal = 50;
+        SingleVarStruct FirstTestStruct(FirstOldVal);
+        TEST_EQUAL("GetMemberValue-SingleVarStruct-UInt32",
+                   FirstOldVal,GetMemberValue<UInt32>(FirstTestStruct,"UIntVar"));
 
-        TEST_EQUAL("GetMemberValue",OldVal,GetMemberValue<UInt32>(TestStruct,"UIntVar"));
+        UInt32 FirstNewVal = 100;
+        SetMemberValue<UInt32>(FirstTestStruct,"UIntVar",FirstNewVal);
+        TEST_EQUAL("SetMemberValue-SingleVarStruct-UInt32",
+                   FirstNewVal,FirstTestStruct.UIntVar);
 
-        UInt32 NewVal = 100;
-        SetMemberValue<UInt32>(TestStruct,"UIntVar",NewVal);
+        std::string SecondOldVal = "Hello";
+        ContainerStruct SecondTestStruct;
+        TEST_EQUAL("GetMemberValue-ContainerStruct-String",
+                   SecondOldVal,GetMemberValue<String>(SecondTestStruct,"StringVar"));
 
-        TEST_EQUAL("SetMemberValue",NewVal,TestStruct.UIntVar);
-    }// (Get/Set)MemberValue/SingleVarStruct
+        std::string SecondNewVal = "kkthxbye";
+        SetMemberValue<std::string>(SecondTestStruct,"StringVar",SecondNewVal);
+        TEST_EQUAL("SetMemberValue-ContainerStruct-String",
+                   SecondNewVal,SecondTestStruct.StringVar);
+
+        std::string ThirdOldVal = "Hello";
+        BaseStruct ThirdTestStruct;
+        TEST_EQUAL("GetMemberValue-BaseStruct-String",
+                   ThirdOldVal,GetMemberValue<std::string>(ThirdTestStruct,"StringVar"));
+
+        std::string ThirdNewVal = "ohai";
+        SetMemberValue<std::string>(ThirdTestStruct,"StringVar",ThirdNewVal);
+        TEST_EQUAL("SetMemberValue-BaseStruct-String",
+                   ThirdNewVal,ThirdTestStruct.StringVar);
+    }// (Get/Set)MemberValue
 }
 
 #endif

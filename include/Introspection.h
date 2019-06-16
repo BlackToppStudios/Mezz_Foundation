@@ -379,7 +379,7 @@ namespace Mezzanine {
     {
         using NoRef = std::remove_reference_t<Tuple>;
         if constexpr( !( std::is_same_v<std::tuple_element_t<Idx,NoRef>,std::tuple_element_t<Idxs,NoRef>> || ... ) ) {
-            return std::forward_as_tuple( std::get<Idx>( std::forward<Tuple>(ToCat) ) );
+            return std::make_tuple( std::get<Idx>( std::forward<Tuple>(ToCat) ) );
         }else{
             (void)ToCat;
             return std::make_tuple();
@@ -391,7 +391,7 @@ namespace Mezzanine {
     /// @param ToCat The tuple to check for duplicate types.
     /// @return Returns an std::tuple with duplicates elements of the parameter tuple removed.
     template<class Tuple, size_t... Idxs>
-    constexpr auto tuple_cat_unique(Tuple&& ToCat, std::index_sequence<Idxs...>)
+    constexpr auto rebuild_tuple_unique(Tuple&& ToCat, std::index_sequence<Idxs...>)
     {
         return std::tuple_cat(
             element_as_tuple<Idxs>( std::forward<Tuple>(ToCat), std::make_index_sequence<Idxs>{} )...
@@ -405,7 +405,7 @@ namespace Mezzanine {
     constexpr auto tuple_cat_unique(Tuples&&... ToCat)
     {
         auto all = std::tuple_cat( std::forward<Tuples>(ToCat)... );
-        return tuple_cat_unique( std::move(all), std::make_index_sequence<std::tuple_size_v<decltype(all)>>{} );
+        return rebuild_tuple_unique( all, std::make_index_sequence<std::tuple_size_v<decltype(all)>>{} );
     }//*/
 
     SAVE_WARNING_STATE
@@ -577,7 +577,7 @@ namespace Mezzanine {
         /// @brief Gets the value of a member on an initialized object.
         /// @param Object The object to retrieve the member value from.
         /// @return Returns the value of the member.
-        ReturnType GetValue(const ClassType& Object) const
+        ReturnType GetValue(ClassType& Object) const
         {
             if( this->HasGetter() ) {
                 if constexpr( std::is_same_v<GetterAccessPtr,MemberPtrType<ClassType,MemberType>> ) {
@@ -871,11 +871,11 @@ namespace Mezzanine {
     /// @warning SFINAE will disable this function if the class is not registered.
     /// @tparam Class Provided type who's members will be looped over.
     /// @tparam Funct Deduced parameter for the callback method to invoke with each member.
-    /// @param Callable The callback that will be invoked for each member in the specified class.
+    /// @param ToCall The callback that will be invoked for each member in the specified class.
     template<typename Class, typename Funct, typename = std::enable_if_t<IsRegistered<Class>()>>
-    void DoForAllMembers(Funct&& Callable)
+    void DoForAllMembers(Funct&& ToCall)
     {
-        IntrospectionHelpers::TupleForEach(std::forward<Funct>(Callable),GetMembers<Class>());
+        IntrospectionHelpers::TupleForEach(std::forward<Funct>(ToCall),GetMembers<Class>());
     }
 
     /// @brief Dummy implementation of DoForAllMembers that is valid for non-registered classes.
@@ -883,11 +883,11 @@ namespace Mezzanine {
     /// @tparam Class Provided type who's members will be looped over.
     /// @tparam Funct Deduced parameter for the callback method to invoke with each member.
     /// @remarks This exists primarily to help cut down on generated template code in the error case.
-    /// @param Callable The callback that will NOT be invoked for each member in the specified class.
+    /// @param ToCall The callback that will NOT be invoked for each member in the specified class.
     template<typename Class, typename Funct, typename = std::enable_if_t<!IsRegistered<Class>()>, typename = void>
-    void DoForAllMembers(Funct&& Callable)
+    void DoForAllMembers(Funct&& ToCall)
     {
-        (void)Callable;
+        (void)ToCall;
         // Deliberately empty as a default dummy implementation
     }
 
@@ -896,16 +896,17 @@ namespace Mezzanine {
     /// @tparam MemberType The type of the MemberAccessor that is expected to be passed into the callable.
     /// @tparam Funct Deduced parameter for the callback method to invoke with the named member.
     /// @param Name The name of the member to invoke the callback with.
-    /// @param Callable The invokable that will be called for the named member in the specified class.
+    /// @param ToCall The invokable that will be called for the named member in the specified class.
     template<typename Class, typename MemberType, typename Funct>
-    void DoForMember(const StringView Name, Funct&& Callable)
+    void DoForMember(const StringView Name, Funct&& ToCall)
     {
         DoForAllMembers<Class>(
             [&](const auto& Member) {
-                if( Name == Member.GetName() ) {
-                    using CurrType = typename std::decay_t<decltype(Member)>::MemberType;
-                    static_assert( std::is_same_v<CurrType,MemberType>, "Member type isn't what was expected!" );
-                    Callable(Member);
+                using CurrType = typename std::decay_t<decltype(Member)>::MemberType;
+                if constexpr( std::is_same_v<CurrType,MemberType> ) {
+                    if( Name == Member.GetName() ) {
+                        ToCall(Member);
+                    }
                 }
             }
         );
@@ -935,7 +936,7 @@ namespace Mezzanine {
     /// @param Obj The object instance to get the value from.
     /// @param Name The name of the member to retrieve on the object.
     template<typename MemberType, typename Class>
-    MemberType GetMemberValue(const Class& Obj, const StringView Name)
+    MemberType GetMemberValue(Class& Obj, const StringView Name)
     {
         MemberType Value{};
         DoForMember<Class,MemberType>(Name,
