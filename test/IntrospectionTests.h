@@ -79,6 +79,9 @@ namespace IntrospectTest
         }
     };
 
+    SAVE_WARNING_STATE
+    SUPPRESS_CLANG_WARNING("-Wweak-vtables")
+
     struct DerivedStructA : virtual public BaseStruct
     {
         double DerivedADoubleVar = 1.0;
@@ -144,6 +147,8 @@ namespace IntrospectTest
             );
         }
     };
+
+    RESTORE_WARNING_STATE
 
     struct SingleVarStruct
     {
