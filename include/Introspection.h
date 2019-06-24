@@ -575,7 +575,7 @@ namespace Mezzanine {
         None       = EnumBit(0), ///< Nothing special about the member.
         Local      = EnumBit(1), ///< Member is only of use on the local host and should not be shared.
         Generated  = EnumBit(2), ///< Member is a cache generated from other members and can be regenerated.
-        Deprecated = EnumBit(3), ///< Member is deprecated and it's use should be avoided.
+        Deprecated = EnumBit(3)  ///< Member is deprecated and it's use should be avoided.
     };
     ENABLE_BITMASK_OPERATORS_INSIDE_MEZZANINE(MemberTags)
 
