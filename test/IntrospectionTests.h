@@ -63,7 +63,7 @@ namespace IntrospectTest
         float GetFloatVar() const
             { return this->FloatVar; }
 
-        static StringView GetSerializableName()
+        static StringView RegisterName()
             { return "BaseStruct"; }
 
         static auto RegisterMembers()
@@ -88,7 +88,7 @@ namespace IntrospectTest
         int DerivedAIntVar = 0;
         unsigned DerivedAUnsignedVar = 0;
 
-        static StringView GetSerializableName()
+        static StringView RegisterName()
             { return "DerivedStructA"; }
 
         static auto RegisterMembers()
@@ -110,7 +110,7 @@ namespace IntrospectTest
         short DerivedBShortVar = 0;
         std::array<char,2> DerivedBCharArrayVar = { {0,0} };
 
-        static StringView GetSerializableName()
+        static StringView RegisterName()
             { return "DerivedStructB"; }
 
         static auto RegisterMembers()
@@ -130,7 +130,7 @@ namespace IntrospectTest
     {
         std::string DiamondStringVar = "Hello";
 
-        static StringView GetSerializableName()
+        static StringView RegisterName()
             { return "DiamondStruct"; }
 
         static auto RegisterMembers()
@@ -169,7 +169,7 @@ namespace IntrospectTest
         static StringView GetSerializableName()
             { return "SingleVarStruct"; }
 
-        static auto RegisterMembers()
+        static auto GetSerializableMembers()
         {
             using namespace Mezzanine;
             using SelfType = SingleVarStruct;

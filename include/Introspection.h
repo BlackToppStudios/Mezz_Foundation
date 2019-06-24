@@ -108,6 +108,251 @@ namespace Mezzanine {
     /// @addtogroup Introspection
     /// @{
 
+    /// @page Mezzanine Introspection System
+    /// @section IntrospectOverview Overview
+    /// The Mezzanine Introspection system is a collection of Classes, Structs, and Functions that heavily
+    /// leverage Template Meta-programming to allow generic code for the reading and writing of values on
+    /// classes and/or structs.
+    /// @n @n
+    /// This Introspection system could be considered a Reflection system and many people do call similar
+    /// systems Reflection systems, but I have opted (perhaps incorrectly) to call this an Introspection
+    /// system because I felt it was closer to the generic computer science definition given on Wikipedia.
+    /// Specifically that Introspection involves the reading and detection of members on an object (which
+    /// this system does), while Reflection involves writing to those members as well as changes to composition
+    /// and behavior of an object (this system only does writing from that list). That said, this is largely
+    /// a semantics issue and it's reasonable to call this system either an Introspection or Reflection
+    /// system.
+    /// @n @n
+    /// The Introspection system utilizes many new features from c++17 and even one feature from
+    /// c++20/the experimental namespace. These features are primarily std::string_view, std::is_detected,
+    /// and fold expressions. If you aren't familiar with these then this system might be slightly more
+    /// difficult to understand. @n
+    ///
+    /// @section IntrospectImplement Implementation
+    /// In this section I will attempt to explain the code, what it does where it's not obvious, and how
+    /// the code interacts with other code where applicable. It may not be intuitive, but I'm going to start
+    /// in the middle for this explanation and move outward throughout the system for this explanation.
+    /// @subsection IntrospectMemAccess Member Accessor
+    /// The MemberAccessor is a class that stores the means of...accessing...a member. Complicated, I know.
+    /// It actually kinda is, but only a little. The MemberAccessor contains only 3 members, two member
+    /// pointers and a string view.
+    /// @n @n
+    /// The pointers are template parameters that are checked with static_asserts to make sure they are
+    /// pointers, but they can be direct to member pointers or pointers to member functions. The only types
+    /// that are not allowed are normal C-arrays. std::array is fine though. The supported function signatures
+    /// vary in order to accommodate as many configurations as possible.
+    /// @n @n
+    /// Setter signatures supported:
+    /// @code
+    /// void (T::*)(const Member&)  // Set by const reference
+    /// void (T::*)(const Member)   // Set by const value
+    /// void (T::*)(Member&&)       // Set by rvalue/move reference
+    /// void (T::*)(Member)         // Set by value
+    /// @endcode
+    /// Getter signatures supported:
+    /// @code
+    /// const Member& (T::*)() const  // Get as const reference
+    /// Member (T::*)() const         // Get as value
+    /// @endcode
+    /// Lastly, the signatures that can be used as both Setters and Getters:
+    /// @code
+    /// Member& (T::*)() const  // Get mutable reference to member
+    /// Member (T::*)           // Pointer directly to member (no functions)
+    /// @endcode
+    /// If you choose to use a direct to member pointer or a non-const reference returning method then there
+    /// are SFINAE enabled constructors and support methods you can use that accept 2 parameters instead of the
+    /// usual 3, allowing you to avoid passing in a duplicate of the same parameter and makes construction
+    /// cleaner.
+    /// @n @n
+    /// An important note about the Set and Get access pointers is that they can be direct to member or pointers
+    /// to member functions that set and/or get the member value. If you are concerned about memory footprint then
+    /// you should strongly consider using direct to member pointers over member function pointers. I've tested
+    /// GCC 9.1 and clang 8.0 on Godbolt.org and the size of a MemberAccessor with direct to member pointers on
+    /// both platforms is 32 bytes. The size of a MemberAccessor with pointers to member functions on both
+    /// platforms is 48 bytes. I don't know why you'd want to, but the system supports it, if you wanted to have
+    /// one direct to member pointer and one member function pointer for the setter and getter then you'd get a
+    /// MemberAccessor that is 40 bytes on both platforms. Curiously, I also tested MSVC 19.14 (through wine)
+    /// on Godbolt.org and all 3 configurations were 32 bytes in size.
+    /// @n @n
+    /// After constructing, the members of the MemberAccessor instance (the name and pointers) are not meant
+    /// to be changed, only queried or dereferenced. There is a pair of Set/Get MemberValue methods that will
+    /// are written to compile just the correct semantics for the type of pointer provided for each of the Set
+    /// and Get methods provided in the template parameters. It is a feature of the system that you aren't
+    /// required to provide a valid pointer to the MemberAccessor on construction, opting instead to give it a
+    /// nullptr. If you do, there is a simple nullptr check that will cause an exception to be thrown when
+    /// trying to Set or Get the member value.
+    /// @n @n
+    /// The only other methods on the MemberAccessor class are those that check if the Setter pointer has been
+    /// set, the Getter pointer has been set, getting the name of the member (via a string view), and getting
+    /// the MemberTags that have been set for that member (via a static method). The tags are set from a
+    /// template parameter given on instantiation of the type. Bitwise OR'ing the tags is supported for some
+    /// more exotic use cases. Look at the @ref MemberTags enum for more details.
+    /// @n @n
+    /// Specifying the Set and Get access pointer types can be verbose and tedious, so a set of methods that
+    /// use type deduction were made to help make the creation of MemberAccessor instances manageable. They are
+    /// 4 simple methods that just wrap the construction of a MemberAccessor.
+    /// @code
+    /// template<typename CommonMethod>                                              // No Tags, Common Set and Get
+    /// constexpr auto MakeMemberAccessor(const StringView Name, CommonMethod Common)
+    /// template<MemberTags Tags, typename CommonMethod>                             // With Tags, Common Set and Get
+    /// constexpr auto MakeMemberAccessor(const StringView Name, CommonMethod Common)
+    /// template<typename SetterMethod, typename GetterMethod>                       // No Tags, Separate Set and Get
+    /// constexpr auto MakeMemberAccessor(const StringView Name, SetterMethod Setter, GetterMethod Getter)
+    /// template<MemberTags Tags, typename SetterMethod, typename GetterMethod>      // With Tags, Separate Set and Get
+    /// constexpr auto MakeMemberAccessor(const StringView Name, SetterMethod Setter, GetterMethod Getter)
+    /// @endcode
+    /// The access pointers are always deduced, so if you invoke a version that doesn't have MemberTags then you
+    /// do not need to specify any template parameters. Otherwise if you are using MemberTags then they need to
+    /// be explicitly provided as a template parameter.
+    /// @code
+    /// auto AccessOne = MakeMemberAccessor("One",&Foo::A);
+    /// auto AccessTwo = MakeMemberAccessor<MemberTags::Local>("Two",&Foo::B);
+    /// auto AccessThree = MakeMemberAccessor("Three",&Bar::SetA,&Bar::GetA);
+    /// auto AccessFour = MakeMemberAccessor<MemberTags::Local | MemberTags::Generated>("Four",&Bar::SetB,&Bar::GetB);
+    /// @endcode
+    /// @subsection IntrospectRegister Registration
+    /// So we've established there is an object that handles the accessing of member data and a convenient way
+    /// to create them. But we haven't established how they, or any other custom class integrate with the
+    /// Introspection system itself. The term used for this throughout the system is "Registration".
+    /// @n @n
+    /// There are a few ways to Register a class with the Introspection system. The simplest and most direct
+    /// would be to create a static method on your class named "RegisterMembers" that returns auto and takes no
+    /// arguments. Inside it you would create and return a tuple of MemberAccessor instances. Easy. Ok, fine.
+    /// There is some more detail to cover.
+    /// @n @n
+    /// There are actually 3 functions the Introspection system will look for on your class, and if any of those
+    /// exist then you'll be able to Introspect your class.
+    /// @code
+    /// static auto RegisterMembers();         // Static member function, definition should be visible
+    /// static auto GetSerializableMembers();  // Static member function, definition should be visible
+    /// template<>
+    /// auto RegisterMembers<MyClass>();       // Template free function, definition should be visible
+    /// @endcode
+    /// Any of these functions will work, and they will be looked for by the Introspection system in the order
+    /// they are listed here. So if you have both a RegisterMembers static member function AND template free
+    /// function (why?) then the Introspection system will use the RegisterMembers static member function and
+    /// completely ignore the template free function.
+    /// @n @n
+    /// The template free function (which is a specialization, we'll cover that later) is a major oddball here
+    /// and comes with a couple of caveats. First, any attempt to use private or protected members (either
+    /// functions or pointers to members) will simply fail to compile. You are limited to the public interface.
+    /// Second, due to limitations imposed by ADL (Argument-Dependent Lookup) any such function needs to be
+    /// declared in the same scope as the base method being specialized from. This means any such function must
+    /// be located in the root Mezzanine namespace.
+    /// @n @n
+    /// In exchange for these caveats you get a pretty powerful feature; the ability to register a class for
+    /// Introspection without altering it whatsoever. So if you have code you aren't responsible for or otherwise
+    /// cannot alter you can use this approach to Introspect it without issue. You could even make a registration
+    /// function for the MemberAccessor class (why? please no) for no reason!
+    /// @n @n
+    /// The two static member functions are essentially identical in every way other than name. RegisterMembers
+    /// is the more correct/consistent name and GetSerializableMembers is more consistent (somewhat) with older
+    /// legacy code in the Mezzanine engine. Otherwise they are the same. So going forward examples will use the
+    /// RegisterMembers name. Speaking of, lets take a look at an implementation example.
+    /// @code
+    /// struct MyVector3
+    /// {
+    ///     float X;
+    ///     float Y;
+    ///     float Z;
+    ///
+    ///     static auto RegisterMembers()
+    ///     {
+    ///         return Members(
+    ///             MakeMemberAccessor("X",&MyVector3::X),
+    ///             MakeMemberAccessor("Y",&MyVector3::Y),
+    ///             MakeMemberAccessor("Z",&MyVector3::Z)
+    ///         );
+    ///     }
+    /// };
+    /// @endcode
+    /// The "Members" method is something we haven't covered before. Members is a simple wrapper around
+    /// std::make_tuple but with a more appropriate name. You can safely imagine Members to instead read
+    /// "std::make_tuple" and that would be correct. Inside that call, we're making a MemberAccessor for each of
+    /// our 3 members; X, Y, and Z. Each MemberAccessor is made without any MemberTags and using a direct to
+    /// member pointer for Set and Get access. The return type is deduced by the compiler and will be a 3 member
+    /// tuple of MemberAccessor instances that can be used by the Introspection system to Introspect MyVector3.
+    /// @n @n
+    /// Next lets look at a slightly more complicated example.
+    /// @code
+    /// class MyBaseClass
+    /// {
+    /// protected:
+    ///     int ID;
+    ///     unsigned int Counter = 0;
+    /// public:
+    ///     MyBaseClass(int NewID) :
+    ///         ID(NewID)
+    ///         {  }
+    ///     virtual ~MyBaseClass() = default;
+    ///
+    ///     void SetID(int NewID)
+    ///     {
+    ///         std::cout << "Assigning ID: " << ID << ".\n";
+    ///         ID = NewID;
+    ///     }
+    ///
+    ///     int GetID() const
+    ///     {
+    ///         std::cout << "Retrieving ID: " << ID << ".\n";
+    ///         return ID;
+    ///     }
+    ///
+    ///     int Increment()
+    ///     {
+    ///         Counter++;
+    ///     }
+    ///
+    ///     static StringView RegisterName()
+    ///     {
+    ///         return "MyBaseClass";
+    ///     }
+    ///
+    ///     static auto RegisterMembers()
+    ///     {
+    ///         using Self = MyBaseClass;
+    ///         return Members(
+    ///             MakeMemberAccessor("ID",&Self::SetID,&Self::GetID),
+    ///             MakeMemberAccessor("Counter",&Self::Counter)
+    ///         );
+    ///     }
+    /// };
+    /// @endcode
+    /// A few weird things here. Lets start with the "RegisterName" function. All the same rules for *Members
+    /// series of functions apply to a similar series of *Name methods. There are 3 where each is checked in
+    /// order and the first one found is used and if you are using the template free function then the ADL caveat
+    /// applies, but not the pointer to private members caveat, because we're not using pointers here. Each of
+    /// the functions is expected to return an StringView (which is a std::string_view alias) rather than a tuple
+    /// of MemberAccessors and it is intended to have the class name as a value rather than a member name. Here's
+    /// what they look like.
+    /// @code
+    /// static StringView RegisterName();         // Static member function, definition should be visible
+    /// static StringView GetSerializableName();  // Static member function, definition should be visible
+    /// template<>
+    /// StringView RegisterName<MyClass>();       // Template free function, definition should be visible
+    /// @endcode
+    /// It's important to note that the Introspection system doesn't need a name to be registered. It doesn't use
+    /// class/type names at all. Our original MyVector3 example would work just fine and be able to read and write
+    /// members as is. Name registration exists exclusively for the benefit of other systems that might use the
+    /// Introspection system, such as Serialization. So it is strongly recommended to include a name registration
+    /// function, but isn't required and can be skipped in isolated or well controlled use cases.
+    /// @n @n
+    /// Back to the rest of the MyBaseClass example.
+    /// @subsection IntrospectGuts TupleForEach
+    ///
+    /// @subsection IntrospectQuery Checks and Querying
+    ///
+    /// @subsection IntrospectDoFor Operating on Data
+    ///
+    /// @section IntrospectTrouble Troubleshooting
+    /// One of the largest frustrations I had while writing this system was when I attempted to debug it with
+    /// GDB. The system optimizes code away so aggressively it was impossible to watch the values I needed to
+    /// watch, forcing me to spread asserts and log streaming throughout the code to get some clue of what was
+    /// going on. It would be difficult to describe the combination of pride and frustration I felt because
+    /// of this. @n
+    /// So troubleshooting the system when something goes wrong can be somewhat difficult. There are a few tips
+    /// I can share as well as some best practices.
+
     ///////////////////////////////////////////////////////////////////////////////
     // Simple Aliases
 
@@ -258,7 +503,7 @@ namespace Mezzanine {
         /// @brief The object type to which the getter method belongs.
         using ObjectType = Object;
         /// @brief The type returned by the getter method.
-        using ReturnType = Return;
+        using ReturnType = Return&;
         /// @brief The decayed type of Return, stripped of reference and const qualifiers.
         using DecayedType = std::decay_t<Return>;
     };//DeduceGetterTypes
@@ -327,9 +572,10 @@ namespace Mezzanine {
     /// member data.  For example a networked serialization backend might skip any member with the Local tag.
     enum class MemberTags
     {
-        None      = EnumBit(0), ///< Nothing special about the member.
-        Local     = EnumBit(1), ///< Member is only of use on the local host and should not be shared.
-        Generated = EnumBit(2)  ///< Member is a cache generated from other members and can be regenerated.
+        None       = EnumBit(0), ///< Nothing special about the member.
+        Local      = EnumBit(1), ///< Member is only of use on the local host and should not be shared.
+        Generated  = EnumBit(2), ///< Member is a cache generated from other members and can be regenerated.
+        Deprecated = EnumBit(3), ///< Member is deprecated and it's use should be avoided.
     };
     ENABLE_BITMASK_OPERATORS_INSIDE_MEZZANINE(MemberTags)
 
@@ -379,7 +625,7 @@ namespace Mezzanine {
     {
         using NoRef = std::remove_reference_t<Tuple>;
         if constexpr( !( std::is_same_v<std::tuple_element_t<Idx,NoRef>,std::tuple_element_t<Idxs,NoRef>> || ... ) ) {
-            return std::make_tuple( std::get<Idx>( std::forward<Tuple>(ToCat) ) );
+            return std::tuple< std::tuple_element_t<Idx,NoRef> >( std::get<Idx>( std::forward<Tuple>(ToCat) ) );
         }else{
             (void)ToCat;
             return std::make_tuple();
@@ -557,6 +803,7 @@ namespace Mezzanine {
         /// @tparam SetFrom The deduced type to be used to assign the new value for the member.
         /// @remarks This method uses SFINAE to disable use of this method if the provided value cannot be
         /// assigned to the member type.
+        /// @exception If the Setter Access pointer is nullptr, then an std::runtime_error will be thrown.
         /// @param Object The object to assign the member value to.
         /// @param Arg The value to be assigned.
         template<typename SetFrom, typename = std::enable_if_t< CanSetFrom<SetFrom>() >>
@@ -575,6 +822,7 @@ namespace Mezzanine {
             }
         }
         /// @brief Gets the value of a member on an initialized object.
+        /// @exception If the Getter Access pointer is nullptr, then an std::runtime_error will be thrown.
         /// @param Object The object to retrieve the member value from.
         /// @return Returns the value of the member.
         ReturnType GetValue(ClassType& Object) const
@@ -585,8 +833,9 @@ namespace Mezzanine {
                 }else{
                     return (Object.*GetterPtr)();
                 }
+            }else{
+                throw std::runtime_error("Cannot Get Member value, no getter provided.");
             }
-            throw std::runtime_error("Cannot Get Member value, no getter provided.");
         }
 
         ///////////////////////////////////////////////////////////////////////////////
@@ -689,6 +938,15 @@ namespace Mezzanine {
 
     namespace IntrospectionHelpers
     {
+        /// @brief Convenience type for RegisterName method detection.
+        /// @tparam Class The class to test.
+        template<typename Class>
+        using RegisterName_t = decltype(&Class::RegisterName);
+        /// @brief Convenience type for is_detected that tests for the existence of RegisterName on a class.
+        /// @tparam Class The class that will be checked for the presence of a RegisterName method.
+        template<typename Class>
+        using HasRegisterName = std::is_detected<RegisterName_t,Class>;
+
         /// @brief Convenience type for GetSerializableName method detection.
         /// @tparam Class The class to test.
         template<typename Class>
@@ -707,6 +965,15 @@ namespace Mezzanine {
         template<typename Class>
         using HasRegisterMembers = std::is_detected<RegisterMembers_t,Class>;
 
+        /// @brief Convenience type for GetSerializableMembers method detection.
+        /// @tparam Class The class to test.
+        template<typename Class>
+        using GetSerializableMembers_t = decltype(&Class::GetSerializableMembers);
+        /// @brief Convenience type for is_detected that tests for the existence of GetSerializableMembers on a class.
+        /// @tparam Class The class that will be checked for the presence of a GetSerializableMembers method.
+        template<typename Class>
+        using HasGetSerializableMembers = std::is_detected<GetSerializableMembers_t,Class>;
+
         /// @brief Gets the registered name of a class.
         /// @tparam Class The type to check the name for.
         /// @remarks This method exists to support different means of providing the tuple of member accessors to
@@ -716,7 +983,9 @@ namespace Mezzanine {
         template<typename Class>
         constexpr StringView GetName()
         {
-            if constexpr( HasGetSerializableName<Class>::value ) {
+            if constexpr( HasRegisterName<Class>::value ) {
+                return Class::RegisterName();
+            }else if constexpr( HasGetSerializableName<Class>::value ) {
                 return Class::GetSerializableName();
             }else{
                 return RegisterName<Class>();
@@ -736,6 +1005,8 @@ namespace Mezzanine {
         {
             if constexpr( HasRegisterMembers<Class>::value ) {
                 return Class::RegisterMembers();
+            }else if constexpr( HasGetSerializableMembers<Class>::value ) {
+                return Class::GetSerializableMembers();
             }else{
                 return RegisterMembers<Class>();
             }
