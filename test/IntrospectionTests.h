@@ -454,8 +454,8 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
                    StringView("ContainerStruct"),RegisterName<ContainerStruct>());
 
         constexpr MemberTags Local = MemberTags::Local;
-        using ContainerVectorType = decltype(MakeMemberAccessor<Local>(nullptr,&ContainerStruct::GetVectorVar));
-        using ContainerStringType = decltype(MakeMemberAccessor<Local>(nullptr,&ContainerStruct::GetStringVar));
+        using ContainerVectorType = decltype(MakeMemberAccessor<Local>("Test",&ContainerStruct::GetVectorVar));
+        using ContainerStringType = decltype(MakeMemberAccessor<Local>("Test",&ContainerStruct::GetStringVar));
         using ContainerMembersType = std::tuple<ContainerVectorType,ContainerStringType>;
         const Boole SecondMatch = std::is_same_v<ContainerMembersType,decltype(RegisterMembers<ContainerStruct>())>;
         TEST_EQUAL("RegisterMembers()-ContainerStruct",
