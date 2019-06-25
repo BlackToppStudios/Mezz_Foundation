@@ -81,6 +81,9 @@ namespace Mezzanine
                 }
         };
 
+        #ifdef _MSC_VER
+        #pragma vtordisp(push, 2)
+        #endif
         /// @brief A class to point at that uses its own reference counting internal mechanism.
         class FooInternal
         {
@@ -176,6 +179,9 @@ namespace Mezzanine
                 virtual FooInternal* GetMostDerived()
                     { return this; }
         };
+        #ifdef _MSC_VER
+        #pragma vtordisp(pop)
+        #endif
 
         /// @brief A class to point at that uses its own referencing counting internal mechanism, can be static cast.
         class VehicleTest
@@ -541,17 +547,12 @@ DEFAULT_TEST_GROUP(CountedPtrTests,CountedPtr)
         TEST_EQUAL("CountedPtrStaticCast()-VehicleToCar", "Starting V6",CarPtrAfterStaticCast->StartEngine());
         TEST_EQUAL("CountedPtrStaticCast()-CarToVehicle", "Unknown Engine",VehiclePtrAfterStaticCast->StartEngine());
 
-        SAVE_WARNING_STATE
-        SUPPRESS_VC_WARNING(4437)
-
         CountedPtr<CarTest> CarPtrAfterDynamicCast = CountedPtrDynamicCast<CarTest>(CarPtr);
         CountedPtr<VehicleTest> VehiclePtrAfterDynamicCast = CountedPtrDynamicCast<VehicleTest>(CarPtrAfterDynamicCast);
 
         TEST_EQUAL("CountedPtrDynamicCast()-VehicleToCar", "Starting V6",CarPtrAfterDynamicCast->StartEngine());
         TEST_EQUAL("CountedPtrDynamicCast()-CarToVehicle", "Unknown Engine",VehiclePtrAfterDynamicCast->StartEngine());
         TEST_EQUAL("CountedPtrDynamicCast()-CastFail", false, CountedPtrDynamicCast<FooExternal>(CarPtr));
-
-        RESTORE_WARNING_STATE
     }
 }
 
