@@ -541,12 +541,17 @@ DEFAULT_TEST_GROUP(CountedPtrTests,CountedPtr)
         TEST_EQUAL("CountedPtrStaticCast()-VehicleToCar", "Starting V6",CarPtrAfterStaticCast->StartEngine());
         TEST_EQUAL("CountedPtrStaticCast()-CarToVehicle", "Unknown Engine",VehiclePtrAfterStaticCast->StartEngine());
 
+        SAVE_WARNING_STATE
+        SUPPRESS_VC_WARNING(4437)
+
         CountedPtr<CarTest> CarPtrAfterDynamicCast = CountedPtrDynamicCast<CarTest>(CarPtr);
         CountedPtr<VehicleTest> VehiclePtrAfterDynamicCast = CountedPtrDynamicCast<VehicleTest>(CarPtrAfterDynamicCast);
 
         TEST_EQUAL("CountedPtrDynamicCast()-VehicleToCar", "Starting V6",CarPtrAfterDynamicCast->StartEngine());
         TEST_EQUAL("CountedPtrDynamicCast()-CarToVehicle", "Unknown Engine",VehiclePtrAfterDynamicCast->StartEngine());
         TEST_EQUAL("CountedPtrDynamicCast()-CastFail", false, CountedPtrDynamicCast<FooExternal>(CarPtr));
+
+        RESTORE_WARNING_STATE
     }
 }
 
