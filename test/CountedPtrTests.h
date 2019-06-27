@@ -211,8 +211,8 @@ namespace Mezzanine
                 Whole GetReferenceCount()
                     { return RefCount; }
 
-                /// @brief Get a pointer to the most Derived type of this class
-                /// @return A pointer for use with CountedPtrCast
+                /// @brief Get a pointer to the most derived type of this class.
+                /// @return A pointer for use with CountedPtrCast.
                 virtual VehicleTest* GetMostDerived()
                     { return this; }
 
@@ -230,8 +230,8 @@ namespace Mezzanine
                 String StartEngine()
                     { return "Starting V6"; }
 
-                /// @brief Get a pointer to the most Derived type of this class
-                /// @return A pointer for use with CountedPtrCast
+                /// @brief Get a pointer to the most derived type of this class.
+                /// @return A pointer for use with CountedPtrCast.
                 virtual CarTest* GetMostDerived()
                     { return this; }
 
@@ -332,12 +332,13 @@ DEFAULT_TEST_GROUP(CountedPtrTests,CountedPtr)
         CountedPtr<FooExternal> PtrCopy( PtrInitial );
 
         TEST_EQUAL("CountedPtr(CountedPtr&)-Ptr1", Whole(2), PtrInitial.UseCount());
-        TEST_EQUAL("CountedPtr(CountedPtr&)-Ptr2", Whole(2), PtrInitial.UseCount());
+        TEST_EQUAL("CountedPtr(CountedPtr&)-Ptr2", Whole(2), PtrCopy.UseCount());
 
         CountedPtr<FooExternal> PtrMove( std::move(PtrCopy) );
 
         TEST_EQUAL("CountedPtr(CountedPtr&&)-NewPointer", Whole(2), PtrMove.UseCount());
         TEST_EQUAL("CountedPtr(CountedPtr&&)-OldPointer", Whole(0), PtrCopy.UseCount());
+        TEST_EQUAL("CountedPtr(CountedPtr&&)-UnchangedPointer", Whole(2), PtrInitial.UseCount());
     }
 
     { // Automated destruction
@@ -414,7 +415,7 @@ DEFAULT_TEST_GROUP(CountedPtrTests,CountedPtr)
 
 
     {// Reset
-        CountedPtr<int> IntPtr(new int(0));
+        CountedPtr<int> IntPtr(new int(1));
         IntPtr.Reset();
         TEST_EQUAL("Reset()", Whole(0), IntPtr.UseCount());
 
