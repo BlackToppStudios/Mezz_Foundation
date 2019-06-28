@@ -57,7 +57,7 @@ namespace Mezzanine
         SUPPRESS_CLANG_WARNING("-Wweak-vtables")
         SUPPRESS_CLANG_WARNING("-Wpadded")
 
-        /// @brief A class to point at
+        /// @brief A class to point at.
         class FooExternal
         {
         public:
@@ -119,7 +119,7 @@ namespace Mezzanine
                 { return ++RefCount; }
 
             /// @brief Decrease the reference count by one and return the updated count.
-            /// @return The updated count;
+            /// @return The updated count.
             Whole DecrementReferenceCount()
                 { return --RefCount; }
 
@@ -134,7 +134,7 @@ namespace Mezzanine
                 { return RefCount; }
 
             /// @brief Get a pointer to the most derived type of this class.
-            /// @return A pointer cast to a void*, for use with CountedPtrCast
+            /// @return A pointer cast to a void*, for use with CountedPtrCast.
             virtual FooInternal* GetMostDerived()
                 { return this; }
         };
@@ -191,12 +191,12 @@ namespace Mezzanine
 
         public:
             /// @brief Increase the reference count by one and return the updated count.
-            /// @return The updated count;
+            /// @return The updated count.
             Whole IncrementReferenceCount()
                 { return ++RefCount; }
 
             /// @brief Decrease the reference count by one and return the updated count.
-            /// @return The updated count;
+            /// @return The updated count.
             Whole DecrementReferenceCount()
                 { return --RefCount; }
 
@@ -206,7 +206,7 @@ namespace Mezzanine
                 { return this; }
 
             /// @brief Get the current amount of references.
-            /// @return A Whole with the current reference count
+            /// @return A Whole with the current reference count.
             Whole GetReferenceCount()
                 { return RefCount; }
 
