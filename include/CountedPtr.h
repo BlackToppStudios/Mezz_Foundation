@@ -488,7 +488,7 @@ namespace Mezzanine
         // Manipulation/Query
 
         /// @brief Reset this to point at nothing.
-        void Reset()
+        void Reset() noexcept
         {
             Release();
             ReferenceCounter = nullptr;
@@ -496,7 +496,7 @@ namespace Mezzanine
 
         /// @brief Reset this to point at the same target as another CountedPtr of the same type.
         /// @param Other Another CountedPtr which will share ownership of the target.
-        void Reset(const CountedPtr<TypePointedTo>& Other)
+        void Reset(const CountedPtr<TypePointedTo>& Other) noexcept
         {
             if( this != &Other ) {
                 Release();
@@ -506,7 +506,7 @@ namespace Mezzanine
 
         /// @brief Take ownership of the passed pointer.
         /// @param PointerTarget The pointer to assume ownership of.
-        void Reset(TypePointedTo* PointerTarget)
+        void Reset(TypePointedTo* PointerTarget) noexcept
         {
             if( PointerTarget )
                 { FirstAcquire(PointerTarget); }

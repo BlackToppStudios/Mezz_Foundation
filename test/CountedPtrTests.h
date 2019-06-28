@@ -56,128 +56,127 @@ namespace Mezzanine
         SAVE_WARNING_STATE
         SUPPRESS_CLANG_WARNING("-Wweak-vtables")
         SUPPRESS_CLANG_WARNING("-Wpadded")
-        SUPPRESS_VC_WARNING(4435)
 
         /// @brief A class to point at
         class FooExternal
         {
-            public:
-                /// @brief A pointer to a bool to indicate whether the object's destructor has been called.
-                Boole* IsDestructed;
-                /// @brief A value to use for testing purposes.
-                Integer Value;
+        public:
+            /// @brief A pointer to a bool to indicate whether the object's destructor has been called.
+            Boole* IsDestructed;
+            /// @brief A value to use for testing purposes.
+            Integer Value;
 
-                /// @brief A constructor that allows setting the value.
-                /// @param DestructFlag Where to save destruction results.
-                /// @param Val A default value to use for testing.
-                explicit FooExternal(Boole* DestructFlag, Integer Val = 0)
-                    : IsDestructed(DestructFlag), Value(Val)
-                    {}
+            /// @brief A constructor that allows setting the value.
+            /// @param DestructFlag Where to save destruction results.
+            /// @param Val A default value to use for testing.
+            explicit FooExternal(Boole* DestructFlag, Integer Val = 0)
+                : IsDestructed(DestructFlag), Value(Val)
+                {}
 
-                /// @brief A destructor that sets the target of IsDestructed to true.
-                ~FooExternal()
+            /// @brief A destructor that sets the target of IsDestructed to true.
+            ~FooExternal()
+            {
+                *IsDestructed = true;
+            }
+        };
+
+        /// @brief A class to point at that uses its own reference counting internal mechanism.
+        class FooInternal
+        {
+        private:
+            /// @brief This is the counter that stores how many references exist.
+            Whole RefCount;
+
+        public:
+            /// @brief A pointer a bool to indicate whether the object's destructor has been called.
+            Boole* IsDestructed;
+            /// @brief A value to use for testing purposes.
+            Integer Value;
+
+            /// @brief A constructor that allows setting the value.
+            /// @param DestructFlag Where to save destruction results.
+            /// @param Val A default value to use for testing.
+            explicit FooInternal(Boole* DestructFlag, Integer Val = 0)
+                : RefCount(0), IsDestructed(DestructFlag), Value(Val)
+                {}
+
+            explicit FooInternal()
+                : RefCount(0), Value(0)
                 {
-                    *IsDestructed = true;
+                    Boole destructFlag = false;
+                    IsDestructed = &destructFlag;
                 }
+
+            /// @brief A destructor that sets the target of IsDestructed to true.
+            virtual ~FooInternal()
+            {
+                *IsDestructed = true;
+            }
+
+            /// @brief Increase the reference count by one and return the updated count.
+            /// @return The updated count;
+            Whole IncrementReferenceCount()
+                { return ++RefCount; }
+
+            /// @brief Decrease the reference count by one and return the updated count.
+            /// @return The updated count;
+            Whole DecrementReferenceCount()
+                { return --RefCount; }
+
+            /// @brief Gets the actual pointer to the target.
+            /// @return A Pointer of the targeted type to the object being managed.
+            FooInternal* GetReferenceCountTargetAsPointer()
+                { return this; }
+
+            /// @brief Get the current amount of references.
+            /// @return A Whole with the current reference count.
+            Whole GetReferenceCount()
+                { return RefCount; }
+
+            /// @brief Get a pointer to the most derived type of this class.
+            /// @return A pointer cast to a void*, for use with CountedPtrCast
+            virtual FooInternal* GetMostDerived()
+                { return this; }
         };
 
         #ifdef _MSC_VER
         #pragma vtordisp(push, 2)
         #endif
-        /// @brief A class to point at that uses its own reference counting internal mechanism.
-        class FooInternal
-        {
-            private:
-                /// @brief This is the counter that stores how many references exist.
-                Whole RefCount;
-
-            public:
-                /// @brief A pointer a bool to indicate whether the object's destructor has been called.
-                Boole* IsDestructed;
-                /// @brief A value to use for testing purposes.
-                Integer Value;
-
-                /// @brief A constructor that allows setting the value.
-                /// @param DestructFlag Where to save destruction results.
-                /// @param Val A default value to use for testing.
-                explicit FooInternal(Boole* DestructFlag, Integer Val = 0)
-                    : RefCount(0), IsDestructed(DestructFlag), Value(Val)
-                    {}
-
-                explicit FooInternal()
-                    : RefCount(0), Value(0)
-                    {
-                        Boole destructFlag = false;
-                        IsDestructed = &destructFlag;
-                    }
-
-                /// @brief A destructor that sets the target of IsDestructed to true.
-                virtual ~FooInternal()
-                {
-                    *IsDestructed = true;
-                }
-
-                /// @brief Increase the reference count by one and return the updated count.
-                /// @return The updated count;
-                Whole IncrementReferenceCount()
-                    { return ++RefCount; }
-
-                /// @brief Decrease the reference count by one and return the updated count.
-                /// @return The updated count;
-                Whole DecrementReferenceCount()
-                    { return --RefCount; }
-
-                /// @brief Gets the actual pointer to the target.
-                /// @return A Pointer of the targeted type to the object being managed.
-                FooInternal* GetReferenceCountTargetAsPointer()
-                    { return this; }
-
-                /// @brief Get the current amount of references.
-                /// @return A Whole with the current reference count.
-                Whole GetReferenceCount()
-                    { return RefCount; }
-
-                /// @brief Get a pointer to the most derived type of this class.
-                /// @return A pointer cast to a void*, for use with CountedPtrCast
-                virtual FooInternal* GetMostDerived()
-                    { return this; }
-        };
-
         /// @brief A class to point at that is derived from FooInternal.
         class FooDerived1 : public virtual FooInternal
         {
-            public:
-                /// @brief A value to use for testing purposes.
-                Integer Value1;
+        public:
+            /// @brief A value to use for testing purposes.
+            Integer Value1;
 
-                /// @brief Get a pointer to the most derived type of this class.
-                /// @return A pointer for use with CountedPtrCast.
-                virtual FooInternal* GetMostDerived()
-                    { return this; }
+            /// @brief Get a pointer to the most derived type of this class.
+            /// @return A pointer for use with CountedPtrCast.
+            virtual FooInternal* GetMostDerived()
+                { return this; }
         };
 
         /// @brief A second class to point at that is derived from FooInternal.
         class FooDerived2 : public virtual FooInternal
         {
-            public:
-                Integer Value2;
+        public:
+            Integer Value2;
 
-                /// @brief Get a pointer to the most derived type of this class.
-                /// @return A pointer for use with CountedPtrCast.
-                virtual FooInternal* GetMostDerived()
-                    { return this; }
+            /// @brief Get a pointer to the most derived type of this class.
+            /// @return A pointer for use with CountedPtrCast.
+            virtual FooInternal* GetMostDerived()
+                { return this; }
         };
 
         /// @brief A class derived from two classes in turn derived from FooInternal.
         class FooDiamond : public FooDerived1, public FooDerived2
         {
-            public:
-                Integer ValueDiamond;
+        public:
+            Integer ValueDiamond;
 
-                /// @brief Get a pointer to the most derived type of this class.
-                /// @return A pointer for use with CountedPtrCast.
-                virtual FooInternal* GetMostDerived()
-                    { return this; }
+            /// @brief Get a pointer to the most derived type of this class.
+            /// @return A pointer for use with CountedPtrCast.
+            virtual FooInternal* GetMostDerived()
+                { return this; }
         };
         #ifdef _MSC_VER
         #pragma vtordisp(pop)
@@ -186,57 +185,57 @@ namespace Mezzanine
         /// @brief A class to point at that uses its own referencing counting internal mechanism, can be static cast.
         class VehicleTest
         {
-            private:
-                /// @brief This is the counter that stores how many references exist.
-                Whole RefCount;
+        private:
+            /// @brief This is the counter that stores how many references exist.
+            Whole RefCount;
 
-            public:
-                /// @brief Increase the reference count by one and return the updated count.
-                /// @return The updated count;
-                Whole IncrementReferenceCount()
-                    { return ++RefCount; }
+        public:
+            /// @brief Increase the reference count by one and return the updated count.
+            /// @return The updated count;
+            Whole IncrementReferenceCount()
+                { return ++RefCount; }
 
-                /// @brief Decrease the reference count by one and return the updated count.
-                /// @return The updated count;
-                Whole DecrementReferenceCount()
-                    { return --RefCount; }
+            /// @brief Decrease the reference count by one and return the updated count.
+            /// @return The updated count;
+            Whole DecrementReferenceCount()
+                { return --RefCount; }
 
-                /// @brief Gets the actual pointer to the target.
-                /// @return A Pointer of the targeted type to the object being managed.
-                VehicleTest* GetReferenceCountTargetAsPointer()
-                    { return this; }
+            /// @brief Gets the actual pointer to the target.
+            /// @return A Pointer of the targeted type to the object being managed.
+            VehicleTest* GetReferenceCountTargetAsPointer()
+                { return this; }
 
-                /// @brief Get the current amount of references.
-                /// @return A Whole with the current reference count
-                Whole GetReferenceCount()
-                    { return RefCount; }
+            /// @brief Get the current amount of references.
+            /// @return A Whole with the current reference count
+            Whole GetReferenceCount()
+                { return RefCount; }
 
-                /// @brief Get a pointer to the most derived type of this class.
-                /// @return A pointer for use with CountedPtrCast.
-                virtual VehicleTest* GetMostDerived()
-                    { return this; }
+            /// @brief Get a pointer to the most derived type of this class.
+            /// @return A pointer for use with CountedPtrCast.
+            virtual VehicleTest* GetMostDerived()
+                { return this; }
 
-                String StartEngine()
-                    { return "Unknown Engine"; }
+            String StartEngine()
+                { return "Unknown Engine"; }
 
-                virtual ~VehicleTest()
-                    {}
+            virtual ~VehicleTest()
+                {}
         };
 
         /// @brief A class to point at that inherits from VehicleTest and can be static cast.
         class CarTest : public VehicleTest
         {
-            public:
-                String StartEngine()
-                    { return "Starting V6"; }
+        public:
+            String StartEngine()
+                { return "Starting V6"; }
 
-                /// @brief Get a pointer to the most derived type of this class.
-                /// @return A pointer for use with CountedPtrCast.
-                virtual CarTest* GetMostDerived()
-                    { return this; }
+            /// @brief Get a pointer to the most derived type of this class.
+            /// @return A pointer for use with CountedPtrCast.
+            virtual CarTest* GetMostDerived()
+                { return this; }
 
-                virtual ~CarTest()
-                    {}
+            virtual ~CarTest()
+                {}
         };
 
         RESTORE_WARNING_STATE
@@ -247,73 +246,73 @@ namespace Mezzanine
     template <>
     class ReferenceCountTraits <FooInternal>
     {
-        public:
-            using RefCountType = FooInternal;
+    public:
+        using RefCountType = FooInternal;
 
-            static RefCountType* ConstructionPointer(RefCountType* Target)
-                { return Target; }
+        static RefCountType* ConstructionPointer(RefCountType* Target)
+            { return Target; }
 
-            enum { IsCastable = CastDynamic };
+        enum { IsCastable = CastDynamic };
     };
 
     template <>
     class ReferenceCountTraits <FooDerived1>
     {
-        public:
-            using RefCountType = FooDerived1;
+    public:
+        using RefCountType = FooDerived1;
 
-            static RefCountType* ConstructionPointer(RefCountType* Target)
-                { return Target; }
+        static RefCountType* ConstructionPointer(RefCountType* Target)
+            { return Target; }
 
-            enum { IsCastable = CastDynamic };
+        enum { IsCastable = CastDynamic };
     };
 
     template <>
     class ReferenceCountTraits <FooDerived2>
     {
-        public:
-            using RefCountType = FooDerived2;
+    public:
+        using RefCountType = FooDerived2;
 
-            static RefCountType* ConstructionPointer(RefCountType* Target)
-                { return Target; }
+        static RefCountType* ConstructionPointer(RefCountType* Target)
+            { return Target; }
 
-            enum { IsCastable = CastDynamic };
+        enum { IsCastable = CastDynamic };
     };
 
     template <>
     class ReferenceCountTraits <FooDiamond>
     {
-        public:
-            using RefCountType = FooDiamond;
+    public:
+        using RefCountType = FooDiamond;
 
-            static RefCountType* ConstructionPointer(RefCountType* Target)
-                { return Target; }
+        static RefCountType* ConstructionPointer(RefCountType* Target)
+            { return Target; }
 
-            enum { IsCastable = CastDynamic };
+        enum { IsCastable = CastDynamic };
     };
 
     template <>
     class ReferenceCountTraits <VehicleTest>
     {
-        public:
-            typedef VehicleTest RefCountType;
+    public:
+        typedef VehicleTest RefCountType;
 
-            static RefCountType* ConstructionPointer(RefCountType* Target)
-                { return Target; }
+        static RefCountType* ConstructionPointer(RefCountType* Target)
+            { return Target; }
 
-            enum { IsCastable = CastStatic };
+        enum { IsCastable = CastStatic };
     };
 
     template <>
     class ReferenceCountTraits <CarTest>
     {
-        public:
-            typedef CarTest RefCountType;
+    public:
+        typedef CarTest RefCountType;
 
-            static RefCountType* ConstructionPointer(RefCountType* Target)
-                { return Target; }
+        static RefCountType* ConstructionPointer(RefCountType* Target)
+            { return Target; }
 
-            enum { IsCastable = CastStatic };
+        enum { IsCastable = CastStatic };
     };
 }
 
