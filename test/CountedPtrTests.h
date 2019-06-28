@@ -348,12 +348,12 @@ DEFAULT_TEST_GROUP(CountedPtrTests,CountedPtr)
             CountedPtr<FooExternal> PtrE( new FooExternal(&destructFlagExternal, 1) );
             CountedPtr<FooInternal> PtrI( new FooInternal(&destructFlagInternal, 3) );
 
-            TEST_EQUAL("AutomatedDestruction-ExternalPreDestruction", destructFlagExternal, false);
-            TEST_EQUAL("AutomatedDestruction-InternalPreDestruction", destructFlagInternal, false);
+            TEST_EQUAL("AutomatedDestruction-ExternalPreDestruction", false, destructFlagExternal);
+            TEST_EQUAL("AutomatedDestruction-InternalPreDestruction", false, destructFlagInternal);
         } // When pointers fall out of scope
 
-        TEST_EQUAL("AutomatedDestruction-ExternalPostDestruction", destructFlagExternal, true);
-        TEST_EQUAL("AutomatedDestruction-InternalPostDestruction", destructFlagInternal, true);
+        TEST_EQUAL("AutomatedDestruction-ExternalPostDestruction", true, destructFlagExternal);
+        TEST_EQUAL("AutomatedDestruction-InternalPostDestruction", true, destructFlagInternal);
     }
 
     { // Use count and dual handle delete
@@ -381,12 +381,12 @@ DEFAULT_TEST_GROUP(CountedPtrTests,CountedPtr)
 
             TEST_EQUAL("UseCount()-ExternalPartialCount", Whole(2), PtrE.UseCount())
             TEST_EQUAL("UseCount()-InternalPartialCount", Whole(2), PtrI.UseCount())
-            TEST_EQUAL("AutomatedDestructionUse2-ExternalPreDestruction", destructFlagExternal, false);
-            TEST_EQUAL("AutomatedDestructionUse2-InternalPreDestruction", destructFlagInternal, false);
+            TEST_EQUAL("AutomatedDestructionUse2-ExternalPreDestruction", false, destructFlagExternal);
+            TEST_EQUAL("AutomatedDestructionUse2-InternalPreDestruction", false, destructFlagInternal);
         } // When pointers fall out of scope
 
-        TEST_EQUAL("AutomatedDestructionUse2-ExternalPostDestruction", destructFlagExternal, true);
-        TEST_EQUAL("AutomatedDestructionUse2-InternalPostDestruction", destructFlagInternal, true);
+        TEST_EQUAL("AutomatedDestructionUse2-ExternalPostDestruction", true, destructFlagExternal);
+        TEST_EQUAL("AutomatedDestructionUse2-InternalPostDestruction", true, destructFlagInternal);
     }
 
     { // Release and dual handles
@@ -396,20 +396,20 @@ DEFAULT_TEST_GROUP(CountedPtrTests,CountedPtr)
         CountedPtr<FooExternal> PtrE( new FooExternal(&destructFlagExternal, 1) );
         CountedPtr<FooExternal> PtrE2( PtrE );
 
-        TEST_EQUAL("Reset()-ExternalPreReset", destructFlagExternal, false);
+        TEST_EQUAL("Reset()-ExternalPreReset", false, destructFlagExternal);
         PtrE.Reset();
-        TEST_EQUAL("Reset()-ExternalPostReset1", destructFlagExternal, false);
+        TEST_EQUAL("Reset()-ExternalPostReset1", false, destructFlagExternal);
         PtrE2.Reset();
-        TEST_EQUAL("Reset()-ExternalPostReset2", destructFlagExternal, true);
+        TEST_EQUAL("Reset()-ExternalPostReset2", true, destructFlagExternal);
 
         CountedPtr<FooInternal> PtrI( new FooInternal(&destructFlagInternal, 3) );
         CountedPtr<FooInternal> PtrI2( PtrI );
 
-        TEST_EQUAL("Reset()-InternalPreReset", destructFlagInternal, false);
+        TEST_EQUAL("Reset()-InternalPreReset", false, destructFlagInternal);
         PtrI.Reset();
-        TEST_EQUAL("Reset()-InternalPostReset1", destructFlagInternal, false);
+        TEST_EQUAL("Reset()-InternalPostReset1", false, destructFlagInternal);
         PtrI2.Reset();
-        TEST_EQUAL("Reset()-InternalPostReset2", destructFlagInternal, true);
+        TEST_EQUAL("Reset()-InternalPostReset2", true, destructFlagInternal);
     }
 
 
@@ -438,15 +438,15 @@ DEFAULT_TEST_GROUP(CountedPtrTests,CountedPtr)
         CountedPtr<FooExternal> PtrE2( PtrE );
         CountedPtr<FooInternal> PtrI2( PtrI );
 
-        TEST_EQUAL("operator*-External1", (*PtrE).Value, 1);
-        TEST_EQUAL("operator*-External2", (*PtrE2).Value, 1);
-        TEST_EQUAL("operator*-Internal1", (*PtrI).Value, 3);
-        TEST_EQUAL("operator*-Internal2", (*PtrI2).Value, 3);
+        TEST_EQUAL("operator*-External1", 1, (*PtrE).Value);
+        TEST_EQUAL("operator*-External2", 1, (*PtrE2).Value);
+        TEST_EQUAL("operator*-Internal1", 3, (*PtrI).Value);
+        TEST_EQUAL("operator*-Internal2", 3, (*PtrI2).Value);
 
-        TEST_EQUAL("operator->-External1", PtrE->Value, 1);
-        TEST_EQUAL("operator->-External2", PtrE2->Value, 1);
-        TEST_EQUAL("operator->-Internal1", PtrI->Value, 3);
-        TEST_EQUAL("operator->-Internal2", PtrI2->Value, 3);
+        TEST_EQUAL("operator->-External1", 1, PtrE->Value);
+        TEST_EQUAL("operator->-External2", 1, PtrE2->Value);
+        TEST_EQUAL("operator->-Internal1", 3, PtrI->Value);
+        TEST_EQUAL("operator->-Internal2", 3, PtrI2->Value);
     }
 
     { // Reseating pointers and equality
@@ -470,20 +470,20 @@ DEFAULT_TEST_GROUP(CountedPtrTests,CountedPtr)
         PtrE2 = PtrE;
         PtrI2 = PtrI;
 
-        TEST_EQUAL("operator=-ExternalReseatFalse", destructFlagExternal, false);
-        TEST_EQUAL("operator=-ExternalReseatTrue", destructFlagExternal2, true);
-        TEST_EQUAL("operator=-InternalReseatFalse", destructFlagInternal, false);
-        TEST_EQUAL("operator=-InternalReseatTrue", destructFlagInternal2, true);
+        TEST_EQUAL("operator=-ExternalReseatFalse", false, destructFlagExternal);
+        TEST_EQUAL("operator=-ExternalReseatTrue", true, destructFlagExternal2);
+        TEST_EQUAL("operator=-InternalReseatFalse", false, destructFlagInternal);
+        TEST_EQUAL("operator=-InternalReseatTrue", true, destructFlagInternal2);
 
         TEST_EQUAL("operator==-ExternalTrue", true, PtrE == PtrE2);
         TEST_EQUAL("operator==-InternalTrue", true, PtrI == PtrI2);
         TEST_EQUAL("operator!=-ExternalFalse", false, PtrE != PtrE2);
         TEST_EQUAL("operator!=-InternalFalse", false, PtrI != PtrI2);
 
-        TEST_EQUAL("operator=-ExternalValue", PtrE->Value, 1);
-        TEST_EQUAL("operator=-External2Value", PtrE2->Value, 1);
-        TEST_EQUAL("operator=-InternalValue", PtrI->Value, 3);
-        TEST_EQUAL("operator=-Internal2Value", PtrI2->Value, 3);
+        TEST_EQUAL("operator=-ExternalValue", 1, PtrE->Value);
+        TEST_EQUAL("operator=-External2Value", 1, PtrE2->Value);
+        TEST_EQUAL("operator=-InternalValue", 3, PtrI->Value);
+        TEST_EQUAL("operator=-Internal2Value", 3, PtrI2->Value);
     }
 
     { // Get(), Unique(), operatorBoole()
@@ -544,14 +544,14 @@ DEFAULT_TEST_GROUP(CountedPtrTests,CountedPtr)
         CountedPtr<CarTest> CarPtrAfterStaticCast = CountedPtrStaticCast<CarTest>(CarPtr);
         CountedPtr<VehicleTest> VehiclePtrAfterStaticCast = CountedPtrStaticCast<VehicleTest>(CarPtrAfterStaticCast);
 
-        TEST_EQUAL("CountedPtrStaticCast()-VehicleToCar", "Starting V6",CarPtrAfterStaticCast->StartEngine());
-        TEST_EQUAL("CountedPtrStaticCast()-CarToVehicle", "Unknown Engine",VehiclePtrAfterStaticCast->StartEngine());
+        TEST_EQUAL("CountedPtrStaticCast()-VehicleToCar", "Starting V6", CarPtrAfterStaticCast->StartEngine());
+        TEST_EQUAL("CountedPtrStaticCast()-CarToVehicle", "Unknown Engine", VehiclePtrAfterStaticCast->StartEngine());
 
         CountedPtr<CarTest> CarPtrAfterDynamicCast = CountedPtrDynamicCast<CarTest>(CarPtr);
         CountedPtr<VehicleTest> VehiclePtrAfterDynamicCast = CountedPtrDynamicCast<VehicleTest>(CarPtrAfterDynamicCast);
 
-        TEST_EQUAL("CountedPtrDynamicCast()-VehicleToCar", "Starting V6",CarPtrAfterDynamicCast->StartEngine());
-        TEST_EQUAL("CountedPtrDynamicCast()-CarToVehicle", "Unknown Engine",VehiclePtrAfterDynamicCast->StartEngine());
+        TEST_EQUAL("CountedPtrDynamicCast()-VehicleToCar", "Starting V6", CarPtrAfterDynamicCast->StartEngine());
+        TEST_EQUAL("CountedPtrDynamicCast()-CarToVehicle", "Unknown Engine", VehiclePtrAfterDynamicCast->StartEngine());
         TEST_EQUAL("CountedPtrDynamicCast()-CastFail", false, CountedPtrDynamicCast<FooExternal>(CarPtr));
     }
 }
