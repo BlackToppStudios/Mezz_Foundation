@@ -72,7 +72,7 @@ namespace Mezzanine
                                         ///< functions on the pointer target.
     };
 
-    /// Forward Declares
+    /// Forward Declares.
 
     /// The pointer itself.
     template<typename TypePointedTo> class CountedPtr;
@@ -109,7 +109,7 @@ namespace Mezzanine
     template<typename ReturnPointer, typename OriginalPointer>
     ReturnPointer* CountedPtrInternalCast(const OriginalPointer* Original);
 
-    /// ReferenceCountTraits
+    /// ReferenceCountTraits.
     template<typename T> class ReferenceCountTraits;
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -158,7 +158,7 @@ namespace Mezzanine
             { return Target; }
 
         /// @brief Get the current amount of references.
-        /// @return A Whole with the current reference count
+        /// @return A Whole with the current reference count.
         Whole GetReferenceCount()
             { return RefCount; }
 
@@ -209,7 +209,7 @@ namespace Mezzanine
         virtual IntrusiveRefCount* GetMostDerived()
             { return this; }
 
-        /// @brief Virtual Destructor to prevent issues with deletion with incomplete type information
+        /// @brief Virtual Destructor to prevent issues with deletion with incomplete type information.
         virtual ~IntrusiveRefCount() {}
     };
     */
@@ -257,7 +257,7 @@ namespace Mezzanine
     };
 
     /*
-    /// @brief An Example ReferenceCountTraits implmentation.
+    /// @brief An Example ReferenceCountTraits implementation.
     /// @pre Any class can be used as a reference counter if it provides the following: @n
     /// TypePointedTo* GetReferenceCountTargetAsPointer(),
     /// Whole GetReferenceCount(),
@@ -276,7 +276,7 @@ namespace Mezzanine
         /// this does not need to allocate a reference count separately.
         /// @param Target The already created object to manage.
         /// @return This is expected to return a valid reference count, since the reference count is in the target,
-        /// this returns whatever was passed in,
+        /// this returns whatever was passed in.
         static RefCountType* ConstructionPointer(RefCountType* Target)
             { return Target; }
 
@@ -343,7 +343,7 @@ namespace Mezzanine
     class CountedPtr
     {
     public:
-        /// @brief The non pointer version of PtrType
+        /// @brief The type of the ReferenceCounter.
         using RefCountType = typename ReferenceCountTraits<TypePointedTo>::RefCountType;
         /// @brief This makes referencing the type of the pointer object easier for external classes.
         using ElementType = TypePointedTo;
@@ -397,7 +397,7 @@ namespace Mezzanine
         ///////////////////////////////////////////////////////////////////////////////
         // Construction/Destruction
 
-        /// @brief Initializing Constructor
+        /// @brief Initializing Constructor.
         /// @details This should only be used for initial creation of a shared pointer group. This will allocate the
         /// raw pointer and the ReferenceCounter that will be used to track the pointer passed. This will only be
         /// explicitly called to prevent accidental premature deletion of the item managed.
@@ -413,19 +413,19 @@ namespace Mezzanine
             else
                 { ReferenceCounter = nullptr; }
         }
-        /// @brief Copy constructor
+        /// @brief Copy constructor.
         /// @param Original The pointer being copied. This fresh pointer will use the same ReferenceCounter
         /// as the original.
         CountedPtr(const CountedPtr& Original) noexcept
             { Acquire( Original.ReferenceCounter ); }
-        /// @brief Casting copy constructor
+        /// @brief Casting copy constructor.
         /// @tparam OtherPointer The other pointer from which to copy.
         /// @param Original The CountedPtr being copied. This fresh pointer will use the same ReferenceCounter
         /// as the original.
         template<typename OtherPointer>
         CountedPtr(const CountedPtr<OtherPointer>& Original) noexcept : ReferenceCounter(nullptr)
             { Acquire( Original.ReferenceCounter ); }
-        /// @brief Move constructor
+        /// @brief Move constructor.
         /// @param Original The pointer being moved without incrementing the ReferenceCount.
         CountedPtr(CountedPtr&& Original) noexcept
         {
@@ -439,7 +439,7 @@ namespace Mezzanine
         ///////////////////////////////////////////////////////////////////////////////
         // Operators
 
-        /// @brief Assignment operator
+        /// @brief Assignment operator.
         /// @details This safely handles the semantics for release of the previously assigned object and acquiring
         /// the new managed object. This performs basic checks as expected.
         /// @param Other The item on the right hand side of the '=', which this class instance will copy.
@@ -474,7 +474,7 @@ namespace Mezzanine
         /// @brief A comparision of two CountedPtr instances.
         /// @details This is used to see if this and another CountedPtr are not managing the same
         /// object or are not part of the same group of CountedPtr managing that object.
-        /// @param Other The CountedPtr on the right hand side of the !=
+        /// @param Other The CountedPtr on the right hand side of the !=.
         /// @return This returns true if this and Other do not use the same reference count.
         Boole operator!=(const CountedPtr& Other) const noexcept
             { return Other.ReferenceCounter != ReferenceCounter; }
@@ -529,13 +529,13 @@ namespace Mezzanine
             { return CountedPtrInternalCast<TypePointedTo>(ReferenceCounter->GetMostDerived()); }
 
         /// @brief Is this the only pointer to the managed object.
-        /// @return True The reference count is 1 or if the pointer is invalid
+        /// @return True The reference count is 1 or if the pointer is invalid.
         /// @note This name was chosen to match standard compliant names, and should be usable in templates
         /// that require this function.
         Boole Unique() const noexcept
             { return ReferenceCounter ? ReferenceCounter->GetReferenceCount() == 1 : true; }
 
-        /// @brief Get the internal Reference count
+        /// @brief Get the internal Reference count.
         /// @return A pointer to internal reference count of this pointer.
         RefCountType* GetReferenceCount() const noexcept
             { return ReferenceCounter; }
@@ -595,7 +595,7 @@ namespace Mezzanine
     {
     public:
         /// @brief This accepts a parameter solely for compatibility with other templates and always returns null.
-        /// @return Always nullptr
+        /// @return Always nullptr.
         static ReturnPointer Cast(OriginalPointer)
             { return ReturnPointer(nullptr); }
     };
@@ -682,18 +682,18 @@ namespace Mezzanine
     Pointer* CountedPtrInternalCast(Pointer* Original)
         { return  Original; }
 
-    /// @brief A compile time cast that uses only the implicit conversion of the underlying raw pointers
-    /// @tparam ReturnType The type to be returned, must be specified
+    /// @brief A compile time cast that uses only the implicit conversion of the underlying raw pointers.
+    /// @tparam ReturnType The type to be returned, must be specified.
     /// @tparam OtherPointerTargetType The type of the given pointer, this can be inferred and should not be provided.
     /// @param Original The pointer to convert.
-    /// @return Either a pointer of the desired type or a compilation error
+    /// @return Either a pointer of the desired type or a compilation error.
     template<typename ReturnType, typename OtherPointerTargetType>
     CountedPtr<ReturnType> CountedPtrCast( CountedPtr<OtherPointerTargetType>& Original )
         { return CountedPtr<ReturnType>(Original); }
 
     /// @brief A compile time cast that uses static casting conversion of the underlying raw pointers but only works on
-    /// internally reference count types
-    /// @tparam ReturnType The type to be returned, must be specified
+    /// internally reference count types.
+    /// @tparam ReturnType The type to be returned, must be specified.
     /// @tparam OtherPointerTargetType The provided pointer's type, this can be inferred and should not be provided.
     /// @param Original The pointer to convert.
     /// @return Either a pointer of the desired type or a compilation error
@@ -702,7 +702,7 @@ namespace Mezzanine
         { return CountedPtr<ReturnType>( static_cast<ReturnType*>( Original.GetReferenceCount() ) ); }
 
     /// @brief A runtime cast that uses dynamic casting conversion of the underlying raw pointers but only works on
-    /// internally reference count types
+    /// internally reference count types.
     /// @tparam ReturnType The type to be returned, must be specified.
     /// @tparam OtherPointerTargetType The provided pointer's type, this can be inferred and should not be provided.
     /// @param Original The pointer to convert.
