@@ -295,7 +295,7 @@ namespace Mezzanine
     class ReferenceCountTraits <VehicleTest>
     {
     public:
-        typedef VehicleTest RefCountType;
+        using RefCountType = VehicleTest;
 
         static RefCountType* ConstructionPointer(RefCountType* Target)
             { return Target; }
@@ -307,7 +307,7 @@ namespace Mezzanine
     class ReferenceCountTraits <CarTest>
     {
     public:
-        typedef CarTest RefCountType;
+        using RefCountType = CarTest;
 
         static RefCountType* ConstructionPointer(RefCountType* Target)
             { return Target; }
