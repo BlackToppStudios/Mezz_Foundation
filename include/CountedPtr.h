@@ -545,7 +545,8 @@ namespace Mezzanine
     // Casting
 
     /// @brief This is used as to determine how a CountedPtr performs casting between pointer types internally.
-    /// @details The default implementation for internal casting in the CountedPtr.
+    /// @details The default implementation for internal casting in the CountedPtr.  Do not use, left empty to
+    /// trigger compilation error if attempted.
     /// @n @n
     /// This should never actually get called. Though it is the default template instance
     /// the default ReferenceCountTraits uses the CastNoneError specialization of this template.  This is left
@@ -560,15 +561,7 @@ namespace Mezzanine
     /// @tparam OriginalPointer The actual type the CountedPtr is maintaining as a target.
     /// @details For any case that uses CastNoneError including the default.
     template<typename ReturnPointer, typename OriginalPointer, CountedPointerCastingState>
-    class CountedPtrCastImpl
-    {
-    public:
-        /// @brief Do not use this cast.  Left empty to cause a compilation error if this is attempted.
-        /// @return Not applicable as this should never be called.
-        static ReturnPointer Cast(OriginalPointer)
-        {
-        }
-    };
+    class CountedPtrCastImpl;
 
     /// @brief An implementation of the CountedPtrCast that always returns the pointer passed,
     /// reached via CastNoneError in the ReferenceCountTraits of the target class.
