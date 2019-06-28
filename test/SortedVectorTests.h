@@ -37,8 +37,8 @@
    Joseph Toppi - toppij@gmail.com
    John Blackwood - makoenergy02@gmail.com
 */
-#ifndef MEZZ_TEST_SortedVector_h
-#define MEZZ_TEST_SortedVector_h
+#ifndef Mezz_Foundation_SortedVectorTests_h
+#define Mezz_Foundation_SortedVectorTests_h
 
 /// @file
 /// @brief This file tests the functionality of the SortedVector class.
