@@ -404,7 +404,7 @@ namespace Mezzanine
         /// @n @n It is quite easy to accidentally
         /// make a secondary group of counted pointers if not using the new statement inline with this constructor,
         /// and it is not recomended to use this in any other way. Here is an example of the recommended way to
-        /// use new inline with this: "Mezzanine::CountedPtr<Mezzanine::Vector3> VecPtr (new Mezzanine::Vector3);"
+        /// use new inline with this: "Mezzanine::CountedPtr<Mezzanine::Vector3> VecPtr (new Mezzanine::Vector3);".
         /// @param PointerTarget The item that will be deleted once all the pointers of this group disappear.
         explicit CountedPtr(TypePointedTo* PointerTarget = nullptr) noexcept
         {
@@ -466,7 +466,7 @@ namespace Mezzanine
         /// @brief A comparision of two CountedPtr instances.
         /// @details This is used to see if this and another CountedPtr are managing the same
         /// object and are part of the same group of CountedPtr managing that object.
-        /// @param Other The CountedPtr on the right hand side of the ==
+        /// @param Other The CountedPtr on the right hand side of the ==.
         /// @return This returns true if this and Other use the same reference count and pointer.
         Boole operator==(const CountedPtr& Other) const noexcept
             { return Other.ReferenceCounter == ReferenceCounter; }
@@ -689,7 +689,7 @@ namespace Mezzanine
     /// @tparam ReturnType The type to be returned, must be specified.
     /// @tparam OtherPointerTargetType The provided pointer's type, this can be inferred and should not be provided.
     /// @param Original The pointer to convert.
-    /// @return Either a pointer of the desired type or a compilation error
+    /// @return Either a pointer of the desired type or a compilation error.
     template<typename ReturnType, typename OtherPointerTargetType>
     CountedPtr<ReturnType> CountedPtrStaticCast(CountedPtr<OtherPointerTargetType>& Original)
         { return CountedPtr<ReturnType>( static_cast<ReturnType*>( Original.GetReferenceCount() ) ); }
