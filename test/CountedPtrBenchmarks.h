@@ -46,10 +46,12 @@
 #include "MezzTest.h"
 
 #include "CountedPtr.h"
+#include "CountedPtrTests.h"
 
 BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
 {
     using namespace Mezzanine;
+    using namespace CountedPtrTesting;
 
     Integer OutputE = 0;
     Integer OutputI = 0;
