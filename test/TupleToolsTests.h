@@ -126,7 +126,7 @@ AUTOMATIC_TEST_GROUP(TupleToolsTests,TupleTools)
     {//tuple_cat_unique
         FirstTupleType FirstTestTuple{50,0.25f,60};
         SecondTupleType SecondTestTuple{'Z',short(255),600};
-        ThirdTupleType ThirdTestTuple{'Y',"Hi"s};
+        ThirdTupleType ThirdTestTuple{'Y',std::string("Hi")};
 
         auto ResultTuple = tuple_cat_unique(FirstTestTuple,SecondTestTuple,ThirdTestTuple);
         constexpr Boole Result = std::is_same_v<std::tuple<int,float,char,short,std::string>,decltype(ResultTuple)>;
@@ -137,7 +137,7 @@ AUTOMATIC_TEST_GROUP(TupleToolsTests,TupleTools)
         TEST_EQUAL_EPSILON("tuple_cat_unique-Value2",0.25f,std::get<1>(ResultTuple));
         TEST_EQUAL("tuple_cat_unique-Value3",'Z',std::get<2>(ResultTuple));
         TEST_EQUAL("tuple_cat_unique-Value4",short(255),std::get<3>(ResultTuple));
-        TEST_EQUAL("tuple_cat_unique-Value5","Hi"s,std::get<4>(ResultTuple));
+        TEST_EQUAL("tuple_cat_unique-Value5",std::string("Hi"),std::get<4>(ResultTuple));
     }//tuple_cat_unique
 }
 

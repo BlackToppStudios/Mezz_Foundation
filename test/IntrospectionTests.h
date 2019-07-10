@@ -143,21 +143,22 @@ namespace IntrospectTest
         static auto RegisterMembers()
         {
             using namespace Mezzanine;
+            using namespace std::string_view_literals;
             using SelfType = DiamondStruct;
 
             return Members(
                 // BaseStruct
-                MakeMemberAccessor("IntVar",&SelfType::IntVar),
-                MakeMemberAccessor("FloatVar",&SelfType::SetFloatVar,&SelfType::GetFloatVar),
-                MakeMemberAccessor("StringVar",&SelfType::StringVar),
+                MakeMemberAccessor("IntVar"sv,&SelfType::IntVar),
+                MakeMemberAccessor("FloatVar"sv,&SelfType::SetFloatVar,&SelfType::GetFloatVar),
+                MakeMemberAccessor("StringVar"sv,&SelfType::StringVar),
                 // DerivedStructA
-                MakeMemberAccessor("DerivedADoubleVar",&SelfType::DerivedADoubleVar),
-                MakeMemberAccessor("DerivedAIntVar",&SelfType::DerivedAIntVar),
-                MakeMemberAccessor("DerivedAUnsignedVar",&SelfType::DerivedAUnsignedVar),
+                MakeMemberAccessor("DerivedADoubleVar"sv,&SelfType::DerivedADoubleVar),
+                MakeMemberAccessor("DerivedAIntVar"sv,&SelfType::DerivedAIntVar),
+                MakeMemberAccessor("DerivedAUnsignedVar"sv,&SelfType::DerivedAUnsignedVar),
                 // DerivedStructB
-                MakeMemberAccessor("DerivedBfloatVar",&SelfType::DerivedBfloatVar),
-                MakeMemberAccessor("DerivedBShortVar",&SelfType::DerivedBShortVar),
-                MakeMemberAccessor("DerivedBCharArrayVar",&SelfType::DerivedBCharArrayVar),
+                MakeMemberAccessor("DerivedBfloatVar"sv,&SelfType::DerivedBfloatVar),
+                MakeMemberAccessor("DerivedBShortVar"sv,&SelfType::DerivedBShortVar),
+                MakeMemberAccessor("DerivedBCharArrayVar"sv,&SelfType::DerivedBCharArrayVar),
                 // DiamondStruct
                 MakeMemberAccessor("DiamondStringVar"sv,&SelfType::DiamondStringVar),
                 MakeMemberAccessor("DiamondStringVarDos"sv,&SelfType::DiamondStringVarDos)
