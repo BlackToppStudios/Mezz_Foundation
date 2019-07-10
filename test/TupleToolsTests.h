@@ -94,7 +94,7 @@ AUTOMATIC_TEST_GROUP(TupleToolsTests,TupleTools)
     }//element_as_tuple
 
     {//rebuild_tuple_unique
-        FirstTupleType FirstTestTuple{30,0.5,40};
+        FirstTupleType FirstTestTuple{30,0.5f,40};
         SecondTupleType SecondTestTuple{'A',short(65),155};
         auto ThirdTestTuple = std::tuple_cat(FirstTestTuple,SecondTestTuple);
 
@@ -111,14 +111,14 @@ AUTOMATIC_TEST_GROUP(TupleToolsTests,TupleTools)
         TEST_EQUAL("rebuild_tuple_unique-Rebuild3-Type",true,Result3);
 
         TEST_EQUAL("rebuild_tuple_unique-Rebuild1-Value1",30,std::get<0>(Rebuild1));
-        TEST_EQUAL_EPSILON("rebuild_tuple_unique-Rebuild1-Value2",0.5,std::get<1>(Rebuild1));
+        TEST_EQUAL_EPSILON("rebuild_tuple_unique-Rebuild1-Value2",0.5f,std::get<1>(Rebuild1));
 
         TEST_EQUAL("rebuild_tuple_unique-Rebuild2-Value1",'A',std::get<0>(Rebuild2));
         TEST_EQUAL("rebuild_tuple_unique-Rebuild2-Value2",short(65),std::get<1>(Rebuild2));
         TEST_EQUAL("rebuild_tuple_unique-Rebuild2-Value3",155,std::get<2>(Rebuild2));
 
         TEST_EQUAL("rebuild_tuple_unique-Rebuild3-Value1",30,std::get<0>(Rebuild3));
-        TEST_EQUAL_EPSILON("rebuild_tuple_unique-Rebuild3-Value2",0.5,std::get<1>(Rebuild3));
+        TEST_EQUAL_EPSILON("rebuild_tuple_unique-Rebuild3-Value2",0.5f,std::get<1>(Rebuild3));
         TEST_EQUAL("rebuild_tuple_unique-Rebuild3-Value3",'A',std::get<2>(Rebuild3));
         TEST_EQUAL("rebuild_tuple_unique-Rebuild3-Value4",short(65),std::get<3>(Rebuild3));
     }//rebuild_tuple_unique

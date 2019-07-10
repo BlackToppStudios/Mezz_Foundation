@@ -47,8 +47,6 @@
 
 #include "Introspection.h"
 
-using namespace std::literals;
-
 namespace IntrospectTest
 {
     using Mezzanine::UInt32;
