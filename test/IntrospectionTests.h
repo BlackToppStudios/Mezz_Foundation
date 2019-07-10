@@ -47,6 +47,8 @@
 
 #include "Introspection.h"
 
+using namespace std::literals;
+
 namespace IntrospectTest
 {
     using Mezzanine::UInt32;
@@ -96,11 +98,14 @@ namespace IntrospectTest
             using namespace Mezzanine;
             using SelfType = DerivedStructA;
 
-            return MergeMembers( BaseStruct::RegisterMembers(), Members(
-                MakeMemberAccessor("DerivedADoubleVar",&SelfType::DerivedADoubleVar),
-                MakeMemberAccessor("DerivedAIntVar",&SelfType::DerivedAIntVar),
-                MakeMemberAccessor("DerivedAUnsignedVar",&SelfType::DerivedAUnsignedVar)
-            ) );
+            return MergeMembers(
+                BaseStruct::RegisterMembers(),
+                Members(
+                    MakeMemberAccessor("DerivedADoubleVar",&SelfType::DerivedADoubleVar),
+                    MakeMemberAccessor("DerivedAIntVar",&SelfType::DerivedAIntVar),
+                    MakeMemberAccessor("DerivedAUnsignedVar",&SelfType::DerivedAUnsignedVar)
+                )
+            );
         }
     };
 
@@ -118,17 +123,21 @@ namespace IntrospectTest
             using namespace Mezzanine;
             using SelfType = DerivedStructB;
 
-            return MergeMembers( BaseStruct::RegisterMembers(), Members(
-                MakeMemberAccessor("DerivedBfloatVar",&SelfType::DerivedBfloatVar),
-                MakeMemberAccessor("DerivedBShortVar",&SelfType::DerivedBShortVar),
-                MakeMemberAccessor("DerivedBCharArrayVar",&SelfType::DerivedBCharArrayVar)
-            ) );
+            return MergeMembers(
+                BaseStruct::RegisterMembers(),
+                Members(
+                    MakeMemberAccessor("DerivedBfloatVar",&SelfType::DerivedBfloatVar),
+                    MakeMemberAccessor("DerivedBShortVar",&SelfType::DerivedBShortVar),
+                    MakeMemberAccessor("DerivedBCharArrayVar",&SelfType::DerivedBCharArrayVar)
+                )
+            );
         }
     };
 
     struct DiamondStruct final : public DerivedStructA, public DerivedStructB
     {
         std::string DiamondStringVar = "Hello";
+        std::string DiamondStringVarDos = "Hola";
 
         static StringView RegisterName()
             { return "DiamondStruct"; }
@@ -138,12 +147,22 @@ namespace IntrospectTest
             using namespace Mezzanine;
             using SelfType = DiamondStruct;
 
-            return MergeMembersUnique(
-                DerivedStructA::RegisterMembers(),
-                DerivedStructB::RegisterMembers(),
-                Members(
-                    MakeMemberAccessor("DiamondStringVar",&SelfType::DiamondStringVar)
-                )
+            return Members(
+                // BaseStruct
+                MakeMemberAccessor("IntVar",&SelfType::IntVar),
+                MakeMemberAccessor("FloatVar",&SelfType::SetFloatVar,&SelfType::GetFloatVar),
+                MakeMemberAccessor("StringVar",&SelfType::StringVar),
+                // DerivedStructA
+                MakeMemberAccessor("DerivedADoubleVar",&SelfType::DerivedADoubleVar),
+                MakeMemberAccessor("DerivedAIntVar",&SelfType::DerivedAIntVar),
+                MakeMemberAccessor("DerivedAUnsignedVar",&SelfType::DerivedAUnsignedVar),
+                // DerivedStructB
+                MakeMemberAccessor("DerivedBfloatVar",&SelfType::DerivedBfloatVar),
+                MakeMemberAccessor("DerivedBShortVar",&SelfType::DerivedBShortVar),
+                MakeMemberAccessor("DerivedBCharArrayVar",&SelfType::DerivedBCharArrayVar),
+                // DiamondStruct
+                MakeMemberAccessor("DiamondStringVar"sv,&SelfType::DiamondStringVar),
+                MakeMemberAccessor("DiamondStringVarDos"sv,&SelfType::DiamondStringVarDos)
             );
         }
     };
@@ -484,27 +503,27 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
         TEST_EQUAL("GetMemberCount()-DerivedStructB",
                    size_t(6),GetMemberCount<DerivedStructB>());
         TEST_EQUAL("GetMemberCount()-DiamondStruct",
-                   size_t(10),GetMemberCount<DiamondStruct>());
+                   size_t(11),GetMemberCount<DiamondStruct>());
         TEST_EQUAL("GetMemberCount()-ContainerStruct",
                    size_t(2),GetMemberCount<ContainerStruct>());
         TEST_EQUAL("GetMemberCount()-vector",
                    size_t(0),GetMemberCount<std::vector<int>>());
     }// Registration Query
 
-    {// (Get/Has)Members
+    {// GetRegisteredMembers/HasMember
         using BaseRegisterType = decltype(BaseStruct::RegisterMembers());
-        using BaseGetType = std::decay_t<decltype(GetMembers<BaseStruct>())>;
+        using BaseGetType = std::decay_t<decltype(GetRegisteredMembers<BaseStruct>())>;
         constexpr Boole BaseResult = std::is_same_v<BaseRegisterType,BaseGetType>;
         TEST_EQUAL("GetMembers()-BaseStruct",
                    true,BaseResult);
 
         using ContainerRegisterType = decltype(RegisterMembers<ContainerStruct>());
-        using ContainerGetType = std::decay_t<decltype(GetMembers<ContainerStruct>())>;
+        using ContainerGetType = std::decay_t<decltype(GetRegisteredMembers<ContainerStruct>())>;
         constexpr Boole ContainerResult = std::is_same_v<ContainerRegisterType,ContainerGetType>;
         TEST_EQUAL("GetMembers()-ContainerStruct",
                    true,ContainerResult);
 
-        using VectorGetType = decltype(GetMembers<std::vector<int>>());
+        using VectorGetType = decltype(GetRegisteredMembers<std::vector<int>>());
         constexpr Boole VectorResult = std::is_same_v<std::tuple<>,VectorGetType>;
         TEST_EQUAL("GetMembers()-vector",
                    false,VectorResult);
@@ -521,7 +540,7 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
 
         TEST_EQUAL("HasMember()-vector",
                    false,HasMember<std::vector<int>>("Start"));
-    }// (Get/Has)Members
+    }// GetRegisteredMembers/HasMember
 
     {// Do For Members
         DiamondStruct TestStruct;
@@ -532,7 +551,7 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
             ++SlowMemberCount;  (void)Member;
         } );
         TEST_EQUAL("DoForAllMembers-DiamondStruct",
-                   size_t(10),SlowMemberCount);
+                   size_t(11),SlowMemberCount);
 
         std::string StrMemberValue;
         DoForMember<DiamondStruct,std::string>( "DiamondStringVar", [&](const auto& Member) {
