@@ -54,9 +54,9 @@ namespace IntrospectTest
 
     struct BaseStruct
     {
-        int IntVar = 0;
-        float FloatVar = 1.0f;
         std::string StringVar = "Hello";
+        float FloatVar = 1.0f;
+        int IntVar = 0;
 
         void SetFloatVar(const float Var)
             { this->FloatVar = Var; }
@@ -72,9 +72,9 @@ namespace IntrospectTest
             using SelfType = BaseStruct;
 
             return Members(
-                MakeMemberAccessor("IntVar",&SelfType::IntVar),
+                MakeMemberAccessor("StringVar",&SelfType::StringVar),
                 MakeMemberAccessor("FloatVar",&SelfType::SetFloatVar,&SelfType::GetFloatVar),
-                MakeMemberAccessor("StringVar",&SelfType::StringVar)
+                MakeMemberAccessor("IntVar",&SelfType::IntVar)
             );
         }
     };
