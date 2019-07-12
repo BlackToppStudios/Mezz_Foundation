@@ -268,11 +268,17 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
     //static_assert(sizeof(std::string) == 32,"Wrong Size.");
     //static_assert(sizeof(std::array<char,2>) == 2,"Wrong Size.");
 
+    static_assert(sizeof(std::string) != 24,"Size of std::string is 24.");
+    static_assert(sizeof(std::string) != 28,"Size of std::string is 28.");
     static_assert(sizeof(std::string) != 32,"Size of std::string is 32.");
     static_assert(sizeof(std::string) != 36,"Size of std::string is 36.");
     static_assert(sizeof(std::string) != 40,"Size of std::string is 40.");
     static_assert(sizeof(std::string) != 44,"Size of std::string is 44.");
     static_assert(sizeof(std::string) != 48,"Size of std::string is 48.");
+    static_assert(sizeof(std::string) != 52,"Size of std::string is 52.");
+    static_assert(sizeof(std::string) != 56,"Size of std::string is 56.");
+    static_assert(sizeof(std::string) != 60,"Size of std::string is 60.");
+    static_assert(sizeof(std::string) != 64,"Size of std::string is 64.");
 
     {// MemberAccessor/PackedStruct Tests
         PackedStruct PackedTest;
