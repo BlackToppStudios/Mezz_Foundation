@@ -268,6 +268,9 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
     //static_assert(sizeof(std::string) == 32,"Wrong Size.");
     //static_assert(sizeof(std::array<char,2>) == 2,"Wrong Size.");
 
+    static_assert(sizeof(std::string) != 12,"Size of std::string is 12.");
+    static_assert(sizeof(std::string) != 16,"Size of std::string is 16.");
+    static_assert(sizeof(std::string) != 20,"Size of std::string is 20.");
     static_assert(sizeof(std::string) != 24,"Size of std::string is 24.");
     static_assert(sizeof(std::string) != 28,"Size of std::string is 28.");
     static_assert(sizeof(std::string) != 32,"Size of std::string is 32.");
