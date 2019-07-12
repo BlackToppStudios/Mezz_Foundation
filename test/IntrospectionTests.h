@@ -84,7 +84,7 @@ namespace IntrospectTest
 
     struct DerivedStructA : virtual public BaseStruct
     {
-        double DerivedADoubleVar = 1.0;
+        float DerivedAFloatVar = 1.0f;
         int DerivedAIntVar = 0;
         unsigned DerivedAUnsignedVar = 0;
 
@@ -99,7 +99,7 @@ namespace IntrospectTest
             return MergeMembers(
                 BaseStruct::RegisterMembers(),
                 Members(
-                    MakeMemberAccessor("DerivedADoubleVar",&SelfType::DerivedADoubleVar),
+                    MakeMemberAccessor("DerivedAFloatVar",&SelfType::DerivedAFloatVar),
                     MakeMemberAccessor("DerivedAIntVar",&SelfType::DerivedAIntVar),
                     MakeMemberAccessor("DerivedAUnsignedVar",&SelfType::DerivedAUnsignedVar)
                 )
@@ -152,7 +152,7 @@ namespace IntrospectTest
                 MakeMemberAccessor("FloatVar"sv,&SelfType::SetFloatVar,&SelfType::GetFloatVar),
                 MakeMemberAccessor("StringVar"sv,&SelfType::StringVar),
                 // DerivedStructA
-                MakeMemberAccessor("DerivedADoubleVar"sv,&SelfType::DerivedADoubleVar),
+                MakeMemberAccessor("DerivedAFloatVar"sv,&SelfType::DerivedAFloatVar),
                 MakeMemberAccessor("DerivedAIntVar"sv,&SelfType::DerivedAIntVar),
                 MakeMemberAccessor("DerivedAUnsignedVar"sv,&SelfType::DerivedAUnsignedVar),
                 // DerivedStructB
@@ -256,32 +256,6 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
 {
     using namespace Mezzanine;
     using namespace IntrospectTest;
-
-    //static_assert(sizeof(BaseStruct) == 40,"Wrong Size.");
-    //static_assert(sizeof(DerivedStructA) == 64,"Wrong Size.");
-    //static_assert(sizeof(DerivedStructB) == 56,"Wrong Size.");
-    //static_assert(sizeof(DiamondStruct) == 144,"Wrong Size.");
-    //static_assert(sizeof(int) == 4,"Wrong Size.");
-    //static_assert(sizeof(float) == 4,"Wrong Size.");
-    //static_assert(sizeof(double) == 8,"Wrong Size.");
-    //static_assert(sizeof(short) == 2,"Wrong Size.");
-    //static_assert(sizeof(std::string) == 32,"Wrong Size.");
-    //static_assert(sizeof(std::array<char,2>) == 2,"Wrong Size.");
-
-    static_assert(sizeof(std::string) != 12,"Size of std::string is 12.");
-    static_assert(sizeof(std::string) != 16,"Size of std::string is 16.");
-    static_assert(sizeof(std::string) != 20,"Size of std::string is 20.");
-    static_assert(sizeof(std::string) != 24,"Size of std::string is 24.");
-    static_assert(sizeof(std::string) != 28,"Size of std::string is 28.");
-    static_assert(sizeof(std::string) != 32,"Size of std::string is 32.");
-    static_assert(sizeof(std::string) != 36,"Size of std::string is 36.");
-    static_assert(sizeof(std::string) != 40,"Size of std::string is 40.");
-    static_assert(sizeof(std::string) != 44,"Size of std::string is 44.");
-    static_assert(sizeof(std::string) != 48,"Size of std::string is 48.");
-    static_assert(sizeof(std::string) != 52,"Size of std::string is 52.");
-    static_assert(sizeof(std::string) != 56,"Size of std::string is 56.");
-    static_assert(sizeof(std::string) != 60,"Size of std::string is 60.");
-    static_assert(sizeof(std::string) != 64,"Size of std::string is 64.");
 
     {// MemberAccessor/PackedStruct Tests
         PackedStruct PackedTest;
