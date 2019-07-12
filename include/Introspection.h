@@ -1380,16 +1380,119 @@ namespace Mezzanine {
     /// template<typename Class>
     /// const auto& GetRegisteredMembers()
     /// @endcode
+    /// Note that GetRegisteredMembers returns a const reference, rather than a copy. All functions on the
+    /// MemberAccessor are cost anyway, but in case you are going to do some template meta programming with the return
+    /// types you'll have to use the class registration function directly.
     /// @subsection IntrospectDoFor Operating on Data
+    /// All of this would be very limited if we weren't able to insert custom logic to run based on the registered
+    /// members of a given class. There are two methods that will accept a lambda to be call for each member being
+    /// worked on. @ref DoForAllMembers will invoke the lambda for every member on the class and @ref DoForMember will
+    /// invoke for only the named Member(s). In general, you should make every member name unique, but the system does
+    /// not check for, nor enforce, uniqueness in member names whatsoever. It is up to you to disambiguate members
+    /// with the same name if that occurs.
+    /// @n @n
+    /// There are a couple of requirements for using both functions, mostly regarding the lambdas. Any lambda created
+    /// should not have a return. It shouldn't prevent compilation in there is a return statement, just the value
+    /// returned won't go anywhere and will be discarded. Additionally, it should accept only one parameter with the
+    /// type "const auto&". Simply "auto" should work as well. Auto is necessary because MemberAccessor types vary
+    /// greatly and making it auto will permit the compiler to generate a lambda for each MemberAccessor in a type
+    /// safe way. By now this should be obvious, but I'll state it anyway. The parameter passed into the lambda is NOT
+    /// the Member or a copy of the member in anyway. It is an accessor to the member and you'll have to call the
+    /// appropriate function on the MemberAccessor inside the lambda to work the with actual member.
+    /// @n @n
+    /// DoForAllMembers is an overloaded function with two versions and uses SFINAE to ensure only one will be visible
+    /// for a given class at a time based on whether or not it is registered. Here's the signatures:
+    /// @code
+    /// template<typename Class, typename Funct, typename = std::enable_if_t<IsRegistered<Class>()>>
+    /// void DoForAllMembers(Funct&& ToCall)
     ///
+    /// template<typename Class, typename Funct, typename = std::enable_if_t<!IsRegistered<Class>()>, typename = void>
+    /// void DoForAllMembers(Funct&& ToCall)
+    /// @endcode
+    /// The non-registered implementation is a no-op to help reduce the amount of code generated from the template. In
+    /// either case you do need to specify the class to operate on as a template parameter and provide a lambda with
+    /// the operation to be performed. Following the guidelines mentioned above, it's pretty straightforward to do
+    /// basic operations with this.
+    /// @code
+    /// MyClass MyClassInstance;
+    /// DoForAllMembers<MyClass>([&](const auto& Member) {
+    ///     std::cout << Member.GetName() << ": " << Member.GetValue(MyClassInstance) << "\n";
+    /// });
+    /// @endcode
+    /// The above code will stream every member (in the sequence specified by your registration method) in MyClass to
+    /// std::cout. If a stream operator doesn't exist for a member then compilation will fail. You could even make
+    /// this more generic by making a template function with deduced parameters.
+    /// @code
+    /// template<class ObjectType>
+    /// void PrintAllMembers(ObjectType&& ToPrint)
+    /// {
+    ///     DoForAllMembers<ObjectType>([&](const auto& Member) {
+    ///         std::cout << Member.GetName() << ": " << Member.GetValue(ToPrint) << "\n";
+    ///     }
+    /// }
+    ///
+    /// void main()
+    /// {
+    ///     MyClass MyClassInstance;
+    ///     MyOtherClass MyOtherClassInstance;
+    ///
+    ///     PrintAllMembers(MyClassInstance);
+    ///     PrintAllMembers(MyOtherClassInstance);
+    ///     return 0;
+    /// }
+    /// @endcode
+    /// You could even take it a step further and create a lambda that captures ANOTHER lambda and will only invoke
+    /// it if the name of the member in question matches the name provided. In fact, this is EXACTLY how DoForMember
+    /// is implemented. DoForMember comes with an extra bonus though. You have to specify the member type, which
+    /// allows the compiler to simply not generate runtime checks for mismatched types. Here's the signature:
+    /// @code
+    /// template<typename Class, typename MemberType, typename Funct>
+    /// void DoForMember(const StringView Name, Funct&& ToCall)
+    /// @endcode
+    /// The function/lambda type is deduced, but the Class and MemberType parameters need to be specified. This
+    /// function will invoke "ToCall" for every member whose type matches MemberType AND whose name matches Name in
+    /// the class specified in the Class template parameter. In sane cases this should result in only one or zero
+    /// invocations. However since classes can, and often do, have multiple members of the same type AND the
+    /// Introspection system doesn't enforce unique Member names, this could result in more than one invocation.
+    /// @n @n
+    /// The last two functions to cover are very simple convenience functions that make use of DoForMember. The
+    /// functions @ref SetMemberValue and @ref GetMemberValue take a member type as a template parameter as
+    /// well as a name and object instance. Here are the signatures:
+    /// @code
+    /// template<typename MemberType, typename Class>
+    /// MemberType GetMemberValue(Class& Obj, const StringView Name)
+    ///
+    /// template<typename MemberType,
+    ///          typename Class,
+    ///          typename ValueType,
+    ///          typename = std::enable_if_t< std::is_convertible_v<ValueType,MemberType> >>
+    /// void SetMemberValue(Class& Obj, const StringView Name, ValueType&& Val)
+    /// @endcode
+    /// The Class template parameter is deduced in both functions. As is the ValueType parameter in SetMemberValue.
+    /// SetMemberValue additionally has an SFINAE switch that will make it fail if you try to provide a type that
+    /// cannot convert to the specified member type.
+    /// @n @n
+    /// GetMemberType has a couple minor caveats to keep in mind. First, it will create a temporary that is eventually
+    /// returned. This temporary is curly bracket initialized and has the type specified in MemberType. If MemberType
+    /// cannot be curly bracket initialized (for whatever reason) then it will fail to compile. Second, if the
+    /// specified member is not found, then the temporary is returned as is without being assigned a value. So the
+    /// failure return from GetMemberType is whatever state is made with "MemberType{}". If this is a perfectly valid
+    /// state for MemberType then disambiguating that valid state from an error will be a challenge. In such cases
+    /// creating your own custom lambda to be passed into DoForMember should be preferred over using GetMemberValue.
     /// @section IntrospectTrouble Troubleshooting
     /// One of the largest frustrations I had while writing this system was when I attempted to debug it with
     /// GDB. The system optimizes code away so aggressively it was impossible to watch the values I needed to
     /// watch, forcing me to spread asserts and log streaming throughout the code to get some clue of what was
     /// going on. It would be difficult to describe the combination of pride and frustration I felt because
-    /// of this. @n
-    /// So troubleshooting the system when something goes wrong can be somewhat difficult. There are a few tips
-    /// I can share as well as some best practices.
+    /// of this.
+    /// @n @n
+    /// So troubleshooting the system when something goes wrong can be somewhat difficult. A debugger is only of very
+    /// limited use. Adding some custom code that prints values will get you better results generally. Throughout
+    /// this manual I mentioned error-like behaviors such as what happens when a class isn't registered and default
+    /// return values because those were the primary issues I ran into while testing the system. I did consider
+    /// causing compilation errors when a non-registered class is used with the system, but I consider it a feature
+    /// to allow people to throw arbitrary or unknown classes at the system without it throwing a fuss. The system
+    /// would lose that if I caused more errors in those situations.
 
     /// @}
 //}// Introspection

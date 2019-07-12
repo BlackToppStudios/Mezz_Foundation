@@ -257,6 +257,17 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
     using namespace Mezzanine;
     using namespace IntrospectTest;
 
+    static_assert(sizeof(BaseStruct) == 40,"Wrong Size.");
+    static_assert(sizeof(DerivedStructA) == 64,"Wrong Size.");
+    static_assert(sizeof(DerivedStructB) == 56,"Wrong Size.");
+    static_assert(sizeof(DiamondStruct) == 144,"Wrong Size.");
+    static_assert(sizeof(int) == 4,"Wrong Size.");
+    static_assert(sizeof(float) == 4,"Wrong Size.");
+    static_assert(sizeof(double) == 8,"Wrong Size.");
+    static_assert(sizeof(short) == 2,"Wrong Size.");
+    static_assert(sizeof(std::string) == 32,"Wrong Size.");
+    static_assert(sizeof(std::array<char,2>) == 2,"Wrong Size.");
+
     {// MemberAccessor/PackedStruct Tests
         PackedStruct PackedTest;
 
