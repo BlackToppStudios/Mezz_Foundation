@@ -91,7 +91,7 @@ namespace Mezzanine
     /// @tparam Tuple The tuple type to be checked and have duplicates removed.
     /// @tparam Idxs An index sequence based on the number of elements to check.
     /// @param ToCat The tuple to check for duplicate types.
-    /// @return Returns an std::tuple with duplicates elements of the parameter tuple removed.
+    /// @return Returns a std::tuple with duplicate elements of the parameter tuple removed.
     template<class Tuple, size_t... Idxs>
     constexpr auto rebuild_tuple_unique(Tuple&& ToCat, std::index_sequence<Idxs...>)
     {
@@ -102,7 +102,7 @@ namespace Mezzanine
     /// @brief Similar to std::tuple_cat, but discards duplicate occurrences of types while concatenating.
     /// @tparam Tuples The deduced collection of tuples to concatenate while removing duplicates.
     /// @param ToCat A collection of tuples to concatenate together.
-    /// @return Returns an std::tuple containing only one of each element type from the parameter tuples.
+    /// @return Returns a std::tuple containing only one of each element type from the parameter tuples.
     template<typename... Tuples>
     constexpr auto tuple_cat_unique(Tuples&&... ToCat)
     {

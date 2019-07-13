@@ -1,4 +1,4 @@
-// © Copyright 2010 - 2018 BlackTopp Studios Inc.
+// © Copyright 2010 - 2019 BlackTopp Studios Inc.
 /* This file is part of The Mezzanine Engine.
 
     The Mezzanine Engine is free software: you can redistribute it and/or modify
@@ -51,11 +51,12 @@ namespace Mezzanine
     /// @brief Convenience method for getting the value of the n-th bit.
     /// @remarks This is useful for setting values on bit-fields.  A value of 0 returns 0,
     /// a value of 1 returns 1, 2 returns 2, 3 returns 4, 4 returns 8, 5 returns 16, etc..
-    /// @param Bit The n-th bit to get the value of.  Range of 0-63.
+    /// @param Bit The n-th bit to get the value of.  Range of 0-64.
     /// @return Returns the value at the specified bit position.
-    constexpr UInt64 EnumBit(const UInt64 Bit)
+    constexpr UInt64 EnumBit(const UInt32 Bit)
     {
-        return ( Bit == 0 ? 0 : 1 << ( Bit - 1 ) );
+        UInt64 BitValue = 1;
+        return ( Bit == 0 ? 0 : BitValue << ( Bit - 1 ) );
     }
 
     /// @brief A default type traits class for all class enums.
@@ -65,7 +66,7 @@ namespace Mezzanine
     class BitMaskOperatorTraits
     {
     public:
-        /// @brief Specializations that support the bit masking operator | and & should set this to true.
+        /// @brief Specializations that support the bit masking operators | and & should set this to true.
         static const bool Supported = false;
     };
 
