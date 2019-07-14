@@ -1,4 +1,4 @@
-// © Copyright 2010 - 2016 BlackTopp Studios Inc.
+// © Copyright 2010 - 2019 BlackTopp Studios Inc.
 /* This file is part of The Mezzanine Engine.
 
     The Mezzanine Engine is free software: you can redistribute it and/or modify
@@ -37,15 +37,13 @@
    Joseph Toppi - toppij@gmail.com
    John Blackwood - makoenergy02@gmail.com
 */
-#ifndef Mezz_Test_dox_h
-#define Mezz_Test_dox_h
+#ifndef Mezz_Foundation_dox_h
+#define Mezz_Foundation_dox_h
 
 /// @file
-/// @brief The main documentation header to include for the testing part of this library.
+/// @brief The main documentation header for the Foundation library.
 
-/// @page Mezz_Test Jagati Library Test
-/// This is library provides basic testing facilities. This library provides tools for unit testing and aggregating the
-/// results of those test. This is tightly integrated with CMake to make adding new tests as seemless as possible.
-///
+/// @page Mezz_Foudnation Mezz_Foudnation
+/// This library provides a set of common runtime utilities used by the majority of Mezzanine libraries.
 
 #endif
