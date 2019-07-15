@@ -69,7 +69,7 @@ namespace Mezzanine
             /// @brief A constructor that allows setting the value.
             /// @param DestructFlag Where to save destruction results.
             /// @param Val A default value to use for testing.
-            explicit FooExternal(Boole* DestructFlag, Integer Val = 0)
+            explicit FooExternal(Boole* DestructFlag, Integer Val = 0) noexcept
                 : IsDestructed(DestructFlag), Value(Val)
                 {}
 
@@ -96,7 +96,7 @@ namespace Mezzanine
             /// @brief A constructor that allows setting the value.
             /// @param DestructFlag Where to save destruction results.
             /// @param Val A default value to use for testing.
-            explicit FooInternal(Boole* DestructFlag, Integer Val = 0)
+            explicit FooInternal(Boole* DestructFlag, Integer Val = 0) noexcept
                 : RefCount(0), IsDestructed(DestructFlag), Value(Val)
                 {}
 
