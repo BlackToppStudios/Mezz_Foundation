@@ -200,7 +200,7 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
         End = ClockType::now();
         DurationType SharedPtrCopyTime = End - Begin;
         TestLog << OutputS << " - Creating, Dereferencing and Copying a shared_ptr " << TestCount
-                << " times with internal counting took: " << SharedPtrCopyTime.count() << " Microseconds."
+                << " times with external counting took: " << SharedPtrCopyTime.count() << " Microseconds."
                 << "\n";
 
         /// make_shared
@@ -228,15 +228,15 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
                     && RawPtrCopyTime < SharedPtrCopyTime && RawPtrCopyTime < MakeSharedCopyTime )
                 << ".\n";
 
-        TEST_WARN( "SanityRawVsCountedPtr", RawPtrTime < CountPtrInternalTime && RawPtrTime < CountPtrExternalTime );
-        TEST_WARN( "SanityRawVsCountedCopy", RawPtrCopyTime < CountPtrCopyInternalTime
-                  && RawPtrCopyTime < CountPtrCopyExternalTime );
-        TEST_WARN( "SanityRawVsShared", RawPtrTime < SharedPtrTime && RawPtrTime < MakeSharedTime);
-        TEST_WARN( "SanityRawVsSharedCopy", RawPtrCopyTime < SharedPtrCopyTime &&
-                  RawPtrCopyTime < MakeSharedCopyTime );
-        TEST_WARN( "SanitySharedWoutMake", MakeSharedTime < SharedPtrTime); // Not very good sanity tests.
+        //TEST_WARN( "SanityRawVsCountedPtr", RawPtrTime < CountPtrInternalTime && RawPtrTime < CountPtrExternalTime );
+        //TEST_WARN( "SanityRawVsCountedCopy", RawPtrCopyTime < CountPtrCopyInternalTime
+        //          && RawPtrCopyTime < CountPtrCopyExternalTime );
+        //TEST_WARN( "SanityRawVsShared", RawPtrTime < SharedPtrTime && RawPtrTime < MakeSharedTime);
+        //TEST_WARN( "SanityRawVsSharedCopy", RawPtrCopyTime < SharedPtrCopyTime &&
+        //          RawPtrCopyTime < MakeSharedCopyTime );
+        //TEST_WARN( "SanitySharedWoutMake", MakeSharedTime < SharedPtrTime); // Not very good sanity tests.
         // The assumption this tests is only very loosely associated with the CountedPtr.
-        TEST_WARN( "SanitySharedWoutMakeCopy", MakeSharedCopyTime < SharedPtrCopyTime);
+        //TEST_WARN( "SanitySharedWoutMakeCopy", MakeSharedCopyTime < SharedPtrCopyTime);
 
         TestLog << "Checking CountedPtr internal is faster than CountedPtr external: "
                 << ( CountPtrInternalTime < CountPtrExternalTime )
@@ -272,10 +272,10 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
                 << ( CountPtrCopyExternalTime < MakeSharedCopyTime )
                 << ".\n";
 
-        TEST_WARN( "ExternalvsShared", CountPtrExternalTime < SharedPtrTime );
-        TEST_WARN( "ExternalvsSharedCopy", CountPtrCopyExternalTime < SharedPtrCopyTime );
-        TEST_WARN( "ExternalvsMakeShared", CountPtrExternalTime < MakeSharedTime );
-        TEST_WARN( "ExternalvsMakeSharedCopy", CountPtrCopyExternalTime < MakeSharedCopyTime );
+        //TEST_WARN( "ExternalvsShared", CountPtrExternalTime < SharedPtrTime );
+        //TEST_WARN( "ExternalvsSharedCopy", CountPtrCopyExternalTime < SharedPtrCopyTime );
+        //TEST_WARN( "ExternalvsMakeShared", CountPtrExternalTime < MakeSharedTime );
+        //TEST_WARN( "ExternalvsMakeSharedCopy", CountPtrCopyExternalTime < MakeSharedCopyTime );
     }
 }
 
