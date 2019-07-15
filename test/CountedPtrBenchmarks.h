@@ -77,8 +77,6 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
         // Create tests
 
         /// Raw Pointers
-        Begin = TimeType::min();
-        End = TimeType::max();
         Begin = ClockType::now();
         for( Whole Count = 0 ; Count < TestCount ; Count++ )
         {
@@ -93,8 +91,6 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
                 << "\n";
 
         /// Internal Reference Counter
-        Begin = TimeType::min();
-        End = TimeType::max();
         Begin = ClockType::now();
         for( Whole Count = 0 ; Count < TestCount ; Count++ )
         {
@@ -108,8 +104,6 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
                 << "\n";
 
         /// External Reference Counter
-        Begin = TimeType::min();
-        End = TimeType::max();
         Begin = ClockType::now();
         for( Whole Count = 0 ; Count < TestCount ; Count++ )
         {
@@ -123,8 +117,6 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
                 << "\n";
 
         /// shared_ptr
-        Begin = TimeType::min();
-        End = TimeType::max();
         Begin = ClockType::now();
         for( Whole Count = 0 ; Count < TestCount ; Count++ )
         {
@@ -138,8 +130,6 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
                 << "\n";
 
         /// shared_ptr Through make_shared
-        Begin = TimeType::min();
-        End = TimeType::max();
         Begin = ClockType::now();
         for( Whole Count = 0 ; Count < TestCount ; Count++ )
         {
@@ -156,8 +146,6 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
         // Copy tests
 
         /// Raw Pointers
-        Begin = TimeType::min();
-        End = TimeType::max();
         Begin = ClockType::now();
         for( Whole Count = 0 ; Count < TestCount ; Count++ )
         {
@@ -173,8 +161,6 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
                 << "\n";
 
         /// Internal Reference Counter
-        Begin = TimeType::min();
-        End = TimeType::max();
         Begin = ClockType::now();
         for( Whole Count = 0 ; Count < TestCount ; Count++ )
         {
@@ -189,8 +175,6 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
                 << "\n";
 
         /// External Reference Counter
-        Begin = TimeType::min();
-        End = TimeType::max();
         Begin = ClockType::now();
         for( Whole Count = 0 ; Count < TestCount ; Count++ )
         {
@@ -206,8 +190,6 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
 
 
         /// shared_ptr
-        Begin = TimeType::min();
-        End = TimeType::max();
         Begin = ClockType::now();
         for( Whole Count = 0 ; Count < TestCount ; Count++ )
         {
@@ -222,8 +204,6 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
                 << "\n";
 
         /// make_shared
-        Begin = TimeType::min();
-        End = TimeType::max();
         Begin = ClockType::now();
         for( Whole Count = 0; Count < TestCount ; Count++)
         {
@@ -264,8 +244,8 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
                 << ( CountPtrCopyInternalTime < CountPtrCopyExternalTime )
                 << ".\n";
 
-        TEST_WARN( "InternalvsExternalTime", CountPtrInternalTime < CountPtrExternalTime);
-        TEST_WARN( "InternalvsExternalTimeCopy", CountPtrCopyInternalTime < CountPtrCopyExternalTime );
+        //TEST_WARN( "InternalvsExternalTime", CountPtrInternalTime < CountPtrExternalTime);
+        //TEST_WARN( "InternalvsExternalTimeCopy", CountPtrCopyInternalTime < CountPtrCopyExternalTime );
 
         TestLog << "Checking CountedPtr internal is faster than shared_ptr: "
                 << ( CountPtrInternalTime < SharedPtrTime )
