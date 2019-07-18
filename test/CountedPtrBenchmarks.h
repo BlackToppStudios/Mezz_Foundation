@@ -87,7 +87,8 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
         End = ClockType::now();
         DurationType RawPtrTime = End - Begin;
         TestLog << OutputS << " - Creating and Dereferencing a raw pointer " << TestCount
-                << " times without reference counting took: " << RawPtrTime.count() << " Microseconds."
+                << " times without reference counting took: "
+                << Mezzanine::Testing::PrettyDurationString(RawPtrTime)
                 << "\n";
 
         /// Internal Reference Counter
@@ -100,7 +101,8 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
         End = ClockType::now();
         DurationType CountPtrInternalTime = End - Begin;
         TestLog << OutputI << " - Creating and Dereferencing a CountedPtr " << TestCount
-                << " times with internal counting took: " << CountPtrInternalTime.count() << " Microseconds."
+                << " times with internal counting took: "
+                << Mezzanine::Testing::PrettyDurationString(CountPtrInternalTime)
                 << "\n";
 
         /// External Reference Counter
@@ -113,7 +115,8 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
         End = ClockType::now();
         DurationType CountPtrExternalTime = End - Begin;
         TestLog << OutputE << " - Creating and Dereferencing a CountedPtr " << TestCount
-                << " times with external counting took: " << CountPtrExternalTime.count() << " Microseconds."
+                << " times with external counting took: "
+                << Mezzanine::Testing::PrettyDurationString(CountPtrExternalTime)
                 << "\n";
 
         /// shared_ptr
@@ -126,7 +129,8 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
         End = ClockType::now();
         DurationType SharedPtrTime = End - Begin;
         TestLog << OutputS << " - Creating and Dereferencing a shared_ptr " << TestCount
-                << " times with external counting took: " << SharedPtrTime.count() << " Microseconds."
+                << " times with external counting took: "
+                << Mezzanine::Testing::PrettyDurationString(SharedPtrTime)
                 << "\n";
 
         /// shared_ptr Through make_shared
@@ -139,7 +143,8 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
         End = ClockType::now();
         DurationType MakeSharedTime = End - Begin;
         TestLog << OutputS << " - Creating and Dereferencing a shared_ptr from make_shared " << TestCount
-                << " times with external counting took: " << MakeSharedTime.count() << " Microseconds."
+                << " times with external counting took: "
+                << Mezzanine::Testing::PrettyDurationString(MakeSharedTime)
                 << "\n";
 
         /////////////////////////////////////
@@ -157,7 +162,8 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
         End = ClockType::now();
         DurationType RawPtrCopyTime = End - Begin;
         TestLog << OutputE << " - Creating, Dereferencing and Copying a raw pointer " << TestCount
-                << " times without reference counting took: " << RawPtrCopyTime.count() << " Microseconds."
+                << " times without reference counting took: "
+                << Mezzanine::Testing::PrettyDurationString(RawPtrCopyTime)
                 << "\n";
 
         /// Internal Reference Counter
@@ -171,7 +177,8 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
         End = ClockType::now();
         DurationType CountPtrCopyInternalTime = End - Begin;
         TestLog << OutputI << " - Creating, Dereferencing and Copying a CountedPtr " << TestCount
-                << " times with internal counting took: " << CountPtrCopyInternalTime.count() << " Microseconds."
+                << " times with internal counting took: "
+                << Mezzanine::Testing::PrettyDurationString(CountPtrCopyInternalTime)
                 << "\n";
 
         /// External Reference Counter
@@ -185,7 +192,8 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
         End = ClockType::now();
         DurationType CountPtrCopyExternalTime = End - Begin;
         TestLog << OutputE << " - Creating, Dereferencing and Copying a CountedPtr " << TestCount
-                << " times with external counting took: " << CountPtrCopyExternalTime.count() << " Microseconds."
+                << " times with external counting took: "
+                << Mezzanine::Testing::PrettyDurationString(CountPtrCopyExternalTime)
                 << "\n";
 
 
@@ -200,7 +208,8 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
         End = ClockType::now();
         DurationType SharedPtrCopyTime = End - Begin;
         TestLog << OutputS << " - Creating, Dereferencing and Copying a shared_ptr " << TestCount
-                << " times with external counting took: " << SharedPtrCopyTime.count() << " Microseconds."
+                << " times with external counting took: "
+                << Mezzanine::Testing::PrettyDurationString(SharedPtrCopyTime)
                 << "\n";
 
         /// make_shared
@@ -214,15 +223,16 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
         End = ClockType::now();
         DurationType MakeSharedCopyTime = End - Begin;
         TestLog << OutputS << " - Creating, Dereferencing and Copying a shared_ptr from make_shared "
-                << TestCount << " times with external counting took: " << MakeSharedCopyTime.count() << " Microseconds."
+                << TestCount << " times with external counting took: "
+                << Mezzanine::Testing::PrettyDurationString(MakeSharedCopyTime)
                 << "\n\n";
 
         /////////////////////////////////////
         // Comparison of Benchmark Results
 
-        TestLog << "Checking that raw pointers are fastest for sanity: "
+        TestLog << std::boolalpha << "Checking that raw pointers are fastest for sanity: "
                 << ( RawPtrTime < CountPtrInternalTime && RawPtrTime < CountPtrExternalTime
-                    && RawPtrTime<SharedPtrTime && RawPtrTime < MakeSharedTime )
+                    && RawPtrTime < SharedPtrTime && RawPtrTime < MakeSharedTime )
                 << " and "
                 << ( RawPtrCopyTime < CountPtrCopyInternalTime && RawPtrCopyTime < CountPtrCopyExternalTime
                     && RawPtrCopyTime < SharedPtrCopyTime && RawPtrCopyTime < MakeSharedCopyTime )
@@ -270,7 +280,7 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
                 << ( CountPtrExternalTime < MakeSharedTime )
                 << " and "
                 << ( CountPtrCopyExternalTime < MakeSharedCopyTime )
-                << ".\n";
+                << ".\n" << std::noboolalpha;
 
         //TEST_WARN( "ExternalvsShared", CountPtrExternalTime < SharedPtrTime );
         //TEST_WARN( "ExternalvsSharedCopy", CountPtrCopyExternalTime < SharedPtrCopyTime );
