@@ -55,12 +55,6 @@ namespace StringTools {
     using ConstStrIter = String::const_iterator;
 
     ///////////////////////////////////////////////////////////////////////////////
-    // Globals, mostly used for comparison and such
-
-    /// @brief Convenience String for comparing to return blank Strings where necessary.
-    const String Blank = "";
-
-    ///////////////////////////////////////////////////////////////////////////////
     // Character Checks
 
     /// @brief Checks if a character is a space.
@@ -120,21 +114,24 @@ namespace StringTools {
     // String Manipulation
 
     /// @brief Converts all lower case characters in a character range to upper case.
-    /// @param Source The String to be modified.
+    /// @param Begin An iterator to the start of the range to modify.
+    /// @param End An iterator to one-passed-the-last in the range to modify.
     void MEZZ_LIB ToUpperCase(StrIter Begin, StrIter End);
     /// @brief Create a copy of the String that is upper case.
     /// @param Source The String that will be the basis for the modified String.
     /// @return Returns a copy of the String that has been modified to be in all upper case.
     String MEZZ_LIB UpperCaseCopy(String Source);
     /// @brief Converts all upper case characters in a character range to lower case.
-    /// @param Source The String to be modified.
+    /// @param Begin An iterator to the start of the range to modify.
+    /// @param End An iterator to one-passed-the-last in the range to modify.
     void MEZZ_LIB ToLowerCase(StrIter Begin, StrIter End);
     /// @brief Create a copy of the String that is lower case.
     /// @param Source The String that will be the basis for the modified String.
     /// @return Returns a copy of the String that has been modified to be in all lower case.
     String MEZZ_LIB LowerCaseCopy(String Source);
     /// @brief Converts the first letter of each word to upper case and all other letters to lower case.
-    /// @param Source The String to be modified.
+    /// @param Begin An iterator to the start of the range to modify.
+    /// @param End An iterator to one-passed-the-last in the range to modify.
     void MEZZ_LIB ToCamelCase(StrIter Begin, StrIter End);
     /// @brief Gets a copy of a String with the first letter of each word upper cased and other letters lower cased.
     /// @param Source The String that will be the basis for the modified String.

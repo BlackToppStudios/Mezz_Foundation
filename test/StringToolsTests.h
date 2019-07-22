@@ -278,7 +278,7 @@ DEFAULT_TEST_GROUP(StringToolsTests,StringTools)
     }//Pattern Matching
 
     {//Convert-From-String Functions
-        TEST_EQUAL("ConvertFromString(const_StringView)-Real",
+        TEST_EQUAL_EPSILON("ConvertFromString(const_StringView)-Real",
                    Real(3.1415926),StringTools::ConvertFromString<Real>("3.1415926"));
         TEST_EQUAL("ConvertFromString(const_StringView)-Integer",
                    Integer(-7272),StringTools::ConvertFromString<Integer>("-7272"));
