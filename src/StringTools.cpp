@@ -259,7 +259,9 @@ namespace StringTools {
 
     void ToUpperCase(StrIter Begin, StrIter End)
     {
-        std::transform(Begin,End,Begin,::toupper);
+        std::transform(Begin,End,Begin,[](int ToConvert) -> char {
+            return static_cast<char>( ::toupper(ToConvert) );
+        });
     }
 
     String UpperCaseCopy(String Source)
@@ -270,7 +272,9 @@ namespace StringTools {
 
     void ToLowerCase(StrIter Begin, StrIter End)
     {
-        std::transform(Begin,End,Begin,::tolower);
+        std::transform(Begin,End,Begin,[](int ToConvert) -> char {
+            return static_cast<char>( ::tolower(ToConvert) );
+        });
     }
 
     String LowerCaseCopy(String Source)
@@ -339,10 +343,10 @@ namespace StringTools {
 
     void RemoveDuplicateWhitespaces(String& Source)
     {
-        static const String Delims = " \t";
-        for( size_t CurrIndex = Source.find_first_of(Delims) ;
+        static const char* Delims = " \t";
+        for( size_t CurrIndex = Source.find_first_of(Delims,0,2) ;
              CurrIndex != String::npos ;
-             CurrIndex = Source.find_first_of(Delims,CurrIndex) )
+             CurrIndex = Source.find_first_of(Delims,CurrIndex,2) )
         {
             size_t EndIndex = CurrIndex;
             Char8 CurrWhite = Source[EndIndex];
