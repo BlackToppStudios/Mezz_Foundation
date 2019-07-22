@@ -41,9 +41,8 @@
 #include "StringTools.h"
 
 #include <cctype>
-#include <charconv>
+//#include <charconv>
 #include <regex>
-//#include <locale>
 
 namespace
 {
@@ -369,20 +368,28 @@ namespace StringTools {
             throw std::runtime_error(ExceptionString);
         }
 
-        //Real Ret = static_cast<Real>( std::strtol(Hex.data(),nullptr,16) );
-        unsigned int Temp = 0;
+        // <charconv> implementation
+        /*unsigned int Temp = 0;
         std::from_chars_result Result = std::from_chars(Hex.data(),Hex.data() + 2,Temp,16);
         if( Result.ec != std::errc() ) {
             throw std::runtime_error("Error parsing Hex String. Does the String contain only valid Hex characters?");
         }
-        Real Ret = static_cast<Real>(Temp);//*/
+        Real Ret = static_cast<Real>(Temp);
+        return std::min(Ret *= HexConversionMultiplier,Real(1.0));//*/
+
+        // std::strtool implementation
+        char* EndPtr = nullptr;
+        Real Ret = static_cast<Real>( std::strtol(Hex.data(),&EndPtr,16) );
+        if( EndPtr != std::next(Hex.data(),2) ) {
+            throw std::runtime_error("Error parsing Hex String. Does the String contain only valid Hex characters?");
+        }
         return std::min(Ret *= HexConversionMultiplier,Real(1.0));
     }
 
     String ConvertColourChannelToHex(const Real Channel)
     {
-        String Ret(2,'0');
-
+        // <charconv> implementation
+        /*String Ret(2,'0');
         unsigned int Temp = static_cast<unsigned int>(Channel * Real(255.0));
         std::to_chars_result Result = std::to_chars(Ret.data(),Ret.data() + 2,Temp,16);
         if( Result.ec != std::errc() ) {
@@ -393,7 +400,15 @@ namespace StringTools {
             std::swap(Ret[0],Ret[1]);
         }
         StringTools::ToUpperCase(Ret.begin(),Ret.end());
-        return Ret;
+        return Ret;//*/
+
+        // StringStream implementation
+        StringStream Converter;
+        Converter.setf( std::ios::hex | std::ios::uppercase, std::ios::basefield | std::ios::uppercase );
+        Converter.width(2);
+        Converter.fill('0');
+        Converter << std::min( static_cast<unsigned int>( Channel * Real(255.0) ), 255u );
+        return Converter.str();
     }
 
     ///////////////////////////////////////////////////////////////////////////////
