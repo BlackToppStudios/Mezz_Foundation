@@ -83,6 +83,7 @@ AddHeaderFile("SortedManagedArray.h")
 AddHeaderFile("SortedVector.h")
 AddHeaderFile("StaticAny.h")
 AddHeaderFile("StreamLogging.h")
+AddHeaderFile("StringTools.h")
 AddHeaderFile("Version.h")
 ShowList("Header Files:" "\t" "${FoundationHeaderFiles}")
 
@@ -90,6 +91,7 @@ AddSourceFile("Base64.cpp")
 AddSourceFile("BinaryBuffer.cpp")
 AddSourceFile("CommandLine.cpp")
 AddSourceFile("StreamLogging.cpp")
+AddSourceFile("StringTools.cpp")
 ShowList("Source Files:" "\t" "${FoundationSourceFiles}")
 
 #AddJagatiDoxInput("Dox.h") # Little d
@@ -110,6 +112,7 @@ AddTestFile("SortedManagedArrayTests.h")
 AddTestFile("SortedVectorTests.h")
 AddTestFile("StaticAnyTests.h")
 AddTestFile("StreamLoggingTests.h")
+AddTestFile("StringToolsTests.h")
 EmitTestCode()
 AddTestTarget()
 
