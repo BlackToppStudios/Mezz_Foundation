@@ -300,10 +300,10 @@ namespace Mezzanine {
 
     /*
     // These tags are left over from a short-lived attempt at using tags as types for the metadata of individual
-    // class members.  The idea being that there be a third variadic template parameter for each created member
-    // that contains all the tags appropriate for that member (most being empty) which would then get stored in
-    // a tuple and (using) aliased on that member type.  That type could then be queried using the type traits
-    // below (tuple_has_type) to generate custom behavior for specific types of data.
+    // class members.  The idea being that there would be a third variadic template parameter for each created
+    // member that contains all the tags appropriate for that member (most being empty) which would then get
+    // stored in a tuple and (using) aliased on that member type.  That type could then be queried using the
+    // type traits below (tuple_has_type) to generate custom behavior for specific types of data.
     // This system is unworkable because of the run-time polymorphic requirements of the serialization backends
     // that are planned for the system.  There is no way to pass around arbitrary and concrete types in a sane
     // manner through a virtual interface.  Furthermore, the likelihood that arbitrary tag types will be needed
@@ -579,7 +579,7 @@ namespace Mezzanine {
         { return MemberAccessor<CommonMethod,CommonMethod,Tags>(Name,Common); }
     /// @brief Convenience method to initialize a MemberAccessor from deduced types.
     /// @tparam SetterMethod The member pointer type to use for setting the member value.
-    /// @tParam GetterMethod The member pointer type to use for getting the member value.
+    /// @tparam GetterMethod The member pointer type to use for getting the member value.
     /// @pre SetterMethod Preconditions are the same as what is stated in the @ref MemberAccessor docs.
     /// @pre GetterMethod Preconditions are the same as what is stated in the @ref MemberAccessor docs.
     /// @param Name The name of the member.
@@ -938,11 +938,13 @@ namespace Mezzanine {
     /// @section IntrospectOverview Overview
     /// The Mezzanine Introspection system is a collection of Classes, Structs, and Functions that heavily
     /// leverage Template Meta-programming to allow generic code for the reading and writing of values on
-    /// classes and/or structs.
+    /// classes and/or structs. With the Introspection system it is possible to create as little as one
+    /// function to perform the reading and/or writing of values of an arbitrary number of types, rather
+    /// than creating one or more functions per type.
     /// @n @n
     /// This Introspection system could be considered a Reflection system and many people do call similar
-    /// systems Reflection systems, but I have opted (perhaps incorrectly) to call this an Introspection
-    /// system because I felt it was closer to the generic computer science definition given on Wikipedia.
+    /// systems Reflection systems, but we have opted (perhaps incorrectly) to call this an Introspection
+    /// system because we felt it was closer to the generic computer science definition given on Wikipedia.
     /// Specifically that Introspection involves the reading and detection of members on an object (which
     /// this system does), while Reflection involves writing to those members as well as changes to composition
     /// and behavior of an object (this system only does writing from that list). That said, this is largely
@@ -952,14 +954,13 @@ namespace Mezzanine {
     /// The Introspection system utilizes many new features from c++17 and even one feature from
     /// c++20/the experimental namespace. These features are primarily std::string_view, std::is_detected,
     /// and fold expressions. If you aren't familiar with these then this system might be slightly more
-    /// difficult to understand. @n
-    ///
+    /// difficult to understand.
     /// @section IntrospectImplement Implementation
-    /// In this section I will attempt to explain the code, what it does where it's not obvious, and how
-    /// the code interacts with other code where applicable. It may not be intuitive, but I'm going to start
-    /// in the middle for this explanation and move outward throughout the system for this explanation.
+    /// In this section we'll attempt to explain the code, what it does where it's not obvious, and how
+    /// the code interacts with other code where applicable. It may not be intuitive, but we'll start
+    /// in the middle of the system for this explanation and move outward for this explanation.
     /// @subsection IntrospectMemAccess Member Accessor
-    /// The MemberAccessor is a class that stores the means of...accessing...a member. Complicated, I know.
+    /// The MemberAccessor is a class that stores the means of...accessing...a member. Deeply Complicated.
     /// It actually kinda is, but only a little. The MemberAccessor contains only 3 members, two member
     /// pointers and a string view.
     /// @n @n
@@ -987,21 +988,20 @@ namespace Mezzanine {
     /// @endcode
     /// If you choose to use a direct to member pointer or a non-const reference returning function then there
     /// are SFINAE enabled constructors and support functions you can use that accept 2 parameters instead of the
-    /// usual 3, allowing you to avoid passing in a duplicate of the same parameter and makes construction
-    /// cleaner.
+    /// usual 3, allowing you to avoid passing in a duplicate of the same parameter and makes construction cleaner.
     /// @n @n
     /// An important note about the Set and Get access pointers is that they can be direct to member or pointers
     /// to member functions that set and/or get the member value. If you are concerned about memory footprint then
-    /// you should strongly consider using direct to member pointers over member function pointers. I've tested
-    /// GCC 9.1 and clang 8.0 on Godbolt.org and the size of a MemberAccessor with direct to member pointers on
+    /// you should strongly consider using direct to member pointers over member function pointers. We've tested
+    /// GCC 9.1 and Clang 8.0 on Godbolt.org and the size of a MemberAccessor with direct to member pointers on
     /// both platforms is 32 bytes. The size of a MemberAccessor with pointers to member functions on both
-    /// platforms is 48 bytes. I don't know why you'd want to, but the system supports it, if you wanted to have
+    /// platforms is 48 bytes. We don't know why you'd want to, but the system supports it if you wanted to have
     /// one direct to member pointer and one member function pointer for the setter and getter then you'd get a
-    /// MemberAccessor that is 40 bytes on both platforms. Curiously, I also tested MSVC 19.14 (through wine)
+    /// MemberAccessor that is 40 bytes on both platforms. Curiously, we also tested MSVC 19.14 (through wine)
     /// on Godbolt.org and all 3 configurations were 32 bytes in size.
     /// @n @n
     /// After constructing, the members of the MemberAccessor instance (the name and pointers) are not meant
-    /// to be changed, only queried or dereferenced. There is a pair of Set/Get MemberValue functions that will
+    /// to be changed, only queried or dereferenced. There is a pair of Set/Get MemberValue functions that
     /// are written to compile just the correct semantics for the type of pointer provided for each of the Set
     /// and Get functions provided in the template parameters. It is a feature of the system that you aren't
     /// required to provide a valid pointer to the MemberAccessor on construction, opting instead to give it a
@@ -1056,13 +1056,13 @@ namespace Mezzanine {
     /// @endcode
     /// Any of these functions will work, and they will be looked for by the Introspection system in the order
     /// they are listed here. So if you have both a RegisterMembers static member function AND template free
-    /// function (why?) then the Introspection system will use the RegisterMembers static member function and
-    /// completely ignore the template free function.
+    /// function then the Introspection system will use the RegisterMembers static member function and completely
+    /// ignore the template free function. This won't cause a compilation error, but results in dead code.
     /// @n @n
     /// The template free function (which is a specialization, we'll cover that later) is a major oddball here
     /// and comes with a couple of caveats. First, any attempt to use private or protected members (either
     /// functions or pointers to members) will simply fail to compile. You are limited to the public interface.
-    /// Second, due to limitations imposed by ADL (Argument-Dependent Lookup) any such function needs to be
+    /// Second, due to limitations imposed by Argument-Dependent Lookup(ADL) any such function needs to be
     /// declared in the same scope as the base function being specialized from. This means any such function must
     /// be located in the root Mezzanine namespace.
     /// @n @n
@@ -1174,7 +1174,7 @@ namespace Mezzanine {
     /// how your class appears to the Introspection system.
     /// @n @n
     /// If you haven't yet raised an eyebrow at the name of our last example class, now is your chance. Some of you
-    /// may be thinking "This is great and all for a simple class, but what about inheritance?" To which I say
+    /// may be thinking "This is great and all for a simple class, but what about inheritance?" To which we say
     /// "Simple! Never inherit!" Kidding, for that we got the @ref MergeMembers function, which is just a fancy
     /// wrapper around std::tuple_cat. This function will create a new tuple from two or more existing tuples with
     /// the order of elements is the order they are provided to the function.
@@ -1235,10 +1235,10 @@ namespace Mezzanine {
     /// @n @n
     /// A few weirdos in the back may still be saying "Ok, you got most inheritance use cases. BUT! I hate myself.
     /// I enjoy Oatmeal Raisin cookies and mixing M&Ms with Skittles. What about diamond inheritance?" For you weirdos
-    /// I have good news and bad news. The good news is this can be done. The bad news is that it'll take a little
+    /// we have good news and bad news. The good news is this can be done. The bad news is that it'll take a little
     /// bit more work than normal inheritance.
     /// @n @n
-    /// I will quickly note that non-virtual inheritance does NOT form a diamond and thus you can use all the same
+    /// We will quickly note that non-virtual inheritance does NOT form a diamond and thus you can use all the same
     /// methods covered with normal inheritance to build a list of all the members. Everything covered here will
     /// pertain to virtual inheritance with a common base class. The problem with using the normal inheritance methods
     /// with diamond inheritance is that it will generate duplicate accessors for the common base class. This will
@@ -1250,7 +1250,7 @@ namespace Mezzanine {
     /// changes then you'll have to update all classes derived from it and this is a maintenance cost that can be
     /// avoided by using MergeMembers. Diamonds get no convenience. They should be avoided in the first place, but in
     /// the absence of convenience it can still be done by explicitly listing the members of every base class. This
-    /// is the approach I took when writing the unit tests for the Introspection system.
+    /// is the approach we took when writing the unit tests for the Introspection system.
     /// @n @n
     /// If you MUST make the code more friendly to changes and maintenance, one thing that could be done is making a
     /// separate static registration method that ONLY includes the members of the class and nothing from its base
@@ -1262,10 +1262,10 @@ namespace Mezzanine {
     /// @subsection IntrospectGuts TupleForEach
     /// So we've covered how a custom class interacts with the MemberAccessor. But, how does the MemberAccessor
     /// interact with the rest of the Introspection system? Or with custom logic given to the Introspection system?
-    /// Before I go further, I should clarify that this part of the manual covers internals that no external developer
-    /// should ever have to interact with. So this is only of benefit to those that want to understand every part of
-    /// the Introspection system or those that may want to make deep changes to it. If you are neither of these kinds
-    /// of developers, skip to the next section.
+    /// Before we go further, it should be clarified that this part of the manual covers internals that no external
+    /// developer should ever have to interact with. So this is only of benefit to those that want to understand
+    /// every part of the Introspection system or those that may want to make deep changes to it. If you are neither
+    /// of these kinds of developers, skip to the next section.
     /// @n @n
     /// All of the functions in the Introspection system that operate on members of classes go through 2 functions
     /// (in the IntrospectionHelpers namespace) to do so generically; @ref TupleForEach and @ref TupleForEachIdx.
@@ -1381,7 +1381,7 @@ namespace Mezzanine {
     /// const auto& GetRegisteredMembers()
     /// @endcode
     /// Note that GetRegisteredMembers returns a const reference, rather than a copy. All functions on the
-    /// MemberAccessor are cost anyway, but in case you are going to do some template meta programming with the return
+    /// MemberAccessor are const anyway, but in case you are going to do some template meta programming with the return
     /// types you'll have to use the class registration function directly.
     /// @subsection IntrospectDoFor Operating on Data
     /// All of this would be very limited if we weren't able to insert custom logic to run based on the registered
@@ -1480,19 +1480,19 @@ namespace Mezzanine {
     /// state for MemberType then disambiguating that valid state from an error will be a challenge. In such cases
     /// creating your own custom lambda to be passed into DoForMember should be preferred over using GetMemberValue.
     /// @section IntrospectTrouble Troubleshooting
-    /// One of the largest frustrations I had while writing this system was when I attempted to debug it with
-    /// GDB. The system optimizes code away so aggressively it was impossible to watch the values I needed to
+    /// One of the largest frustrations we had while writing this system was when we attempted to debug it with
+    /// GDB. The system optimizes code away so aggressively it was impossible to watch the values we needed to
     /// watch, forcing me to spread asserts and log streaming throughout the code to get some clue of what was
-    /// going on. It would be difficult to describe the combination of pride and frustration I felt because
+    /// going on. It would be difficult to describe the combination of pride and frustration we felt because
     /// of this.
     /// @n @n
     /// So troubleshooting the system when something goes wrong can be somewhat difficult. A debugger is only of very
     /// limited use. Adding some custom code that prints values will get you better results generally. Throughout
-    /// this manual I mentioned error-like behaviors such as what happens when a class isn't registered and default
-    /// return values because those were the primary issues I ran into while testing the system. I did consider
-    /// causing compilation errors when a non-registered class is used with the system, but I consider it a feature
+    /// this manual we mentioned error-like behaviors such as what happens when a class isn't registered and default
+    /// return values because those were the primary issues we ran into while testing the system. We did consider
+    /// causing compilation errors when a non-registered class is used with the system, but we consider it a feature
     /// to allow people to throw arbitrary or unknown classes at the system without it throwing a fuss. The system
-    /// would lose that if I caused more errors in those situations.
+    /// would lose that if we caused more errors in those situations.
 
     /// @}
 //}// Introspection
