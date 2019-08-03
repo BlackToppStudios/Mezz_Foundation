@@ -945,11 +945,13 @@ namespace Mezzanine {
     /// This Introspection system could be considered a Reflection system and many people do call similar
     /// systems Reflection systems, but we have opted (perhaps incorrectly) to call this an Introspection
     /// system because we felt it was closer to the generic computer science definition given on Wikipedia.
-    /// Specifically that Introspection involves the reading and detection of members on an object (which
-    /// this system does), while Reflection involves writing to those members as well as changes to composition
-    /// and behavior of an object (this system only does writing from that list). That said, this is largely
-    /// a semantics issue and it's reasonable to call this system either an Introspection or Reflection
-    /// system.
+    /// Specifically that
+    /// <a href="https://en.wikipedia.org/wiki/Type_introspection">Introspection</a>
+    /// involves the reading and detection of members on an object (which this system does), while
+    /// <a href="https://en.wikipedia.org/wiki/Reflection_(computer_programming)">Reflection</a>
+    /// involves writing to those members as well as changes to composition and behavior of an object (this
+    /// system only does writing from that list). That said, this is largely a semantics issue and it's
+    /// reasonable to call this system either an Introspection or Reflection system.
     /// @n @n
     /// The Introspection system utilizes many new features from c++17 and even one feature from
     /// c++20/the experimental namespace. These features are primarily std::string_view, std::is_detected,
@@ -1257,8 +1259,6 @@ namespace Mezzanine {
     /// classes, which is then called upon by the class forming the diamond to assemble the accessors needed by the
     /// diamond. The Introspection system doesn't provide any utilities to make this easier, so it's on you to make
     /// it work smoothly. But doing this, diamonds can be supported.
-    /// @n @n
-    /// Weirdo.
     /// @subsection IntrospectGuts TupleForEach
     /// So we've covered how a custom class interacts with the MemberAccessor. But, how does the MemberAccessor
     /// interact with the rest of the Introspection system? Or with custom logic given to the Introspection system?
