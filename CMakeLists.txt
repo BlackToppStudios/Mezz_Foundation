@@ -1,4 +1,4 @@
-# © Copyright 2010 - 2018 BlackTopp Studios Inc.
+# © Copyright 2010 - 2019 BlackTopp Studios Inc.
 # This file is part of The Mezzanine Engine.
 #
 #    The Mezzanine Engine is free software: you can redistribute it and/or modify
@@ -79,11 +79,13 @@ AddHeaderFile("BitFieldTools.h")
 AddHeaderFile("CountedPtr.h")
 AddHeaderFile("CommandLine.h")
 AddHeaderFile("FlatMap.h")
+AddHeaderFile("Introspection.h")
 AddHeaderFile("ManagedArray.h")
 AddHeaderFile("SortedManagedArray.h")
 AddHeaderFile("SortedVector.h")
 AddHeaderFile("StaticAny.h")
 AddHeaderFile("StreamLogging.h")
+AddHeaderFile("TupleTools.h")
 AddHeaderFile("Version.h")
 ShowList("Header Files:" "\t" "${FoundationHeaderFiles}")
 
@@ -108,11 +110,13 @@ AddTestFile("CountedPtrBenchmarks.h")
 AddTestFile("CountedPtrTests.h")
 AddTestFile("CommandLineTests.h")
 AddTestFile("FlatMapTests.h")
+AddTestFile("IntrospectionTests.h")
 AddTestFile("ManagedArrayTests.h")
 AddTestFile("SortedManagedArrayTests.h")
 AddTestFile("SortedVectorTests.h")
 AddTestFile("StaticAnyTests.h")
 AddTestFile("StreamLoggingTests.h")
+AddTestFile("TupleToolsTests.h")
 EmitTestCode()
 AddTestTarget()
 

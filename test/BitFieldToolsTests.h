@@ -1,4 +1,4 @@
-// © Copyright 2010 - 2018 BlackTopp Studios Inc.
+// © Copyright 2010 - 2019 BlackTopp Studios Inc.
 /* This file is part of The Mezzanine Engine.
 
     The Mezzanine Engine is free software: you can redistribute it and/or modify
@@ -87,6 +87,13 @@ DEFAULT_TEST_GROUP(BitFieldToolsTests, BitFieldTools)
     TEST_EQUAL("AndABisNone", TestBitField::None, TestBitField::A & TestBitField::B);
     TEST_EQUAL("AndAandBCisNone", TestBitField::None, TestBitField::A & TestBitField::BC);
     TEST_EQUAL("AndABandBCisB", TestBitField::B, TestBitField::AB & TestBitField::BC);
+
+    TEST_EQUAL("EnumBit-0",UInt64(0),EnumBit(0));
+    TEST_EQUAL("EnumBit-1",UInt64(1),EnumBit(1));
+    TEST_EQUAL("EnumBit-3",UInt64(4),EnumBit(3));
+    TEST_EQUAL("EnumBit-7",UInt64(64),EnumBit(7));
+    TEST_EQUAL("EnumBit-13",UInt64(4096),EnumBit(13));
+    TEST_EQUAL("EnumBit-64",UInt64(0x8000000000000000),EnumBit(64));
 }
 
 #endif
