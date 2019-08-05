@@ -1,4 +1,4 @@
-// © Copyright 2010 - 2018 BlackTopp Studios Inc.
+// © Copyright 2010 - 2019 BlackTopp Studios Inc.
 /* This file is part of The Mezzanine Engine.
 
     The Mezzanine Engine is free software: you can redistribute it and/or modify
@@ -37,8 +37,8 @@
    Joseph Toppi - toppij@gmail.com
    John Blackwood - makoenergy02@gmail.com
 */
-#ifndef MEZZ_TEST_SortedVector_h
-#define MEZZ_TEST_SortedVector_h
+#ifndef Mezz_Foundation_SortedVectorTests_h
+#define Mezz_Foundation_SortedVectorTests_h
 
 /// @file
 /// @brief This file tests the functionality of the SortedVector class.
