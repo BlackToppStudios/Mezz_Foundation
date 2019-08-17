@@ -67,7 +67,7 @@ namespace StringTools {
     Boole MEZZ_LIB IsTab(const Char8 ToCheck);
     /// @brief Checks if a character is a newline.
     /// @param ToCheck The character to be checked.
-    /// @return Returns true if the character is a newline, false otherwise.
+    /// @return Returns true if the character is a "\r" or "\n" newline, false otherwise.
     Boole MEZZ_LIB IsNewline(const Char8 ToCheck);
     /// @brief Checks if a character is a whitespace.
     /// @param ToCheck The character to be checked.
@@ -132,31 +132,58 @@ namespace StringTools {
     /// @brief Converts the first letter of each word to upper case and all other letters to lower case.
     /// @param Begin An iterator to the start of the range to modify.
     /// @param End An iterator to one-passed-the-last in the range to modify.
-    void MEZZ_LIB ToCamelCase(StrIter Begin, StrIter End);
+    void MEZZ_LIB ToPascalCase(StrIter Begin, StrIter End);
     /// @brief Gets a copy of a String with the first letter of each word upper cased and other letters lower cased.
     /// @param Source The String that will be the basis for the modified String.
-    /// @return Returns a copy of the String that has been modified to be in Camel Case.
-    String MEZZ_LIB CamelCaseCopy(String Source);
+    /// @return Returns a copy of the String that has been modified to be in Pascal Case.
+    String MEZZ_LIB PascalCaseCopy(String Source);
 
     ///////////////////////////////////////////////////////////////////////////////
     // Size Modifying String Manipulations
 
-    /// @brief Trims all whitespaces and tabs from a one or both sides of a String.
-    /// @param Source The String to be modified.
-    /// @param Left Whether or not to trim the left side of the String.
-    /// @param Right Whether or not to trim the right side of the String.
-    void MEZZ_LIB Trim(String& Source, const Boole Left = true, const Boole Right = true);
-    /// @brief Trims all whitespaces and tabs from a one or both sides of a String.
-    /// @param Source The String that will be the basis for the modified String.
-    /// @param Left Whether or not to trim the left side of the String.
-    /// @param Right Whether or not to trim the right side of the String.
-    String MEZZ_LIB TrimCopy(String Source, const Boole Left = true, const Boole Right = true);
-    /// @brief Replaces all instances of multiple consecutive whitespaces with only a single whitespace.
-    /// @param Source The String to be modified.
-    void MEZZ_LIB RemoveDuplicateWhitespaces(String& Source);
-    /// @brief Gets a copy of a string with all duplicate whitespaces removed.
-    /// @param Source The String that will be the basis for the modified String.
-    String MEZZ_LIB RemoveDuplicateWhitespacesCopy(String Source);
+    /// @brief Trims all whitespace characters from both sides of a String.
+    /// @param Begin An iterator to the start of the range to modify.
+    /// @param End An iterator to one-passed-the-last in the range to modify.
+    /// @return Returns an iterator to the new end of the provided range.
+    StrIter MEZZ_LIB Trim(StrIter Begin, StrIter End);
+    /// @brief Same as Trim, but in a copy of the iterator range so the original isn't modified.
+    /// @param Begin An iterator to the start of the range to copy and modify.
+    /// @param End An iterator to one-passed-the-last in the range to copy and modify.
+    /// @return Returns a String to the copied and modified range.
+    String MEZZ_LIB TrimCopy(ConstStrIter Begin, ConstStrIter End);
+
+    /// @brief Trims all whitespace characters from the left side of a String.
+    /// @param Begin An iterator to the start of the range to modify.
+    /// @param End An iterator to one-passed-the-last in the range to modify.
+    /// @return Returns an iterator to the new end of the provided range.
+    StrIter MEZZ_LIB TrimLeft(StrIter Begin, StrIter End);
+    /// @brief Same as TrimLeft, but in a copy of the iterator range so the original isn't modified.
+    /// @param Begin An iterator to the start of the range to copy and modify.
+    /// @param End An iterator to one-passed-the-last in the range to copy and modify.
+    /// @return Returns a String to the copied and modified range.
+    String MEZZ_LIB TrimLeftCopy(ConstStrIter Begin, ConstStrIter End);
+
+    /// @brief Trims all whitespace characters from the right side of a String.
+    /// @param Begin An iterator to the start of the range to modify.
+    /// @param End An iterator to one-passed-the-last in the range to modify.
+    /// @return Returns an iterator to the new end of the provided range.
+    StrIter MEZZ_LIB TrimRight(StrIter Begin, StrIter End);
+    /// @brief Same as TrimRight, but in a copy of the iterator range so the original isn't modified.
+    /// @param Begin An iterator to the start of the range to copy and modify.
+    /// @param End An iterator to one-passed-the-last in the range to copy and modify.
+    /// @return Returns a String to the copied and modified range.
+    String MEZZ_LIB TrimRightCopy(ConstStrIter Begin, ConstStrIter End);
+
+    /// @brief Replaces all occurrences of any repeating whitespace character to just one of that whitespace character.
+    /// @param Begin An iterator to the start of the range to modify.
+    /// @param End An iterator to one-passed-the-last in the range to modify.
+    /// @return Returns an iterator to the new end of the provided range.
+    StrIter MEZZ_LIB RemoveDuplicateWhitespaces(StrIter Begin, StrIter End);
+    /// @brief Same as RemoveDuplicateWhitespaces, but in a copy of the iterator range so the original isn't modified.
+    /// @param Begin An iterator to the start of the range to copy and modify.
+    /// @param End An iterator to one-passed-the-last in the range to copy and modify.
+    /// @return Returns a String to the copied and modified range.
+    String MEZZ_LIB RemoveDuplicateWhitespacesCopy(ConstStrIter Begin, ConstStrIter End);
 
     ///////////////////////////////////////////////////////////////////////////////
     // Colour Channels
@@ -180,7 +207,7 @@ namespace StringTools {
     /// @param Delims The characters to look for and use as split points in the source String.
     /// @param MaxSplits The maximum number of splits to perform on this String. Value of zero means unlimited splits.
     /// @return Returns a vector containing all the substrings generated from the source String.
-    StringVector MEZZ_LIB Split(const String& Source, const String& Delims = " \t\n", const Whole MaxSplits = 0);
+    StringVector MEZZ_LIB Split(const StringView Source, const StringView Delims = " \t\n", const Whole MaxSplits = 0);
 
     ///////////////////////////////////////////////////////////////////////////////
     // Pattern Matching

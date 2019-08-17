@@ -44,6 +44,8 @@
 //#include <charconv>
 #include <regex>
 
+#include <iostream>
+
 namespace
 {
     using namespace Mezzanine;
@@ -283,7 +285,7 @@ namespace StringTools {
         return Source;
     }
 
-    void ToCamelCase(StrIter Begin, StrIter End)
+    void ToPascalCase(StrIter Begin, StrIter End)
     {
         Boole PrevCharIsWhitespace = true;
         for( StrIter CurrIt = Begin ; CurrIt != End ; ++CurrIt )
@@ -299,67 +301,115 @@ namespace StringTools {
         }
     }
 
-    String CamelCaseCopy(String Source)
+    String PascalCaseCopy(String Source)
     {
-        StringTools::ToCamelCase(Source.begin(),Source.end());
+        StringTools::ToPascalCase(Source.begin(),Source.end());
         return Source;
     }
 
     ///////////////////////////////////////////////////////////////////////////////
     // Size Modifying String Manipulations
 
-    void Trim(String& Source, const Boole Left, const Boole Right)
+    StrIter Trim(StrIter Begin, StrIter End)
+    {
+        StrIter Ret = TrimLeft(Begin,End);
+        Ret = TrimRight(Begin,Ret);
+        return Ret;
+    }
+
+    String TrimCopy(ConstStrIter Begin, ConstStrIter End)
+    {
+        String Ret(Begin,End);
+        ConstStrIter NewEnd = StringTools::Trim(Ret.begin(),Ret.end());
+        Ret.erase( std::distance(Ret.cbegin(),NewEnd) );
+        return Ret;
+    }
+
+    StrIter TrimLeft(StrIter Begin, StrIter End)
     {
         const String Delims = " \t\r";
-        if( Left ) {
-            size_t Forward = 0;
-            while( Forward < Source.size() )
-            {
-                if( Delims.find( Source[Forward] ) == String::npos ) {
-                    break;
-                }
-                ++Forward;
-            }
-            Source.erase(0,Forward);
-        }
-        if( Right ) {
-            size_t Reverse = Source.size();
-            while( Reverse > 0 )
-            {
-                if( Delims.find( Source[Reverse-1] ) == String::npos ) {
-                    break;
-                }
-                --Reverse;
-            }
-            Source.erase(Reverse);
-        }
-    }
-
-    String TrimCopy(String Source, const Boole Left, const Boole Right)
-    {
-        StringTools::Trim(Source,Left,Right);
-        return Source;
-    }
-
-    void RemoveDuplicateWhitespaces(String& Source)
-    {
-        static const char* Delims = " \t";
-        for( size_t CurrIndex = Source.find_first_of(Delims,0,2) ;
-             CurrIndex != String::npos ;
-             CurrIndex = Source.find_first_of(Delims,CurrIndex,2) )
+        const size_t OldSize = std::distance(Begin,End);
+        size_t Forward = 0;
+        while( Forward < OldSize )
         {
-            size_t EndIndex = CurrIndex;
-            Char8 CurrWhite = Source[EndIndex];
-            while( Source[EndIndex] == CurrWhite ) EndIndex++;
-            Source.replace(CurrIndex,EndIndex - CurrIndex,1,CurrWhite);
-            CurrIndex++;
+            if( Delims.find( *std::next(Begin,Forward) ) == String::npos ) {
+                break;
+            }
+            ++Forward;
+        }
+
+        if( Forward > 0 ) {
+            return std::move( std::next(Begin,Forward), End, Begin );
+        }else{
+            return End;
         }
     }
 
-    String RemoveDuplicateWhitespacesCopy(String Source)
+    String TrimLeftCopy(ConstStrIter Begin, ConstStrIter End)
     {
-        StringTools::RemoveDuplicateWhitespaces(Source);
-        return Source;
+        String Ret(Begin,End);
+        ConstStrIter NewEnd = StringTools::TrimLeft(Ret.begin(),Ret.end());
+        Ret.erase( std::distance(Ret.cbegin(),NewEnd) );
+        return Ret;
+    }
+
+    StrIter TrimRight(StrIter Begin, StrIter End)
+    {
+        const String Delims = " \t\r";
+        const size_t OldSize = std::distance(Begin,End);
+        size_t Reverse = OldSize;
+        while( Reverse > 0 )
+        {
+            if( Delims.find( *std::next(Begin,Reverse - 1) ) == String::npos ) {
+                break;
+            }
+            --Reverse;
+        }
+
+        return std::next(Begin,Reverse);
+    }
+
+    String TrimRightCopy(ConstStrIter Begin, ConstStrIter End)
+    {
+        String Ret(Begin,End);
+        std::cout << "\nRet String: '" << Ret << "'\n";
+        ConstStrIter NewEnd = StringTools::TrimRight(Ret.begin(),Ret.end());
+        Ret.erase( std::distance(Ret.cbegin(),NewEnd) );
+        return Ret;
+    }
+
+    StrIter RemoveDuplicateWhitespaces(StrIter Begin, StrIter End)
+    {
+        // Opted for the lazy solution here. A potentially better solution would be to mark the removed spaces
+        // on one loop and then have another that does the moves, so that no char is moved more than once.
+        const String Delims = " \t";
+        for( StrIter CurrPos = std::find_first_of(Begin,End,Delims.begin(),Delims.end()) ;
+             CurrPos != End ;
+             CurrPos = std::find_first_of(CurrPos,End,Delims.begin(),Delims.end()) )
+        {
+            StrIter WhitespaceEnd = CurrPos;
+            Char8 CurrWhitespace = (*CurrPos);
+            while( (*WhitespaceEnd) == CurrWhitespace && WhitespaceEnd != End )
+            {
+                ++WhitespaceEnd;
+            }
+
+            // Increment the CurrPos here to preserve the one whitespace char we want to keep.
+            size_t RemoveCount = std::distance(++CurrPos,WhitespaceEnd);
+            if( RemoveCount > 0 ) {
+                std::move(WhitespaceEnd,End,CurrPos);
+                End = std::prev(End,RemoveCount);
+            }
+        }
+        return End;
+    }
+
+    String RemoveDuplicateWhitespacesCopy(ConstStrIter Begin, ConstStrIter End)
+    {
+        String Ret(Begin,End);
+        ConstStrIter NewEnd = StringTools::RemoveDuplicateWhitespaces(Ret.begin(),Ret.end());
+        Ret.erase( std::distance(Ret.cbegin(),NewEnd) );
+        return Ret;
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -418,7 +468,7 @@ namespace StringTools {
     ///////////////////////////////////////////////////////////////////////////////
     // Tokenizing
 
-    StringVector Split(const String& Source, const String& Delims, const Whole MaxSplits)
+    StringVector Split(const StringView Source, const StringView Delims, const Whole MaxSplits)
     {
         StringVector Ret;
 

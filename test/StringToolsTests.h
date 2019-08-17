@@ -86,67 +86,81 @@ DEFAULT_TEST_GROUP(StringToolsTests,StringTools)
 
     {//String Manipulation
         String ToUpperString("This is typed in a reasonable, soft-spoken tone.");
-        String ToUpperResult("THIS IS TYPED IN A REASONABLE, SOFT-SPOKEN TONE.");
+        const String ToUpperResult("THIS IS TYPED IN A REASONABLE, SOFT-SPOKEN TONE.");
         StringTools::ToUpperCase(ToUpperString.begin(),ToUpperString.end());
         TEST_EQUAL("ToUpperCase(StrIter,StrIter)",ToUpperResult,ToUpperString);
 
-        String UpperCopyString("This Is An Odd Sentence Typed In Camel-Case; With An Unnecessary Semi-Colon.");
-        String UpperCopyResult("THIS IS AN ODD SENTENCE TYPED IN CAMEL-CASE; WITH AN UNNECESSARY SEMI-COLON.");
+        String UpperCopyString("This Is An Odd Sentence Typed In Pascal-Case; With An Unnecessary Semi-Colon.");
+        const String UpperCopyResult("THIS IS AN ODD SENTENCE TYPED IN PASCAL-CASE; WITH AN UNNECESSARY SEMI-COLON.");
         TEST_EQUAL("UpperCaseCopy(String)",UpperCopyResult,StringTools::UpperCaseCopy(UpperCopyString));
 
         String ToLowerString("CAPS LOCK IS CRUISE CONTROL FOR COOL!");
-        String ToLowerResult("caps lock is cruise control for cool!");
+        const String ToLowerResult("caps lock is cruise control for cool!");
         StringTools::ToLowerCase(ToLowerString.begin(),ToLowerString.end());
         TEST_EQUAL("ToLowerCase(StrIter,StrIter)",ToLowerResult,ToLowerString);
 
         String LowerCopyString("I HAVE A VERY GOOD BRAIN AND HAVE SAID MANY THINGS.");
-        String LowerCopyResult("i have a very good brain and have said many things.");
+        const String LowerCopyResult("i have a very good brain and have said many things.");
         TEST_EQUAL("LowerCaseCopy(String)",LowerCopyResult,StringTools::LowerCaseCopy(LowerCopyString));
 
-        String ToCamelCaseString("Test string, do not reply.");
-        String ToCamelCaseResult("Test String, Do Not Reply.");
-        StringTools::ToCamelCase(ToCamelCaseString.begin(),ToCamelCaseString.end());
-        TEST_EQUAL("ToCamelCase(StrIter,StrIter)",ToCamelCaseResult,ToCamelCaseString);
+        String ToPascalCaseString("Test string, do not reply.");
+        const String ToPascalCaseResult("Test String, Do Not Reply.");
+        StringTools::ToPascalCase(ToPascalCaseString.begin(),ToPascalCaseString.end());
+        TEST_EQUAL("ToPascalCase(StrIter,StrIter)",ToPascalCaseResult,ToPascalCaseString);
 
-        String CamelCaseCopyString("I'm so meta, even this acronym.");
-        String CamelCaseCopyResult("I'm So Meta, Even This Acronym.");
-        TEST_EQUAL("CamelCaseCopy(String)",CamelCaseCopyResult,StringTools::CamelCaseCopy(CamelCaseCopyString));
+        String PascalCaseCopyString("I'm so meta, even this acronym.");
+        const String PascalCaseCopyResult("I'm So Meta, Even This Acronym.");
+        TEST_EQUAL("PascalCaseCopy(String)",PascalCaseCopyResult,StringTools::PascalCaseCopy(PascalCaseCopyString));
     }//String Manipulation
 
     {//Size Modifying String Manipulation
-        String TrimSourceString("    This is a trim test. \t\t");
+        const String TrimSourceString("    This is a trim test. \t\t");
         String TrimPassString1("    This is a trim test. \t\t");
         String TrimPassString2("    This is a trim test. \t\t");
         String TrimPassString3("    This is a trim test. \t\t");
-        String TrimPassString4("    This is a trim test. \t\t");
-        StringTools::Trim(TrimPassString1);//,true,true);
-        StringTools::Trim(TrimPassString2,false,true);
-        StringTools::Trim(TrimPassString3,true,false);
-        StringTools::Trim(TrimPassString4,false,false);
-        TEST_EQUAL("Trim(String&,const_Boole,const_Boole)-Pass1",String("This is a trim test."),TrimPassString1);
-        TEST_EQUAL("Trim(String&,const_Boole,const_Boole)-Pass2",String("    This is a trim test."),TrimPassString2);
-        TEST_EQUAL("Trim(String&,const_Boole,const_Boole)-Pass3",String("This is a trim test. \t\t"),TrimPassString3);
-        TEST_EQUAL("Trim(String&,const_Boole,const_Boole)-Pass4",TrimSourceString,TrimPassString4);
+        StringTools::StrIter Pass1Iter = StringTools::Trim(TrimPassString1.begin(),TrimPassString1.end());
+        TrimPassString1.erase( size_t(Pass1Iter - TrimPassString1.begin()) );// Manual Cleanup
+        StringTools::StrIter Pass2Iter = StringTools::TrimRight(TrimPassString2.begin(),TrimPassString2.end());
+        TrimPassString2.erase( size_t(Pass2Iter - TrimPassString2.begin()) );// Manual Cleanup
+        StringTools::StrIter Pass3Iter = StringTools::TrimLeft(TrimPassString3.begin(),TrimPassString3.end());
+        TrimPassString3.erase( size_t(Pass3Iter - TrimPassString3.begin()) );// Manual Cleanup
+        TEST_EQUAL("Trim(String&,const_Boole,const_Boole)-StringVal",
+                   String("This is a trim test."),TrimPassString1);
+        TEST_EQUAL("Trim(String&,const_Boole,const_Boole)-EndPos",
+                   size_t(20),size_t(Pass1Iter - TrimPassString1.begin()));
+        TEST_EQUAL("TrimRight(String&,const_Boole,const_Boole)-StringVal",
+                   String("    This is a trim test."),TrimPassString2);
+        TEST_EQUAL("TrimRight(String&,const_Boole,const_Boole)-EndPos",
+                   size_t(24),size_t(Pass2Iter - TrimPassString2.begin()));
+        TEST_EQUAL("TrimLeft(String&,const_Boole,const_Boole)-StringVal",
+                   String("This is a trim test. \t\t"),TrimPassString3);
+        TEST_EQUAL("TrimLeft(String&,const_Boole,const_Boole)-EndPos",
+                   size_t(23),size_t(Pass3Iter - TrimPassString3.begin()));
 
-        String TrimCopySourceString("\tThis is an indented trim test.  ");
-        TEST_EQUAL("TrimCopy(String,const_Boole,const_Boole)-Pass1",
-                   String("This is an indented trim test."),StringTools::TrimCopy(TrimCopySourceString));
-        TEST_EQUAL("TrimCopy(String,const_Boole,const_Boole)-Pass2",
-                   String("\tThis is an indented trim test."),StringTools::TrimCopy(TrimCopySourceString,false,true));
-        TEST_EQUAL("TrimCopy(String,const_Boole,const_Boole)-Pass3",
-                   String("This is an indented trim test.  "),StringTools::TrimCopy(TrimCopySourceString,true,false));
-        TEST_EQUAL("TrimCopy(String,const_Boole,const_Boole)-Pass4",
-                   TrimCopySourceString,StringTools::TrimCopy(TrimCopySourceString,false,false));
+        const String TrimCopySourceString("\tThis is an indented trim test.  ");
+        TEST_EQUAL("TrimCopy(String,const_Boole,const_Boole)-Pass",
+                   String("This is an indented trim test."),
+                   StringTools::TrimCopy(TrimCopySourceString.begin(),TrimCopySourceString.end()));
+        TEST_EQUAL("TrimRightCopy(String,const_Boole,const_Boole)-Pass",
+                   String("\tThis is an indented trim test."),
+                   StringTools::TrimRightCopy(TrimCopySourceString.begin(),TrimCopySourceString.end()));
+        TEST_EQUAL("TrimLeftCopy(String,const_Boole,const_Boole)-Pass",
+                   String("This is an indented trim test.  "),
+                   StringTools::TrimLeftCopy(TrimCopySourceString.begin(),TrimCopySourceString.end()));
 
         String DupWhiteSourceString("This  is  a needlessly  wide sentence.   ");
         String DupWhiteResultString("This is a needlessly wide sentence. ");
-        StringTools::RemoveDuplicateWhitespaces(DupWhiteSourceString);
+        StringTools::StrIter DupWhiteIter = StringTools::RemoveDuplicateWhitespaces(DupWhiteSourceString.begin(),
+                                                                                    DupWhiteSourceString.end());
+        DupWhiteSourceString.erase( size_t(DupWhiteIter - DupWhiteSourceString.begin()) );// Manual Cleanup
         TEST_EQUAL("RemoveDuplicateWhitespaces(String&)",DupWhiteResultString,DupWhiteSourceString);
 
         String DupWhiteCopySourceString("\t\tThis indented  sentence   is    stretching     really      far.");
-        String DupWhiteCopyResultString("\tThis indented sentence is stretching really far.");
-        TEST_EQUAL("RemoveDuplicateWhitespacesCopy(String)",
-                   DupWhiteCopyResultString,StringTools::RemoveDuplicateWhitespacesCopy(DupWhiteCopySourceString));
+        const String DupWhiteCopyResultString("\tThis indented sentence is stretching really far.");
+        //TEST_EQUAL("RemoveDuplicateWhitespacesCopy(String)",
+        //           DupWhiteCopyResultString,
+        //           StringTools::RemoveDuplicateWhitespacesCopy(DupWhiteCopySourceString.begin(),
+        //                                                       DupWhiteSourceString.end()));
     }//Size Modifying String Manipulation
 
     {//Colour Channels
@@ -178,7 +192,7 @@ DEFAULT_TEST_GROUP(StringToolsTests,StringTools)
     }//Colour Channels
 
     {//Tokenizing
-        String SplitSourceString("This is a string that will be split into 11 parts.");
+        const String SplitSourceString("This is a string that will be split into 11 parts.");
         StringVector DefaultSplitResult = StringTools::Split(SplitSourceString);
         StringVector ISplitResult = StringTools::Split(SplitSourceString,"i",5);// Should normally split 7 times.
         TEST_EQUAL("Split(const_String&,const_String&,const_Whole)-DefaultCount",
@@ -222,7 +236,7 @@ DEFAULT_TEST_GROUP(StringToolsTests,StringTools)
     }//Tokenizing
 
     {//Pattern Matching
-        String StartsWithSourceString("Autocannibalism");
+        const String StartsWithSourceString("Autocannibalism");
         TEST_EQUAL("StartsWith(const_StringView,const_StringView,const_Boole)-Pass",
                    true,StringTools::StartsWith(StartsWithSourceString,"auto",false));
         TEST_EQUAL("StartsWith(const_StringView,const_StringView,const_Boole)-CasePass",
@@ -232,7 +246,7 @@ DEFAULT_TEST_GROUP(StringToolsTests,StringTools)
         TEST_EQUAL("StartsWith(const_StringView,const_StringView,const_Boole)-CaseFail",
                    false,StringTools::StartsWith(StartsWithSourceString,"AUTO",true));
 
-        String EndsWithSourceString("ThatsTheJoke.jpg");
+        const String EndsWithSourceString("ThatsTheJoke.jpg");
         TEST_EQUAL("EndsWith(const_StringView,const_StringView,const_Boole)-Pass",
                    true,StringTools::EndsWith(EndsWithSourceString,".JPG",false));
         TEST_EQUAL("EndsWith(const_StringView,const_StringView,const_Boole)-CasePass",
