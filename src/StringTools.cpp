@@ -215,48 +215,6 @@ namespace
 namespace Mezzanine {
 namespace StringTools {
     ///////////////////////////////////////////////////////////////////////////////
-    // Character Manipulation and Checks
-
-    Boole IsSpace(const Char8 ToCheck)
-        { return ( ToCheck == ' ' ); }
-
-    Boole IsTab(const Char8 ToCheck)
-        { return ( ToCheck == '\t' || ToCheck == '\v' ); }
-
-    Boole IsNewline(const Char8 ToCheck)
-        { return ( ToCheck == '\r' || ToCheck == '\n' ); }
-
-    Boole IsWhitespace(const Char8 ToCheck)
-        { return ( IsSpace(ToCheck) || IsTab(ToCheck) || IsNewline(ToCheck) ); }
-
-    Boole IsDigit(const Char8 ToCheck)
-        { return ( ToCheck >= '0' && ToCheck <= '9' ); }
-
-    Boole IsLowerAlphaLetter(const Char8 ToCheck)
-        { return ( ToCheck >= 'a' && ToCheck <= 'z' ); }
-
-    Boole IsUpperAlphaLetter(const Char8 ToCheck)
-        { return ( ToCheck >= 'A' && ToCheck <= 'Z' ); }
-
-    Boole IsAlphaLetter(const Char8 ToCheck)
-        { return ( IsLowerAlphaLetter(ToCheck) || IsUpperAlphaLetter(ToCheck) ); }
-
-    Boole IsLowerHexLetter(const Char8 ToCheck)
-        { return ( ToCheck >= 'a' && ToCheck <= 'f' ); }
-
-    Boole IsUpperHexLetter(const Char8 ToCheck)
-        { return ( ToCheck >= 'A' && ToCheck <= 'F' ); }
-
-    Boole IsHexLetter(const Char8 ToCheck)
-        { return ( IsLowerHexLetter(ToCheck) || IsUpperHexLetter(ToCheck) ); }
-
-    Boole IsHexDigit(const Char8 ToCheck)
-        { return ( IsDigit(ToCheck) || IsHexLetter(ToCheck) ); }
-
-    Boole IsAlphanumeric(const Char8 ToCheck)
-        { return ( IsDigit(ToCheck) || IsAlphaLetter(ToCheck) ); }
-
-    ///////////////////////////////////////////////////////////////////////////////
     // String Manipulation and Checks
 
     void ToUpperCase(StrIter Begin, StrIter End)
@@ -360,7 +318,7 @@ namespace StringTools {
         using IterDiffType = StrIter::difference_type;
 
         const String Delims = " \t\r";
-        const IterDiffType OldSize = static_cast<size_t>( std::distance(Begin,End) );
+        const IterDiffType OldSize = std::distance(Begin,End);
         IterDiffType Reverse = OldSize;
         while( Reverse > 0 )
         {

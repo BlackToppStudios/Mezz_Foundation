@@ -55,60 +55,141 @@ namespace StringTools {
     using ConstStrIter = String::const_iterator;
 
     ///////////////////////////////////////////////////////////////////////////////
+    // Character Type Traits
+
+    /// @brief Helper class for checking if a type is a valid character type.
+    /// @tparam FailType If we're here, then this type isn't a valid character type.
+    /// @remarks This is the catch-all failure type.
+    template<typename FailType>
+    struct is_char_helper : std::false_type
+        {  };
+    /// @brief Helper specialization class for checking if a type is a valid character type.
+    /// @remarks This is the type used when a char is detected.
+    template<>
+    struct is_char_helper<char> : std::true_type
+        {  };
+    /// @brief Helper specialization class for checking if a type is a valid character type.
+    /// @remarks This is the type used when an unsigned char is detected.
+    template<>
+    struct is_char_helper<unsigned char> : std::true_type
+        {  };
+    /// @brief Helper specialization class for checking if a type is a valid character type.
+    /// @remarks This is the type used when a wchar_t is detected.
+    template<>
+    struct is_char_helper<wchar_t> : std::true_type
+        {  };
+    /// @brief Helper specialization class for checking if a type is a valid character type.
+    /// @remarks This is the type used when a char16_t is detected.
+    template<>
+    struct is_char_helper<char16_t> : std::true_type
+        {  };
+    /// @brief Helper specialization class for checking if a type is a valid character type.
+    /// @remarks This is the type used when a char32_t is detected.
+    template<>
+    struct is_char_helper<char32_t> : std::true_type
+        {  };
+    /// @brief A type trait for detecting a valid character type.
+    /// @tparam CheckType The type to be checked.
+    /// @remarks This ultimately inherits from either std::true_type or std::false_type and
+    /// the bool value can be checked via the static "value" member.
+    template<typename CheckType>
+    struct is_char : is_char_helper< std::remove_cv_t< std::remove_reference_t<CheckType> > >
+        {  };
+
+    ///////////////////////////////////////////////////////////////////////////////
     // Character Checks
 
     /// @brief Checks if a character is a space.
+    /// @tparam CharType The (hopefully valid) character type to check.
     /// @param ToCheck The character to be checked.
     /// @return Returns true if the character is a space, false otherwise.
-    Boole MEZZ_LIB IsSpace(const Char8 ToCheck);
+    template<typename CharType, typename = std::enable_if_t< is_char<CharType>::value > >
+    constexpr Boole MEZZ_LIB IsSpace(const CharType ToCheck)
+        { return ( ToCheck == ' ' ); }
     /// @brief Checks if a character is a tab.
+    /// @tparam CharType The (hopefully valid) character type to check.
     /// @param ToCheck The character to be checked.
     /// @return Returns true if the character is a tab, false otherwise.
-    Boole MEZZ_LIB IsTab(const Char8 ToCheck);
+    template<typename CharType, typename = std::enable_if_t< is_char<CharType>::value > >
+    constexpr Boole MEZZ_LIB IsTab(const CharType ToCheck)
+        { return ( ToCheck == '\t' || ToCheck == '\v' ); }
     /// @brief Checks if a character is a newline.
+    /// @tparam CharType The (hopefully valid) character type to check.
     /// @param ToCheck The character to be checked.
     /// @return Returns true if the character is a "\r" or "\n" newline, false otherwise.
-    Boole MEZZ_LIB IsNewline(const Char8 ToCheck);
+    template<typename CharType, typename = std::enable_if_t< is_char<CharType>::value > >
+    constexpr Boole MEZZ_LIB IsNewline(const CharType ToCheck)
+        { return ( ToCheck == '\r' || ToCheck == '\n' ); }
     /// @brief Checks if a character is a whitespace.
+    /// @tparam CharType The (hopefully valid) character type to check.
     /// @param ToCheck The character to be checked.
     /// @return Returns true if the character is a whitespace, false otherwise.
-    Boole MEZZ_LIB IsWhitespace(const Char8 ToCheck);
+    template<typename CharType, typename = std::enable_if_t< is_char<CharType>::value > >
+    constexpr Boole MEZZ_LIB IsWhitespace(const CharType ToCheck)
+        { return ( IsSpace(ToCheck) || IsTab(ToCheck) || IsNewline(ToCheck) ); }
     /// @brief Checks if a character is a decimal digit.
+    /// @tparam CharType The (hopefully valid) character type to check.
     /// @param ToCheck The character to be checked.
     /// @return Returns true if the character is a decimal digit, false otherwise.
-    Boole MEZZ_LIB IsDigit(const Char8 ToCheck);
+    template<typename CharType, typename = std::enable_if_t< is_char<CharType>::value > >
+    constexpr Boole MEZZ_LIB IsDigit(const CharType ToCheck)
+        { return ( ToCheck >= '0' && ToCheck <= '9' ); }
     /// @brief Checks if a character is a lower-case alphabetic letter.
+    /// @tparam CharType The (hopefully valid) character type to check.
     /// @param ToCheck The character to be checked.
     /// @return Returns true if the character is a lower-case letter, false otherwise.
-    Boole MEZZ_LIB IsLowerAlphaLetter(const Char8 ToCheck);
+    template<typename CharType, typename = std::enable_if_t< is_char<CharType>::value > >
+    constexpr Boole MEZZ_LIB IsLowerAlphaLetter(const CharType ToCheck)
+        { return ( ToCheck >= 'a' && ToCheck <= 'z' ); }
     /// @brief Checks if a character is a upper-case alphabetic letter.
+    /// @tparam CharType The (hopefully valid) character type to check.
     /// @param ToCheck The character to be checked.
     /// @return Returns true if the character is a upper-case letter, false otherwise.
-    Boole MEZZ_LIB IsUpperAlphaLetter(const Char8 ToCheck);
+    template<typename CharType, typename = std::enable_if_t< is_char<CharType>::value > >
+    constexpr Boole MEZZ_LIB IsUpperAlphaLetter(const CharType ToCheck)
+        { return ( ToCheck >= 'A' && ToCheck <= 'Z' ); }
     /// @brief Checks if a character is a lower or upper case letter.
+    /// @tparam CharType The (hopefully valid) character type to check.
     /// @param ToCheck The character to be checked.
     /// @return Returns true if the character is a lower or upper case letter, false otherwise.
-    Boole MEZZ_LIB IsAlphaLetter(const Char8 ToCheck);
+    template<typename CharType, typename = std::enable_if_t< is_char<CharType>::value > >
+    constexpr Boole MEZZ_LIB IsAlphaLetter(const CharType ToCheck)
+        { return ( IsLowerAlphaLetter(ToCheck) || IsUpperAlphaLetter(ToCheck) ); }
     /// @brief Checks if a character is a lower-case hexadecimal letter.
+    /// @tparam CharType The (hopefully valid) character type to check.
     /// @param ToCheck The character to be checked.
     /// @return Returns true if the character is a lower-case letter, false otherwise.
-    Boole MEZZ_LIB IsLowerHexLetter(const Char8 ToCheck);
+    template<typename CharType, typename = std::enable_if_t< is_char<CharType>::value > >
+    constexpr Boole MEZZ_LIB IsLowerHexLetter(const CharType ToCheck)
+        { return ( ToCheck >= 'a' && ToCheck <= 'f' ); }
     /// @brief Checks if a character is a upper-case hexadecimal letter.
+    /// @tparam CharType The (hopefully valid) character type to check.
     /// @param ToCheck The character to be checked.
     /// @return Returns true if the character is a upper-case letter, false otherwise.
-    Boole MEZZ_LIB IsUpperHexLetter(const Char8 ToCheck);
+    template<typename CharType, typename = std::enable_if_t< is_char<CharType>::value > >
+    constexpr Boole MEZZ_LIB IsUpperHexLetter(const CharType ToCheck)
+        { return ( ToCheck >= 'A' && ToCheck <= 'F' ); }
     /// @brief Checks if a character is a hexadecimal letter.
+    /// @tparam CharType The (hopefully valid) character type to check.
     /// @param ToCheck The character to be checked.
     /// @return Returns true if the character is a hexadecimal letter, false otherwise.
-    Boole MEZZ_LIB IsHexLetter(const Char8 ToCheck);
+    template<typename CharType, typename = std::enable_if_t< is_char<CharType>::value > >
+    constexpr Boole MEZZ_LIB IsHexLetter(const CharType ToCheck)
+        { return ( IsLowerHexLetter(ToCheck) || IsUpperHexLetter(ToCheck) ); }
     /// @brief Checks if a character is a hexadecimal digit.
+    /// @tparam CharType The (hopefully valid) character type to check.
     /// @param ToCheck The character to be checked.
     /// @return Returns true if the character is a hexadecimal digit, false otherwise.
-    Boole MEZZ_LIB IsHexDigit(const Char8 ToCheck);
+    template<typename CharType, typename = std::enable_if_t< is_char<CharType>::value > >
+    constexpr Boole MEZZ_LIB IsHexDigit(const CharType ToCheck)
+        { return ( IsDigit(ToCheck) || IsHexLetter(ToCheck) ); }
     /// @brief Checks if a character is a letter or digit.
+    /// @tparam CharType The (hopefully valid) character type to check.
     /// @param ToCheck The character to be checked.
     /// @return Returns true if the character is a letter or digit, false otherwise.
-    Boole MEZZ_LIB IsAlphanumeric(const Char8 ToCheck);
+    template<typename CharType, typename = std::enable_if_t< is_char<CharType>::value > >
+    constexpr Boole MEZZ_LIB IsAlphanumeric(const CharType ToCheck)
+        { return ( IsDigit(ToCheck) || IsAlphaLetter(ToCheck) ); }
 
     ///////////////////////////////////////////////////////////////////////////////
     // String Manipulation

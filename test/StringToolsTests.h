@@ -52,36 +52,47 @@ DEFAULT_TEST_GROUP(StringToolsTests,StringTools)
     using namespace Mezzanine;
 
     {//Character Checks
-        TEST_EQUAL("IsSpace(const_Char8)-Pass",true,StringTools::IsSpace(' '));
-        TEST_EQUAL("IsSpace(const_Char8)-Fail",false,StringTools::IsSpace('\t'));
-        TEST_EQUAL("IsTab(const_Char8)-Pass1",true,StringTools::IsTab('\t'));
-        TEST_EQUAL("IsTab(const_Char8)-Pass2",true,StringTools::IsTab('\v'));
-        TEST_EQUAL("IsTab(const_Char8)-Fail",false,StringTools::IsTab('\r'));
-        TEST_EQUAL("IsNewline(const_Char8)-Pass1",true,StringTools::IsNewline('\r'));
-        TEST_EQUAL("IsNewline(const_Char8)-Pass2",true,StringTools::IsNewline('\n'));
-        TEST_EQUAL("IsNewline(const_Char8)-Fail",false,StringTools::IsNewline('!'));
-        TEST_EQUAL("IsWhitespace(const_Char8)-Pass1",true,StringTools::IsWhitespace(' '));
-        TEST_EQUAL("IsWhitespace(const_Char8)-Pass2",true,StringTools::IsWhitespace('\t'));
-        TEST_EQUAL("IsWhitespace(const_Char8)-Pass3",true,StringTools::IsWhitespace('\n'));
-        TEST_EQUAL("IsWhitespace(const_Char8)-Fail",false,StringTools::IsWhitespace('&'));
-        TEST_EQUAL("IsDigit(const_Char8)-Pass",true,StringTools::IsDigit('5'));
-        TEST_EQUAL("IsDigit(const_Char8)-Fail",false,StringTools::IsDigit('L'));
-        TEST_EQUAL("IsLowerAlphaLetter(const_Char8)-Pass",true,StringTools::IsLowerAlphaLetter('a'));
-        TEST_EQUAL("IsLowerAlphaLetter(const_Char8)-Fail",false,StringTools::IsLowerAlphaLetter('A'));
-        TEST_EQUAL("IsUpperAlphaLetter(const_Char8)-Pass",true,StringTools::IsUpperAlphaLetter('B'));
-        TEST_EQUAL("IsUpperAlphaLetter(const_Char8)-Fail",false,StringTools::IsUpperAlphaLetter('b'));
-        TEST_EQUAL("IsAlphaLetter(const_Char8)-Pass",true,StringTools::IsAlphaLetter('y'));
-        TEST_EQUAL("IsAlphaLetter(const_Char8)-Fail",false,StringTools::IsAlphaLetter('9'));
-        TEST_EQUAL("IsLowerHexLetter(const_Char8)-Pass",true,StringTools::IsLowerHexLetter('e'));
-        TEST_EQUAL("IsLowerHexLetter(const_Char8)-Fail",false,StringTools::IsLowerHexLetter('g'));
-        TEST_EQUAL("IsUpperHexLetter(const_Char8)-Pass",true,StringTools::IsUpperHexLetter('F'));
-        TEST_EQUAL("IsUpperHexLetter(const_Char8)-Fail",false,StringTools::IsUpperHexLetter('1'));
-        TEST_EQUAL("IsHexLetter(const_Char8)-Pass",true,StringTools::IsHexLetter('B'));
-        TEST_EQUAL("IsHexLetter(const_Char8)-Fail",false,StringTools::IsHexLetter('z'));
-        TEST_EQUAL("IsHexDigit(const_Char8)-Pass",true,StringTools::IsHexDigit('8'));
-        TEST_EQUAL("IsHexDigit(const_Char8)-Fail",false,StringTools::IsHexDigit('t'));
-        TEST_EQUAL("IsAlphanumeric(const_Char8)-Pass",true,StringTools::IsAlphanumeric('R'));
-        TEST_EQUAL("IsAlphanumeric(const_Char8)-Fail",false,StringTools::IsAlphanumeric(' '));
+        TEST_EQUAL("IsSpace(const_CharType)-Pass",true,StringTools::IsSpace(' '));
+        TEST_EQUAL("IsSpace(const_CharType)-Fail",false,StringTools::IsSpace('\t'));
+        TEST_EQUAL("IsTab(const_CharType)-Pass1",true,StringTools::IsTab('\t'));
+        TEST_EQUAL("IsTab(const_CharType)-Pass2",true,StringTools::IsTab('\v'));
+        TEST_EQUAL("IsTab(const_CharType)-Fail",false,StringTools::IsTab('\r'));
+        TEST_EQUAL("IsNewline(const_CharType)-Pass1",true,StringTools::IsNewline('\r'));
+        TEST_EQUAL("IsNewline(const_CharType)-Pass2",true,StringTools::IsNewline('\n'));
+        TEST_EQUAL("IsNewline(const_CharType)-Fail",false,StringTools::IsNewline('!'));
+        TEST_EQUAL("IsWhitespace(const_CharType)-Pass1",true,StringTools::IsWhitespace(' '));
+        TEST_EQUAL("IsWhitespace(const_CharType)-Pass2",true,StringTools::IsWhitespace('\t'));
+        TEST_EQUAL("IsWhitespace(const_CharType)-Pass3",true,StringTools::IsWhitespace('\n'));
+        TEST_EQUAL("IsWhitespace(const_CharType)-Fail",false,StringTools::IsWhitespace('&'));
+        TEST_EQUAL("IsDigit(const_CharType)-Pass",true,StringTools::IsDigit('5'));
+        TEST_EQUAL("IsDigit(const_CharType)-Fail",false,StringTools::IsDigit('L'));
+        TEST_EQUAL("IsLowerAlphaLetter(const_CharType)-Pass",true,StringTools::IsLowerAlphaLetter('a'));
+        TEST_EQUAL("IsLowerAlphaLetter(const_CharType)-Fail",false,StringTools::IsLowerAlphaLetter('A'));
+        TEST_EQUAL("IsUpperAlphaLetter(const_CharType)-Pass",true,StringTools::IsUpperAlphaLetter('B'));
+        TEST_EQUAL("IsUpperAlphaLetter(const_CharType)-Fail",false,StringTools::IsUpperAlphaLetter('b'));
+        TEST_EQUAL("IsAlphaLetter(const_CharType)-Pass",true,StringTools::IsAlphaLetter('y'));
+        TEST_EQUAL("IsAlphaLetter(const_CharType)-Fail",false,StringTools::IsAlphaLetter('9'));
+        TEST_EQUAL("IsLowerHexLetter(const_CharType)-Pass",true,StringTools::IsLowerHexLetter('e'));
+        TEST_EQUAL("IsLowerHexLetter(const_CharType)-Fail",false,StringTools::IsLowerHexLetter('g'));
+        TEST_EQUAL("IsUpperHexLetter(const_CharType)-Pass",true,StringTools::IsUpperHexLetter('F'));
+        TEST_EQUAL("IsUpperHexLetter(const_CharType)-Fail",false,StringTools::IsUpperHexLetter('1'));
+        TEST_EQUAL("IsHexLetter(const_CharType)-Pass",true,StringTools::IsHexLetter('B'));
+        TEST_EQUAL("IsHexLetter(const_CharType)-Fail",false,StringTools::IsHexLetter('z'));
+        TEST_EQUAL("IsHexDigit(const_CharType)-Pass",true,StringTools::IsHexDigit('8'));
+        TEST_EQUAL("IsHexDigit(const_CharType)-Fail",false,StringTools::IsHexDigit('t'));
+        TEST_EQUAL("IsAlphanumeric(const_CharType)-Pass",true,StringTools::IsAlphanumeric('R'));
+        TEST_EQUAL("IsAlphanumeric(const_CharType)-Fail",false,StringTools::IsAlphanumeric(' '));
+
+        unsigned char UCharPass = ' ';
+        unsigned char UCharFail = '\t';
+        TEST_EQUAL("IsSpace(const_CharType)-unsigned_char-Pass",true,StringTools::IsSpace(UCharPass));
+        TEST_EQUAL("IsSpace(const_CharType)-unsigned_char-Fail",false,StringTools::IsSpace(UCharFail));
+        TEST_EQUAL("IsSpace(const_CharType)-wchar_t-Pass",true,StringTools::IsSpace(wchar_t(' ')));
+        TEST_EQUAL("IsSpace(const_CharType)-wchar_t-Fail",false,StringTools::IsSpace(wchar_t('\t')));
+        TEST_EQUAL("IsSpace(const_CharType)-char16_t-Pass",true,StringTools::IsSpace(char16_t(' ')));
+        TEST_EQUAL("IsSpace(const_CharType)-char16_t-Fail",false,StringTools::IsSpace(char16_t('\t')));
+        TEST_EQUAL("IsSpace(const_CharType)-char32_t-Pass",true,StringTools::IsSpace(char32_t(' ')));
+        TEST_EQUAL("IsSpace(const_CharType)-char32_t-Fail",false,StringTools::IsSpace(char32_t('\t')));
     }//Character Manipulation and Checks
 
     {//String Manipulation
