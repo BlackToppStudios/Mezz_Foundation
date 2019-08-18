@@ -321,15 +321,17 @@ namespace StringTools {
     {
         String Ret(Begin,End);
         ConstStrIter NewEnd = StringTools::Trim(Ret.begin(),Ret.end());
-        Ret.erase( std::distance(Ret.cbegin(),NewEnd) );
+        Ret.erase( static_cast<size_t>( std::distance(Ret.cbegin(),NewEnd) ) );
         return Ret;
     }
 
     StrIter TrimLeft(StrIter Begin, StrIter End)
     {
+        using IterDiffType = StrIter::difference_type;
+
         const String Delims = " \t\r";
-        const size_t OldSize = std::distance(Begin,End);
-        size_t Forward = 0;
+        const IterDiffType OldSize = std::distance(Begin,End);
+        IterDiffType Forward = 0;
         while( Forward < OldSize )
         {
             if( Delims.find( *std::next(Begin,Forward) ) == String::npos ) {
@@ -349,15 +351,17 @@ namespace StringTools {
     {
         String Ret(Begin,End);
         ConstStrIter NewEnd = StringTools::TrimLeft(Ret.begin(),Ret.end());
-        Ret.erase( std::distance(Ret.cbegin(),NewEnd) );
+        Ret.erase( static_cast<size_t>( std::distance(Ret.cbegin(),NewEnd) ) );
         return Ret;
     }
 
     StrIter TrimRight(StrIter Begin, StrIter End)
     {
+        using IterDiffType = StrIter::difference_type;
+
         const String Delims = " \t\r";
-        const size_t OldSize = std::distance(Begin,End);
-        size_t Reverse = OldSize;
+        const IterDiffType OldSize = static_cast<size_t>( std::distance(Begin,End) );
+        IterDiffType Reverse = OldSize;
         while( Reverse > 0 )
         {
             if( Delims.find( *std::next(Begin,Reverse - 1) ) == String::npos ) {
@@ -374,12 +378,13 @@ namespace StringTools {
         String Ret(Begin,End);
         std::cout << "\nRet String: '" << Ret << "'\n";
         ConstStrIter NewEnd = StringTools::TrimRight(Ret.begin(),Ret.end());
-        Ret.erase( std::distance(Ret.cbegin(),NewEnd) );
+        Ret.erase( static_cast<size_t>( std::distance(Ret.cbegin(),NewEnd) ) );
         return Ret;
     }
 
     StrIter RemoveDuplicateWhitespaces(StrIter Begin, StrIter End)
     {
+        using IterDiffType = StrIter::difference_type;
         // Opted for the lazy solution here. A potentially better solution would be to mark the removed spaces
         // on one loop and then have another that does the moves, so that no char is moved more than once.
         const String Delims = " \t";
@@ -395,7 +400,7 @@ namespace StringTools {
             }
 
             // Increment the CurrPos here to preserve the one whitespace char we want to keep.
-            size_t RemoveCount = std::distance(++CurrPos,WhitespaceEnd);
+            const IterDiffType RemoveCount = std::distance(++CurrPos,WhitespaceEnd);
             if( RemoveCount > 0 ) {
                 std::move(WhitespaceEnd,End,CurrPos);
                 End = std::prev(End,RemoveCount);
@@ -408,7 +413,7 @@ namespace StringTools {
     {
         String Ret(Begin,End);
         ConstStrIter NewEnd = StringTools::RemoveDuplicateWhitespaces(Ret.begin(),Ret.end());
-        Ret.erase( std::distance(Ret.cbegin(),NewEnd) );
+        Ret.erase( static_cast<size_t>( std::distance(Ret.cbegin(),NewEnd) ) );
         return Ret;
     }
 
