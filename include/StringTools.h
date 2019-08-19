@@ -74,6 +74,11 @@ namespace StringTools {
     struct is_char_helper<unsigned char> : std::true_type
         {  };
     /// @brief Helper specialization class for checking if a type is a valid character type.
+    /// @remarks This is the type used when an signed char is detected.
+    template<>
+    struct is_char_helper<signed char> : std::true_type
+        {  };
+    /// @brief Helper specialization class for checking if a type is a valid character type.
     /// @remarks This is the type used when a wchar_t is detected.
     template<>
     struct is_char_helper<wchar_t> : std::true_type
