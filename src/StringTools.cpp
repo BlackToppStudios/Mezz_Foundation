@@ -465,7 +465,7 @@ namespace StringTools {
     String Join(const std::vector<StringView>& Sources, const StringView Delims)
     {
         String Ret;
-        size_t ReserveSize = 0;
+        size_t ReserveSize = ( Sources.size() - 1 ) * Delims.size();
         for( StringView View : Sources )
             { ReserveSize += View.size(); }
         Ret.reserve(ReserveSize);
