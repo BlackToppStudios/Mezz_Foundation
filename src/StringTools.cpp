@@ -334,7 +334,6 @@ namespace StringTools {
     String TrimRightCopy(ConstStrIter Begin, ConstStrIter End)
     {
         String Ret(Begin,End);
-        std::cout << "\nRet String: '" << Ret << "'\n";
         ConstStrIter NewEnd = StringTools::TrimRight(Ret.begin(),Ret.end());
         Ret.erase( static_cast<size_t>( std::distance(Ret.cbegin(),NewEnd) ) );
         return Ret;
@@ -460,6 +459,23 @@ namespace StringTools {
             Start = Source.find_first_not_of(Delims,Start);
         }while(Pos != String::npos);
 
+        return Ret;
+    }
+
+    String Join(const std::vector<StringView>& Source, const StringView Delims)
+    {
+        String Ret;
+        size_t ReserveSize = 0;
+        for( StringView View : Source )
+            { ReserveSize += View.size(); }
+        Ret.reserve(ReserveSize);
+
+        Ret.append( Source[0] );
+        for( unsigned int Index = 1 ; Index < Source.size() ; ++Index )
+        {
+            Ret.append( Delims );
+            Ret.append( Source[Index] );
+        }
         return Ret;
     }
 

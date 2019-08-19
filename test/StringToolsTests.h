@@ -76,7 +76,8 @@ DEFAULT_TEST_GROUP(StringToolsTests,StringTools)
         TEST_EQUAL("IsLowerHexLetter(const_CharType)-Fail",false,StringTools::IsLowerHexLetter('g'));
         TEST_EQUAL("IsUpperHexLetter(const_CharType)-Pass",true,StringTools::IsUpperHexLetter('F'));
         TEST_EQUAL("IsUpperHexLetter(const_CharType)-Fail",false,StringTools::IsUpperHexLetter('1'));
-        TEST_EQUAL("IsHexLetter(const_CharType)-Pass",true,StringTools::IsHexLetter('B'));
+        TEST_EQUAL("IsHexLetter(const_CharType)-Upper-Pass",true,StringTools::IsHexLetter('B'));
+        TEST_EQUAL("IsHexLetter(const_CharType)-Lower-Pass",true,StringTools::IsHexLetter('b'));
         TEST_EQUAL("IsHexLetter(const_CharType)-Fail",false,StringTools::IsHexLetter('z'));
         TEST_EQUAL("IsHexDigit(const_CharType)-Pass",true,StringTools::IsHexDigit('8'));
         TEST_EQUAL("IsHexDigit(const_CharType)-Fail",false,StringTools::IsHexDigit('t'));
@@ -204,8 +205,8 @@ DEFAULT_TEST_GROUP(StringToolsTests,StringTools)
 
     {//Tokenizing
         const String SplitSourceString("This is a string that will be split into 11 parts.");
+
         StringVector DefaultSplitResult = StringTools::Split(SplitSourceString);
-        StringVector ISplitResult = StringTools::Split(SplitSourceString,"i",5);// Should normally split 7 times.
         TEST_EQUAL("Split(const_String&,const_String&,const_Whole)-DefaultCount",
                    size_t(11),DefaultSplitResult.size());
         TEST_EQUAL("Split(const_String&,const_String&,const_Whole)-DefaultElement1",
@@ -230,6 +231,9 @@ DEFAULT_TEST_GROUP(StringToolsTests,StringTools)
                    String("11"),DefaultSplitResult[9]);
         TEST_EQUAL("Split(const_String&,const_String&,const_Whole)-DefaultElement11",
                    String("parts."),DefaultSplitResult[10]);
+
+        // This should normally split 6 times to produce 7 pieces.
+        StringVector ISplitResult = StringTools::Split(SplitSourceString,"i",5);
         TEST_EQUAL("Split(const_String&,const_String&,const_Whole)-ISplitCount",
                    size_t(6),ISplitResult.size());
         TEST_EQUAL("Split(const_String&,const_String&,const_Whole)-ISplitElement1",
@@ -244,6 +248,14 @@ DEFAULT_TEST_GROUP(StringToolsTests,StringTools)
                    String("ll be spl"),ISplitResult[4]);
         TEST_EQUAL("Split(const_String&,const_String&,const_Whole)-ISplitElement6",
                    String("t into 11 parts."),ISplitResult[5]);
+
+        std::vector<StringView> DefaultJoinSource(DefaultSplitResult.begin(),DefaultSplitResult.end());
+        TEST_EQUAL("Join(const_vector,const_String)-JoinDefault",
+                   SplitSourceString,StringTools::Join(DefaultJoinSource));
+
+        std::vector<StringView> IJoinSource(ISplitResult.begin(),ISplitResult.end());
+        TEST_EQUAL("Join(const_vector,const_String)-JoinISplit",
+                   SplitSourceString,StringTools::Join(IJoinSource,"i"));
     }//Tokenizing
 
     {//Pattern Matching
@@ -272,34 +284,34 @@ DEFAULT_TEST_GROUP(StringToolsTests,StringTools)
         String ThirdSource("Test\\Data\\Results.txt");
         String FourthSource("*Star*");
 
-        String FirstPattern("Test/Data/*.txt");
-        String SecondPattern("*.???");
-        String ThirdPattern("*.dat");
-        String FourthPattern("ws_[0-9][0-9]_??_*.dat");
-        String FifthPattern("Test\\\\Data\\\\*.txt");
-        String SixthPattern("\\**\\*");
+        String UnixTestDataTextPattern("Test/Data/*.txt");
+        String AnythingWith3CharExtPattern("*.???");
+        String AnythingDotDatPattern("*.dat");
+        String GibberishDateDotDatPattern("ws_[0-9][0-9]_??_*.dat");
+        String WinTestDataTextPattern("Test\\\\Data\\\\*.txt");
+        String StarAnythingStarPattern("\\**\\*");
 
         TEST_EQUAL("PatternMatch(const_StringView,const_StringView,const_Boole)-Pass1",
-                   true,StringTools::PatternMatch(FirstSource,FirstPattern,false));
+                   true,StringTools::PatternMatch(FirstSource,UnixTestDataTextPattern,false));
         TEST_EQUAL("PatternMatch(const_StringView,const_StringView,const_Boole)-Pass2",
-                   true,StringTools::PatternMatch(FirstSource,SecondPattern,false));
+                   true,StringTools::PatternMatch(FirstSource,AnythingWith3CharExtPattern,false));
         TEST_EQUAL("PatternMatch(const_StringView,const_StringView,const_Boole)-Pass3",
-                   true,StringTools::PatternMatch(SecondSource,SecondPattern,true));
+                   true,StringTools::PatternMatch(SecondSource,AnythingWith3CharExtPattern,true));
         TEST_EQUAL("PatternMatch(const_StringView,const_StringView,const_Boole)-Pass4",
-                   true,StringTools::PatternMatch(SecondSource,FourthPattern,false));
+                   true,StringTools::PatternMatch(SecondSource,GibberishDateDotDatPattern,false));
         TEST_EQUAL("PatternMatch(const_StringView,const_StringView,const_Boole)-Pass5",
-                   true,StringTools::PatternMatch(ThirdSource,FifthPattern,false));
+                   true,StringTools::PatternMatch(ThirdSource,WinTestDataTextPattern,false));
         TEST_EQUAL("PatternMatch(const_StringView,const_StringView,const_Boole)-Pass6",
-                   true,StringTools::PatternMatch(FourthSource,SixthPattern,true));
+                   true,StringTools::PatternMatch(FourthSource,StarAnythingStarPattern,true));
 
         TEST_EQUAL("PatternMatch(const_StringView,const_StringView,const_Boole)-Fail1",
-                   false,StringTools::PatternMatch(FirstSource,ThirdPattern,false));
+                   false,StringTools::PatternMatch(FirstSource,AnythingDotDatPattern,false));
         TEST_EQUAL("PatternMatch(const_StringView,const_StringView,const_Boole)-Fail2",
-                   false,StringTools::PatternMatch(SecondSource,FourthPattern,true));
+                   false,StringTools::PatternMatch(SecondSource,GibberishDateDotDatPattern,true));
         TEST_EQUAL("PatternMatch(const_StringView,const_StringView,const_Boole)-Fail3",
-                   false,StringTools::PatternMatch(FirstSource,ThirdPattern,false));
+                   false,StringTools::PatternMatch(FirstSource,AnythingDotDatPattern,false));
         TEST_EQUAL("PatternMatch(const_StringView,const_StringView,const_Boole)-Fail4",
-                   false,StringTools::PatternMatch(ThirdSource,SixthPattern,true));
+                   false,StringTools::PatternMatch(ThirdSource,StarAnythingStarPattern,true));
     }//Pattern Matching
 
     {//Convert-From-String Functions
@@ -336,8 +348,10 @@ DEFAULT_TEST_GROUP(StringToolsTests,StringTools)
                    false,StringTools::ConvertToBool("False",true));
         TEST_EQUAL("ConvertToBool(const_StringView,const_Boole)-Default",
                    true,StringTools::ConvertToBool("Yes"));
-        TEST_EQUAL("ConvertToBool(const_StringView,const_Boole)-Gibberish",
+        TEST_EQUAL("ConvertToBool(const_StringView,const_Boole)-Gibberish-Fail",
                    false,StringTools::ConvertToBool("Gibberish"));
+        TEST_EQUAL("ConvertToBool(const_StringView,const_Boole)-Gibberish-PassingDefault",
+                   true,StringTools::ConvertToBool("Gibberish",true));
     }//Convert-From-String Functions
 
     {//Convert-To-String Functions
