@@ -294,7 +294,7 @@ namespace StringTools {
     /// @param Sources A container of Strings to be Joined.
     /// @param Delims A String that will be placed in between each source String provided.
     /// @return Returns a String containing all source Strings separated by the Delim String.
-    String MEZZ_LIB Join(const std::vector<StringView>& Source, const StringView Delims = " ");
+    String MEZZ_LIB Join(const std::vector<StringView>& Sources, const StringView Delims = " ");
 
     ///////////////////////////////////////////////////////////////////////////////
     // Pattern Matching

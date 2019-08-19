@@ -462,19 +462,19 @@ namespace StringTools {
         return Ret;
     }
 
-    String Join(const std::vector<StringView>& Source, const StringView Delims)
+    String Join(const std::vector<StringView>& Sources, const StringView Delims)
     {
         String Ret;
         size_t ReserveSize = 0;
-        for( StringView View : Source )
+        for( StringView View : Sources )
             { ReserveSize += View.size(); }
         Ret.reserve(ReserveSize);
 
-        Ret.append( Source[0] );
-        for( unsigned int Index = 1 ; Index < Source.size() ; ++Index )
+        Ret.append( Sources[0] );
+        for( unsigned int Index = 1 ; Index < Sources.size() ; ++Index )
         {
             Ret.append( Delims );
-            Ret.append( Source[Index] );
+            Ret.append( Sources[Index] );
         }
         return Ret;
     }
