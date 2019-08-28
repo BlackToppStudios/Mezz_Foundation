@@ -584,6 +584,13 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
         TEST_EQUAL("DoForAllMembers-DiamondStruct",
                    size_t(11),SlowMemberCount);
 
+        size_t SlowMemberReverseCount = 0;
+        DoForAllMembersReverse<DiamondStruct>( [&](const auto& Member) {
+            ++SlowMemberReverseCount;  (void)Member;
+        } );
+        TEST_EQUAL("DoForAllMembersReverse-DiamondStruct",
+                   size_t(11),SlowMemberCount);
+
         std::string StrMemberValue;
         DoForMember<DiamondStruct,std::string>( "DiamondStringVar", [&](const auto& Member) {
             StrMemberValue = Member.GetValue(TestStruct);

@@ -43,65 +43,9 @@
 #ifndef SWIG
     #include <tuple>
     #include "DataTypes.h"
+    #include "DetectionTraits.h"
     #include "BitFieldTools.h"
 #endif
-
-#if __cplusplus <= 201703L
-// A hack to allow easier exposure to std::is_detected.  Delete this when we update to C++20.
-#if defined(_MSC_VER) && !defined(__INTEL_COMPILER)
-namespace std
-{
-    // "MSVC is a good compiler" they said.
-    // "No reason to use any other" they said.
-    // I fart in their general direction.
-    struct nonesuch
-    {
-        nonesuch() = delete;
-        ~nonesuch() = delete;
-        nonesuch(nonesuch const&) = delete;
-        void operator=(nonesuch const&) = delete;
-    };
-
-    namespace detail
-    {
-        template <class Default, class AlwaysVoid, template<class...> class Op, class... Args>
-        struct detector
-        {
-            using value_t = std::false_type;
-            using type = Default;
-        };
-
-        template <class Default, template<class...> class Op, class... Args>
-        struct detector<Default, std::void_t<Op<Args...>>, Op, Args...>
-        {
-            // Note that std::void_t is a C++17 feature
-            using value_t = std::true_type;
-            using type = Op<Args...>;
-        };
-    } // namespace detail
-
-    template <template<class...> class Op, class... Args>
-    using is_detected = typename detail::detector<nonesuch, void, Op, Args...>::value_t;
-
-    template <template<class...> class Op, class... Args>
-    using detected_t = typename detail::detector<nonesuch, void, Op, Args...>::type;
-
-    template <class Default, template<class...> class Op, class... Args>
-    using detected_or = detail::detector<Default, void, Op, Args...>;
-}
-#else // defined(_MSC_VER) && !defined(__INTEL_COMPILER)
-#ifndef SWIG
-    #include <experimental/type_traits>
-#endif
-namespace std
-{
-    template<template<typename...> class Op, typename... Args>
-    using is_detected = std::experimental::is_detected<Op,Args...>;
-    template<template<typename...> class Op, typename... Args>
-    constexpr bool is_detected_v = std::experimental::is_detected_v<Op,Args...>;
-}
-#endif // defined(_MSC_VER) && !defined(__INTEL_COMPILER)
-#endif // __cplusplus <= 201703L
 
 namespace Mezzanine {
 //namespace Introspection {
@@ -727,6 +671,20 @@ namespace Mezzanine {
 
         RESTORE_WARNING_STATE
 
+        /// @brief A unimplemented template function that will generate a reversed index_sequence type.
+        /// @remarks A function was used here instead of a struct due to the ease of parameter deduction. This
+        /// function simply exists to generate a type in it's return from the deduced types in it's parameter.
+        /// @tparam Idxs A collection of indexes to build the index sequence with.
+        /// @return Shouldn't return anything as it should never be used at runtime.
+        template<size_t... Idxs>
+        constexpr auto reverse_index_sequence(const std::index_sequence<Idxs...>&)
+            -> decltype( std::index_sequence<sizeof...(Idxs) - 1U - Idxs...>{} );
+
+        /// @brief A convenience type for generating a index sequence from a parameter pack and reversing it.
+        /// @tparam ParamPack The parameter pack to generate a reversed sequence for.
+        template<typename... ParamPack>
+        using reverse_index_sequence_for = decltype(reverse_index_sequence(std::index_sequence_for<ParamPack...>{}));
+
         /// @brief The actual implementation for the TupleForEach.
         /// @tparam Funct Deduced type for the callback that will be called for each member of the tuple.
         /// @tparam Members Variadic template type for the members that will be passed into Funct.
@@ -746,7 +704,7 @@ namespace Mezzanine {
         constexpr void TupleForEach(Funct&& ToCall, const std::tuple<Members...>& Mems)
             { TupleForEachIdx(std::forward<Funct>(ToCall),Mems,std::index_sequence_for<Members...>{}); }
 
-        /// @brief Specialization implementation for an empty tuple.
+        /// @brief Specialized forward ForEach implementation for an empty tuple.
         /// @remarks This method is a no-op.
         /// @tparam Funct Deduced type for the callback that won't be invoked.
         /// @tparam Members Variadic template type that ought to be empty if this implementation is being used.
@@ -754,6 +712,25 @@ namespace Mezzanine {
         /// @param Mems An empty tuple.
         template<typename Funct, typename... Members>
         constexpr void TupleForEach(Funct&& ToCall, const std::tuple<>& Mems)
+            { (void)ToCall;  (void)Mems; }
+
+        /// @brief A reversed ForEach implementation for the types and members of a tuple.
+        /// @tparam Funct Deduced type for the callback that will be called for each member of the tuple.
+        /// @tparam Members Variadic template type for the members that will be passed into Funct.
+        /// @param ToCall The callback to be invoked for each member of the tuple.
+        /// @param Mems The tuple of (presumably) member types that will be passed into the callback individually.
+        template<typename Funct, typename... Members>
+        constexpr void TupleForEachReverse(Funct&& ToCall, const std::tuple<Members...>& Mems)
+            { TupleForEachIdx(std::forward<Funct>(ToCall),Mems,reverse_index_sequence_for<Members...>{}); }
+
+        /// @brief Specialized reverse ForEach implementation for an empty tuple.
+        /// @remarks This method is a no-op.
+        /// @tparam Funct Deduced type for the callback that won't be invoked.
+        /// @tparam Members Variadic template type that ought to be empty if this implementation is being used.
+        /// @param ToCall The callback that won't be invoked.
+        /// @param Mems An empty tuple.
+        template<typename Funct, typename... Members>
+        constexpr void TupleForEachReverse(Funct&& ToCall, const std::tuple<>& Mems)
             { (void)ToCall;  (void)Mems; }
     }//IntrospectionHelpers
 
@@ -853,6 +830,31 @@ namespace Mezzanine {
     /// @param ToCall The callback that will NOT be invoked for each member in the specified class.
     template<typename Class, typename Funct, typename = std::enable_if_t<!IsRegistered<Class>()>, typename = void>
     void DoForAllMembers(Funct&& ToCall)
+    {
+        (void)ToCall;
+        // Deliberately empty as a default dummy implementation
+    }
+
+    /// @brief Invokes a callable for each registered member on a class in reverse order.
+    /// @remarks The order is determined by the order the members tuple is constructed with during registration.
+    /// @warning SFINAE will disable this function if the class is not registered.
+    /// @tparam Class Provided type who's members will be looped over.
+    /// @tparam Funct Deduced parameter for the callback method to invoke with each member.
+    /// @param ToCall The callback that will be invoked for each member in the specified class.
+    template<typename Class, typename Funct, typename = std::enable_if_t<IsRegistered<Class>()>>
+    void DoForAllMembersReverse(Funct&& ToCall)
+    {
+        IntrospectionHelpers::TupleForEachReverse(std::forward<Funct>(ToCall),GetRegisteredMembers<Class>());
+    }
+
+    /// @brief Dummy implementation of DoForAllMembersReverse that is valid for non-registered classes.
+    /// @warning SFINAE will disable this function if the class is registered.
+    /// @tparam Class Provided type who's members will be looped over.
+    /// @tparam Funct Deduced parameter for the callback method to invoke with each member.
+    /// @remarks This exists primarily to help cut down on generated template code in the error case.
+    /// @param ToCall The callback that will NOT be invoked for each member in the specified class.
+    template<typename Class, typename Funct, typename = std::enable_if_t<!IsRegistered<Class>()>, typename = void>
+    void DoForAllMembersReverse(Funct&& ToCall)
     {
         (void)ToCall;
         // Deliberately empty as a default dummy implementation
@@ -1400,16 +1402,24 @@ namespace Mezzanine {
     /// the Member or a copy of the member in anyway. It is an accessor to the member and you'll have to call the
     /// appropriate function on the MemberAccessor inside the lambda to work the with actual member.
     /// @n @n
-    /// DoForAllMembers is an overloaded function with two versions and uses SFINAE to ensure only one will be visible
-    /// for a given class at a time based on whether or not it is registered. Here's the signatures:
+    /// DoForAllMembers and DoForAllMembersReverse are overloaded functions with two versions each and use SFINAE to
+    /// ensure only one each will be visible for a given class at a time based on whether or not it is registered.
+    /// DoForAllMembers will go over each member in the order provided to the members tuple during registration.
+    /// DoForAllMembersReverse will go over each member in the provided tuple in reverse order. Here's the signatures:
     /// @code
     /// template<typename Class, typename Funct, typename = std::enable_if_t<IsRegistered<Class>()>>
     /// void DoForAllMembers(Funct&& ToCall)
     ///
     /// template<typename Class, typename Funct, typename = std::enable_if_t<!IsRegistered<Class>()>, typename = void>
     /// void DoForAllMembers(Funct&& ToCall)
+    ///
+    /// template<typename Class, typename Funct, typename = std::enable_if_t<IsRegistered<Class>()>>
+    /// void DoForAllMembersReverse(Funct&& ToCall)
+    ///
+    /// template<typename Class, typename Funct, typename = std::enable_if_t<!IsRegistered<Class>()>, typename = void>
+    /// void DoForAllMembersReverse(Funct&& ToCall)
     /// @endcode
-    /// The non-registered implementation is a no-op to help reduce the amount of code generated from the template. In
+    /// The non-registered implementations are no-ops to help reduce the amount of code generated from the template. In
     /// either case you do need to specify the class to operate on as a template parameter and provide a lambda with
     /// the operation to be performed. Following the guidelines mentioned above, it's pretty straightforward to do
     /// basic operations with this.
