@@ -109,7 +109,7 @@ namespace IntrospectTest
 
     struct DerivedStructB : virtual public BaseStruct
     {
-        float DerivedBfloatVar = 1.0f;
+        float DerivedBFloatVar = 1.0f;
         short DerivedBShortVar = 0;
         std::array<char,2> DerivedBCharArrayVar = { {0,0} };
 
@@ -124,7 +124,7 @@ namespace IntrospectTest
             return MergeMembers(
                 BaseStruct::RegisterMembers(),
                 Members(
-                    MakeMemberAccessor("DerivedBfloatVar",&SelfType::DerivedBfloatVar),
+                    MakeMemberAccessor("DerivedBFloatVar",&SelfType::DerivedBFloatVar),
                     MakeMemberAccessor("DerivedBShortVar",&SelfType::DerivedBShortVar),
                     MakeMemberAccessor("DerivedBCharArrayVar",&SelfType::DerivedBCharArrayVar)
                 )
@@ -156,7 +156,7 @@ namespace IntrospectTest
                 MakeMemberAccessor("DerivedAIntVar"sv,&SelfType::DerivedAIntVar),
                 MakeMemberAccessor("DerivedAUnsignedVar"sv,&SelfType::DerivedAUnsignedVar),
                 // DerivedStructB
-                MakeMemberAccessor("DerivedBfloatVar"sv,&SelfType::DerivedBfloatVar),
+                MakeMemberAccessor("DerivedBFloatVar"sv,&SelfType::DerivedBFloatVar),
                 MakeMemberAccessor("DerivedBShortVar"sv,&SelfType::DerivedBShortVar),
                 MakeMemberAccessor("DerivedBCharArrayVar"sv,&SelfType::DerivedBCharArrayVar),
                 // DiamondStruct
@@ -577,19 +577,63 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
         DiamondStruct TestStruct;
         TestStruct.DiamondStringVar = "Goodbye";
 
-        size_t SlowMemberCount = 0;
+        std::vector<StringView> ForwardNames;
         DoForAllMembers<DiamondStruct>( [&](const auto& Member) {
-            ++SlowMemberCount;  (void)Member;
+            ForwardNames.push_back( Member.GetName() );
         } );
-        TEST_EQUAL("DoForAllMembers-DiamondStruct",
-                   size_t(11),SlowMemberCount);
+        TEST_EQUAL("DoForAllMembers-DiamondStruct-Count",
+                   size_t(11),ForwardNames.size());
+        TEST_EQUAL("DoForAllMembers-DiamondStruct-Element1",
+                   StringView("IntVar"),ForwardNames[0]);
+        TEST_EQUAL("DoForAllMembers-DiamondStruct-Element2",
+                   StringView("FloatVar"),ForwardNames[1]);
+        TEST_EQUAL("DoForAllMembers-DiamondStruct-Element3",
+                   StringView("StringVar"),ForwardNames[2]);
+        TEST_EQUAL("DoForAllMembers-DiamondStruct-Element4",
+                   StringView("DerivedAFloatVar"),ForwardNames[3]);
+        TEST_EQUAL("DoForAllMembers-DiamondStruct-Element5",
+                   StringView("DerivedAIntVar"),ForwardNames[4]);
+        TEST_EQUAL("DoForAllMembers-DiamondStruct-Element6",
+                   StringView("DerivedAUnsignedVar"),ForwardNames[5]);
+        TEST_EQUAL("DoForAllMembers-DiamondStruct-Element7",
+                   StringView("DerivedBFloatVar"),ForwardNames[6]);
+        TEST_EQUAL("DoForAllMembers-DiamondStruct-Element8",
+                   StringView("DerivedBShortVar"),ForwardNames[7]);
+        TEST_EQUAL("DoForAllMembers-DiamondStruct-Element9",
+                   StringView("DerivedBCharArrayVar"),ForwardNames[8]);
+        TEST_EQUAL("DoForAllMembers-DiamondStruct-Element10",
+                   StringView("DiamondStringVar"),ForwardNames[9]);
+        TEST_EQUAL("DoForAllMembers-DiamondStruct-Element11",
+                   StringView("DiamondStringVarDos"),ForwardNames[10]);
 
-        size_t SlowMemberReverseCount = 0;
+        std::vector<StringView> ReverseNames;
         DoForAllMembersReverse<DiamondStruct>( [&](const auto& Member) {
-            ++SlowMemberReverseCount;  (void)Member;
+            ReverseNames.push_back( Member.GetName() );
         } );
-        TEST_EQUAL("DoForAllMembersReverse-DiamondStruct",
-                   size_t(11),SlowMemberCount);
+        TEST_EQUAL("DoForAllMembersReverse-DiamondStruct-Count",
+                   size_t(11),ForwardNames.size());
+        TEST_EQUAL("DoForAllMembersReverse-DiamondStruct-Element1",
+                   StringView("DiamondStringVarDos"),ReverseNames[0]);
+        TEST_EQUAL("DoForAllMembersReverse-DiamondStruct-Element2",
+                   StringView("DiamondStringVar"),ReverseNames[1]);
+        TEST_EQUAL("DoForAllMembersReverse-DiamondStruct-Element3",
+                   StringView("DerivedBCharArrayVar"),ReverseNames[2]);
+        TEST_EQUAL("DoForAllMembersReverse-DiamondStruct-Element4",
+                   StringView("DerivedBShortVar"),ReverseNames[3]);
+        TEST_EQUAL("DoForAllMembersReverse-DiamondStruct-Element5",
+                   StringView("DerivedBFloatVar"),ReverseNames[4]);
+        TEST_EQUAL("DoForAllMembersReverse-DiamondStruct-Element6",
+                   StringView("DerivedAUnsignedVar"),ReverseNames[5]);
+        TEST_EQUAL("DoForAllMembersReverse-DiamondStruct-Element7",
+                   StringView("DerivedAIntVar"),ReverseNames[6]);
+        TEST_EQUAL("DoForAllMembersReverse-DiamondStruct-Element8",
+                   StringView("DerivedAFloatVar"),ReverseNames[7]);
+        TEST_EQUAL("DoForAllMembersReverse-DiamondStruct-Element9",
+                   StringView("StringVar"),ReverseNames[8]);
+        TEST_EQUAL("DoForAllMembersReverse-DiamondStruct-Element10",
+                   StringView("FloatVar"),ReverseNames[9]);
+        TEST_EQUAL("DoForAllMembersReverse-DiamondStruct-Element11",
+                   StringView("IntVar"),ReverseNames[10]);
 
         std::string StrMemberValue;
         DoForMember<DiamondStruct,std::string>( "DiamondStringVar", [&](const auto& Member) {
