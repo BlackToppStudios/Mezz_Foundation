@@ -1,14 +1,16 @@
 sudo: required
-dist: xenial
+dist: bionic
 language: cpp
 
 matrix:
   include:
     - os: osx
+      osx_image: xcode10.3
       compiler: clang
       env: BUILD_TYPE=Debug
       env: CXXFLAGS=-fno-var-tracking
     - os: osx
+      osx_image: xcode10.3
       compiler: clang
       env: BUILD_TYPE=Release
       env: CXXFLAGS=-fno-var-tracking
