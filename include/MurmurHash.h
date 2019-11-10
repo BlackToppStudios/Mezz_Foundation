@@ -49,6 +49,10 @@
 namespace Mezzanine {
 namespace Hashing {
     /// @page murmurhash
+    /// The Murmur Hash implementation used by the Mezzanine is heavily based upon the
+    /// implementation found <a href="https://github.com/aappleby/smhasher">here</a>, but
+    /// with minor modifications made for clarity and styling.
+    /// @n@n
     /// Note - The x86 and x64 versions do _not_ produce the same results, as the
     /// algorithms are optimized for their respective platforms. You can still
     /// compile and run any of them on any platform, but your performance with the
