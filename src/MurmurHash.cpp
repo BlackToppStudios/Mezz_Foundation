@@ -173,7 +173,7 @@ namespace Hashing {
         return OutputHash;
     }
 
-    MurmurHashResult_128_x86 MurmurHash3_x86_128(const void* Key, const SizeType Length, const UInt32 Seed)
+    MurmurHashResult_x86_128 MurmurHash3_x86_128(const void* Key, const SizeType Length, const UInt32 Seed)
     {
         const SizeType NumBlocks = Length / 16;
 
@@ -311,7 +311,7 @@ namespace Hashing {
         HashPart3 += HashPart1;
         HashPart4 += HashPart1;
 
-        MurmurHashResult_128_x86 Result;
+        MurmurHashResult_x86_128 Result;
         Result.Hash[0] = HashPart1;
         Result.Hash[1] = HashPart2;
         Result.Hash[2] = HashPart3;
@@ -319,7 +319,7 @@ namespace Hashing {
         return Result;
     }
 
-    MurmurHashResult_128_x64 MurmurHash3_x64_128(const void* Key, const SizeType Length, const UInt32 Seed)
+    MurmurHashResult_x64_128 MurmurHash3_x64_128(const void* Key, const SizeType Length, const UInt32 Seed)
     {
         const SizeType NumBlocks = Length / 16;
 
@@ -412,7 +412,7 @@ namespace Hashing {
         HashPart1 += HashPart2;
         HashPart2 += HashPart1;
 
-        MurmurHashResult_128_x64 Result;
+        MurmurHashResult_x64_128 Result;
         Result.Hash[0] = HashPart1;
         Result.Hash[1] = HashPart2;
         return Result;

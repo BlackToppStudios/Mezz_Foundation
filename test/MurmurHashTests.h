@@ -376,8 +376,8 @@ AUTOMATIC_TEST_GROUP(MurmurHashTests,MurmurHash)
     using namespace Mezzanine;
     using namespace aappleby;
 
-    using Result_x86 = Hashing::MurmurHashResult_128_x86;
-    using Result_x64 = Hashing::MurmurHashResult_128_x64;
+    using Result_x86 = Hashing::MurmurHashResult_x86_128;
+    using Result_x64 = Hashing::MurmurHashResult_x64_128;
     // These were generated randomly via an online tool.
     const UInt32 FirstSeed = 0xec42027b;
     const UInt32 SecondSeed = 0x7f615220;

@@ -41,10 +41,6 @@
 // MurmurHash3 was written by Austin Appleby, and is placed in the public
 // domain. The author hereby disclaims copyright to this source code.
 
-// Note - The x86 and x64 versions do _not_ produce the same results, as the
-// algorithms are optimized for their respective platforms. You can still
-// compile and run any of them on any platform, but your performance with the
-// non-native version will be less than optimal.
 #ifndef Mezz_Foundation_MurmurHash_h
 #define Mezz_Foundation_MurmurHash_h
 
@@ -52,38 +48,47 @@
 
 namespace Mezzanine {
 namespace Hashing {
+    /// @page murmurhash
+    /// Note - The x86 and x64 versions do _not_ produce the same results, as the
+    /// algorithms are optimized for their respective platforms. You can still
+    /// compile and run any of them on any platform, but your performance with the
+    /// non-native version will be less than optimal.
+
     /// @brief A convenience type for the return value of a x86 128-bit Hashing function.
-    struct MurmurHashResult_128_x86
+    struct MurmurHashResult_x86_128
     {
         /// @brief Array of 32-bit unsigned integers forming the 128-bit hash.
         UInt32 Hash[4] = {};
-    };//MurmurHash128_x86
+    };//MurmurHashResult_x86_128
 
     /// @brief A convenience type for the return value of a x64 128-bit Hashing function.
-    struct MurmurHashResult_128_x64
+    struct MurmurHashResult_x64_128
     {
         /// @brief Array of 64-bit unsigned integers forming the 128-bit hash.
         UInt64 Hash[2] = {};
-    };//MurmurHash128_x64
+    };//MurmurHashResult_x64_128
 
     /// @brief A Murmur hash function for 32-bit platforms that produces a 32-bit hash.
+    /// @remarks This function can be run on 64-bit platforms.  See @ref murmurhash page for more details.
     /// @param Key A pointer to the data that will be hashed.
     /// @param Length The byte length of the Key.
-    /// @param Seed The base number to scramble the hash with.
+    /// @param Seed The base number to salt the hash with.
     /// @return Returns a 32-bit Hash of the Key.
     UInt32 MurmurHash3_x86_32(const void* Key, const SizeType Length, const UInt32 Seed);
     /// @brief A Murmur hash function for 32-bit platforms that produces a 128-bit hash.
+    /// @remarks This function can be run on 64-bit platforms.  See @ref murmurhash page for more details.
     /// @param Key A pointer to the data that will be hashed.
     /// @param Length The byte length of the Key.
-    /// @param Seed The base number to scramble the hash with.
+    /// @param Seed The base number to salt the hash with.
     /// @return Returns a 128-bit Hash of the Key.
-    MurmurHashResult_128_x86 MurmurHash3_x86_128(const void* Key, const SizeType Length, const UInt32 Seed);
+    MurmurHashResult_x86_128 MurmurHash3_x86_128(const void* Key, const SizeType Length, const UInt32 Seed);
     /// @brief A Murmur hash function for 64-bit platforms that produces a 128-bit hash.
+    /// @remarks This function can be run on 32-bit platforms.  See @ref murmurhash page for more details.
     /// @param Key A pointer to the data that will be hashed.
     /// @param Length The byte length of the Key.
-    /// @param Seed The base number to scramble the hash with.
+    /// @param Seed The base number to salt the hash with.
     /// @return Returns a 128-bit Hash of the Key.
-    MurmurHashResult_128_x64 MurmurHash3_x64_128(const void* Key, const SizeType Length, const UInt32 Seed);
+    MurmurHashResult_x64_128 MurmurHash3_x64_128(const void* Key, const SizeType Length, const UInt32 Seed);
 }//Hashing
 }//Mezzanine
 
