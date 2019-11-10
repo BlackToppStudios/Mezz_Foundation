@@ -127,7 +127,6 @@ namespace Hashing {
     UInt32 MurmurHash3_x86_32(const void* Key, const SizeType Length, const UInt32 Seed)
     {
         const SizeType NumBlocks = Length / 4;
-        const UInt8* Source = static_cast<const UInt8*>(Key);
         UInt32 OutputHash = Seed;
 
         static const UInt32 x86_32_Constant_One = 0xcc9e2d51;
@@ -136,7 +135,7 @@ namespace Hashing {
         //----------
         // Body
 
-        const UInt32* Blocks = reinterpret_cast<const UInt32*>(Source);
+        const UInt32* Blocks = static_cast<const UInt32*>(Key);
         for( SizeType BlockIdx = 0 ; BlockIdx < NumBlocks ; BlockIdx++ )
         {
             UInt32 KeyBlock = GetBlock32(Blocks,BlockIdx);
@@ -153,7 +152,7 @@ namespace Hashing {
         //----------
         // Tail
 
-        const UInt8* Tail = ( Source + ( NumBlocks * 4 ) );
+        const UInt8* Tail = ( static_cast<const UInt8*>(Key) + ( NumBlocks * 4 ) );
         UInt32 TailBlock = 0;
         switch( Length & 3 )
         {
@@ -176,7 +175,6 @@ namespace Hashing {
 
     MurmurHashResult_128_x86 MurmurHash3_x86_128(const void* Key, const SizeType Length, const UInt32 Seed)
     {
-        const UInt8* Source = static_cast<const UInt8*>(Key);
         const SizeType NumBlocks = Length / 16;
 
         static const UInt32 x86_128_Constant_One = 0x239b961b;
@@ -192,7 +190,7 @@ namespace Hashing {
         //----------
         // Body
 
-        const UInt32* Blocks = reinterpret_cast<const UInt32*>(Source);
+        const UInt32* Blocks = static_cast<const UInt32*>(Key);
 
         for( SizeType BlockIdx = 0 ; BlockIdx != NumBlocks ; BlockIdx++ )
         {
@@ -241,7 +239,7 @@ namespace Hashing {
         //----------
         // Tail
 
-        const UInt8* Tail = ( Source + ( NumBlocks * 16 ) );
+        const UInt8* Tail = ( static_cast<const UInt8*>(Key) + ( NumBlocks * 16 ) );
 
         UInt32 TailBlockPart1 = 0;
         UInt32 TailBlockPart2 = 0;
@@ -323,7 +321,6 @@ namespace Hashing {
 
     MurmurHashResult_128_x64 MurmurHash3_x64_128(const void* Key, const SizeType Length, const UInt32 Seed)
     {
-        const UInt8* Source = static_cast<const UInt8*>(Key);
         const SizeType NumBlocks = Length / 16;
 
         SAVE_WARNING_STATE
@@ -338,7 +335,7 @@ namespace Hashing {
         //----------
         // Body
 
-        const UInt64* Blocks = reinterpret_cast<const UInt64*>(Source);
+        const UInt64* Blocks = static_cast<const UInt64*>(Key);
 
         for( SizeType BlockIdx = 0 ; BlockIdx < NumBlocks ; BlockIdx++ )
         {
@@ -367,7 +364,7 @@ namespace Hashing {
         //----------
         // Tail
 
-        const UInt8* Tail = ( Source + ( NumBlocks * 16 ) );
+        const UInt8* Tail = ( static_cast<const UInt8*>(Key) + ( NumBlocks * 16 ) );
 
         UInt64 TailBlockPart1 = 0;
         UInt64 TailBlockPart2 = 0;
