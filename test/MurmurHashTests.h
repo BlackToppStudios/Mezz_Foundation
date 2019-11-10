@@ -50,6 +50,8 @@
 // This ought to be replaced with "SUPPRESS_ALL_WARNINGS" when that becomes available.
 // We're not responsible for this code.
 SAVE_WARNING_STATE
+SUPPRESS_GCC_WARNING("-Wold-style-cast")
+SUPPRESS_GCC_WARNING("-Wimplicit-fallthrough")
 namespace aappleby {
 #if defined(_MSC_VER)
 
@@ -367,32 +369,223 @@ RESTORE_WARNING_STATE
 
 AUTOMATIC_TEST_GROUP(MurmurHashTests,MurmurHash)
 {
+    using namespace Mezzanine;
+    using namespace aappleby;
+
+    using Result_x86 = Hashing::MurmurHashResult_128_x86;
+    using Result_x64 = Hashing::MurmurHashResult_128_x64;
     // These were generated randomly via an online tool.
     const UInt32 FirstSeed = 0xec42027b;
     const UInt32 SecondSeed = 0x7f615220;
 
-    {// x86_32 - Text
+    const String TinyText = "Hi";
+    const String SmallText = "I have no idea what I am doing. Seriously.";
+    // Excerpt from Demosthenes' Third Philippic speech, delivered on the Pnyx Hill, Athens, in 341 BC.
+    const String LargeText = "It is a strange thing, perhaps, that I am about to say, but it is true. "
+                             "The worst feature in the past is that in which lies our best hope for the future. "
+                             "And what is this? It is that you are in your present plight because you do not do "
+                             "any part of your duty, small or great; for of course, if you were doing all that you "
+                             "should do, and were still in this evil case, you could not even hope for any "
+                             "improvement. As it is, Philip has conquered your indolence and your indifference; but "
+                             "he has not conquered Athens. You have not been vanquished, you have never even stirred.";
 
+    const int TinyTextSize = static_cast<int>(TinyText.size());
+    const int SmallTextSize = static_cast<int>(SmallText.size());
+    const int LargeTextSize = static_cast<int>(LargeText.size());
+
+    // Binary randomly generated on random.org
+    const std::array<UInt8,2> TinyBinary = { 0xd0, 0x0f };
+    const std::array<UInt8,32> SmallBinary = { 0x22, 0xf2, 0x51, 0x91, 0x2d, 0x04, 0x47, 0x7e,
+                                               0x75, 0xd6, 0x5d, 0x95, 0xdd, 0xad, 0xba, 0xdf,
+                                               0x7e, 0x40, 0x52, 0xa2, 0x17, 0x01, 0x5a, 0x93,
+                                               0x73, 0x9c, 0x30, 0xe6, 0xf8, 0xb3, 0xff, 0xf2 };
+    const std::array<UInt8,128> LargeBinary = { 0x0f, 0x3b, 0x0a, 0x31, 0xe9, 0x6e, 0x36, 0xa3,
+                                                0x04, 0x20, 0xfd, 0xce, 0xa6, 0xcc, 0x96, 0x9d,
+                                                0x3c, 0x6c, 0x59, 0x0f, 0xd5, 0x92, 0xe7, 0x92,
+                                                0x91, 0xec, 0x10, 0xac, 0x59, 0x26, 0x94, 0xb5,
+                                                0x23, 0xef, 0x2e, 0xdb, 0xc4, 0xd2, 0x2f, 0x63,
+                                                0x2d, 0x7b, 0x3d, 0x60, 0xa4, 0x3a, 0xf3, 0x27,
+                                                0xdd, 0xbb, 0x3c, 0x9f, 0xcd, 0x14, 0x5a, 0xca,
+                                                0xdf, 0xfb, 0x24, 0x00, 0xc1, 0xe7, 0x7a, 0x10,
+                                                0x4f, 0xd7, 0x9d, 0xcc, 0x49, 0x76, 0xaa, 0xe7,
+                                                0x9f, 0x14, 0xb0, 0x85, 0x65, 0x89, 0x6e, 0xb2,
+                                                0x57, 0xee, 0x06, 0x70, 0xbd, 0x4b, 0x0f, 0xdc,
+                                                0x3c, 0x06, 0xd6, 0x6f, 0x86, 0xbd, 0xa3, 0x36,
+                                                0x65, 0xcf, 0xd2, 0x63, 0xa3, 0x03, 0x00, 0xa6,
+                                                0x6f, 0xad, 0x8d, 0x27, 0xba, 0x8f, 0xeb, 0x15,
+                                                0xa0, 0x7e, 0x9d, 0xfe, 0x81, 0x6f, 0xdc, 0x51,
+                                                0x9f, 0xba, 0x02, 0x24, 0x71, 0x72, 0x7c, 0xba };
+
+    const int TinyBinarySize = static_cast<int>(TinyBinary.size());
+    const int SmallBinarySize = static_cast<int>(SmallBinary.size());
+    const int LargeBinarySize = static_cast<int>(LargeBinary.size());
+
+    {// x86_32 - Text
+        UInt32 AapplebyTiny{};
+        MurmurHash3_x86_32(TinyText.data(),TinyTextSize,FirstSeed,&AapplebyTiny);
+        UInt32 MezzTiny = Hashing::MurmurHash3_x86_32(TinyText.data(),TinyText.size(),FirstSeed);
+        TEST_EQUAL("MurmurHash3_x86_32(const_void*,const_Integer,const_UInt32)-Text-Tiny",
+                   AapplebyTiny,MezzTiny);
+
+        UInt32 AapplebySmall{};
+        MurmurHash3_x86_32(SmallText.data(),SmallTextSize,FirstSeed,&AapplebySmall);
+        UInt32 MezzSmall = Hashing::MurmurHash3_x86_32(SmallText.data(),SmallText.size(),FirstSeed);
+        TEST_EQUAL("MurmurHash3_x86_32(const_void*,const_Integer,const_UInt32)-Text-Small",
+                   AapplebySmall,MezzSmall);
+
+        UInt32 AapplebyLarge{};
+        MurmurHash3_x86_32(LargeText.data(),LargeTextSize,FirstSeed,&AapplebyLarge);
+        UInt32 MezzLarge = Hashing::MurmurHash3_x86_32(LargeText.data(),LargeText.size(),FirstSeed);
+        TEST_EQUAL("MurmurHash3_x86_32(const_void*,const_Integer,const_UInt32)-Text-Large",
+                   AapplebyLarge,MezzLarge);
     }// x86_32 - Text
 
     {// x86_32 - Binary
+        UInt32 AapplebyTiny{};
+        MurmurHash3_x86_32(TinyBinary.data(),TinyBinarySize,SecondSeed,&AapplebyTiny);
+        UInt32 MezzTiny = Hashing::MurmurHash3_x86_32(TinyBinary.data(),TinyBinary.size(),SecondSeed);
+        TEST_EQUAL("MurmurHash3_x86_32(const_void*,const_Integer,const_UInt32)-Binary-Tiny",
+                   AapplebyTiny,MezzTiny);
 
+        UInt32 AapplebySmall{};
+        MurmurHash3_x86_32(SmallBinary.data(),SmallBinarySize,SecondSeed,&AapplebySmall);
+        UInt32 MezzSmall = Hashing::MurmurHash3_x86_32(SmallBinary.data(),SmallBinary.size(),SecondSeed);
+        TEST_EQUAL("MurmurHash3_x86_32(const_void*,const_Integer,const_UInt32)-Binary-Small",
+                   AapplebySmall,MezzSmall);
+
+        UInt32 AapplebyLarge{};
+        MurmurHash3_x86_32(LargeBinary.data(),LargeBinarySize,SecondSeed,&AapplebyLarge);
+        UInt32 MezzLarge = Hashing::MurmurHash3_x86_32(LargeBinary.data(),LargeBinary.size(),SecondSeed);
+        TEST_EQUAL("MurmurHash3_x86_32(const_void*,const_Integer,const_UInt32)-Binary-Large",
+                   AapplebyLarge,MezzLarge);
     }// x86_32 - Binary
 
     {// x86_128 - Text
+        Result_x86 AapplebyTiny;
+        MurmurHash3_x86_128(TinyText.data(),TinyTextSize,FirstSeed,&AapplebyTiny.Hash[0]);
+        Result_x86 MezzTiny = Hashing::MurmurHash3_x86_128(TinyText.data(),TinyText.size(),FirstSeed);
+        TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Text-Tiny-Index0",
+                   AapplebyTiny.Hash[0],MezzTiny.Hash[0]);
+        TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Text-Tiny-Index1",
+                   AapplebyTiny.Hash[1],MezzTiny.Hash[1]);
+        TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Text-Tiny-Index2",
+                   AapplebyTiny.Hash[2],MezzTiny.Hash[2]);
+        TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Text-Tiny-Index3",
+                   AapplebyTiny.Hash[3],MezzTiny.Hash[3]);
 
+        Result_x86 AapplebySmall;
+        MurmurHash3_x86_128(SmallText.data(),SmallTextSize,FirstSeed,&AapplebySmall.Hash[0]);
+        Result_x86 MezzSmall = Hashing::MurmurHash3_x86_128(SmallText.data(),SmallText.size(),FirstSeed);
+        TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Text-Small-Index0",
+                   AapplebySmall.Hash[0],MezzSmall.Hash[0]);
+        TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Text-Small-Index1",
+                   AapplebySmall.Hash[1],MezzSmall.Hash[1]);
+        TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Text-Small-Index2",
+                   AapplebySmall.Hash[2],MezzSmall.Hash[2]);
+        TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Text-Small-Index3",
+                   AapplebySmall.Hash[3],MezzSmall.Hash[3]);
+
+        Result_x86 AapplebyLarge;
+        MurmurHash3_x86_128(LargeText.data(),LargeTextSize,FirstSeed,&AapplebyLarge.Hash[0]);
+        Result_x86 MezzLarge = Hashing::MurmurHash3_x86_128(LargeText.data(),LargeText.size(),FirstSeed);
+        TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Text-Large-Index0",
+                   AapplebyLarge.Hash[0],MezzLarge.Hash[0]);
+        TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Text-Large-Index1",
+                   AapplebyLarge.Hash[1],MezzLarge.Hash[1]);
+        TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Text-Large-Index2",
+                   AapplebyLarge.Hash[2],MezzLarge.Hash[2]);
+        TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Text-Large-Index3",
+                   AapplebyLarge.Hash[3],MezzLarge.Hash[3]);
     }// x86_128 - Text
 
     {// x86_128 - Binary
+        Result_x86 AapplebyTiny;
+        MurmurHash3_x86_128(TinyBinary.data(),TinyBinarySize,SecondSeed,&AapplebyTiny.Hash[0]);
+        Result_x86 MezzTiny = Hashing::MurmurHash3_x86_128(TinyBinary.data(),TinyBinary.size(),SecondSeed);
+        TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Binary-Tiny-Index0",
+                   AapplebyTiny.Hash[0],MezzTiny.Hash[0]);
+        TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Binary-Tiny-Index1",
+                   AapplebyTiny.Hash[1],MezzTiny.Hash[1]);
+        TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Binary-Tiny-Index2",
+                   AapplebyTiny.Hash[2],MezzTiny.Hash[2]);
+        TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Binary-Tiny-Index3",
+                   AapplebyTiny.Hash[3],MezzTiny.Hash[3]);
 
+        Result_x86 AapplebySmall;
+        MurmurHash3_x86_128(SmallBinary.data(),SmallBinarySize,SecondSeed,&AapplebySmall.Hash[0]);
+        Result_x86 MezzSmall = Hashing::MurmurHash3_x86_128(SmallBinary.data(),SmallBinary.size(),SecondSeed);
+        TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Binary-Small-Index0",
+                   AapplebySmall.Hash[0],MezzSmall.Hash[0]);
+        TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Binary-Small-Index1",
+                   AapplebySmall.Hash[1],MezzSmall.Hash[1]);
+        TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Binary-Small-Index2",
+                   AapplebySmall.Hash[2],MezzSmall.Hash[2]);
+        TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Binary-Small-Index3",
+                   AapplebySmall.Hash[3],MezzSmall.Hash[3]);
+
+        Result_x86 AapplebyLarge;
+        MurmurHash3_x86_128(LargeBinary.data(),LargeBinarySize,SecondSeed,&AapplebyLarge.Hash[0]);
+        Result_x86 MezzLarge = Hashing::MurmurHash3_x86_128(LargeBinary.data(),LargeBinary.size(),SecondSeed);
+        TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Binary-Large-Index0",
+                   AapplebyLarge.Hash[0],MezzLarge.Hash[0]);
+        TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Binary-Large-Index1",
+                   AapplebyLarge.Hash[1],MezzLarge.Hash[1]);
+        TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Binary-Large-Index2",
+                   AapplebyLarge.Hash[2],MezzLarge.Hash[2]);
+        TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Binary-Large-Index3",
+                   AapplebyLarge.Hash[3],MezzLarge.Hash[3]);
     }// x86_128 - Binary
 
     {// x64_128 - Text
+        Result_x64 AapplebyTiny;
+        MurmurHash3_x64_128(TinyText.data(),TinyTextSize,FirstSeed,&AapplebyTiny.Hash[0]);
+        Result_x64 MezzTiny = Hashing::MurmurHash3_x64_128(TinyText.data(),TinyText.size(),FirstSeed);
+        TEST_EQUAL("MurmurHash3_x64_128(const_void*,const_Integer,const_UInt32)-Text-Tiny-Index0",
+                   AapplebyTiny.Hash[0],MezzTiny.Hash[0]);
+        TEST_EQUAL("MurmurHash3_x64_128(const_void*,const_Integer,const_UInt32)-Text-Tiny-Index1",
+                   AapplebyTiny.Hash[1],MezzTiny.Hash[1]);
 
+        Result_x64 AapplebySmall;
+        MurmurHash3_x64_128(SmallText.data(),SmallTextSize,FirstSeed,&AapplebySmall.Hash[0]);
+        Result_x64 MezzSmall = Hashing::MurmurHash3_x64_128(SmallText.data(),SmallText.size(),FirstSeed);
+        TEST_EQUAL("MurmurHash3_x64_128(const_void*,const_Integer,const_UInt32)-Text-Small-Index0",
+                   AapplebySmall.Hash[0],MezzSmall.Hash[0]);
+        TEST_EQUAL("MurmurHash3_x64_128(const_void*,const_Integer,const_UInt32)-Text-Small-Index1",
+                   AapplebySmall.Hash[1],MezzSmall.Hash[1]);
+
+        Result_x64 AapplebyLarge;
+        MurmurHash3_x64_128(LargeText.data(),LargeTextSize,FirstSeed,&AapplebyLarge.Hash[0]);
+        Result_x64 MezzLarge = Hashing::MurmurHash3_x64_128(LargeText.data(),LargeText.size(),FirstSeed);
+        TEST_EQUAL("MurmurHash3_x64_128(const_void*,const_Integer,const_UInt32)-Text-Large-Index0",
+                   AapplebyLarge.Hash[0],MezzLarge.Hash[0]);
+        TEST_EQUAL("MurmurHash3_x64_128(const_void*,const_Integer,const_UInt32)-Text-Large-Index1",
+                   AapplebyLarge.Hash[1],MezzLarge.Hash[1]);
     }// x64_128 - Text
 
     {// x64_128 - Binary
+        Result_x64 AapplebyTiny;
+        MurmurHash3_x64_128(TinyBinary.data(),TinyBinarySize,SecondSeed,&AapplebyTiny.Hash[0]);
+        Result_x64 MezzTiny = Hashing::MurmurHash3_x64_128(TinyBinary.data(),TinyBinary.size(),SecondSeed);
+        TEST_EQUAL("MurmurHash3_x64_128(const_void*,const_Integer,const_UInt32)-Binary-Tiny-Index0",
+                   AapplebyTiny.Hash[0],MezzTiny.Hash[0]);
+        TEST_EQUAL("MurmurHash3_x64_128(const_void*,const_Integer,const_UInt32)-Binary-Tiny-Index1",
+                   AapplebyTiny.Hash[1],MezzTiny.Hash[1]);
 
+        Result_x64 AapplebySmall;
+        MurmurHash3_x64_128(SmallBinary.data(),SmallBinarySize,SecondSeed,&AapplebySmall.Hash[0]);
+        Result_x64 MezzSmall = Hashing::MurmurHash3_x64_128(SmallBinary.data(),SmallBinary.size(),SecondSeed);
+        TEST_EQUAL("MurmurHash3_x64_128(const_void*,const_Integer,const_UInt32)-Binary-Small-Index0",
+                   AapplebySmall.Hash[0],MezzSmall.Hash[0]);
+        TEST_EQUAL("MurmurHash3_x64_128(const_void*,const_Integer,const_UInt32)-Binary-Small-Index1",
+                   AapplebySmall.Hash[1],MezzSmall.Hash[1]);
+
+        Result_x64 AapplebyLarge;
+        MurmurHash3_x64_128(LargeBinary.data(),LargeBinarySize,SecondSeed,&AapplebyLarge.Hash[0]);
+        Result_x64 MezzLarge = Hashing::MurmurHash3_x64_128(LargeBinary.data(),LargeBinary.size(),SecondSeed);
+        TEST_EQUAL("MurmurHash3_x64_128(const_void*,const_Integer,const_UInt32)-Binary-Large-Index0",
+                   AapplebyLarge.Hash[0],MezzLarge.Hash[0]);
+        TEST_EQUAL("MurmurHash3_x64_128(const_void*,const_Integer,const_UInt32)-Binary-Large-Index1",
+                   AapplebyLarge.Hash[1],MezzLarge.Hash[1]);
     }// x64_128 - Binary
 }
 

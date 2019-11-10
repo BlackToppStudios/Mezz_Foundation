@@ -53,15 +53,17 @@
 namespace Mezzanine {
 namespace Hashing {
     /// @brief A convenience type for the return value of a x86 128-bit Hashing function.
-    struct MurmurHash128_x86
+    struct MurmurHashResult_128_x86
     {
-        UInt32 Hash[4];
+        /// @brief Array of 32-bit unsigned integers forming the 128-bit hash.
+        UInt32 Hash[4] = {};
     };//MurmurHash128_x86
 
     /// @brief A convenience type for the return value of a x64 128-bit Hashing function.
-    struct MurmurHash128_x64
+    struct MurmurHashResult_128_x64
     {
-        UInt64 Hash[2];
+        /// @brief Array of 64-bit unsigned integers forming the 128-bit hash.
+        UInt64 Hash[2] = {};
     };//MurmurHash128_x64
 
     /// @brief A Murmur hash function for 32-bit platforms that produces a 32-bit hash.
@@ -69,19 +71,19 @@ namespace Hashing {
     /// @param Length The byte length of the Key.
     /// @param Seed
     /// @return Returns a 32-bit Hash of the Key.
-    UInt32 MurmurHash3_x86_32(const void* Key, const Integer Length, const UInt32 Seed);
+    UInt32 MurmurHash3_x86_32(const void* Key, const SizeType Length, const UInt32 Seed);
     /// @brief A Murmur hash function for 32-bit platforms that produces a 128-bit hash.
     /// @param Key A pointer to the data that will be hashed.
     /// @param Length The byte length of the Key.
     /// @param Seed
     /// @return Returns a 128-bit Hash of the Key.
-    MurmurHash128_x86 MurmurHash3_x86_128(const void* Key, const Integer Length, const UInt32 Seed);
+    MurmurHashResult_128_x86 MurmurHash3_x86_128(const void* Key, const SizeType Length, const UInt32 Seed);
     /// @brief A Murmur hash function for 64-bit platforms that produces a 128-bit hash.
     /// @param Key A pointer to the data that will be hashed.
     /// @param Length The byte length of the Key.
     /// @param Seed
     /// @return Returns a 128-bit Hash of the Key.
-    MurmurHash128_x64 MurmurHash3_x64_128(const void* Key, const Integer Length, const UInt32 Seed);
+    MurmurHashResult_128_x64 MurmurHash3_x64_128(const void* Key, const SizeType Length, const UInt32 Seed);
 }//Hashing
 }//Mezzanine
 

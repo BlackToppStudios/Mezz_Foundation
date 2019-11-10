@@ -85,12 +85,12 @@ namespace {
     // Block read - if your platform needs to do endian-swapping or can only
     // handle aligned reads, do the conversion here
 
-    FORCE_INLINE UInt32 GetBlock32(const UInt32* Blocks, Integer Index)
+    FORCE_INLINE UInt32 GetBlock32(const UInt32* Blocks, const SizeType Index)
     {
         return Blocks[Index];
     }
 
-    FORCE_INLINE UInt64 GetBlock64(const UInt64* Blocks, Integer Index)
+    FORCE_INLINE UInt64 GetBlock64(const UInt64* Blocks, const SizeType Index)
     {
         return Blocks[Index];
     }
@@ -125,9 +125,9 @@ namespace {
 
 namespace Mezzanine {
 namespace Hashing {
-    UInt32 MurmurHash3_x86_32(const void* Key, const Integer Length, const UInt32 Seed)
+    UInt32 MurmurHash3_x86_32(const void* Key, const SizeType Length, const UInt32 Seed)
     {
-        const Integer NumBlocks = Length / 4;
+        const SizeType NumBlocks = Length / 4;
         const UInt8* Source = static_cast<const UInt8*>(Key);
         UInt32 OutputHash = Seed;
 
@@ -137,8 +137,8 @@ namespace Hashing {
         //----------
         // Body
 
-        const UInt32* Blocks = reinterpret_cast<const UInt32*>( Source + ( NumBlocks * 4 ) );
-        for( Integer BlockIdx = -NumBlocks ; BlockIdx != 0 ; BlockIdx++ )
+        const UInt32* Blocks = reinterpret_cast<const UInt32*>(Source);
+        for( SizeType BlockIdx = 0 ; BlockIdx < NumBlocks ; BlockIdx++ )
         {
             UInt32 KeyBlock = GetBlock32(Blocks,BlockIdx);
 
@@ -170,15 +170,15 @@ namespace Hashing {
         //----------
         // Finalization
 
-        OutputHash ^= Length;
+        OutputHash ^= static_cast<UInt32>(Length);
         OutputHash = FinalMix32(OutputHash);
         return OutputHash;
     }
 
-    MurmurHash128_x86 MurmurHash3_x86_128(const void* Key, const Integer Length, const UInt32 Seed)
+    MurmurHashResult_128_x86 MurmurHash3_x86_128(const void* Key, const SizeType Length, const UInt32 Seed)
     {
         const UInt8* Source = static_cast<const UInt8*>(Key);
-        const Integer NumBlocks = Length / 16;
+        const SizeType NumBlocks = Length / 16;
 
         static const UInt32 x86_128_Constant_One = 0x239b961b;
         static const UInt32 x86_128_Constant_Two = 0xab0e9789;
@@ -193,9 +193,9 @@ namespace Hashing {
         //----------
         // Body
 
-        const UInt32* Blocks = reinterpret_cast<const UInt32*>( Source + ( NumBlocks * 16 ) );
+        const UInt32* Blocks = reinterpret_cast<const UInt32*>(Source);
 
-        for( Integer BlockIdx = -NumBlocks ; BlockIdx != 0 ; BlockIdx++ )
+        for( SizeType BlockIdx = 0 ; BlockIdx != NumBlocks ; BlockIdx++ )
         {
             UInt32 KeyBlockPart1 = GetBlock32(Blocks,(BlockIdx * 4) + 0);
             UInt32 KeyBlockPart2 = GetBlock32(Blocks,(BlockIdx * 4) + 1);
@@ -290,10 +290,10 @@ namespace Hashing {
         //----------
         // Finalization
 
-        HashPart1 ^= Length;
-        HashPart2 ^= Length;
-        HashPart3 ^= Length;
-        HashPart4 ^= Length;
+        HashPart1 ^= static_cast<UInt32>(Length);
+        HashPart2 ^= static_cast<UInt32>(Length);
+        HashPart3 ^= static_cast<UInt32>(Length);
+        HashPart4 ^= static_cast<UInt32>(Length);
 
         HashPart1 += HashPart2;
         HashPart1 += HashPart3;
@@ -314,7 +314,7 @@ namespace Hashing {
         HashPart3 += HashPart1;
         HashPart4 += HashPart1;
 
-        MurmurHash128_x86 Result;
+        MurmurHashResult_128_x86 Result;
         Result.Hash[0] = HashPart1;
         Result.Hash[1] = HashPart2;
         Result.Hash[2] = HashPart3;
@@ -322,10 +322,10 @@ namespace Hashing {
         return Result;
     }
 
-    MurmurHash128_x64 MurmurHash3_x64_128(const void* Key, const Integer Length, const UInt32 Seed)
+    MurmurHashResult_128_x64 MurmurHash3_x64_128(const void* Key, const SizeType Length, const UInt32 Seed)
     {
         const UInt8* Source = static_cast<const UInt8*>(Key);
-        const Integer NumBlocks = Length / 16;
+        const SizeType NumBlocks = Length / 16;
 
         static const UInt64 x64_128_Constant_One = BIG_CONSTANT(0x87c37b91114253d5);
         static const UInt64 x64_128_Constant_Two = BIG_CONSTANT(0x4cf5ad432745937f);
@@ -338,7 +338,7 @@ namespace Hashing {
 
         const UInt64* Blocks = reinterpret_cast<const UInt64*>(Source);
 
-        for( Integer BlockIdx = 0 ; BlockIdx < NumBlocks ; BlockIdx++ )
+        for( SizeType BlockIdx = 0 ; BlockIdx < NumBlocks ; BlockIdx++ )
         {
             UInt64 KeyBlockPart1 = GetBlock64(Blocks,(BlockIdx * 2) + 0);
             UInt64 KeyBlockPart2 = GetBlock64(Blocks,(BlockIdx * 2) + 1);
@@ -401,8 +401,8 @@ namespace Hashing {
         //----------
         // Finalization
 
-        HashPart1 ^= Length;
-        HashPart2 ^= Length;
+        HashPart1 ^= static_cast<UInt64>(Length);
+        HashPart2 ^= static_cast<UInt64>(Length);
 
         HashPart1 += HashPart2;
         HashPart2 += HashPart1;
@@ -413,7 +413,7 @@ namespace Hashing {
         HashPart1 += HashPart2;
         HashPart2 += HashPart1;
 
-        MurmurHash128_x64 Result;
+        MurmurHashResult_128_x64 Result;
         Result.Hash[0] = HashPart1;
         Result.Hash[1] = HashPart2;
         return Result;
