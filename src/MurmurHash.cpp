@@ -109,11 +109,14 @@ namespace {
 
     FORCE_INLINE UInt64 FinalMix64(UInt64 ToMix)
     {
+        SAVE_WARNING_STATE
+        SUPPRESS_CLANG_WARNING("-Wc++98-compat-pedantic")
         ToMix ^= ToMix >> 33;
         ToMix *= 0xff51afd7ed558ccdllu;
         ToMix ^= ToMix >> 33;
         ToMix *= 0xc4ceb9fe1a85ec53llu;
         ToMix ^= ToMix >> 33;
+        RESTORE_WARNING_STATE
 
         return ToMix;
     }
@@ -323,8 +326,11 @@ namespace Hashing {
         const UInt8* Source = static_cast<const UInt8*>(Key);
         const SizeType NumBlocks = Length / 16;
 
+        SAVE_WARNING_STATE
+        SUPPRESS_CLANG_WARNING("-Wc++98-compat-pedantic")
         static const UInt64 x64_128_Constant_One = 0x87c37b91114253d5llu;
         static const UInt64 x64_128_Constant_Two = 0x4cf5ad432745937fllu;
+        RESTORE_WARNING_STATE
 
         UInt64 HashPart1 = Seed;
         UInt64 HashPart2 = Seed;
