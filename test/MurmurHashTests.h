@@ -52,6 +52,8 @@
 SAVE_WARNING_STATE
 SUPPRESS_GCC_WARNING("-Wold-style-cast")
 SUPPRESS_GCC_WARNING("-Wimplicit-fallthrough")
+SUPPRESS_CLANG_WARNING("-Wc++98-compat-pedantic")
+SUPPRESS_CLANG_WARNING("-Wsign-conversion")
 namespace aappleby {
 #if defined(_MSC_VER)
 

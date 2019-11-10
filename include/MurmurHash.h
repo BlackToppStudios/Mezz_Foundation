@@ -69,19 +69,19 @@ namespace Hashing {
     /// @brief A Murmur hash function for 32-bit platforms that produces a 32-bit hash.
     /// @param Key A pointer to the data that will be hashed.
     /// @param Length The byte length of the Key.
-    /// @param Seed
+    /// @param Seed The base number to scramble the hash with.
     /// @return Returns a 32-bit Hash of the Key.
     UInt32 MurmurHash3_x86_32(const void* Key, const SizeType Length, const UInt32 Seed);
     /// @brief A Murmur hash function for 32-bit platforms that produces a 128-bit hash.
     /// @param Key A pointer to the data that will be hashed.
     /// @param Length The byte length of the Key.
-    /// @param Seed
+    /// @param Seed The base number to scramble the hash with.
     /// @return Returns a 128-bit Hash of the Key.
     MurmurHashResult_128_x86 MurmurHash3_x86_128(const void* Key, const SizeType Length, const UInt32 Seed);
     /// @brief A Murmur hash function for 64-bit platforms that produces a 128-bit hash.
     /// @param Key A pointer to the data that will be hashed.
     /// @param Length The byte length of the Key.
-    /// @param Seed
+    /// @param Seed The base number to scramble the hash with.
     /// @return Returns a 128-bit Hash of the Key.
     MurmurHashResult_128_x64 MurmurHash3_x64_128(const void* Key, const SizeType Length, const UInt32 Seed);
 }//Hashing
