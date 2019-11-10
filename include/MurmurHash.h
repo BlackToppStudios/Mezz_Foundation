@@ -57,6 +57,11 @@ namespace Hashing {
     /// algorithms are optimized for their respective platforms. You can still
     /// compile and run any of them on any platform, but your performance with the
     /// non-native version will be less than optimal.
+    /// @n@n
+    /// The different hashing fuctions are:
+    ///   - @ref MurmurHash3_x86_32
+    ///   - @ref MurmurHash3_x86_128
+    ///   - @ref MurmurHash3_x64_128
 
     /// @brief A convenience type for the return value of a x86 128-bit Hashing function.
     struct MurmurHashResult_x86_128
