@@ -247,36 +247,36 @@ namespace Hashing {
 
         switch( Length & 15 )
         {
-            case 15: TailBlockPart4 ^= Tail[14] << 16;  [[fallthrough]];
-            case 14: TailBlockPart4 ^= Tail[13] << 8;   [[fallthrough]];
-            case 13: TailBlockPart4 ^= Tail[12] << 0;
+            case 15: TailBlockPart4 ^= static_cast<UInt32>( Tail[14] << 16 );  [[fallthrough]];
+            case 14: TailBlockPart4 ^= static_cast<UInt32>( Tail[13] << 8 );   [[fallthrough]];
+            case 13: TailBlockPart4 ^= static_cast<UInt32>( Tail[12] << 0 );
                      TailBlockPart4 *= x86_128_Constant_Four;
                      TailBlockPart4  = ROTL32(TailBlockPart4,18);
                      TailBlockPart4 *= x86_128_Constant_One;
-                     HashPart4 ^= TailBlockPart4;       [[fallthrough]];
+                     HashPart4 ^= TailBlockPart4;                              [[fallthrough]];
 
-            case 12: TailBlockPart3 ^= Tail[11] << 24;  [[fallthrough]];
-            case 11: TailBlockPart3 ^= Tail[10] << 16;  [[fallthrough]];
-            case 10: TailBlockPart3 ^= Tail[ 9] << 8;   [[fallthrough]];
-            case  9: TailBlockPart3 ^= Tail[ 8] << 0;
+            case 12: TailBlockPart3 ^= static_cast<UInt32>( Tail[11] << 24 );  [[fallthrough]];
+            case 11: TailBlockPart3 ^= static_cast<UInt32>( Tail[10] << 16 );  [[fallthrough]];
+            case 10: TailBlockPart3 ^= static_cast<UInt32>( Tail[ 9] << 8 );   [[fallthrough]];
+            case  9: TailBlockPart3 ^= static_cast<UInt32>( Tail[ 8] << 0 );
                      TailBlockPart3 *= x86_128_Constant_Three;
                      TailBlockPart3  = ROTL32(TailBlockPart3,17);
                      TailBlockPart3 *= x86_128_Constant_Four;
-                     HashPart3 ^= TailBlockPart3;       [[fallthrough]];
+                     HashPart3 ^= TailBlockPart3;                              [[fallthrough]];
 
-            case  8: TailBlockPart2 ^= Tail[ 7] << 24;  [[fallthrough]];
-            case  7: TailBlockPart2 ^= Tail[ 6] << 16;  [[fallthrough]];
-            case  6: TailBlockPart2 ^= Tail[ 5] << 8;   [[fallthrough]];
-            case  5: TailBlockPart2 ^= Tail[ 4] << 0;
+            case  8: TailBlockPart2 ^= static_cast<UInt32>( Tail[ 7] << 24 );  [[fallthrough]];
+            case  7: TailBlockPart2 ^= static_cast<UInt32>( Tail[ 6] << 16 );  [[fallthrough]];
+            case  6: TailBlockPart2 ^= static_cast<UInt32>( Tail[ 5] << 8 );   [[fallthrough]];
+            case  5: TailBlockPart2 ^= static_cast<UInt32>( Tail[ 4] << 0 );
                      TailBlockPart2 *= x86_128_Constant_Two;
                      TailBlockPart2  = ROTL32(TailBlockPart2,16);
                      TailBlockPart2 *= x86_128_Constant_Three;
-                     HashPart2 ^= TailBlockPart2;       [[fallthrough]];
+                     HashPart2 ^= TailBlockPart2;                              [[fallthrough]];
 
-            case  4: TailBlockPart1 ^= Tail[ 3] << 24;  [[fallthrough]];
-            case  3: TailBlockPart1 ^= Tail[ 2] << 16;  [[fallthrough]];
-            case  2: TailBlockPart1 ^= Tail[ 1] << 8;   [[fallthrough]];
-            case  1: TailBlockPart1 ^= Tail[ 0] << 0;
+            case  4: TailBlockPart1 ^= static_cast<UInt32>( Tail[ 3] << 24 );  [[fallthrough]];
+            case  3: TailBlockPart1 ^= static_cast<UInt32>( Tail[ 2] << 16 );  [[fallthrough]];
+            case  2: TailBlockPart1 ^= static_cast<UInt32>( Tail[ 1] << 8 );   [[fallthrough]];
+            case  1: TailBlockPart1 ^= static_cast<UInt32>( Tail[ 0] << 0 );
                      TailBlockPart1 *= x86_128_Constant_One;
                      TailBlockPart1  = ROTL32(TailBlockPart1,15);
                      TailBlockPart1 *= x86_128_Constant_Two;
