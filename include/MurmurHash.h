@@ -83,21 +83,24 @@ namespace Hashing {
     /// @param Length The byte length of the Key.
     /// @param Seed The base number to salt the hash with.
     /// @return Returns a 32-bit Hash of the Key.
-    UInt32 MurmurHash3_x86_32(const void* Key, const SizeType Length, const UInt32 Seed);
+    [[nodiscard]]
+    UInt32 MurmurHash3_x86_32(const void* Key, const SizeType Length, const UInt32 Seed) noexcept;
     /// @brief A Murmur hash function for 32-bit platforms that produces a 128-bit hash.
     /// @remarks This function can be run on 64-bit platforms.  See @ref murmurhash page for more details.
     /// @param Key A pointer to the data that will be hashed.
     /// @param Length The byte length of the Key.
     /// @param Seed The base number to salt the hash with.
     /// @return Returns a 128-bit Hash of the Key.
-    MurmurHashResult_x86_128 MurmurHash3_x86_128(const void* Key, const SizeType Length, const UInt32 Seed);
+    [[nodiscard]]
+    MurmurHashResult_x86_128 MurmurHash3_x86_128(const void* Key, const SizeType Length, const UInt32 Seed) noexcept;
     /// @brief A Murmur hash function for 64-bit platforms that produces a 128-bit hash.
     /// @remarks This function can be run on 32-bit platforms.  See @ref murmurhash page for more details.
     /// @param Key A pointer to the data that will be hashed.
     /// @param Length The byte length of the Key.
     /// @param Seed The base number to salt the hash with.
     /// @return Returns a 128-bit Hash of the Key.
-    MurmurHashResult_x64_128 MurmurHash3_x64_128(const void* Key, const SizeType Length, const UInt32 Seed);
+    [[nodiscard]]
+    MurmurHashResult_x64_128 MurmurHash3_x64_128(const void* Key, const SizeType Length, const UInt32 Seed) noexcept;
 }//Hashing
 }//Mezzanine
 
