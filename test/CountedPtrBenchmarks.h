@@ -223,6 +223,8 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
         /////////////////////////////////////
         // Comparison of Benchmark Results
 
+        TEST_WARN( "FixMe", true );
+
         /*
         TestLog << "Checking that raw pointers are fastest for sanity.\n";
         TEST_WARN( "RawPtrCreateVsInternal",
@@ -241,7 +243,6 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
                    RawPtrCopyResult.Average < StdPtrCopyResult.Average );
         TEST_WARN( "RawPtrCopyVsStdMakeSharedCopy",
                    RawPtrCopyResult.Average < MakeSharedCopyResult.Average );
-        */
 
         TestLog << "Checking CountedPtr internal is faster than CountedPtr external.\n";
         TEST_WARN( "InternalVsExternal",
@@ -261,7 +262,7 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
         TEST_WARN( "InternalCopyVsStdMakeSharedCopy",
                    InternalRefCopyResult.Average < MakeSharedCopyResult.Average );
 
-        /* Don't care about these tests as much.
+        // Don't care about these tests as much.
         TestLog << "Checking CountedPtr External is faster than shared_ptr.\n";
         TEST_WARN( "ExternalVsShared",
                    ExternalRefCreateResult.Average < StdPtrCreateResult.Average );
