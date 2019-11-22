@@ -63,12 +63,12 @@ namespace {
     #else   // defined(_MSC_VER) aka Good Compilers
         #define FORCE_INLINE inline __attribute__((always_inline))
 
-        inline UInt32 rotl32(UInt32 x, Int8 r)
+        inline UInt32 rotl32(UInt32 x, Int8 r) noexcept
         {
             return ( x << r ) | ( x >> ( 32 - r ) );
         }
 
-        inline UInt64 rotl64(UInt64 x, Int8 r)
+        inline UInt64 rotl64(UInt64 x, Int8 r) noexcept
         {
             return ( x << r ) | ( x >> ( 64 - r ) );
         }
@@ -81,12 +81,12 @@ namespace {
     // Block read - if your platform needs to do endian-swapping or can only
     // handle aligned reads, do the conversion here
 
-    FORCE_INLINE UInt32 GetBlock32(const UInt32* Blocks, const SizeType Index)
+    FORCE_INLINE UInt32 GetBlock32(const UInt32* Blocks, const SizeType Index) noexcept
     {
         return Blocks[Index];
     }
 
-    FORCE_INLINE UInt64 GetBlock64(const UInt64* Blocks, const SizeType Index)
+    FORCE_INLINE UInt64 GetBlock64(const UInt64* Blocks, const SizeType Index) noexcept
     {
         return Blocks[Index];
     }
@@ -94,7 +94,7 @@ namespace {
     //-----------------------------------------------------------------------------
     // Finalization mix - force all bits of a hash block to avalanche
 
-    FORCE_INLINE UInt32 FinalMix32(UInt32 ToMix)
+    FORCE_INLINE UInt32 FinalMix32(UInt32 ToMix) noexcept
     {
         ToMix ^= ToMix >> 16;
         ToMix *= 0x85ebca6b;
@@ -107,7 +107,7 @@ namespace {
 
     //----------
 
-    FORCE_INLINE UInt64 FinalMix64(UInt64 ToMix)
+    FORCE_INLINE UInt64 FinalMix64(UInt64 ToMix) noexcept
     {
         SAVE_WARNING_STATE
         SUPPRESS_CLANG_WARNING("-Wc++98-compat-pedantic")
@@ -124,7 +124,7 @@ namespace {
 
 namespace Mezzanine {
 namespace Hashing {
-    UInt32 MurmurHash3_x86_32(const void* Key, const SizeType Length, const UInt32 Seed)
+    UInt32 MurmurHash3_x86_32(const void* Key, const SizeType Length, const UInt32 Seed) noexcept
     {
         const SizeType NumBlocks = Length / 4;
         UInt32 OutputHash = Seed;
@@ -173,7 +173,7 @@ namespace Hashing {
         return OutputHash;
     }
 
-    MurmurHashResult_x86_128 MurmurHash3_x86_128(const void* Key, const SizeType Length, const UInt32 Seed)
+    MurmurHashResult_x86_128 MurmurHash3_x86_128(const void* Key, const SizeType Length, const UInt32 Seed) noexcept
     {
         const SizeType NumBlocks = Length / 16;
 
@@ -319,7 +319,7 @@ namespace Hashing {
         return Result;
     }
 
-    MurmurHashResult_x64_128 MurmurHash3_x64_128(const void* Key, const SizeType Length, const UInt32 Seed)
+    MurmurHashResult_x64_128 MurmurHash3_x64_128(const void* Key, const SizeType Length, const UInt32 Seed) noexcept
     {
         const SizeType NumBlocks = Length / 16;
 
