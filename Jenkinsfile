@@ -244,7 +244,7 @@ pipeline {
                         checkout scm
                         sh 'mkdir -p build-release'
                         dir('build-release') { sh """
-                            cmake -E env CXXFLAGS="-v -fno-var-tracking -s WASM=1" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
+                            cmake -E env CXXFLAGS="-v -fno-var-tracking -s WASM=1 -s ALLOW_MEMORY_GROWTH" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
                             ninja &&
                             node Foundation_Tester.js NoThreads
                         """ }
