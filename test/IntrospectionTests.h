@@ -80,7 +80,6 @@ namespace IntrospectTest
     };
 
     SAVE_WARNING_STATE
-    SUPPRESS_CLANG_WARNING("-Wweak-vtables")
 
     struct DerivedStructA : virtual public BaseStruct
     {

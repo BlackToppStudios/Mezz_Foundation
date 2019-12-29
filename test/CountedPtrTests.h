@@ -54,7 +54,6 @@ namespace Mezzanine
     namespace CountedPtrTesting
     {
         SAVE_WARNING_STATE
-        SUPPRESS_CLANG_WARNING("-Wweak-vtables")
         SUPPRESS_CLANG_WARNING("-Wpadded")
 
         /// @brief A class to point at.
