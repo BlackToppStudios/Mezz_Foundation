@@ -101,6 +101,44 @@ namespace StringTools {
     struct is_char : is_char_helper< std::remove_cv_t< std::remove_reference_t<CheckType> > >
         {  };
 
+    /// @brief Convenience inline variable for getting just the bool of the is_char check.
+    /// @tparam CheckType The type to check if it is a character type.
+    template<class CheckType>
+    inline constexpr Boole is_char_v = is_char<CheckType>::value;
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // String Type Traits
+
+    /// @brief Helper class for checking if a type is a valid string type.
+    /// @tparam FailType If we're here, then this type isn't a valid string type.
+    /// @remarks This is the catch-all failure type.
+    template<typename FailType>
+    struct is_string_helper : std::false_type
+        {  };
+    /// @brief Helper specialization class for checking if a type is a valid string type.
+    /// @remarks This is the type used when a std::string is detected.
+    template<>
+    struct is_string_helper<std::string> : std::true_type
+        {  };
+    /// @brief Helper specialization class for checking if a type is a valid string type.
+    /// @remarks This is the type used when an std::string_view is detected.
+    template<>
+    struct is_string_helper<std::string_view> : std::true_type
+        {  };
+    /// @brief A type trait for detecting a valid string type.
+    /// @tparam CheckType The type to be checked.
+    /// @remarks This ultimately inherits from either std::true_type or std::false_type and
+    /// the bool value can be checked via the static "value" member.
+    /// @warning This will NOT match c-strings because they are icky.
+    template<typename CheckType>
+    struct is_string : is_string_helper< std::remove_cv_t< std::remove_reference_t<CheckType> > >
+        {  };
+
+    /// @brief Convenience inline variable for getting just the bool of the is_string check.
+    /// @tparam CheckType The type to check if it is a string type.
+    template<class CheckType>
+    inline constexpr Boole is_string_v = is_string<CheckType>::value;
+
     ///////////////////////////////////////////////////////////////////////////////
     // Character Checks
 
