@@ -1,4 +1,4 @@
-# © Copyright 2010 - 2019 BlackTopp Studios Inc.
+# © Copyright 2010 - 2020 BlackTopp Studios Inc.
 # This file is part of The Mezzanine Engine.
 #
 #    The Mezzanine Engine is free software: you can redistribute it and/or modify
@@ -63,13 +63,18 @@ include("${JAGATI_File}")
 
 ########################################################################################################################
 # The rest of the Jagati setup
-
 StandardJagatiSetup()
 IncludeJagatiPackage("StaticFoundation")
 IncludeJagatiPackage("Test")
 
 ########################################################################################################################
-# Source files
+# Setup Exception Sources
+AddJagatiException("InputOutPut" "Base" "Base Exception for all IO")
+EmitExceptionSource()
+AddExceptionSource()
+
+########################################################################################################################
+# Normal Source files
 message(STATUS "Determining Source Files.")
 
 AddHeaderFile("Base64.h")
@@ -123,9 +128,6 @@ AddTestFile("StringToolsTests.h")
 AddTestFile("TupleToolsTests.h")
 EmitTestCode()
 AddTestTarget()
-
-AddJagatiException("InputOutPut" "Base" "Base Exception for all IO")
-EmitExceptionHeader()
 
 SetCodeCoverage()
 AddIDEVisibility("Jenkinsfile")
