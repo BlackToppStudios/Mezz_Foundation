@@ -208,25 +208,25 @@ namespace Mezzanine
             { return InternalStorage[Index]; }
         /// @brief Gets the element at the specified index.
         /// @exception If the index specified is greater than the current number of stored elements,
-        /// a std::out_of_range exception will be thrown.
+        /// a Mezzanine::Exception::OutOfRange exception will be thrown.
         /// @param Index Position of the element to retrieve.
         /// @return Returns a reference to the element at the specified index.
         ElementType& at(size_t Index)
         {
             if( Index >= size() ) {
-                throw std::out_of_range("Specified index is invalid.");
+                MEZZ_EXCEPTION(OutOfRangeCode, "Specified index is invalid.");
             }
             return InternalStorage[Index];
         }
         /// @brief Gets the element at the specified index.
         /// @exception If the index specified is greater than the current number of stored elements,
-        /// a std::out_of_range exception will be thrown.
+        /// a Mezzanine::Exception::OutOfRange exception will be thrown.
         /// @param Index Position of the element to retrieve.
         /// @return Returns a const reference to the element at the specified index.
         const ElementType& at(size_t Index) const
         {
             if( Index >= size() ) {
-                throw std::out_of_range("Specified index is invalid.");
+                MEZZ_EXCEPTION(OutOfRangeCode, "Specified index is invalid (const).");
             }
             return InternalStorage[Index];
         }

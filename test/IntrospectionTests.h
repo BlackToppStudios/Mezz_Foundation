@@ -45,6 +45,7 @@
 
 #include "MezzTest.h"
 
+#include "MezzException.h"
 #include "Introspection.h"
 
 namespace IntrospectTest
@@ -437,7 +438,7 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
         using NoSetType = MemberAccessor<NoSetMethodType,NoSetMethodType,MemberTags::None>;
         NoSetType NoSetAccessor("InvalidIntVar",nullptr,&BaseStruct::IntVar);
         TEST_THROW( "MemberAccessor::SetValue(T)-NoSet-Throw",
-                    std::runtime_error,
+                    Mezzanine::Exception::IntrospectionNullptr,
                     [&](){ NoSetAccessor.SetValue(TestStruct,5); } );
         TEST_NO_THROW( "MemberAccessor::GetValue()-NoSet-NoThrow",
                        [&](){ NoSetAccessor.GetValue(TestStruct); } );
@@ -448,17 +449,17 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
         TEST_NO_THROW( "MemberAccessor::SetValue(T)-NoGet-Throw",
                        [&](){ NoGetAccessor.SetValue(TestStruct,5.0f); } );
         TEST_THROW( "MemberAccessor::GetValue()-NoGet-NoThrow",
-                    std::runtime_error,
+                    Mezzanine::Exception::IntrospectionNullptr,
                     [&](){ NoGetAccessor.GetValue(TestStruct); } );
 
         using NoSetOrGetMethodType = decltype(&BaseStruct::StringVar);
         using NoSetOrGetType = MemberAccessor<NoSetOrGetMethodType,NoSetOrGetMethodType,MemberTags::None>;
         NoSetOrGetType NoSetOrGetAccessor("InvalidStringVar",nullptr,nullptr);
         TEST_THROW( "MemberAccessor::SetValue(T)-NoSetOrGet-Throw",
-                    std::runtime_error,
+                    Mezzanine::Exception::IntrospectionNullptr,
                     [&](){ NoSetOrGetAccessor.SetValue(TestStruct,String("Oh noes!")); } );
         TEST_THROW( "MemberAccessor::GetValue()-NoSetOrGet-Throw",
-                    std::runtime_error,
+                    Mezzanine::Exception::IntrospectionNullptr,
                     [&](){ NoSetOrGetAccessor.GetValue(TestStruct); } );
     }// MemberAccessor/BaseStruct Throw Tests
 

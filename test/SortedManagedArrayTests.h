@@ -213,8 +213,12 @@ DEFAULT_TEST_GROUP(SortedManagedArrayTests,SortedManagedArray)
         TEST_EQUAL("at(size_t)_const-Element6",216,ConstQueryArray[5]);
         TEST_EQUAL("at(size_t)_const-Element8",512,ConstQueryArray[7]);
 
-        TEST_THROW("at(size_t)-Throw",std::out_of_range,[&QueryArray](){ QueryArray.at(100); });
-        TEST_THROW("at(size_t)_const-Throw",std::out_of_range,[&ConstQueryArray](){ ConstQueryArray.at(500); });
+        TEST_THROW("at(size_t)-Throw",
+                   Mezzanine::Exception::OutOfRange,
+                   [&QueryArray](){ QueryArray.at(100); });
+        TEST_THROW("at(size_t)_const-Throw",
+                   Mezzanine::Exception::OutOfRange,
+                   [&ConstQueryArray](){ ConstQueryArray.at(500); });
 
         TEST_EQUAL("contains(const_value_type&)_const-Pass",true,QueryArray.contains(36));
         TEST_EQUAL("contains(const_value_type&)_const-Fail",false,QueryArray.contains(50));
@@ -280,10 +284,10 @@ DEFAULT_TEST_GROUP(SortedManagedArrayTests,SortedManagedArray)
         TEST_EQUAL("add_range()-Element7",50,ModifierArray[6]);
 
         TEST_THROW("add()-Throw",
-                std::out_of_range,
+                Mezzanine::Exception::CapacityConsumed,
                 [&ModifierArray](){ ModifierArray.add(999); });
         TEST_THROW("add_range()-Throw",
-                std::out_of_range,
+                Mezzanine::Exception::CapacityConsumed,
                 [&](){ ModifierArray.add_range(AddRangeTest.begin(),AddRangeTest.end()); });
 
         ModifierArray.erase(ModifierArray.begin());

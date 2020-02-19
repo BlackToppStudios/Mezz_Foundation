@@ -42,6 +42,7 @@
 /// @brief The implementation of some tools for making working with binary stuff easier.
 
 #include "Base64.h"
+#include "MezzException.h"
 
 /*
  * Some of the following functions and 1 variable were taken from http://www.adp-gmbh.ch/cpp/common/base64.html
@@ -133,8 +134,7 @@ namespace Base64 {
     SizeType PredictBinarySize(const Char8* EncodedString, const SizeType EncodedSize)
     {
         if( EncodedSize < 4 ) {
-            throw std::invalid_argument("Provided String is too short to be Base64.");
-            //MEZZ_EXCEPTION(ExceptionBase::PARAMETERS_EXCEPTION, "Provided String is too short to be Base64.")
+            MEZZ_EXCEPTION(Base64SourceCode, "Provided String is too short to be Base64.");
         }
 
         return EncodedSize / 4 * 3 -
@@ -157,8 +157,7 @@ namespace Base64 {
                              Char8* DestBytes, const SizeType DestLength)
     {
         if( PredictBase64Size(SrcLength) > DestLength ) {
-            throw std::invalid_argument("Destination Buffer too small to hold Base64 encoding.");
-          //MEZZ_EXCEPTION(ExceptionBase::PARAMETERS_EXCEPTION,"Destination Buffer too small to hold Base64 encode.");
+            MEZZ_EXCEPTION(Base64DestinationCode, "Destination Buffer too small to hold Base64 encoding.");
         }
 
         SizeType BytesWritten = 0;
@@ -233,12 +232,11 @@ namespace Base64 {
                              UInt8* DestBytes, const SizeType DestLength)
     {
         if( PredictBinarySize(SrcBytes,SrcLength) > DestLength ) {
-            throw std::invalid_argument("Destination Buffer too small to hold decoded Base64.");
-            //MEZZ_EXCEPTION(ExceptionBase::PARAMETERS_EXCEPTION,"Destination Buffer too small to hold decoded Base64.");
+            MEZZ_EXCEPTION(Base64DestinationCode, "Destination Buffer too small to hold decoded Base64.");
         }
 
         if( ( SrcLength % 4 ) != 0 ) {
-            throw std::invalid_argument("Unexpected number of characters in Base64 buffer.");
+            MEZZ_EXCEPTION(Base64SourceCode, "Unexpected number of characters in Base64 buffer.");
         }
 
         SizeType BytesWritten = 0;
@@ -253,8 +251,7 @@ namespace Base64 {
         while( Progress < SrcBytes + SrcLength )
         {
             if( IsNotBase64( *(Progress + 0),*(Progress + 1),*(Progress + 2),*(Progress + 3) ) ) {
-                throw std::range_error("Invalid character found during Base64 decode.");
-                //MEZZ_EXCEPTION(ExceptionBase::PARAMETERS_EXCEPTION,"Invalid character found during Base64 decode.");
+                MEZZ_EXCEPTION(Base64BadCharCode, "Invalid character found during Base64 decode.");
             }
 
             First = GetBase64IndexNoCheck( *(Progress + 0) );

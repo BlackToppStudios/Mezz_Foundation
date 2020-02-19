@@ -1,4 +1,4 @@
-// © Copyright 2010 - 2020 BlackTopp Studios Inc.
+// Â© Copyright 2010 - 2020 BlackTopp Studios Inc.
 /* This file is part of The Mezzanine Engine.
 
     The Mezzanine Engine is free software: you can redistribute it and/or modify
@@ -61,7 +61,7 @@ DEFAULT_TEST_GROUP(ExceptionTests,Exception)
 
     try
     {
-        MEZZ_EXCEPTION(InputOutPutCode,"Test Message");
+        MEZZ_EXCEPTION(InputOutPutCode, "Test Message");
     } catch (const Mezzanine::Exception::InputOutPut&) {
         TEST("BaseExceptionCanBeThro"
              "wnWithMEZZ_EXCEPTION", true);

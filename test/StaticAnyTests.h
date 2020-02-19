@@ -84,10 +84,10 @@ DEFAULT_TEST_GROUP(StaticAnyTests,StaticAny)
         TEST_EQUAL( "StaticAnyCast<String>(StaticAny<>)-ConstRef-Pass",
                     "ConstTest", StaticAnyCast<String>(ConstStringAny) );
         TEST_THROW( "StaticAnyCast<String>(StaticAny<>)-Ref-Fail",
-                    std::bad_cast,
+                    Mezzanine::Exception::BadCast,
                     [&StringAny](){ StaticAnyCast< std::vector<char> >(StringAny); } );
         TEST_THROW( "StaticAnyCast<String>(StaticAny<>)-ConstRef-Fail",
-                    std::bad_cast,
+                    Mezzanine::Exception::BadCast ,
                     [&ConstStringAny](){ StaticAnyCast< std::vector<char> >(ConstStringAny); } );
 
         double Archimedes(3.1415926);
@@ -99,10 +99,10 @@ DEFAULT_TEST_GROUP(StaticAnyTests,StaticAny)
         TEST_EQUAL_EPSILON( "StaticAnyCast<double>(StaticAny<>)-ConstPtr-Pass",
                             Eulers, *StaticAnyCast<double>(&ConstDoubleAny) );
         TEST_THROW( "StaticAnyCast<double>(StaticAny<>)-Ptr-Fail",
-                    std::bad_cast,
+                    Mezzanine::Exception::BadCast ,
                     [&DoubleAny](){ StaticAnyCast<float>(&DoubleAny); } );
         TEST_THROW( "StaticAnyCast<double>(StaticAny<>)-ConstPtr-Fail",
-                    std::bad_cast,
+                    Mezzanine::Exception::BadCast ,
                     [&ConstDoubleAny](){ StaticAnyCast<float>(&ConstDoubleAny); } );
 
         AnyType SharedPtrAny( std::make_shared<long>( long(123) ) );
@@ -112,10 +112,10 @@ DEFAULT_TEST_GROUP(StaticAnyTests,StaticAny)
         TEST_EQUAL( "StaticAnyCast<_std::shared_ptr<short>_>(StaticAny<>)-ConstRef-Pass",
                     short(12345), *( StaticAnyCast< std::shared_ptr<short> >(ConstSharedPtrAny) ) );
         TEST_THROW( "StaticAnyCast<_std::shared_ptr<long>_>(StaticAny<>)-Ref-Fail",
-                    std::bad_cast,
+                    Mezzanine::Exception::BadCast ,
                     [&SharedPtrAny](){ StaticAnyCast< std::shared_ptr<char> >(SharedPtrAny); } );
         TEST_THROW( "StaticAnyCast<_std::shared_ptr<short>_>(StaticAny<>)-ConstRef-Fail",
-                    std::bad_cast,
+                    Mezzanine::Exception::BadCast ,
                     [&ConstSharedPtrAny](){ StaticAnyCast< std::shared_ptr<char> >(ConstSharedPtrAny); } );
     }// Casting
 

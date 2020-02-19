@@ -220,8 +220,12 @@ DEFAULT_TEST_GROUP(SortedVectorTests,SortedVector)
         TEST_EQUAL("at(size_t)_const-Element6",216,ConstQueryVector[5]);
         TEST_EQUAL("at(size_t)_const-Element8",512,ConstQueryVector[7]);
 
-        TEST_THROW("at(size_t)-Throw",std::out_of_range,[&QueryVector](){ QueryVector.at(100); });
-        TEST_THROW("at(size_t)_const-Throw",std::out_of_range,[&ConstQueryVector](){ ConstQueryVector.at(500); });
+        TEST_THROW("at(size_t)-Throw",
+                   Mezzanine::Exception::OutOfRange,
+                   [&QueryVector](){ QueryVector.at(100); });
+        TEST_THROW("at(size_t)_const-Throw",
+                   Mezzanine::Exception::OutOfRange,
+                   [&ConstQueryVector](){ ConstQueryVector.at(500); });
 
         TEST_EQUAL("contains(const_value_type&)_const-Pass",true,QueryVector.contains(36));
         TEST_EQUAL("contains(const_value_type&)_const-Fail",false,QueryVector.contains(50));

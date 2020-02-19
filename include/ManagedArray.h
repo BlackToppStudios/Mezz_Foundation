@@ -46,6 +46,7 @@
 
 #ifndef SWIG
     #include "DataTypes.h"
+    #include "MezzException.h"
 #endif
 
 namespace Mezzanine
@@ -254,25 +255,25 @@ namespace Mezzanine
             { return Retrieve(Index); }
         /// @brief Gets the element at the specified index.
         /// @exception If the index specified is greater than the current number of stored elements,
-        /// a std::out_of_range exception will be thrown.
+        /// a Mezzanine::Exception::OutOfRange exception will be thrown.
         /// @param Index The offset of the element to retrieve.
         /// @return Returns a reference to the element at the specified index.
         value_type& at(size_t Index)
         {
             if( Index >= UsedSpace ) {
-                throw std::out_of_range("Specified array index is invalid.");
+                MEZZ_EXCEPTION(OutOfRangeCode, "Specified array index is invalid.");
             }
             return Retrieve(Index);
         }
         /// @brief Gets the element at the specified index.
         /// @exception If the index specified is greater than the current number of stored elements,
-        /// a std::out_of_range exception will be thrown.
+        /// a Mezzanine::Exception::OutOfRange exception will be thrown.
         /// @param Index The offset of the element to retrieve.
         /// @return Returns a reference to the element at the specified index.
         const value_type& at(size_t Index) const
         {
             if( Index >= UsedSpace ) {
-                throw std::out_of_range("Specified array index is invalid.");
+                MEZZ_EXCEPTION(OutOfRangeCode, "Specified array index is invalid (const).");
             }
             return Retrieve(Index);
         }
@@ -288,24 +289,25 @@ namespace Mezzanine
 
         /// @brief Appends a new element to the array.
         /// @exception If the array is already full, attempting to push a new element will
-        /// throw an std::out_of_range exception.
+        /// throw an Mezzanine::Exception::CapacityError exception.
         /// @param ToPush The element that will be copied to the end of the array.
         void push_back(const value_type& ToPush)
         {
             if( UsedSpace >= NumElements ) {
-                throw std::out_of_range("Attempting to add an element to a full array.");
+                MEZZ_EXCEPTION(CapacityConsumedCode,
+                               "Attempting to add an element to a full array (push_back const&).");
             }
             Create( begin() + UsedSpace, ToPush );
             UsedSpace++;
         }
         /// @brief Appends a new element to the array.
         /// @exception If the array is already full, attempting to push a new element will
-        /// throw an std::out_of_range exception.
+        /// throw an Mezzanine::Exception::CapacityError exception.
         /// @param ToPush The element that will be moved to the end of the array.
         void push_back(value_type&& ToPush)
         {
             if( UsedSpace >= NumElements ) {
-                throw std::out_of_range("Attempting to add an element to a full array.");
+                MEZZ_EXCEPTION(CapacityConsumedCode, "Attempting to add an element to a full array (push_back &&).");
             }
             Create( begin() + UsedSpace, ToPush );
             UsedSpace++;
@@ -321,6 +323,8 @@ namespace Mezzanine
             { insert(end(),First,Last); }
 
         /// @brief Adds an element to the array by constructing in place.
+        /// @exception If the array is already full, attempting to push a new element will
+        /// throw an Mezzanine::Exception::CapacityError exception.
         /// @param Pos An iterator to the position to construct the new element.
         /// @param Args Variadic template of construction parameters.
         /// @return Returns an iterator to the created element.
@@ -328,7 +332,7 @@ namespace Mezzanine
         iterator emplace(const_iterator Pos, ArgTypes&&... Args)
         {
             if( UsedSpace >= NumElements ) {
-                throw std::out_of_range("Attempting to add an element to a full array.");
+                MEZZ_EXCEPTION(CapacityConsumedCode, "Attempting to add an element to a full array (emplace).");
             }
 
             iterator Ret = const_cast<iterator>(Pos);
@@ -346,14 +350,14 @@ namespace Mezzanine
 
         /// @brief Constructs a new element in place at the end of the array.
         /// @exception If the array is already full, attempting to push a new element will
-        /// throw an std::out_of_range exception.
+        /// throw an Mezzanine::Exception::CapacityError exception.
         /// @param Args Variadic template of construction parameters.
         /// @return Returns a reference to the created element.
         template<class... ArgTypes>
         value_type& emplace_back(ArgTypes&&... Args)
         {
             if( UsedSpace >= NumElements ) {
-                throw std::out_of_range("Attempting to add an element to a full array.");
+                MEZZ_EXCEPTION(CapacityConsumedCode, "Attempting to add an element to a full array (emplace_back).");
             }
             Create( begin() + UsedSpace, std::forward<ArgTypes>(Args)... );
             return Retrieve( UsedSpace++ );
@@ -361,13 +365,13 @@ namespace Mezzanine
 
         /// @brief Inserts a new element by copy assignment.
         /// @exception If the array is already full, attempting to push a new element will
-        /// throw an std::out_of_range exception.
+        /// throw an Mezzanine::Exception::CapacityError exception.
         /// @param Pos A const iterator to the position the new element will be inserted.
         /// @return Returns an iterator to the inserted element.
         iterator insert(const_iterator Pos, const value_type& ToInsert)
         {
             if( UsedSpace >= NumElements ) {
-                throw std::out_of_range("Attempting to add an element to a full array.");
+                MEZZ_EXCEPTION(CapacityConsumedCode, "Attempting to add an element to a full array (insert const&).");
             }
 
             iterator Ret = const_cast<iterator>(Pos);
@@ -384,13 +388,13 @@ namespace Mezzanine
 
         /// @brief Inserts a new element by move assignment.
         /// @exception If the array is already full, attempting to push a new element will
-        /// throw an std::out_of_range exception.
+        /// throw an Mezzanine::Exception::CapacityError exception.
         /// @param Pos A const iterator to the position the new element will be inserted.
         /// @return Returns an iterator to the inserted element.
         iterator insert(const_iterator Pos, value_type&& ToInsert)
         {
             if( UsedSpace >= NumElements ) {
-                throw std::out_of_range("Attempting to add an element to a full array.");
+                MEZZ_EXCEPTION(CapacityConsumedCode, "Attempting to add an element to a full array (insert &&).");
             }
 
             iterator Ret = const_cast<iterator>(Pos);
@@ -406,6 +410,8 @@ namespace Mezzanine
         }
 
         /// @brief Inserts a range of elements into the array (via copying).
+        /// @exception If the array is already full or this would exceed its capacity, this will
+        /// throw an Mezzanine::Exception::CapacityError exception.
         /// @tparam InputIterator The iterator type pointing to elements that will be inserted.
         /// @param Pos A const iterator to the position the range will be inserted.
         /// @param First An iterator to the first element in the range to be inserted.
@@ -417,7 +423,8 @@ namespace Mezzanine
             using DifferenceType = typename std::iterator_traits<InputIterator>::difference_type;
             const DifferenceType ToInsert = std::distance(First,Last);
             if( UsedSpace + static_cast<size_t>( ToInsert ) > NumElements ) {
-                throw std::out_of_range("Attempting to add a range of elements that would exceed array capacity.");
+                MEZZ_EXCEPTION(CapacityConsumedCode,
+                               "Attempting to add a range of elements that would exceed array capacity.");
             }
 
             iterator Ret = const_cast<iterator>(Pos);
@@ -450,13 +457,14 @@ namespace Mezzanine
             { Destroy( begin() + --UsedSpace ); }
 
         /// @brief Removes a single element from the array.
-        /// @exception If the provided iterator is outside this array, an std::out_of_range exception will be thrown.
+        /// @exception If the provided iterator is outside this array, an Mezzanine::Exception::OutOfRange exception
+        /// will be thrown.
         /// @param Pos A const iterator to the position of the element to be erased.
         /// @return Returns an iterator to the element after the one that was erased (and is now in it's spot).
         iterator erase(const_iterator Pos)
         {
             if( !(Pos >= begin() && Pos < end()) ) {
-                throw std::out_of_range("Iterator provided is outside the valid container range.");
+                MEZZ_EXCEPTION(OutOfRangeCode, "Iterator provided is outside the valid container range.");
             }
             iterator Ret = const_cast<iterator>(Pos);
             DestroyAtAndAfter( std::move(Ret + 1,end(),Ret) );
@@ -464,7 +472,8 @@ namespace Mezzanine
         }
 
         /// @brief Removes a range of elements from the array.
-        /// @exception If the provided iterator is outside this array, an std::out_of_range exception will be thrown.
+        /// @exception If the provided iterator range is outside this array, a Mezzanine::Exception::OutOfRange
+        /// exception will be thrown.
         /// @param First A const iterator to the first element to be removed.
         /// @param Last A const iterator to the one passed the last element to be removed.
         /// @return Returns an iterator to the first element after the removed range.
@@ -472,7 +481,7 @@ namespace Mezzanine
         {
             using DifferenceType = typename std::iterator_traits<const_iterator>::difference_type;
             if( !(First >= begin() && Last < end()) ) {
-                throw std::out_of_range("Iterator range is outside the valid container range.");
+                MEZZ_EXCEPTION(OutOfRangeCode, "Iterator range is outside the valid container range.");
             }
             iterator Ret = const_cast<iterator>(First);
             DifferenceType ElementsToErase = std::distance(First,Last);

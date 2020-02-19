@@ -1,4 +1,4 @@
-// © Copyright 2010 - 2019 BlackTopp Studios Inc.
+// Â© Copyright 2010 - 2019 BlackTopp Studios Inc.
 /* This file is part of The Mezzanine Engine.
 
     The Mezzanine Engine is free software: you can redistribute it and/or modify
@@ -43,6 +43,7 @@
 #include "MezzTest.h"
 
 #include "FlatMap.h"
+#include "MezzException.h"
 
 /// @file
 /// @brief This file tests the functionality of the FlatMap class.
@@ -442,10 +443,10 @@ void FlatMapTests::TestElementAccess()
                         0.264f, ConstAccessMap.at(ConstAccessValueOne.first) );
 
     TEST_THROW("at(const_key_type&)-Throw",
-               std::out_of_range,
+               Mezzanine::Exception::OutOfRange,
                [&AccessMap](){ AccessMap.at("Mars"); } );
     TEST_THROW("at(const_key_type&)_const-Throw",
-               std::out_of_range,
+               Mezzanine::Exception::OutOfRange,
                [&ConstAccessMap](){ ConstAccessMap.at("Venus"); } );
 }//Element Access
 

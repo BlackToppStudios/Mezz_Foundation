@@ -45,6 +45,7 @@
 
 #include "MezzTest.h"
 
+#include "MezzException.h"
 #include "BinaryBuffer.h"
 
 Mezzanine::Boole BufferCompare(const Mezzanine::UInt8* First,
@@ -214,10 +215,10 @@ AUTOMATIC_TEST_GROUP(BinaryBufferTests,BinaryBuffer)
                    '!',ConstAccessBuffer.at(12));
 
         TEST_THROW("at(const_SizeType)-Throw",
-                   std::out_of_range,
+                   Mezzanine::Exception::OutOfRange,
                    [&AccessBuffer](){ UInt8 Char = AccessBuffer.at(1000); std::cerr << Char; });
         TEST_THROW("at(const_SizeType)_const-Throw",
-                   std::out_of_range,
+                   Mezzanine::Exception::OutOfRange,
                    [&ConstAccessBuffer](){ UInt8 Char = ConstAccessBuffer.at(1000); std::cerr << Char; });
     }//Element Access
 
@@ -236,7 +237,7 @@ AUTOMATIC_TEST_GROUP(BinaryBufferTests,BinaryBuffer)
 
         BinaryBuffer CreateThrowTest;
         TEST_THROW("CreateBuffer()-Throw",
-                   std::length_error,
+                   Mezzanine::Exception::InvalidLength,
                    [&](){ CreateThrowTest.CreateBuffer(); });
 
         CreateTest.DeleteBuffer(100);

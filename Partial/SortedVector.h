@@ -199,7 +199,7 @@ namespace Mezzanine
             }
 
             /// @brief Get an item in the vector, operates in fast constant time.
-            /// @param Index A 0 based index, if too large this can throw std::out_of_range.
+            /// @param Index A 0 based index, if too large this trigger undefined behavior.
             /// @return A reference to the stored item in the container. If the value is changed
             /// then SortedVector::sort should be called.
             T& operator[] (size_t Index)

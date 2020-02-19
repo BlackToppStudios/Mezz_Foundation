@@ -69,7 +69,67 @@ IncludeJagatiPackage("Test")
 
 ########################################################################################################################
 # Setup Exception Sources
-AddJagatiException("InputOutPut" "Base" "Base Exception for all IO")
+
+# This uses as a goal and description design for creating nest hierarchies of exceptions. It seems more desirable to
+# catch all Container or all IO errors rather than all Index or Range errors? Following this thought prcoess Argument,
+# Index, Range, and Name errors can be handled as subclasses of the more important system level categorization.
+
+# I have added some remarks for possible entries
+
+# Parent Exceptions
+# Audio
+AddJagatiException("Container" "Base" "Base Exception for containers.")
+# Database
+AddJagatiException("Encoding" "Base" "Base Exception for converting data from one form to another")
+AddJagatiException("InputOutPut" "Base" "Base Exception for all IO.")
+AddJagatiException("Introspection" "Base" "Base Exception for everyhing related to the introspection system.")
+# Math
+# Security
+# Scripting
+# Threading
+# Unknown - What could cause us to throw and not Know?
+# User Interface
+
+##########################################################
+# Container Exceptions
+# TODO: When multiple inheritance is supported add std::out_of_range
+AddJagatiException("OutOfRange" "Container" "When attempting to access an item not in a container.")
+# TODO: When multiple inheritance is supported add std::length_error
+AddJagatiException("InvalidLength" "Container" "When trying to make containers of zero or negative size.")
+AddJagatiException("CapacityConsumed" "Container" "Not enough space or couldn't allocate enough memory.")
+AddJagatiException("BadCast" "Container" "Bad conversion while storing or retrieving contained items.")
+
+##########################################################
+# Encoding/Conversion
+
+# Encoding Base64
+# TODO: When multiple inheritance is supported add std::invalid_argument
+AddJagatiException("Base64" "Encoding" "A problem with encoding or decoding Base64.")
+AddJagatiException("Base64Source" "Base64" "A Base64 function called with an invalid input buffer.")
+AddJagatiException("Base64Destination" "Base64" "A Base64 function called with invalid output buffer.")
+# TODO: When multiple inheritance is supported add std::range_error
+AddJagatiException("Base64BadChar" "Base64Source" "A Base64 function called with bogus characters.")
+
+# Conversion
+AddJagatiException("HexConversion" "Encoding" "A problem convert to or from hex strings.")
+
+##########################################################
+# InputOutput
+
+# File
+    # FileNotFound
+# Network
+    # DNS
+
+##########################################################
+# Introspection
+AddJagatiException("IntrospectionNullptr" "Introspection" "Base Exception for everyhing related.")
+
+
+
+
+
+##########################################################
 EmitExceptionSource()
 AddExceptionSource()
 

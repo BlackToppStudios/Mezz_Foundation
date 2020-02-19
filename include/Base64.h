@@ -63,6 +63,8 @@ namespace Base64 {
     /// make memory allocation an issue if not calculated carefully.
     /// @param EncodedString The base64 encoded string.
     /// @return Returns the exact length of the result once it is decoded.
+    /// @throw Mezzanine::Exception::Base64Source If the EncodedString is too short to be valid, to avoid this check the
+    /// size if the size of the input string is at least 4 characters.
     SizeType MEZZ_LIB PredictBinarySize(const String& EncodedString);
     /// @brief From an encoded string get the exact size of the decode binary in bytes.
     /// @remarks The binary is about 3/4 of the base64 size, but that can be off by just enough to
@@ -70,6 +72,8 @@ namespace Base64 {
     /// @param EncodedString The base64 encoded string.
     /// @param EncodedSize The size of the base64 encoded string.
     /// @return Returns the exact length of the result once it is decoded.
+    /// @throw Mezzanine::Exception::Base64Source If the EncodedString is too short to be valid, to avoid this check the
+    /// size if the size of the input string is at least 4 characters.
     SizeType MEZZ_LIB PredictBinarySize(const Char8* EncodedString, const SizeType EncodedSize);
     /// @brief From the size of a binary get the exact Base64 size in bytes.
     /// @remarks The Base64 is about 133% of the binary size, but that can be off by just enough
@@ -88,6 +92,7 @@ namespace Base64 {
     /// @param DestBytes A pointer to the dest(destination) buffer to place the result of the conversion into.
     /// @param DestLength The length of the dest(destination) buffer in bytes.
     /// @return Returns the number of actual bytes written to the destination buffer.
+    /// @throw Mezzanine::Exception::Base64Destination If the destination is too small to contain the encoded data.
     SizeType MEZZ_LIB EncodeRawBuffer(const UInt8* SrcBytes, const SizeType SrcLength,
                                       Char8* DestBytes, const SizeType DestLength);
 
@@ -101,6 +106,9 @@ namespace Base64 {
     /// @param DestBytes A pointer to the dest(destination) buffer to place the result of the conversion into.
     /// @param DestLength The length of the dest(destination) buffer in bytes.
     /// @return Returns the number of actual bytes written to the destination buffer.
+    /// @throw Mezzanine::Exception::Base64Destination If the destination is too small to contain the decoded string.
+    /// @throw Mezzanine::Exception::Base64Source If the input buffer is not a valid length.
+    /// @throw Mezzanine::Exception::Base64BadChar If the input has bad characters
     SizeType MEZZ_LIB DecodeRawBuffer(const Char8* SrcBytes, const SizeType SrcLength,
                                       UInt8* DestBytes, const SizeType DestLength);
 }//Base64

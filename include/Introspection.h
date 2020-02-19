@@ -45,6 +45,7 @@
     #include "DataTypes.h"
     #include "DetectionTraits.h"
     #include "BitFieldTools.h"
+    #include "MezzException.h"
 #endif
 
 namespace Mezzanine {
@@ -438,7 +439,8 @@ namespace Mezzanine {
         /// @tparam SetFrom The deduced type to be used to assign the new value for the member.
         /// @remarks This method uses SFINAE to disable use of this method if the provided value cannot be
         /// assigned to the member type.
-        /// @exception If the Setter Access pointer is nullptr, then an std::runtime_error will be thrown.
+        /// @exception If the Setter Access pointer is nullptr, then an Mezzanine::Exception::IntrospectionNullptrCode
+        /// will be thrown.
         /// @param Object The object to assign the member value to.
         /// @param Arg The value to be assigned.
         template<typename SetFrom, typename = std::enable_if_t< CanSetFrom<SetFrom>() >>
@@ -453,11 +455,12 @@ namespace Mezzanine {
                     (Object.*SetterPtr)(Arg);
                 }
             }else{
-                throw std::runtime_error("Cannot Set Member value, no setter provided.");
+                MEZZ_EXCEPTION(IntrospectionNullptrCode, "Cannot Set Member value, no setter provided.")
             }
         }
         /// @brief Gets the value of a member on an initialized object.
-        /// @exception If the Getter Access pointer is nullptr, then an std::runtime_error will be thrown.
+        /// @exception If the Getter Access pointer is nullptr, then an Mezzanine::Exception::IntrospectionNullptrCode
+        /// will be thrown.
         /// @param Object The object to retrieve the member value from.
         /// @return Returns the value of the member.
         ReturnType GetValue(ClassType& Object) const
@@ -469,7 +472,7 @@ namespace Mezzanine {
                     return (Object.*GetterPtr)();
                 }
             }else{
-                throw std::runtime_error("Cannot Get Member value, no getter provided.");
+                MEZZ_EXCEPTION(IntrospectionNullptrCode, "Cannot Get Member value, no getter provided.")
             }
         }
 

@@ -46,6 +46,7 @@
 #include "MezzTest.h"
 
 #include "StringTools.h"
+#include "MezzException.h"
 
 DEFAULT_TEST_GROUP(StringToolsTests,StringTools)
 {
@@ -188,6 +189,16 @@ DEFAULT_TEST_GROUP(StringToolsTests,StringTools)
                            Real(63.0 / 255.0),StringTools::ConvertHexToColourChannel(HexStr3));
         TEST_EQUAL_EPSILON("ConvertHexToColourChannel(const_StringView)-Fourth",
                            Real(6.0 / 255.0),StringTools::ConvertHexToColourChannel(HexStr4));
+
+        TEST_THROW("ConvertHexToColourChannel(const_StringView)-InvalidLengthLong",
+                   Mezzanine::Exception::HexConversion,
+                   [](){ StringTools::ConvertHexToColourChannel("ABC"); });
+        TEST_THROW("ConvertHexToColourChannel(const_StringView)-InvalidLengthShort",
+                   Mezzanine::Exception::HexConversion,
+                   [](){ StringTools::ConvertHexToColourChannel("A"); });
+        TEST_THROW("ConvertHexToColourChannel(const_StringView)-InvalidChar",
+                   Mezzanine::Exception::HexConversion,
+                   [](){ StringTools::ConvertHexToColourChannel("QQ"); });
 
         Real ChannelVal1 = 0.8675f;//221.2125
         Real ChannelVal2 = 0.1234f;//31.467

@@ -46,6 +46,7 @@
 #include "MezzTest.h"
 
 #include "Base64.h"
+#include "MezzException.h"
 
 // This ought to be replaced with "SUPPRESS_ALL_WARNINGS" when that becomes available.
 // This is reference code from other people and we're not responsible for it, in fact
@@ -344,7 +345,7 @@ AUTOMATIC_TEST_GROUP(Base64Tests,Base64)
 
         const char* FailStr = "lol";
         TEST_THROW( "PredictBinarySize(const_SizeType)-Throw",
-                    std::invalid_argument,
+                    Mezzanine::Exception::Base64Source,
                     [FailStr](){ std::cerr << Base64::PredictBinarySize(FailStr,3); } );
 
         TEST_EQUAL( "PredictBase64Size(const_SizeType)-First",
@@ -398,7 +399,7 @@ AUTOMATIC_TEST_GROUP(Base64Tests,Base64)
             std::cerr << Base64::EncodeRawBuffer(ThrowBuf.Binary,ThrowBuf.Size,ThrowStr.get(),4);
         }
         TEST_THROW( "EncodeRawBuffer(const_UInt8*,const_SizeType,Char8*,const_SizeType)-Throw-SmallDest",
-                    std::invalid_argument,
+                    Mezzanine::Exception::Base64Destination,
                     EncodeThrowFunct );
 
         BinaryBuffer TestBuffer1Base64 = Base64::Decode(Test1Base64);
@@ -438,7 +439,7 @@ AUTOMATIC_TEST_GROUP(Base64Tests,Base64)
             std::cerr << Base64::DecodeRawBuffer(ThrowStr.c_str(),ThrowStr.length(),ThrowBuf.Binary,ThrowBuf.Size);
         }
         TEST_THROW( "DecodeRawBuffer(const_Char8*,const_SizeType,UInt8*,const_SizeType)-Throw-SmallDest",
-                    std::invalid_argument,
+                    Mezzanine::Exception::Base64Destination,
                     DecodeThrowOneFunct );
 
         auto DecodeThrowTwoFunct = [] () {
@@ -447,7 +448,7 @@ AUTOMATIC_TEST_GROUP(Base64Tests,Base64)
             std::cerr << Base64::DecodeRawBuffer(ThrowStr.c_str(),ThrowStr.length(),ThrowBuf.Binary,ThrowBuf.Size);
         }
         TEST_THROW( "DecodeRawBuffer(const_Char8*,const_SizeType,UInt8*,const_SizeType)-Throw-NotMultipleOfFour",
-                    std::invalid_argument,
+                    Mezzanine::Exception::Base64Source,
                     DecodeThrowTwoFunct );
 
         auto DecodeThrowThreeFunct = [] () {
@@ -456,7 +457,7 @@ AUTOMATIC_TEST_GROUP(Base64Tests,Base64)
             std::cerr << Base64::DecodeRawBuffer(ThrowStr.c_str(),ThrowStr.length(),ThrowBuf.Binary,ThrowBuf.Size);
         }
         TEST_THROW( "DecodeRawBuffer(const_Char8*,const_SizeType,UInt8*,const_SizeType)-Throw-NotBase64",
-                    std::range_error,
+                    Mezzanine::Exception::Base64BadChar,
                     DecodeThrowThreeFunct );
 
         delete[] UnicodeEncodeBuf;
