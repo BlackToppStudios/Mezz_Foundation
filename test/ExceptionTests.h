@@ -45,9 +45,7 @@
 #include "MezzException.h"
 
 /// @file
-/// @brief This file tests the functionality of the Exceptions functionality.
-
-
+/// @brief This file tests basic functionality of the Exceptions and verifies the Jagati exceptions are available.
 
 DEFAULT_TEST_GROUP(ExceptionTests,Exception)
 {
@@ -61,8 +59,8 @@ DEFAULT_TEST_GROUP(ExceptionTests,Exception)
 
     try
     {
-        MEZZ_EXCEPTION(InputOutPutCode, "Test Message");
-    } catch (const Mezzanine::Exception::InputOutPut&) {
+        MEZZ_EXCEPTION(InputOutputCode, "Test Message");
+    } catch (const Mezzanine::Exception::InputOutput&) {
         TEST("BaseExceptionCanBeThro"
              "wnWithMEZZ_EXCEPTION", true);
     }
@@ -80,12 +78,12 @@ DEFAULT_TEST_GROUP(ExceptionTests,Exception)
                ExceptionCode::BaseCode,
                ExceptionCodeFromClassname("Base"));
 
-    TEST_EQUAL("CodeToString-InputOutPut",
-               String("InputOutPut"),
-               ExceptionClassNameFromCode(ExceptionCode::InputOutPutCode));
-    TEST_EQUAL("StringToCode-InputOutPut",
-               ExceptionCode::InputOutPutCode,
-               ExceptionCodeFromClassname("InputOutPut"));
+    TEST_EQUAL("CodeToString-InputOutput",
+               String("InputOutput"),
+               ExceptionClassNameFromCode(ExceptionCode::InputOutputCode));
+    TEST_EQUAL("StringToCode-InputOutput",
+               ExceptionCode::InputOutputCode,
+               ExceptionCodeFromClassname("InputOutput"));
 
 /*  // UB!
     TEST_EQUAL("CodeToString-Invalid",

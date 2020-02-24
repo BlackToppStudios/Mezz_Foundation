@@ -555,8 +555,7 @@ RESTORE_WARNING_STATE
     inline const ElementType* StaticAnyCast(const StaticAny<AnyCastSize,AnyCastAlign>* Any)
     {
         if( std::type_index( typeid(ElementType) ) != std::type_index( Any->get_type() ) ) {
-            MEZZ_EXCEPTION(BadCastCode, "Invalid StaticAnyCast (const*"
-                                           ").");
+            MEZZ_EXCEPTION(BadCastCode, "Invalid StaticAnyCast (const*).");
         }
         return reinterpret_cast<const ElementType*>( Any->GetStoragePtr() );
     }

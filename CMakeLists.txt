@@ -81,10 +81,11 @@ IncludeJagatiPackage("Test")
 AddJagatiException("Container" "Base" "Base Exception for containers.")
 # Database
 AddJagatiException("Encoding" "Base" "Base Exception for converting data from one form to another")
-AddJagatiException("InputOutPut" "Base" "Base Exception for all IO.")
+AddJagatiException("InputOutput" "Base" "Base Exception for all IO.")
 AddJagatiException("Introspection" "Base" "Base Exception for everyhing related to the introspection system.")
 # Math
 # Security
+# Serialization
 # Scripting
 # Threading
 # Unknown - What could cause us to throw and not Know?
