@@ -1,4 +1,4 @@
-// © Copyright 2010 - 2019 BlackTopp Studios Inc.
+// © Copyright 2010 - 2020 BlackTopp Studios Inc.
 /* This file is part of The Mezzanine Engine.
 
     The Mezzanine Engine is free software: you can redistribute it and/or modify
@@ -485,10 +485,10 @@ RESTORE_WARNING_STATE
 
     /// @brief Casts a StaticAny into its appropriate type.
     /// @warning You can only cast a StaticAny into the exact type that that was stored in it.  You cannot
-    /// cast a StaticAny into a covariant or any other type.  Attempting to do so will cause a std::bad_cast
-    /// exception to be thrown.
+    /// cast a StaticAny into a covariant or any other type.  Attempting to do so will cause a
+    /// Mezzanine::Exception::BadCast exception to be thrown.
     /// @exception If the type being stored by the StaticAny doesn't match the type being casted to a
-    /// std::bad_cast exception will be thrown.
+    /// Mezzanine::Exception::BadCast exception will be thrown.
     /// @tparam ElementType The type to cast the type-erased element in the StaticAny to.
     /// @tparam AnyCastSize The (deduced) size of the internal storage of the StaticAny.
     /// @tparam AnyCastAlign The (deduced) alignment of the internal storage of the StaticAny.
@@ -498,16 +498,16 @@ RESTORE_WARNING_STATE
     inline ElementType& StaticAnyCast(StaticAny<AnyCastSize,AnyCastAlign>& Any)
     {
         if( std::type_index( typeid(ElementType) ) != std::type_index( Any.get_type() ) ) {
-            throw std::bad_cast();
+            MEZZ_EXCEPTION(BadCastCode, "Invalid StaticAnyCast (&).");
         }
         return *reinterpret_cast<ElementType*>( Any.GetStoragePtr() );
     }
     /// @brief Casts a StaticAny into its appropriate type.
     /// @warning You can only cast a StaticAny into the exact type that that was stored in it.  You cannot
-    /// cast a StaticAny into a covariant or any other type.  Attempting to do so will cause a std::bad_cast
-    /// exception to be thrown.
+    /// cast a StaticAny into a covariant or any other type.  Attempting to do so will cause a
+    /// Mezzanine::Exception::BadCast exception to be thrown.
     /// @exception If the type being stored by the StaticAny doesn't match the type being casted to a
-    /// std::bad_cast exception will be thrown.
+    /// Mezzanine::Exception::BadCast  exception will be thrown.
     /// @tparam ElementType The type to cast the type-erased element in the StaticAny to.
     /// @tparam AnyCastSize The (deduced) size of the internal storage of the StaticAny.
     /// @tparam AnyCastAlign The (deduced) alignment of the internal storage of the StaticAny.
@@ -517,16 +517,16 @@ RESTORE_WARNING_STATE
     inline const ElementType& StaticAnyCast(const StaticAny<AnyCastSize,AnyCastAlign>& Any)
     {
         if( std::type_index( typeid(ElementType) ) != std::type_index( Any.get_type() ) ) {
-            throw std::bad_cast();
+            MEZZ_EXCEPTION(BadCastCode, "Invalid StaticAnyCast (const&).");
         }
         return *reinterpret_cast<const ElementType*>( Any.GetStoragePtr() );
     }
     /// @brief Casts a StaticAny into its appropriate type.
     /// @warning You can only cast a StaticAny into the exact type that that was stored in it.  You cannot
-    /// cast a StaticAny into a covariant or any other type.  Attempting to do so will cause a std::bad_cast
-    /// exception to be thrown.
+    /// cast a StaticAny into a covariant or any other type.  Attempting to do so will cause a
+    /// Mezzanine::Exception::BadCast exception to be thrown.
     /// @exception If the type being stored by the StaticAny doesn't match the type being casted to a
-    /// std::bad_cast exception will be thrown.
+    /// Mezzanine::Exception::BadCast  exception will be thrown.
     /// @tparam ElementType The type to cast the type-erased element in the StaticAny to.
     /// @tparam AnyCastSize The (deduced) size of the internal storage of the StaticAny.
     /// @tparam AnyCastAlign The (deduced) alignment of the internal storage of the StaticAny.
@@ -536,16 +536,16 @@ RESTORE_WARNING_STATE
     inline ElementType* StaticAnyCast(StaticAny<AnyCastSize,AnyCastAlign>* Any)
     {
         if( std::type_index( typeid(ElementType) ) != std::type_index( Any->get_type() ) ) {
-            throw std::bad_cast();
+            MEZZ_EXCEPTION(BadCastCode, "Invalid StaticAnyCast (*).");
         }
         return reinterpret_cast<ElementType*>( Any->GetStoragePtr() );
     }
     /// @brief Casts a StaticAny into its appropriate type.
     /// @warning You can only cast a StaticAny into the exact type that that was stored in it.  You cannot
-    /// cast a StaticAny into a covariant or any other type.  Attempting to do so will cause a std::bad_cast
-    /// exception to be thrown.
+    /// cast a StaticAny into a covariant or any other type.  Attempting to do so will cause a
+    /// Mezzanine::Exception::BadCast exception to be thrown.
     /// @exception If the type being stored by the StaticAny doesn't match the type being casted to a
-    /// std::bad_cast exception will be thrown.
+    /// Mezzanine::Exception::BadCast exception will be thrown.
     /// @tparam ElementType The type to cast the type-erased element in the StaticAny to.
     /// @tparam AnyCastSize The (deduced) size of the internal storage of the StaticAny.
     /// @tparam AnyCastAlign The (deduced) alignment of the internal storage of the StaticAny.
@@ -555,7 +555,7 @@ RESTORE_WARNING_STATE
     inline const ElementType* StaticAnyCast(const StaticAny<AnyCastSize,AnyCastAlign>* Any)
     {
         if( std::type_index( typeid(ElementType) ) != std::type_index( Any->get_type() ) ) {
-            throw std::bad_cast();
+            MEZZ_EXCEPTION(BadCastCode, "Invalid StaticAnyCast (const*).");
         }
         return reinterpret_cast<const ElementType*>( Any->GetStoragePtr() );
     }

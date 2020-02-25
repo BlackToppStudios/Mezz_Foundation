@@ -1,4 +1,4 @@
-// © Copyright 2010 - 2019 BlackTopp Studios Inc.
+// Â© Copyright 2010 - 2019 BlackTopp Studios Inc.
 /* This file is part of The Mezzanine Engine.
 
     The Mezzanine Engine is free software: you can redistribute it and/or modify
@@ -46,6 +46,7 @@
 #ifndef SWIG
     #include "DataTypes.h"
     #include "BinaryFind.h"
+    #include "MezzException.h"
 #endif
 
 namespace Mezzanine
@@ -397,7 +398,7 @@ namespace Mezzanine
         /// @warning Unlike normal maps, adding or removing elements can invalidate iterators and
         /// references if the underlying container does a reallocation.  Avoid adding or removing
         /// elements while holding on to references retrieved via this method.
-        /// @exception If no values are mapped to the key specified, a std::out_of_range
+        /// @exception If no values are mapped to the key specified, a Mezzanine::Exception::OutOfRange
         /// exception will be thrown.
         /// @param Key The key mapped to the stored data that will be retrieved.
         /// @return Returns a reference to the mapped value associated with the specified key.
@@ -405,7 +406,7 @@ namespace Mezzanine
         {
             iterator FoundIt = find(Key);
             if( FoundIt == end() ) {
-                throw std::out_of_range("Specified key was not found in FlatMap.");
+                MEZZ_EXCEPTION(OutOfRangeCode, "Specified key was not found in FlatMap.");
             }
             return (*FoundIt).second;
         }
@@ -413,7 +414,7 @@ namespace Mezzanine
         /// @warning Unlike normal maps, adding or removing elements can invalidate iterators and
         /// references if the underlying container does a reallocation.  Avoid adding or removing
         /// elements while holding on to references retrieved via this method.
-        /// @exception If no values are mapped to the key specified, a std::out_of_range
+        /// @exception If no values are mapped to the key specified, a Mezzanine::Exception::OutOfRange
         /// exception will be thrown.
         /// @param Key The key mapped to the stored data that will be retrieved.
         /// @return Returns a const reference to the mapped value associated with the specified key.
@@ -421,7 +422,7 @@ namespace Mezzanine
         {
             const_iterator FoundIt = find(Key);
             if( FoundIt == end() ) {
-                throw std::out_of_range("Specified key was not found in FlatMap.");
+                MEZZ_EXCEPTION(OutOfRangeCode, "Specified key was not found in FlatMap (const).");
             }
             return (*FoundIt).second;
         }
@@ -430,7 +431,8 @@ namespace Mezzanine
         // Lookup
 
         /// @brief Gets the number of stored pairs with keys matching a specified value.
-        /// @remarks This method exists primarily for api compatibility with multi_maps.  This method will always return 1 or 0.
+        /// @remarks This method exists primarily for api compatibility with multi_maps. This method will always return
+        /// 1 or 0.
         /// @param Key The key to check for.
         /// @return Returns the number of stored pairs that match the specified key.
         size_type count(const key_type& Key) const

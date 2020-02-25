@@ -1,4 +1,4 @@
-// © Copyright 2010 - 2019 BlackTopp Studios Inc.
+// © Copyright 2010 - 2020 BlackTopp Studios Inc.
 /* This file is part of The Mezzanine Engine.
 
     The Mezzanine Engine is free software: you can redistribute it and/or modify
@@ -45,6 +45,7 @@
 
 #include "MezzTest.h"
 
+#include "MezzException.h"
 #include "ManagedArray.h"
 
 DEFAULT_TEST_GROUP(ManagedArrayTests,ManagedArray)
@@ -198,8 +199,12 @@ DEFAULT_TEST_GROUP(ManagedArrayTests,ManagedArray)
         TEST_EQUAL("at(size_t)_const-Element6",216,ConstQueryArray[5]);
         TEST_EQUAL("at(size_t)_const-Element8",512,ConstQueryArray[7]);
 
-        TEST_THROW("at(size_t)-Throw",std::out_of_range,[&QueryArray](){ QueryArray.at(100); });
-        TEST_THROW("at(size_t)_const-Throw",std::out_of_range,[&ConstQueryArray](){ ConstQueryArray.at(500); });
+        TEST_THROW("at(size_t)-Throw",
+                   Mezzanine::Exception::OutOfRange,
+                   [&QueryArray](){ QueryArray.at(100); });
+        TEST_THROW("at(size_t)_const-Throw",
+                   Mezzanine::Exception::OutOfRange,
+                   [&ConstQueryArray](){ ConstQueryArray.at(500); });
 
         TEST_EQUAL("contains(const_value_type&)_const-Pass",true,QueryArray.contains(36));
         TEST_EQUAL("contains(const_value_type&)_const-Fail",false,QueryArray.contains(50));
@@ -212,7 +217,7 @@ DEFAULT_TEST_GROUP(ManagedArrayTests,ManagedArray)
         TEST_EQUAL("push_back(const_value_type&)-Size",size_t(1),FirstPushBack.size());
         TEST_EQUAL("push_back(const_value_type&)-Element1",66,FirstPushBack[0]);
         TEST_THROW("push_back(const_value_type&)-Throw",
-                   std::out_of_range,
+                   Mezzanine::Exception::CapacityConsumed,
                    [&FirstPushBack](){ FirstPushBack.push_back(99); });
 
         ManagedArray<int,1> SecondPushBack;
@@ -220,7 +225,7 @@ DEFAULT_TEST_GROUP(ManagedArrayTests,ManagedArray)
         TEST_EQUAL("push_back(value_type&&)-Size",size_t(1),SecondPushBack.size());
         TEST_EQUAL("push_back(value_type&&)-Element1",77,SecondPushBack[0]);
         TEST_THROW("push_back(value_type&&)-Throw",
-                   std::out_of_range,
+                   Mezzanine::Exception::CapacityConsumed,
                    [&SecondPushBack](){ SecondPushBack.push_back( std::move(99) ); });
 
         ManagedArray<int,10> AppendArray = { 1, 3, 5 };
@@ -236,7 +241,7 @@ DEFAULT_TEST_GROUP(ManagedArrayTests,ManagedArray)
 
         std::vector<int> ThrowAppendSource = { 1, 1, 1, 1, 1, 1 };
         TEST_THROW("append(InputIterator,InputIterator)-Throw",
-                   std::out_of_range,
+                   Mezzanine::Exception::CapacityConsumed,
                    [&](){ AppendArray.append(ThrowAppendSource.begin(),ThrowAppendSource.end()); });
 
         ManagedArray<int,5> EmplaceArray = { 1, 3, 7 };
@@ -250,7 +255,7 @@ DEFAULT_TEST_GROUP(ManagedArrayTests,ManagedArray)
         TEST_EQUAL("emplace(const_iterator,ArgTypes&&...)-Element5",1337,EmplaceArray[4]);
 
         TEST_THROW("emplace(const_iterator,ArgTypes&&...)-Throw",
-                   std::out_of_range,
+                   Mezzanine::Exception::CapacityConsumed,
                    [&EmplaceArray](){ EmplaceArray.emplace(EmplaceArray.begin(),1337); });
 
         ManagedArray<String,4> EmplaceBackArray = { "This ", "is ", "a " };
@@ -262,7 +267,7 @@ DEFAULT_TEST_GROUP(ManagedArrayTests,ManagedArray)
         TEST_EQUAL("emplace_back(ArgTypes&&...)-Element4",String("test."),EmplaceBackArray[3]);
 
         TEST_THROW("emplace_back(ArgTypes&&...)-Throw",
-                   std::out_of_range,
+                   Mezzanine::Exception::CapacityConsumed,
                    [&EmplaceBackArray](){ EmplaceBackArray.emplace_back("NOT!"); });
 
         ManagedArray<int,4> InsertCopyArray = { 4, 6 };
@@ -277,7 +282,7 @@ DEFAULT_TEST_GROUP(ManagedArrayTests,ManagedArray)
         TEST_EQUAL("insert(const_iterator,const_value_type&)-Element4",7,InsertCopyArray[3]);
 
         TEST_THROW("insert(const_iterator,const_value_type&)-Throw",
-                   std::out_of_range,
+                   Mezzanine::Exception::CapacityConsumed,
                    [&InsertCopyArray](){ InsertCopyArray.insert(InsertCopyArray.begin(),7331); });
 
         ManagedArray<int,4> InsertMoveArray = { 9, 11 };
@@ -290,7 +295,7 @@ DEFAULT_TEST_GROUP(ManagedArrayTests,ManagedArray)
         TEST_EQUAL("insert(const_iterator,value_type&&)-Element4",12,InsertMoveArray[3]);
 
         TEST_THROW("insert(const_iterator,value_type&&)-Throw",
-                   std::out_of_range,
+                   Mezzanine::Exception::CapacityConsumed,
                    [&InsertMoveArray](){ InsertMoveArray.insert(InsertMoveArray.begin(),3317); });
 
         ManagedArray<int,14> InsertRangeArray = { 0, 55, 89 };//{ 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89 };
@@ -320,9 +325,13 @@ DEFAULT_TEST_GROUP(ManagedArrayTests,ManagedArray)
         TEST_EQUAL("insert(const_iterator,InputIterator,InputIterator)-SecondInsertElement11",55,InsertRangeArray[10]);
         TEST_EQUAL("insert(const_iterator,InputIterator,InputIterator)-SecondInsertElement12",89,InsertRangeArray[11]);
 
-        TEST_THROW("insert(const_iterator,InputIterator,InputIterator)-Throw",
-                   std::out_of_range,
-                   [&](){ InsertRangeArray.insert(InsertRangeArray.begin() + 6,FirstInsertSource.begin(),FirstInsertSource.end()); });
+        TEST_THROW("insert(const_iterator,CapacityConsumed,InputIterator)-Throw",
+                   Mezzanine::Exception::CapacityConsumed,
+                   [&](){
+                        InsertRangeArray.insert(InsertRangeArray.begin() + 6,
+                                                FirstInsertSource.begin(),
+                                                FirstInsertSource.end());
+                   });
 
         ManagedArray<int,2> PopBackArray = { 5, 10 };
         PopBackArray.pop_back();
@@ -336,7 +345,7 @@ DEFAULT_TEST_GROUP(ManagedArrayTests,ManagedArray)
         TEST_EQUAL("erase(const_iterator)-Element2",777,EraseArray[1]);
 
         TEST_THROW("erase(const_iterator)-Throw",
-                   std::out_of_range,
+                   Mezzanine::Exception::OutOfRange,
                    [&EraseArray](){ EraseArray.erase(EraseArray.begin() + 9); });
 
         ManagedArray<int,6> EraseRangeArray = { 1, 22, 333, 4444, 55555, 666666 };
@@ -348,7 +357,7 @@ DEFAULT_TEST_GROUP(ManagedArrayTests,ManagedArray)
         TEST_EQUAL("erase(const_iterator,const_iterator)-Element3",666666,EraseRangeArray[2]);
 
         TEST_THROW("erase(const_iterator,const_iterator)-Throw",
-                   std::out_of_range,
+                   Mezzanine::Exception::OutOfRange,
                    [&EraseRangeArray](){ EraseRangeArray.erase(EraseRangeArray.begin() + 7, EraseRangeArray.begin() + 9); });
 
         ManagedArray<int,3> FirstSwapArray = { 123, 234, 345 };

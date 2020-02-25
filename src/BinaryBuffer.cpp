@@ -1,4 +1,4 @@
-// © Copyright 2010 - 2019 BlackTopp Studios Inc.
+// © Copyright 2010 - 2020 BlackTopp Studios Inc.
 /* This file is part of The Mezzanine Engine.
 
     The Mezzanine Engine is free software: you can redistribute it and/or modify
@@ -43,6 +43,7 @@
 
 #include "BinaryBuffer.h"
 #include "Base64.h"
+#include "MezzException.h"
 
 #include <cstring>
 
@@ -128,7 +129,7 @@ namespace Mezzanine
     BinaryBuffer::Byte& BinaryBuffer::at(const SizeType Index)
     {
         if( Index >= this->Size ) {
-            throw std::out_of_range("Attempted access beyond range of BinaryBuffer.");
+            MEZZ_EXCEPTION(OutOfRangeCode, "Attempted access beyond range of BinaryBuffer.");
         }
         return *(this->Binary + Index);
     }
@@ -136,7 +137,7 @@ namespace Mezzanine
     const BinaryBuffer::Byte& BinaryBuffer::at(const SizeType Index) const
     {
         if( Index >= this->Size ) {
-            throw std::out_of_range("Attempted access beyond range of BinaryBuffer.");
+            MEZZ_EXCEPTION(OutOfRangeCode, "Attempted access beyond range of BinaryBuffer (const).");
         }
         return *(this->Binary + Index);
     }
@@ -150,7 +151,7 @@ namespace Mezzanine
         if( this->Size != 0 ) {
             this->Binary = new Byte[this->Size * sizeof(Byte)];
         }else{
-            throw std::length_error("Cannot create zero size buffer.");
+            MEZZ_EXCEPTION(InvalidLengthCode, "Cannot create zero size BinaryBuffer.");
         }
     }
 

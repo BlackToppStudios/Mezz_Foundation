@@ -91,7 +91,8 @@ namespace Mezzanine
 #if !(defined(SWIG) && defined(MEZZLUA51)) // Stop Swig from making lua bindings but allow other languages
         /// @brief Get The value associate with a certain Axis.
         /// @param Axis Which axis to retrieve.
-        /// @note Despite the multiple scripting overloads of this Method, only Real GetAxisValue(const Whole& Axis) const; exists in the scripting interface
+        /// @note Despite the multiple scripting overloads of this Method, only
+        /// Real GetAxisValue(const Whole& Axis) const; exists in the scripting interface
         /// @return Either X, Y or Z as indicated by the value passed in.
         Real GetAxisValue(const StandardAxis& Axis) const;
 #endif // \SWIG
@@ -100,7 +101,8 @@ namespace Mezzanine
         Real GetAxisValue(const Whole& Axis) const;
 
 #ifndef SWIG // Since these functions differ only by constness, they make no sense to most(all?) scripting languages
-        /// @brief Get The value associate with a certain Axis in such a way that it can readily be assigned in this Vector3.
+        /// @brief Get The value associate with a certain Axis in such a way that it can readily be assigned in this
+        /// Vector3.
         /// @param Axis Which axis to retrieve.
         /// @return Either X, Y or Z as indicated by the value passed in.
         Real& GetAxisValue(const StandardAxis& Axis);
@@ -261,12 +263,14 @@ namespace Mezzanine
         /// @brief Less or Equal Comparison Operator.
         /// @return Returns true if X<=X, Y<=Y and Z<=Z. If any of those do not hold this returns false.
         /// @param Vec This is the other Mezzanine::Vector3.
-        /// @note Used primarily for testing. This is not implement for use with other kinds of Vector3 implementations as it is widely considered useless.
+        /// @note Used primarily for testing. This is not implement for use with other kinds of Vector3 implementations
+        /// as it is widely considered useless.
         Boole operator<= (const Mezzanine::Vector3 &Vec) const;
         /// @brief Greater than or Equal Comparison Operator.
         /// @return Returns true if X>=X, Y>=Y and Z>=Z. If any of those do not hold this returns false.
         /// @param Vec This is the other Mezzanine::Vector3.
-        /// @note Used primarily for testing. This is not implement for use with other kinds of Vector3 implementations as it is widely considered useless.
+        /// @note Used primarily for testing. This is not implement for use with other kinds of Vector3 implementations
+        /// as it is widely considered useless.
         Boole operator>= (const Mezzanine::Vector3 &Vec) const;
 
         ///////////////////////////////////////////////////////////////////////////////
@@ -377,11 +381,13 @@ namespace Mezzanine
         /// @return This is the dotproduct of this vector and vec
         Real DotProduct(const Vector3& Vec) const;
         /// @brief This will change this point into it's own normal relative to the origin
-        /// @details This will change this vector into one that is the same direction from the origin, but only one unit a away.
+        /// @details This will change this vector into one that is the same direction from the origin, but only one unit
+        /// a away.
         /// @return Returns a reference to this after being altered.
         Vector3& Normalize();
         /// @brief This returns the normal for this relative to the origin
-        /// @details This will return a vector that is 1 unit in away from the origin, if a line were starting and the origin it would pass through
+        /// @details This will return a vector that is 1 unit in away from the origin, if a line were starting and the
+        /// origin it would pass through
         /// both the normal and the original point.
         /// @return At a vector3 that is the normal of this Vector3 or 0,0,0 if the current Vector is all 0s
         Vector3 GetNormal() const;
@@ -411,7 +417,8 @@ namespace Mezzanine
         /// @return A normalized Vector3 that indicates the direction from this vector to another.
         Vector3 GetDirection(const Vector3& Destination) const;
         /// @brief Gets a vector that is perpendicular to this one.
-        /// @remarks There are an infinite number of possibilities for 3 dimensions but this method will guarantee to generate one of them.
+        /// @remarks There are an infinite number of possibilities for 3 dimensions but this method will guarantee to
+        /// generate one of them.
         /// @return Returns a Vector3 that is guarenteed to be perpendicular to this vector.
         Vector3 Perpendicular() const;
         /// @brief Gets whether or not a vector is perpendicular to this one.
@@ -448,7 +455,8 @@ namespace Mezzanine
         Boole IsZeroLength() const;
         /// @brief Gets the rotation needed to rotate this vector as an axis to another axis.
         /// @param Axis The target axis to rotate to.
-        /// @param FallBackAxis If the Dot produt of this and Axis are invalid FallBackAxis will be used instead otherwise, the rotation is calculated the hard way.
+        /// @param FallBackAxis If the Dot produt of this and Axis are invalid FallBackAxis will be used instead
+        /// otherwise, the rotation is calculated the hard way.
         /// @return Returns a Quaternion representing the needed rotation to the specified axis.
         Quaternion GetRotationToAxis(const Vector3& Axis, const Vector3& FallBackAxis = Vector3()) const;
 
@@ -566,9 +574,11 @@ namespace std
             static const bool is_iec559 = std::numeric_limits<Mezzanine::Real>::is_iec559;
             /// @brief Is overflow of this type handle by modulo overflow?
             static const bool is_modulo = std::numeric_limits<Mezzanine::Real>::is_modulo;
-            /// @brief How many integer digits(in machine base) of precision can this handle in each X, Y or Z without floating point component or error?
+            /// @brief How many integer digits(in machine base) of precision can this handle in each X, Y or Z without
+            /// floating point component or error?
             static const int digits = std::numeric_limits<Mezzanine::Real>::digits;
-            /// @brief How many integer digits in base 10 of precision can this handle in each X, Y or Z without floating point component or error?
+            /// @brief How many integer digits in base 10 of precision can this handle in each X, Y or Z without
+            /// floating point component or error?
             static const int digits10 = std::numeric_limits<Mezzanine::Real>::digits10;
             /// @brief The base of the number system that this is implemented in
             static const int radix = std::numeric_limits<Mezzanine::Real>::radix;
@@ -655,7 +665,8 @@ namespace std
                                          );
             }
 
-            /// @brief Get the closest value to 0 that is not 0 this can represent, including extra precision for being close to 0 if supported.
+            /// @brief Get the closest value to 0 that is not 0 this can represent, including extra precision for being
+            /// close to 0 if supported.
             /// @return A vector containing 3 very small values.
             static Mezzanine::Vector3 denorm_min()
             {
@@ -732,7 +743,8 @@ namespace Mezzanine
     /// @brief Used to Serialize an Mezzanine::Vector3 to a human readable stream
     /// @details The current XML format
     /// will create one node with no child nodes. The name of the xml node will be "Vector3". It will have 4 attributes.
-    /// "Version", will be set to a value of 1, indicating if came from version 1 compatible Vector3. It will also have an "X", "Y" and
+    /// "Version", will be set to a value of 1, indicating if came from version 1 compatible Vector3. It will also have
+    /// an "X", "Y" and
     /// "Z" attributes will values set appropriately. For example '<Vector3 Version="1" X="1" Y="2" Z="3" />'.
     /// @param x The Mezzanine::Vector3 to be converted to characters.
     /// @param stream The place to send the characters, that define the Mezzanine::Vector3.
@@ -745,7 +757,8 @@ namespace Mezzanine
     /// @param Vec The Mezzanine::Vector3 that will accept the values from the xml
     /// @param stream The place to get the characters from, that define the Mezzanine::Vector3.
     /// @return Get an std::ostream that was read from, this allow chaining of the >> operators.
-    /// @throw Can throw any exception that any function in the Mezzanine::xml namespace could throw in addition to a Mezzanine::Exception if the serialization version doesn't match.
+    /// @throw Can throw any exception that any function in the Mezzanine::xml namespace could throw in addition to a
+    /// Mezzanine::Exception if the serialization version doesn't match.
     std::istream& MEZZ_LIB operator >> (std::istream& stream, Mezzanine::Vector3& Vec);
 
     /// @brief Converts an XML node into a Mezzanine::Vector3
@@ -753,7 +766,8 @@ namespace Mezzanine
     /// @param OneNode An XML Node containing the the text of a Vector3
     /// @param Vec the Mezzanine::Vector3 to store the deserialized Vector3
     /// @return This returns a reference to the XML::Node for operator chaining or whatever.
-    /// @throw Can throw any exception that any function in the Mezzanine::xml namespace could throw in addition to a Mezzanine::Exception if the serialization version doesn't match.
+    /// @throw Can throw any exception that any function in the Mezzanine::xml namespace could throw in addition to a
+    /// Mezzanine::Exception if the serialization version doesn't match.
     void MEZZ_LIB  operator >> (const Mezzanine::XML::Node& OneNode, Mezzanine::Vector3& Vec);
 
     /// @brief Conversion Assignment Operator to Ogre::Vector3.

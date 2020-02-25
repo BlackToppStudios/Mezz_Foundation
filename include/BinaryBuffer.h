@@ -1,4 +1,4 @@
-// © Copyright 2010 - 2019 BlackTopp Studios Inc.
+// © Copyright 2010 - 2020 BlackTopp Studios Inc.
 /* This file is part of The Mezzanine Engine.
 
     The Mezzanine Engine is free software: you can redistribute it and/or modify
@@ -117,14 +117,12 @@ namespace Mezzanine
         // Operators
 
         /// @brief Copy Assignment Operator.
-        /// @exception If attempting to self-assign, this will throw a std::invalid_argument exception.
         /// @details Allocates identical amount of memory as other buffer then copies the other buffer into
         /// the allocated space. Each BinaryBuffer retains ownership of their respective buffers.
         /// @param Other The other buffer to be copied.
         /// @return Returns a reference to this.
         BinaryBuffer& operator=(const BinaryBuffer& Other);
         /// @brief Move Assignment Operator.
-        /// @exception If attempting to self-assign, this will throw a std::invalid_argument exception.
         /// @details This will first deallocate any buffer currently allocated in this and then perform a simple
         /// move of the Binary and Size from the Other BinaryBuffer and set it's members to their defaults
         /// (Binary:nullptr, Size:0).
@@ -150,13 +148,13 @@ namespace Mezzanine
         const Byte& operator[](const SizeType Index) const noexcept;
 
         /// @brief Gets an element at the desired index.
-        /// @exception This can throw a @ref std::out_of_range if the index value is higher
+        /// @exception This can throw a @ref Mezzanine::Exception::OutOfRange if the index value is higher
         /// than the Size member of this buffer.
         /// @param Index The index of the element to retrieve.
         /// @return Returns a reference to the element at the specified index.
         Byte& at(const SizeType Index);
         /// @brief Gets an element at the desired index.
-        /// @exception This can throw a @ref std::out_of_range if the index value is higher
+        /// @exception This can throw a @ref Mezzanine::Exception::OutOfRange if the index value is higher
         /// than the Size member of this buffer.
         /// @param Index The index of the element to retrieve.
         /// @return Returns a const reference to the element at the specified index.
@@ -166,7 +164,8 @@ namespace Mezzanine
         // Utility
 
         /// @brief This will create a buffer with size matching the this->Size and point this->Binary to that Buffer.
-        /// @exception If this buffers size is currently set at zero, a std::length_error exception will be thrown.
+        /// @exception If this buffers size is currently set at zero, a Mezzanine::Exception::LengthError exception will
+        /// be thrown.
         /// @warning This will delete any existing buffer prior to creating the new one.  Use with caution.
         void CreateBuffer();
         /// @brief Deletes the existing internal buffer (if one is initialized).

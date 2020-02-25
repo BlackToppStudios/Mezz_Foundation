@@ -1,4 +1,4 @@
-# © Copyright 2010 - 2019 BlackTopp Studios Inc.
+# © Copyright 2010 - 2020 BlackTopp Studios Inc.
 # This file is part of The Mezzanine Engine.
 #
 #    The Mezzanine Engine is free software: you can redistribute it and/or modify
@@ -52,10 +52,10 @@ if(NOT JAGATI_Download)
     option(JAGATI_Download "Should the Jagati be downloaded automatically" ON)
 endif(NOT JAGATI_Download)
 if(JAGATI_Download)
-    set(JAGATI_Checksum "a2043610a5e0d315f0e268b9aa42bdd2819ed6e20a6f1f88cfa\
-ef4ec99ce149e87cff846f2eb7d0558d5d94f4006b963bfbc36ef897013179563335d5ea57767"
+    set(JAGATI_Checksum "404c78d4a4bce87e5ffe2321c86e8ef74951a8e69536d4e55c2\
+bdfb9298a9cef1237d4d349487b1d66df4267c868f54cb6d499eacf854f05308c9398b4e0e77e"
         CACHE STRING "Check that when the Jagati is downloaded the right one is used (for consistency and security).")
-    set(JAGATI_Url "https://raw.githubusercontent.com/BlackToppStudios/Jagati/0.27.4/Jagati.cmake"
+    set(JAGATI_Url "https://raw.githubusercontent.com/BlackToppStudios/Jagati/0.29.0/Jagati.cmake"
         CACHE STRING "Where to download the Jagati from.")
     file(DOWNLOAD "${JAGATI_Url}" "${JAGATI_File}" EXPECTED_HASH SHA512=${JAGATI_Checksum})
 endif(JAGATI_Download)
@@ -63,13 +63,81 @@ include("${JAGATI_File}")
 
 ########################################################################################################################
 # The rest of the Jagati setup
-
 StandardJagatiSetup()
 IncludeJagatiPackage("StaticFoundation")
 IncludeJagatiPackage("Test")
 
 ########################################################################################################################
-# Source files
+# Setup Exception Sources
+
+# This uses as a goal and description design for creating nest hierarchies of exceptions. It seems more desirable to
+# catch all Container or all IO errors rather than all Index or Range errors? Following this thought prcoess Argument,
+# Index, Range, and Name errors can be handled as subclasses of the more important system level categorization.
+
+# I have added some remarks for possible entries
+
+# Parent Exceptions
+# Audio
+AddJagatiException("Container" "Base" "Base Exception for containers.")
+# Database
+AddJagatiException("Encoding" "Base" "Base Exception for converting data from one form to another")
+# Graphics
+AddJagatiException("InputOutput" "Base" "Base Exception for all IO.")
+AddJagatiException("Introspection" "Base" "Base Exception for everyhing related to the introspection system.")
+# Math
+# Physics
+# Security
+# Serialization
+# Scripting
+# Threading
+# Unknown - What could cause us to throw and not Know?
+# User Interface
+
+##########################################################
+# Container Exceptions
+# TODO: When multiple inheritance is supported add std::out_of_range
+AddJagatiException("OutOfRange" "Container" "When attempting to access an item not in a container.")
+# TODO: When multiple inheritance is supported add std::length_error
+AddJagatiException("InvalidLength" "Container" "When trying to make containers of zero or negative size.")
+AddJagatiException("CapacityConsumed" "Container" "Not enough space or couldn't allocate enough memory.")
+AddJagatiException("BadCast" "Container" "Bad conversion while storing or retrieving contained items.")
+
+##########################################################
+# Encoding/Conversion
+
+# Encoding Base64
+# TODO: When multiple inheritance is supported add std::invalid_argument
+AddJagatiException("Base64" "Encoding" "A problem with encoding or decoding Base64.")
+AddJagatiException("Base64Source" "Base64" "A Base64 function called with an invalid input buffer.")
+AddJagatiException("Base64Destination" "Base64" "A Base64 function called with invalid output buffer.")
+# TODO: When multiple inheritance is supported add std::range_error
+AddJagatiException("Base64BadChar" "Base64Source" "A Base64 function called with bogus characters.")
+
+# Conversion
+AddJagatiException("HexConversion" "Encoding" "A problem convert to or from hex strings.")
+
+##########################################################
+# InputOutput
+
+# File
+    # FileNotFound
+# Network
+    # DNS
+
+##########################################################
+# Introspection
+AddJagatiException("IntrospectionNullptr" "Introspection" "Base Exception for everyhing related.")
+
+
+
+
+
+##########################################################
+EmitExceptionSource()
+AddExceptionSource()
+
+########################################################################################################################
+# Normal Source files
 message(STATUS "Determining Source Files.")
 
 AddHeaderFile("Base64.h")
@@ -113,6 +181,7 @@ AddTestFile("BitFieldToolsTests.h")
 AddTestFile("CountedPtrBenchmarks.h")
 AddTestFile("CountedPtrTests.h")
 AddTestFile("CommandLineTests.h")
+AddTestFile("ExceptionTests.h")
 AddTestFile("FlatMapTests.h")
 AddTestFile("IntrospectionTests.h")
 AddTestFile("ManagedArrayTests.h")
