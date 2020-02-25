@@ -81,9 +81,11 @@ IncludeJagatiPackage("Test")
 AddJagatiException("Container" "Base" "Base Exception for containers.")
 # Database
 AddJagatiException("Encoding" "Base" "Base Exception for converting data from one form to another")
+# Graphics
 AddJagatiException("InputOutput" "Base" "Base Exception for all IO.")
 AddJagatiException("Introspection" "Base" "Base Exception for everyhing related to the introspection system.")
 # Math
+# Physics
 # Security
 # Serialization
 # Scripting
