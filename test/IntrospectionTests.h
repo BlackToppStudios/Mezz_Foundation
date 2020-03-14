@@ -1,7 +1,4 @@
-#ifndef HEADER_5E861F9F8EB2480
-#define HEADER_5E861F9F8EB2480
-
-// © Copyright 2010 - 2019 BlackTopp Studios Inc.
+// © Copyright 2010 - 2020 BlackTopp Studios Inc.
 /* This file is part of The Mezzanine Engine.
 
     The Mezzanine Engine is free software: you can redistribute it and/or modify
@@ -48,6 +45,7 @@
 
 #include "MezzTest.h"
 
+#include "MezzException.h"
 #include "Introspection.h"
 
 namespace IntrospectTest
@@ -83,7 +81,6 @@ namespace IntrospectTest
     };
 
     SAVE_WARNING_STATE
-    SUPPRESS_CLANG_WARNING("-Wweak-vtables")
 
     struct DerivedStructA : virtual public BaseStruct
     {
@@ -441,7 +438,7 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
         using NoSetType = MemberAccessor<NoSetMethodType,NoSetMethodType,MemberTags::None>;
         NoSetType NoSetAccessor("InvalidIntVar",nullptr,&BaseStruct::IntVar);
         TEST_THROW( "MemberAccessor::SetValue(T)-NoSet-Throw",
-                    std::runtime_error,
+                    Mezzanine::Exception::IntrospectionNullptr,
                     [&](){ NoSetAccessor.SetValue(TestStruct,5); } );
         TEST_NO_THROW( "MemberAccessor::GetValue()-NoSet-NoThrow",
                        [&](){ static_cast<void>( NoSetAccessor.GetValue(TestStruct) ); } );
@@ -452,17 +449,17 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
         TEST_NO_THROW( "MemberAccessor::SetValue(T)-NoGet-Throw",
                        [&](){ NoGetAccessor.SetValue(TestStruct,5.0f); } );
         TEST_THROW( "MemberAccessor::GetValue()-NoGet-NoThrow",
-                    std::runtime_error,
+                    Mezzanine::Exception::IntrospectionNullptr,
                     [&](){ static_cast<void>( NoGetAccessor.GetValue(TestStruct) ); } );
 
         using NoSetOrGetMethodType = decltype(&BaseStruct::StringVar);
         using NoSetOrGetType = MemberAccessor<NoSetOrGetMethodType,NoSetOrGetMethodType,MemberTags::None>;
         NoSetOrGetType NoSetOrGetAccessor("InvalidStringVar",nullptr,nullptr);
         TEST_THROW( "MemberAccessor::SetValue(T)-NoSetOrGet-Throw",
-                    std::runtime_error,
+                    Mezzanine::Exception::IntrospectionNullptr,
                     [&](){ NoSetOrGetAccessor.SetValue(TestStruct,String("Oh noes!")); } );
         TEST_THROW( "MemberAccessor::GetValue()-NoSetOrGet-Throw",
-                    std::runtime_error,
+                    Mezzanine::Exception::IntrospectionNullptr,
                     [&](){ static_cast<void>( NoSetOrGetAccessor.GetValue(TestStruct) ); } );
     }// MemberAccessor/BaseStruct Throw Tests
 

@@ -47,7 +47,6 @@
 #include "MezzTest.h"
 
 SAVE_WARNING_STATE
-SUPPRESS_CLANG_WARNING("-Wweak-vtables") // We really don't care, because this will this will be recompiled each test.
 SUPPRESS_CLANG_WARNING("-Wpadded") // Test classes will likely need to be padded and we don't care.
 
 /// @brief The test suite will find all classes identified as tests in CMake, but they need to look like this.

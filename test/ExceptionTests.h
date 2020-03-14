@@ -37,13 +37,63 @@
    Joseph Toppi - toppij@gmail.com
    John Blackwood - makoenergy02@gmail.com
 */
-#ifndef Mezz_Foundation_dox_h
-#define Mezz_Foundation_dox_h
+#ifndef Mezz_Foundation_ExceptionTests_h
+#define Mezz_Foundation_ExceptionTests_h
+
+#include "MezzTest.h"
+
+#include "MezzException.h"
 
 /// @file
-/// @brief The main documentation header for the Foundation library.
+/// @brief This file tests basic functionality of the Exceptions and verifies the Jagati exceptions are available.
 
-/// @page Mezz_Foudnation Mezz_Foudnation
-/// This library provides a set of common runtime utilities used by the majority of Mezzanine libraries.
+DEFAULT_TEST_GROUP(ExceptionTests,Exception)
+{
+
+    try
+    {
+        throw Mezzanine::Exception::Base("TestException", "TestFunction", "TestFile", 0);
+    } catch (const std::exception&) {
+        TEST("BaseExceptionCanBeThrownAndCaught", true);
+    }
+
+    try
+    {
+        MEZZ_EXCEPTION(InputOutputCode, "Test Message");
+    } catch (const Mezzanine::Exception::InputOutput&) {
+        TEST("BaseExceptionCanBeThro"
+             "wnWithMEZZ_EXCEPTION", true);
+    }
+
+// still need to test members and add the rest of the Foundation Exceptions
+
+    using String = Mezzanine::String;
+    using namespace Mezzanine::Exception;
+
+
+    TEST_EQUAL("CodeToString-Base",
+               String("Base"),
+               ExceptionClassNameFromCode(ExceptionCode::BaseCode));
+    TEST_EQUAL("StringToCode-Base",
+               ExceptionCode::BaseCode,
+               ExceptionCodeFromClassname("Base"));
+
+    TEST_EQUAL("CodeToString-InputOutput",
+               String("InputOutput"),
+               ExceptionClassNameFromCode(ExceptionCode::InputOutputCode));
+    TEST_EQUAL("StringToCode-InputOutput",
+               ExceptionCode::InputOutputCode,
+               ExceptionCodeFromClassname("InputOutput"));
+
+/*  // UB!
+    TEST_EQUAL("CodeToString-Invalid",
+               String("NotAnExceptionCode"),
+               ExceptionClassNameFromCode(static_cast<ExceptionCode>(99999999)));*/
+    TEST_EQUAL("StringToCode-Invalid",
+               ExceptionCode::NotAnExceptionCode,
+               ExceptionCodeFromClassname("Not a valid class name."));
+
+}
+
 
 #endif

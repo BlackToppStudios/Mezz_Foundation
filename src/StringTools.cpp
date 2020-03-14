@@ -1,4 +1,4 @@
-// © Copyright 2010 - 2019 BlackTopp Studios Inc.
+// © Copyright 2010 - 2020 BlackTopp Studios Inc.
 /* This file is part of The Mezzanine Engine.
 
     The Mezzanine Engine is free software: you can redistribute it and/or modify
@@ -39,6 +39,7 @@
 */
 
 #include "StringTools.h"
+#include "MezzException.h"
 
 #include <cctype>
 //#include <charconv>
@@ -71,8 +72,13 @@ namespace
     /// @param PatIt An iterator to the current position in the string containing the pattern to search for.
     /// @param PatEnd An iterator to the end of the string containing the pattern to search for.
     /// @param CaseSensitive Whether or not the pattern to be matched should be matched in the same case.
-    /// @return Returns an iterator to the position in the source string the pattern begins if one is found, or SrcEnd if no pattern was found.
-    StrIter SearchPattern(StrIter SrcIt, const StrIter SrcEnd, StrIter PatIt, const StrIter PatEnd, const Boole CaseSensitive)
+    /// @return Returns an iterator to the position in the source string the pattern begins if one is found, or SrcEnd
+    /// if no pattern was found.
+    StrIter SearchPattern(StrIter SrcIt,
+                          const StrIter SrcEnd,
+                          StrIter PatIt,
+                          const StrIter PatEnd,
+                          const Boole CaseSensitive)
     {
         for(  ;  ; ++SrcIt )
         {
@@ -108,8 +114,13 @@ namespace
     /// @param PatIt An iterator to the current position in the pattern string.
     /// @param PatEnd An iterator to the end of the pattern string.
     /// @param CaseSensitive Whether or not the pattern to be matched should be matched in the same case.
-    /// @return Returns true if the pattern immediately following the asterisk matches a sequence in the source, false otherwise.
-    Boole MatchAsterisk(StrIter& SrcIt, const StrIter SrcEnd, StrIter& PatIt, const StrIter PatEnd, const Boole CaseSensitive)
+    /// @return Returns true if the pattern immediately following the asterisk matches a sequence in the source, false
+    /// otherwise.
+    Boole MatchAsterisk(StrIter& SrcIt,
+                        const StrIter SrcEnd,
+                        StrIter& PatIt,
+                        const StrIter PatEnd,
+                        const Boole CaseSensitive)
     {
         const StrIter PatBegin = PatIt;
         const String ControlChars("[*?");
@@ -380,15 +391,16 @@ namespace StringTools {
     Real ConvertHexToColourChannel(const StringView Hex)
     {
         if( Hex.size() != 2 ) {
-            String ExceptionString("Hex code requires 2 characters to express a Colour channel.");
-            throw std::runtime_error(ExceptionString);
+            MEZZ_EXCEPTION(HexConversionCode,
+                           "Hex code requires 2 characters to express a Colour channel.");
         }
 
         // <charconv> implementation
         /*unsigned int Temp = 0;
         std::from_chars_result Result = std::from_chars(Hex.data(),Hex.data() + 2,Temp,16);
         if( Result.ec != std::errc() ) {
-            throw std::runtime_error("Error parsing Hex String. Does the String contain only valid Hex characters?");
+            MEZZ_EXCEPTION(HexConversionCode,
+                           "Error parsing Hex String. Does the String contain only valid Hex characters?");
         }
         Real Ret = static_cast<Real>(Temp);
         return std::min(Ret *= HexConversionMultiplier,Real(1.0));//*/
@@ -397,7 +409,8 @@ namespace StringTools {
         char* EndPtr = nullptr;
         Real Ret = static_cast<Real>( std::strtol(Hex.data(),&EndPtr,16) );
         if( EndPtr != std::next(Hex.data(),2) ) {
-            throw std::runtime_error("Error parsing Hex String. Does the String contain only valid Hex characters?");
+            MEZZ_EXCEPTION(HexConversionCode,
+                           "Error parsing Hex String. Does the String contain only valid Hex characters?");
         }
         return std::min(Ret *= HexConversionMultiplier,Real(1.0));
     }
@@ -409,7 +422,8 @@ namespace StringTools {
         unsigned int Temp = static_cast<unsigned int>(Channel * Real(255.0));
         std::to_chars_result Result = std::to_chars(Ret.data(),Ret.data() + 2,Temp,16);
         if( Result.ec != std::errc() ) {
-            throw std::runtime_error("Error converting Real to Hex. Is it within the range 0.0-1.0?");
+            MEZZ_EXCEPTION(HexConversionCode,
+                           "Error converting Real to Hex. Is it within the range 0.0-1.0?");
         }
 
         if( Result.ptr == std::next(Ret.data()) ) {
