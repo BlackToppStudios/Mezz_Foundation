@@ -37,449 +37,900 @@
    Joseph Toppi - toppij@gmail.com
    John Blackwood - makoenergy02@gmail.com
 */
-#ifndef _serialization_h
-#define _serialization_h
+#ifndef Mezz_Foundation_Serialization_h
+#define Mezz_Foundation_Serialization_h
 
 /// @file
-/// @brief The interface for serialization
+/// @brief The collection of utilities that form the Serialization front-end.
 
-#include "datatypes.h"
-#include "countedptr.h"
 #ifndef SWIG
-    #include "XML/xml.h"
+    #include "Introspection.h"
+    #include "StringTools.h"
+
+    #include <unordered_map>
 #endif
 
-namespace Mezzanine
-{
-    /// @page Serialization
-    /// @section SerializationMain
-    /// Serialization is the process of converting a class instance into a serial sequence of bits. DeSerialization is taking those
-    /// bits and reconstructing the original object without losing anything of value (in theory the only things not saved are cached
-    /// values or values calulated as they are needed). These bits could be just about anything, because of its ubiquity we chose
-    /// to serialize to xml (or something so similar as to be indistinguishable from standard xml). This allows a wide variety of tools
-    /// to be used when working with and verifying these serialized classes. Additionally, transmitting and storing xml is easy to do,
-    /// and can be done with a variety of other factors in mind. The xml text can be sent down any stream, put in any file, compressed,
-    /// queried. You should see @ref XMLManual for information about the xml system itself.
-    /// \n \n
-    /// Topics:
-    ///     - @ref serializationxml
-    ///     - @ref serializationintegration
-    ///         - @ref serializationmaking
-    ///         - @ref serializationserializers
-    ///         - @ref serializationlegacy
-    ///     - @ref serializationoperators
-    ///     - @ref serializationmisc
-    /// @subsection serializationxml Serialization and XML
-    /// The process of serializing doesn't just convert from class instance to text. Since our end goal is to convert live objects to
-    /// XML it makes sense to closely integrate the Mezzanine::xml portion of the engine. If you plan on writing serialization
-    /// and deserialization code you should read the following parts of the @ref XMLManual at a minimum:
-    ///     - @ref XMLDOM
-    ///     - @ref XMLAccessingBasics
-    ///     - @ref XMLModifyingNodeData
-    ///     - @ref XMLModifyingAttributeData
-    ///
-    /// The central object that will carry information during this process is the Mezzanine::XML::Node. The Mezzanine::XML::Node is an excellent
-    /// tool for converting and storing data in a single unified heirarchy.
-    /// \n \n
-    /// C++ and most other object oriented languages heavily imply that class inheritance should be structured as hierarchies. Additionally
-    /// Hierarchies are implied when complex class has other complex classes or datatypes as members. Both of these structures map
-    /// cleanly onto the kind of hierarchies that a well formed xml documents provide.
-    /// \n \n
-    /// There are some relationships in video game objects that cross normal hierarchical boundaries. For example, A constraint
-    /// references two actors, and defines a relationship between them. When serialized the constraint simply stores the name of
-    /// the actor and looks it up in the actor manager during deserialization. This implies that the actors exist already, or that
-    /// there is some mechanism to create the constraint and fill in the actor later. Several mechanisms were discussed to
-    /// accomplish this, some include: two passes of processing where constraint would be done in the second pass, a work queue that
-    /// would store objects that couldn't be deserialized yet, a prefetcher that would dig through the xml to find the required
-    /// object.
-    /// \n \n
-    /// Those methods all likely could have been made to work. However, they are not optimal for a variety of reasons. All of them
-    /// have a set of preconditions and require more computing resources and could potentially delay loading or transmission times.
-    /// Some of them heavily imply that all of the items to deserialize must be stored in the same xml source. Some demand access to
-    /// xml that may not have been transmitted yet.
-    /// \n \n
-    /// The simplest, most performant way to work around the issues that cross-hierarchical relationships presented was to ignore
-    /// them. More specifically, throw an exception if an object reference during deserialization is not present. Then we ask that
-    /// programmers who write code that must store, transmit and reconstruct class instances be aware of the following preconditions
-    /// So can produce their own solutions:
-    ///     - CollisionShapes must come before Actors and AreaEffects
-    ///     - WorldNodes must come before Actors, Light and ParticleEffects. (this is still work in progress).
-    ///         - Currently WorldNodes try to find the objects that are attached to them, and the attached tries to find the world node. (if one does not exist, this silently fails)
-    ///     - Actors must come before constraints.
-    ///     - Actors may have a WorldNode inside them, if this is the case, then the actor must come before Lights and ParticleEffects Attached to it.
-    ///     - Actors must be done before SoundSets
-    ///     - Sounds must be done before SoundSet (Still in progress)
-    ///
-    /// The easyiest way to meet these conditions and not consume an inordinate amount of computing resources, is to pay attention
-    /// to the order that items are serialized in. If a program serializes the worldnodes, then the actors, then everything else
-    /// it will have relatively little trouble making it work.
-    /// @subsection serializationintegration Integrate Serialization into Your Code
-    /// There several ways to interact with the current serialization system. One might have to create a class that can be
-    /// serialized or deserialized. There may be situations where another system is emitting xml and it must be intergrated into
-    /// an existing game. It may be desired to create a 'factory' that produces objects from and xml source or create a sink to put
-    /// objects into so they can be serialized. Here we will discuss some of the ways that the serialization system can be extended
-    /// and what kind of assumptions it makes, so that anyone can write software that interacts with it cleanly.
-    /// @subsubsection serializationmaking Make a Serializable or a DeSerializable
-    /// Creating a class that be serialized is easy. There is just one function that it must implement. If a class implements this,
-    /// it is said to be Serializable:
-    /// @code
-    /// void SerializableClass::ProtoSerialize(XML::Node&) const;
-    /// @endcode
-    /// The member ProtoSerialize(XML::Node&) is expected to accept a Mezzanine::XML::Node and attach exactly one Node to it. This new Serialized
-    /// node should contain all the data stored in the current state of the object being serialized. Storing data outside of this
-    /// one node could cause undefined behavior.
-    /// \n \n
-    /// The exact layout of the data in the Serialized Node is not pre-determined. The creator of that function need only
-    /// take into account any difficulties DeSerializing when creating this. Because of this concern it is advisable name the Serialized
-    /// node something unique and appropriate and to include a 'Version' attribute on it. If the class
-    /// changes, the DeSerialization function will only need to check the 'Version' attribute to know if and how it can handle it.
-    /// \n \n
-    /// Integrating with the DeSerialization code is pretty easy too. There are two functions you are expected to implement to
-    /// create a DeSerializable:
-    /// @code
-    /// void DeSerializableClass::ProtoDeSerialize(const XML::Node&);
-    /// static String DeSerializableClass::GetSerializableName();
-    /// @endcode
-    /// The GetSerializableName() is expected to simply return the name of the xml elements this class will DeSerialize. For example
-    /// A Mezzanine::Vector3 returns "Vector3", and a Mezzanine::ActorRigid return "ActorRigid". If a class is both DeSerializable and
-    /// serializable it makes sense to call this function when assigning the name to the Serialized Node it creates.
-    /// \n \n
-    /// ProtoDeSerialize(const XML::Node&), accepts a Mezzanine::XML::Node. The Node passed to it would correspond to the Serialized
-    /// Node created by the ProtoSerialize(XML::Node&) function listed above. If xml is created by something then this is calling
-    /// code is expecting this function to be the correct deserialization function. It is advisable but not required to verify the
-    /// name of the xml node matches what is expected and that
-    /// the 'Version' is something this code can handle. It is also advisable that every piece of data pulled out is verified the
-    /// best it can be. If exceptions are thrown for every discrepency, then programmers using this will create xml and code that
-    /// produce no discrepencies.
-    /// \n \n
-    /// The following template make use of only the 3 functions described above to Serialize or DeSerialize class instances:
-    /// @code
-    /// template <class T> std::ostream& Serialize(std::ostream& Stream, const T& Converted, const String& Indent = String("") );
-    /// template <class T> std::istream& DeSerialize(std::istream& Stream, T& Converted);
-    /// @endcode
-    /// The functions make calls on the Mezzanine::xml system and expect a fairly basic set of conditions to be met before they are used.
-    /// Serialize accepts an output stream and the class instance to be Serialized. It will create an XML::Document and populate it
-    /// data from the class provided and then emit that into the stream. DeSerialize accepts an inputstream and the object to be
-    /// populated. It expects the next xml element in the stream to be a serialized version of the passed object and will then
-    /// overwrite as many of the values of the passed object as possible with the serialized values. For small items DeSerialize
-    /// is fine, where possible it is better to have the XML::Document open the file or stream itself as to prevent the second
-    /// pass through to find exactly one xml element.
-    /// \n \n
-    /// @subsubsection serializationserializers Working with Serializers and Deserializers
-    /// In some cases, there are some pieces of information that cannot be supplied or
-    /// entered by the class itself. This data must be provided by another class or upon creation of the class. This other class
-    /// can implement the Serializer, DeSerializer, or both interfaces to make working with large amounts of serialization easier.
-    /// \n \n
-    /// For example EntityProxy can only accept a mesh upon construction. So overwriting an existing EntityProxy is impossible to do completely.
-    /// It expected to be partially implemented, to the extent possible, in the class members. But if you have the need to create
-    /// EntityProxys on the fly from data stored in files it makes sense to have a dedicated class or interface than can create these.
-    /// Here is what goes into a Serializer:
-    /// @code
-    /// template <class Serializable> class Serializer
-    /// {
-    ///     virtual void Serializer::ProtoSerializeAll(XML::Node& CurrentRoot) const = 0;
-    ///     virtual std::ostream& Serializer::SerializeAll(std::ostream& Stream) const;
-    ///     virtual void Serializer::ProtoSerialize(const Serializable& Target, XML::Node& CurrentRoot) = 0;
-    ///     virtual std::ostream& Serializer::Serialize(std::ostream& Stream, const Serializable& Target)
-    /// };
-    /// @endcode
-    /// Serializer::ProtoSerialize() when implement should take the required steps to attach a Serialized Node to the
-    /// Passed XML::Node that represent the Serialization target. It is expected to get the extra information that the target
-    /// cannot provide from somewhere else. Ideally the the Serializer can be, or be associated with, a manager or container
-    /// of some kind. There is not default implementation of this.
-    /// \n \n
-    /// Serializer::Serialize() Goes one step further than Serializer::ProtoSerialize() and also sends it down a stream. The
-    /// default implements use Serializer::ProtoSerialize().
-    /// \n \n
-    /// Serializer::ProtoSerializeAll() performs a similar role to Serializer::ProtoSerialize(), but again, it goes one step
-    /// further. Rather than accept a single Target to serialize it is expected that the Serializer go to the source of the
-    /// Targets and serialize all of them that are available. All of the target should be contained in one Node attached to
-    /// the Node the function accepts. This is not implemented by default, the logic is too specific to the items to be
-    /// serialized.
-    /// \n \n
-    /// Serializer::SerializeAll() uses Serializer::ProtoSerializeAll() to send all of the available Targets in Serialized
-    /// down a stream.
-    /// \n \n
-    /// The logic behind a DeSerializer is similar to a Serializer. The same types of methods, even similar implementations
-    /// if the function is implemented. Like the ProtoDeSerialize() individual DeSerializables implement, the functions on
-    /// a DeSerializer will be passed the nodes that would correspond to the those created by their counterparts on the
-    /// Serializer. Here is the contents of a Deserializer:
-    /// @code
-    /// template <class DeSerializable> class DeSerializer
-    /// {
-    ///     virtual void DeSerializer::ProtoDeSerializeAll(const XML::Node& OneNode) = 0;
-    ///     virtual std::istream& DeSerializer::DeSerializeAll(std::istream& Stream)
-    ///     virtual DeSerializable* DeSerializer::ProtoDeSerialize(const XML::Node& OneNode) = 0;
-    ///     virtual std::istream& DeSerializer::DeSerialize(std::istream& Stream)
-    ///     virtual String ContainerName() const = 0;
-    /// };
-    /// @endcode
-    /// The function ContainerName() should be used when creating and verifying the xml element that is parent to the items
-    /// DeSerialized by ProtoDeSerializeAll(). The Default implmentation of DeSerializeAll() will use ContainerName to
-    /// verify it has extracted the correct Node.
-    /// \n \n
-    /// There is no technical reason why a class cannot be both a serializer and a deserializer, or even multiple kinds of
-    /// Serializers or DeSerializers. To keep things simple the Managers provided by the Mezzanine engine will store a pointer
-    /// to the appropriate Serializer when one is required.
-    /// @subsubsection serializationlegacy Integrating with External XML Providers
-    /// Sometimes yu will be forced to work with a system that produces xml that is not structured in a similar way to this
-    /// system. Sometimes it may be too costly or not possible to modify the code to integrate it. For these the following
-    /// function exists:
-    /// @code
-    /// template <class T> void SloppyProtoSerialize(const T& Converted, XML::Node& CurrentRoot)
-    /// @endcode
-    /// This function will make a call on the the stream insertion operator of the class passed in. If one doesn't exist
-    /// it is easy to add one in your code without chaning the original source. If one does exist than you should probably
-    /// copy/paste the whole function and re-implement it calling the functions that emit the XML string or stream. If you
-    /// want to implement a stream insertion operator, the function prototype should be similar to the stream insertion
-    /// operator in the @ref serializationoperators section.
-    /// @subsection serializationoperators Serialization Operators
-    /// The stream insertion (<<) and stream extraction (>>) operators can be used for serializing and deserializing most items
-    /// in the Mezzanine engine.
-    ///
-    /// Unfortunately due to conflict with the stream insertion operators provided with the iostreams library these couldn't be
-    /// made into a template. That doesn't mean that they are difficult to implement. Here is a typical implemenation of stream
-    /// insertion operators for XML serialization:
-    /// @code
-    /// std::ostream& operator << (std::ostream& stream, const Mezzanine::RigidDebris& DebrisToSerialize)
-    /// {
-    ///     Serialize(stream, DebrisToSerialize);
-    ///     return stream;
-    /// }
-    ///
-    /// std::istream& operator >> (std::istream& stream, Mezzanine::RigidDebris& x)
-    ///     { return DeSerialize(stream, x); }
-    ///
-    /// void operator >> (const Mezzanine::XML::Node& OneNode, Mezzanine::RigidDebris& x)
-    ///     { x.ProtoDeSerialize(OneNode); }
-    ///
-    /// @endcode
-    /// You will want to implement these functions with the appropriate type. The type Mezzanine::RigidDebris is used purely as example
-    /// Though this is actual working code and was in the engine at one point, the current code is more sophiscticated
-    /// \n \n
-    /// The function operator<< simply calls Serialize and returns the stream, so it has all the pre and cost conditions of the Serialize
-    /// function listed in the @ref serializationmaking section.
-    /// \n \n
-    /// The stream extraction operators are a little bit more interesting. The operator>>(istream,YourType), by virtue of calling Deserialize
-    /// will wind up taking two passes over the XML. One looking for the ending tag that matches the first (it gets all the children of that tag too)
-    /// and one performing the actual parsing. The operator>>(istream,YourType) will work only with completely parsed objects in memory. With the
-    /// combination of these two all the heavy lifting of parsing is done up front, and the rest of the deserialization is just a bunch of pointer
-    /// and string manipulation. Another possibility with your stream extraction operator, if you new that it had exactly one parent xml node ,you
-    /// create without that first pass for improved performance.
-    /// @subsection serializationmisc Other little Things
-    /// To simplify and standardize errors thrown, the following functions exist:
-    /// @code
-    /// void SerializeError(const String& FailedTo, const String& ClassName, Boole SOrD = true);
-    /// void DeSerializeError(const String& FailedTo, const String& ClassName, Boole SOrD = false);
-    /// @endcode
-    /// Both of these functions throw a Mezzanine::Exception with the descriptive text of "Could not {FailedTo} during {ClassName} [De]Serialization."
-    /// If SOrD (Serialize Or Deserialize) is true the "De" is not printed.
-
-
-
+namespace Mezzanine {
+namespace Serialization {
+    /// @addtogroup Serialization
+    /// @{
 
     ///////////////////////////////////////////////////////////////////////////////
-    /// @brief A tool for serializing classes with specific issues serializing.
-    /// @details Some classes have private members and it is impractical to change the class to expose this data. In this case a
-    /// serializer could be made that to work around this limitation.
-    /// \n \n
-    /// This was designed with the idea that a manager could inherit from this or have a separate class that implements this as a member. There should also be
-    /// no reason why something could not inherit from this and Mezzanine::DeSerializer. The type of this template is expected to match what this is serializing.
-    ///////////////////////////////////////
-    template <class Serializable>
-    class MEZZ_LIB Serializer
+    // Forward Declares
+
+    class AttributeWalker;
+    class ObjectWalker;
+
+    template<typename SerializeType, typename = std::enable_if_t<!std::is_pointer_v<SerializeType>>>
+    void Serialize(const StringView Name,
+                   const SerializeType& ToSerialize,
+                   const MemberTags Tags,
+                   const Int32 Version,
+                   Serialization::ObjectWalker& Walker);
+    template<typename SerializeType, typename = std::enable_if_t<std::is_pointer_v<SerializeType>>>
+    void Serialize(const StringView Name,
+                   const SerializeType ToSerialize,
+                   const MemberTags Tags,
+                   const Int32 Version,
+                   Serialization::ObjectWalker& Walker);
+    template<typename SerializeType>
+    void Serialize(const StringView Name,
+                   const std::shared_ptr<SerializeType> ToSerialize,
+                   const MemberTags Tags,
+                   const Int32 Version,
+                   Serialization::ObjectWalker& Walker);
+
+    template<typename SerializeType, typename = std::enable_if_t<!std::is_pointer_v<SerializeType>>>
+    void Deserialize(SerializeType& ToDeserialize,
+                     const Int32 Version,
+                     Serialization::ObjectWalker& Walker);
+    template<typename SerializeType, typename = std::enable_if_t<std::is_pointer_v<SerializeType>>>
+    void Deserialize(SerializeType ToDeserialize,
+                     const Int32 Version,
+                     Serialization::ObjectWalker& Walker);
+    template<typename SerializeType>
+    void Deserialize(std::shared_ptr<SerializeType> ToDeserialize,
+                     const Int32 Version,
+                     Serialization::ObjectWalker& Walker);
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // Convenience type traits
+
+    /// @brief Convenience type trait that decays the checked type before passing it to std::is_class.
+    /// @tparam CheckType The type to decay and check if it is a class.
+    template<class CheckType>
+    struct is_class_decayed :
+        std::is_class< std::remove_cv_t< std::remove_reference_t<CheckType> > >
+        {  };
+
+    /// @brief Convenience inline variable for getting just the bool of the is_class_decayed check.
+    /// @tparam CheckType The type to check if it is a class type after being decayed.
+    template<class CheckType>
+    inline constexpr Boole is_class_decayed_v = is_class_decayed<CheckType>::value;
+
+    /// @brief A type trait that checks to see if a type is a class that isn't a String or StringView.
+    /// @tparam CheckType The type to check if it is any class type other than String or StringView.
+    template<class CheckType>
+    struct is_generic_serializable :
+        std::bool_constant< !StringTools::is_string_v<CheckType> && is_class_decayed_v<CheckType> >
+        {  };
+
+    /// @brief Convenience inline variable for getting just the bool of the is_non_string_class check.
+    /// @tparam CheckType The type to check if it is a non-string class type.
+    template<class CheckType>
+    inline constexpr Boole is_generic_serializable_v = is_generic_serializable<CheckType>::value;
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // Convenience detection traits
+
+    /// @brief Convenience type for GetName method detection.
+    /// @tparam Class The class to test.
+    template<typename Class>
+    using GetName_t = decltype(std::declval<Class&>().GetName());
+    /// @brief Convenience type for is_detected that tests for the existence of GetName on a class.
+    /// @tparam Class The class that will be checked for the presence of a GetName method.
+    template<typename Class>
+    using HasGetName = std::is_detected<GetName_t,Class>;
+
+    /// @brief Convenience type for GetID method detection.
+    /// @tparam Class The class to test.
+    template<typename Class>
+    using GetID_t = decltype(std::declval<Class&>().GetID());
+    /// @brief Convenience type for is_detected that tests for the existence of GetID on a class.
+    /// @tparam Class The class that will be checked for the presence of a GetID method.
+    template<typename Class>
+    using HasGetID = std::is_detected<GetID_t,Class>;
+
+    /// @brief Convenience type for GetIdentification method detection.
+    /// @tparam Class The class to test.
+    template<typename Class>
+    using GetIdentification_t = decltype(std::declval<Class&>().GetIdentification());
+    /// @brief Convenience type for is_detected that tests for the existence of GetIdentification on a class.
+    /// @tparam Class The class that will be checked for the presence of a GetIdentification method.
+    template<typename Class>
+    using HasIdentificationName = std::is_detected<GetIdentification_t,Class>;
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // Convenience constants
+
+    /// @brief A simple enum for the constants used for versioning objects that are serialized.
+    enum ObjectVersion
     {
-        public:
-        /// @brief Get all of the data from the serializable class instance
-        /// @details This is to be implemented in individual serializer with logic
-        /// specific to the required tasks. It is expected to produce an XML::Node
-        /// containing the entirety of the data required to reconstitute the serialized
-        /// class. \n \n
-        /// This is expected to gets it's knowledge about what to serialize some other than
-        /// being passed as an argument. It could query a manager or be passed a series pointers
-        /// that is needs to work with.
-        /// \n \n
-        /// This is not implemented by default.
-        /// @param CurrentRoot The point in the XML hierarchy that all the items deserialized should be appended to.
-        virtual void ProtoSerializeAll(XML::Node& CurrentRoot) const = 0;
-        /// @brief Output the complete serialized data to a stream.
-        /// @param Stream The std::ostream to send the data into.
-        /// @details By default this is implemented in using ProtoSerializeAll().
-        /// @return The populated ostream.
-        virtual std::ostream& SerializeAll(std::ostream& Stream) const
-        {
-            Mezzanine::XML::Document Doc;
-            Doc.Load("");
-            ProtoSerializeAll(Doc);
-            Doc.Print(Stream);
-            return Stream;
-        }
-
-        /// @brief Get all the serialized data about one class instance in an XML::Node
-        /// @param Target A reference to class instance to be deserialized.
-        /// @details This is not implemented by default.
-        /// @param CurrentRoot The point in the XML hierarchy that all this vector3 should be appended to.
-        virtual void ProtoSerialize(const Serializable& Target, XML::Node& CurrentRoot) = 0;
-        /// @brief Output the specified member to a stream
-        /// @param Target A reference to class instance to be deserialized.
-        /// @param Stream The std::ostream to send the data into.
-        /// @details The default implementation of this uses ProtoSerialize(const String&)
-        /// @return The std::ostream that was passed in.
-        virtual std::ostream& Serialize(std::ostream& Stream, const Serializable& Target)
-        {
-            Mezzanine::XML::Document Doc;
-            Doc.Load("");
-            ProtoSerialize(Target,Doc);
-            Doc.Print(Stream);
-            return Stream;
-        }
-
+        Latest = 0  ///< The latest version available to the current build. Not useful for Deserialization.
     };
 
     ///////////////////////////////////////////////////////////////////////////////
-    /// @brief A tool for deserializing classes with specific issues deserializing them
-    /// @details Some classes Must have certain values available at the time of construction. This make deserializing them by overwriting an existing
-    /// class instance impractical. \n \n
-    /// This is expected to work with classes that have implemented the required DeSerializable functions. Specifically This makes use of
-    /// "static String GetSerializableName()", and it is expected that functions that must be implemented would call on "void ProtoDeSerialize(const XML::Node&)".
-    /// The type of this template is expected to match what this is deserializing.
-    /// \n \n
-    /// This was designed with the idea that a manager could inherit from this or have a separate class that implements this as a member. There should also be
-    /// no reason why something could not inherit from this and Mezzanine::Serializer.
-    ///////////////////////////////////////
-    template <class DeSerializable>
-    class MEZZ_LIB DeSerializer
+    // Backend Interface
+
+    // Needs ObjectNode forward declare
+
+    class BackendBase
     {
-        public:
-        /// @brief Convert An XML Node into a complete series of live class instances
-        /// @param OneNode A reference to the XML node to reconstitute into multiple Live classes.
-        /// @details This is expected to put the deserialized items somewhere they can be accessed by the calling,
-        /// but provides no facility for working them itself. \n \n
-        /// Not implemented in default DeSerializer.
-        virtual void ProtoDeSerializeAll(const XML::Node& OneNode)
-        {
-            // no checking occurs here, because this should be DeSerializeAll(istream&)
-            XML::Node SingleItemNode = OneNode.GetFirstChild();
-            while(SingleItemNode)
-            {
-                ProtoDeSerialize(SingleItemNode);
-                SingleItemNode = SingleItemNode.GetNextSibling();
+    public:
+        ///////////////////////////////////////////////////////////////////////////////
+        // Query
+
+        virtual StringView GetImplementationName() const = 0;
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Root Object
+
+        virtual ObjectWalker& GetWalker() const = 0;
+    };//BackendBase
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // SerializerContext
+
+    class ContextBase
+    {
+    public:
+        virtual ContextBase* GetParentContext() const = 0;
+
+        virtual Boole IsSame(void* ObjectPtr, const std::type_info& Info) const = 0;
+
+        virtual void* FindContextObject(const StringView Name, const std::type_index Type) const = 0;
+        virtual void* FindContextObject(const UInt64 ID, const std::type_index Type) const = 0;
+    };//SerializerContextBase
+
+    template<typename SpecialContext>
+    class Context : public ContextBase
+        {  };
+
+    template<typename SpecialContext>
+    ContextBase* UpdateContext(const ContextBase* Current, const SpecialContext* ToUpdate)
+    {
+        using ContextType = Context<SpecialContext>;
+        if constexpr( !std::is_abstract_v<ContextType> ) {
+            static_assert( std::is_constructible_v<ContextType,ContextBase*,SpecialContext*>,
+                           "SerializerContext type lacks well-formed constructor." );
+            if( Current != nullptr && !Current->IsSame(ToUpdate,typeid(SpecialContext)) ) {
+                return new ContextType(Current,ToUpdate);
             }
         }
-        /// @brief Get One node that has several of the appropriate kinds of nodes as children and deserialize all of them
-        /// @param Stream The std::istream to get the data from.
-        /// @details The default implementation of this uses ProtoDeSerializeAll(XML::Node&) to accept11
-        /// The complete XML to serialise and assemble it in memory.
-        /// @return This returns the input stream after the xml document has been extracted from it.
-        virtual std::istream& DeSerializeAll(std::istream& Stream)
-        {
-            Mezzanine::String OneTag( Mezzanine::XML::GetOneTag(Stream) );
-            Mezzanine::CountedPtr<Mezzanine::XML::Document> Doc(Mezzanine::XML::PreParseClassFromSingleTag(this->ContainerName(), OneTag) );
-            ProtoDeSerializeAll(Doc->GetFirstChild());
-            return Stream;
-        }
+        return Current;
+    }
 
-        /// @brief Convert An XML Node into a complete live data structure
-        /// @param OneNode A reference to the XML node to reconstitute into a live class instance.
-        /// @details Not implemented in default serializer.
-        /// @return A pointer to the freshly deserialized class instance.
-        virtual DeSerializable* ProtoDeSerialize(const XML::Node& OneNode) = 0;
-        /// @brief Get the serialized version of all the live data from the stream.
-        /// @param Stream The std::istream to get the data from.
-        /// @details The default implementation of this uses ProtoDeSerializeAll(XML::Node*) to accept
-        /// The complete XML to serialise and assemble it in memory.
-        /// @return This returns the input stream after the xml document has been extracted from it.
-        virtual std::istream& DeSerialize(std::istream& Stream)
-        {
-            Mezzanine::String OneTag( Mezzanine::XML::GetOneTag(Stream) );
-            Mezzanine::CountedPtr<Mezzanine::XML::Document> Doc(Mezzanine::XML::PreParseClassFromSingleTag(DeSerializable::GetSerializableName(), OneTag) );
-            ProtoDeSerialize(Doc->GetFirstChild());
-            return Stream;
+    template<typename SpecialContext>
+    ContextBase* RevertContext(const ContextBase* Current, const SpecialContext* ToRevert)
+    {
+        using ContextType = Context<SpecialContext>;
+        if constexpr( !std::is_abstract_v<ContextType> ) {
+            if( Current != nullptr && Current->IsSame(ToRevert,typeid(SpecialContext)) ) {
+                ContextBase* Reverted = Current->GetParentContext();
+                delete Current;
+                return Reverted;
+            }
         }
+        return Current;
+    }
 
-        /// @brief This will return the Name of the element that Contains multiple of the items to be DeSerialized
-        /// @return A String that correctly indicates the name of an xml tag.
-        virtual String ContainerName() const = 0;
+    ///////////////////////////////////////////////////////////////////////////////
+    // Tree Walkers
+
+    class MEZZ_LIB AttributeWalker
+    {
+    public:
+        ///////////////////////////////////////////////////////////////////////////////
+        // Name Operations
+
+        virtual void SetName(const StringView Name) = 0;
+        [[nodiscard]]
+        virtual StringView GetName() const = 0;
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Value Operations
+
+        virtual void SetString(const StringView Value) = 0;
+        [[nodiscard]]
+        virtual std::optional<StringView> GetString() const = 0;
+
+        virtual void SetLongDouble(const long double Value) = 0;
+        [[nodiscard]]
+        virtual std::optional<long double> GetLongDouble() const = 0;
+
+        virtual void SetDouble(const double Value) = 0;
+        [[nodiscard]]
+        virtual std::optional<double> GetDouble() const = 0;
+
+        virtual void SetFloat(const float Value) = 0;
+        [[nodiscard]]
+        virtual std::optional<float> GetFloat() const = 0;
+
+        virtual void SetUInt64(const UInt64 Value) = 0;
+        [[nodiscard]]
+        virtual std::optional<UInt64> GetUInt64() const = 0;
+
+        virtual void SetInt64(const Int64 Value) = 0;
+        [[nodiscard]]
+        virtual std::optional<Int64> GetInt64() const = 0;
+
+        virtual void SetUInt32(const UInt32 Value) = 0;
+        [[nodiscard]]
+        virtual std::optional<UInt32> GetUInt32() const = 0;
+
+        virtual void SetInt32(const Int32 Value) = 0;
+        [[nodiscard]]
+        virtual std::optional<Int32> GetInt32() const = 0;
+
+        virtual void SetUInt16(const UInt16 Value) = 0;
+        [[nodiscard]]
+        virtual std::optional<UInt16> GetUInt16() const = 0;
+
+        virtual void SetInt16(const Int16 Value) = 0;
+        [[nodiscard]]
+        virtual std::optional<Int16> GetInt16() const = 0;
+
+        virtual void SetUInt8(const UInt8 Value) = 0;
+        [[nodiscard]]
+        virtual std::optional<UInt8> GetUInt8() const = 0;
+
+        virtual void SetInt8(const Int8 Value) = 0;
+        [[nodiscard]]
+        virtual std::optional<Int8> GetInt8() const = 0;
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Navigation
+
+        virtual AttributeWalker& Next() = 0;
+        virtual AttributeWalker& Previous() = 0;
+        [[nodiscard]]
+        virtual Boole AtBegin() const = 0;
+        [[nodiscard]]
+        virtual Boole AtEnd() const = 0;
+    };//AttributeWalker
+
+    namespace Attribute {
+        ///////////////////////////////////////////////////////////////////////////////
+        // Attribute Helpers
+
+        template<typename Datum>
+        void SetValue(AttributeWalker& Walker, const Datum Value)
+            { (void)Walker;  (void)Value; }
+        template<typename Datum>
+        [[nodiscard]]
+        std::optional<Datum> GetValue(const AttributeWalker& Walker)
+            { return std::optional<Datum>(); }
+
+        template<>
+        void SetValue<StringView>(AttributeWalker& Walker, const StringView Value)
+            { Walker.SetString(Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<StringView> GetValue<StringView>(const AttributeWalker& Walker)
+            { return Walker.GetString(); }
+
+        template<>
+        void SetValue<long double>(AttributeWalker& Walker, const long double Value)
+            { Walker.SetLongDouble(Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<long double> GetValue<long double>(const AttributeWalker& Walker)
+            { return Walker.GetLongDouble(); }
+
+        template<>
+        void SetValue<double>(AttributeWalker& Walker, const double Value)
+            { Walker.SetDouble(Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<double> GetValue<double>(const AttributeWalker& Walker)
+            { return Walker.GetDouble(); }
+
+        template<>
+        void SetValue<float>(AttributeWalker& Walker, const float Value)
+            { Walker.SetFloat(Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<float> GetValue<float>(const AttributeWalker& Walker)
+            { return Walker.GetFloat(); }
+
+        template<>
+        void SetValue<UInt64>(AttributeWalker& Walker, const UInt64 Value)
+            { Walker.SetUInt64(Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<UInt64> GetValue<UInt64>(const AttributeWalker& Walker)
+            { return Walker.GetUInt64(); }
+
+        template<>
+        void SetValue<Int64>(AttributeWalker& Walker, const Int64 Value)
+            { Walker.SetInt64(Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<Int64> GetValue<Int64>(const AttributeWalker& Walker)
+            { return Walker.GetInt64(); }
+
+        template<>
+        void SetValue<UInt32>(AttributeWalker& Walker, const UInt32 Value)
+            { Walker.SetUInt32(Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<UInt32> GetValue<UInt32>(const AttributeWalker& Walker)
+            { return Walker.GetUInt32(); }
+
+        template<>
+        void SetValue<Int32>(AttributeWalker& Walker, const Int32 Value)
+            { Walker.SetInt32(Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<Int32> GetValue<Int32>(const AttributeWalker& Walker)
+            { return Walker.GetInt32(); }
+
+        template<>
+        void SetValue<UInt16>(AttributeWalker& Walker, const UInt16 Value)
+            { Walker.SetUInt16(Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<UInt16> GetValue<UInt16>(const AttributeWalker& Walker)
+            { return Walker.GetUInt16(); }
+
+        template<>
+        void SetValue<Int16>(AttributeWalker& Walker, const Int16 Value)
+            { Walker.SetInt16(Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<Int16> GetValue<Int16>(const AttributeWalker& Walker)
+            { return Walker.GetInt16(); }
+
+        template<>
+        void SetValue<UInt8>(AttributeWalker& Walker, const UInt8 Value)
+            { Walker.SetUInt8(Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<UInt8> GetValue<UInt8>(const AttributeWalker& Walker)
+            { return Walker.GetUInt8(); }
+
+        template<>
+        void SetValue<Int8>(AttributeWalker& Walker, const Int8 Value)
+            { Walker.SetInt8(Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<Int8> GetValue<Int8>(const AttributeWalker& Walker)
+            { return Walker.GetInt8(); }
+    }
+
+    class MEZZ_LIB ObjectWalker
+    {
+    public:
+        ///////////////////////////////////////////////////////////////////////////////
+        // Object Operations
+
+        virtual void SetName(const StringView Name) = 0;
+        [[nodiscard]]
+        virtual StringView GetName() const = 0;
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Object Navigation
+
+        [[nodiscard]]
+        virtual Boole AtRoot() const = 0;
+        [[nodiscard]]
+        virtual Boole AtBegin() const = 0;
+        [[nodiscard]]
+        virtual Boole AtEnd() const = 0;
+        [[nodiscard]]
+        virtual Boole HasChildren() const = 0;
+        [[nodiscard]]
+        virtual Boole HasChild(const StringView Name) const = 0;
+
+        virtual ObjectWalker& Next() = 0;
+        virtual ObjectWalker& Previous() = 0;
+        virtual ObjectWalker& Parent() = 0;
+        virtual ObjectWalker& FirstChild() = 0;
+        virtual ObjectWalker& Child(const StringView Name) = 0;
+
+        [[nodiscard]]
+        virtual Boole CreateChild(const StringView Name, const MemberTags Tags, const Boole Move) = 0;
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Attributes
+
+        [[nodiscard]]
+        virtual Boole HasAttributes() const = 0;
+        [[nodiscard]]
+        virtual AttributeWalker& GetAttributes() const = 0;
+        [[nodiscard]]
+        virtual AttributeWalker& GetAttribute(const StringView Name) const = 0;
+        [[nodiscard]]
+        virtual Boole CreateAttribute(const StringView Name, const MemberTags Tags) = 0;
+
+        template<typename AttributeType>
+        void Attribute(const StringView Name, const MemberTags Tags, AttributeType&& Attrib)
+        {
+            if( this->CreateAttribute(Name,Tags) ) {
+                AttributeWalker& Walker = this->GetAttribute(Name);
+                Serialization::Attribute::SetValue<AttributeType>( Walker, std::forward<AttributeType>(Attrib) );
+            }
+        }
+    };//ObjectWalker
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // ObjectLink (for handling non-owned pointers between objects)
+
+    struct MEZZ_LIB ObjectLink
+    {
+        String TypeName;
+        String InstanceName;
+        Boole IsConstructed = false;
     };
 
-    /// @brief Convert any class that supports serialization or has a serializer to a string of chars in a stream
-    /// @details Any Class will work with this template as long as it implements the method "XML::Node ProtoSerialize(XML::Document&) const"
-    /// @param Stream The ostream to put the serializable into.
-    /// @param Converted The item to be serialized, which must have a "XML::Node ProtoSerialize(XML::Node& CurrentRoot) const" method.
-    /// @param Indent Defaults to nothing but can be set to "\t" to get normal
-    /// @return A the stream that was passed and now contains the serialized object.
-    template <class T>
-    std::ostream& Serialize(std::ostream& Stream, const T& Converted, const String& Indent = String("") )
+    ///////////////////////////////////////////////////////////////////////////////
+    // ObjectJoin (for handling shared ownership pointers between objects)
+
+    struct MEZZ_LIB ObjectJoin
     {
-        Mezzanine::XML::Document Doc;
-        Doc.Load("");           // This sets the encoding to UTF8 ?!
-        Converted.ProtoSerialize(Doc);
-        Doc.Print(Stream, Indent.c_str());
-        return Stream;
+        Boole IsConstructed = false;
+    };
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // Serialization Tree Navigation Helpers
+
+    class MEZZ_LIB ScopedObjectNode
+    {
+    protected:
+        Serialization::ObjectWalker* Node = nullptr;
+    public:
+        ScopedObjectNode(const StringView Name, const MemberTags Tags, Serialization::ObjectWalker& Walker)
+        {
+            if( Walker.CreateChild(Name,Tags,true) ) {
+                this->Node = &Walker;
+            }
+        }
+        ~ScopedObjectNode()
+        {
+            if( this->IsValid() ) {
+                this->Node->Parent();
+            }
+        }
+
+        Boole IsValid() const
+            { return ( this->Node != nullptr ); }
+    };
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // PolymorphicCasterHolder
+#if 1
+    template<class Base, class Derived>
+    class ObjectCaster;
+
+    class ObjectCasterBase
+    {
+    public:
+        virtual ~ObjectCasterBase() = default;
+        virtual Boole CanUpcast(const std::type_info& BaseType, const std::type_info& DerivedType) const = 0;
+        virtual void Serialize(const StringView Name,
+                               const MemberTags Tags,
+                               void* ToCast,
+                               const Integer Version,
+                               Serialization::ObjectWalker& Walker) = 0;
+        virtual void Deserialize(void* ToCast,
+                                 const Integer Version,
+                                 Serialization::ObjectWalker& Walker) = 0;
+    };//ObjectCasterBase
+
+    struct PolymorphicCasterHolder
+    {
+        using CasterBaseType = ObjectCasterBase;
+        using DerivedContainer = std::vector<CasterBaseType*>;
+        using BaseContainer = std::unordered_map< std::type_index, DerivedContainer >;
+
+        BaseContainer Casters;
+
+        PolymorphicCasterHolder() = default;
+        PolymorphicCasterHolder(const PolymorphicCasterHolder& Other) = delete;
+        PolymorphicCasterHolder(PolymorphicCasterHolder&& Other) = delete;
+        ~PolymorphicCasterHolder() = default;
+
+        PolymorphicCasterHolder& operator=(const PolymorphicCasterHolder& Other) = delete;
+        PolymorphicCasterHolder& operator=(PolymorphicCasterHolder&& Other) = delete;
+
+        template<class Base, class Derived>
+        void RegisterCaster(ObjectCaster<Base,Derived>* NewCaster)
+        {
+            Casters[ std::type_index( typeid(Base) ) ].push_back(NewCaster);
+        }
+
+        ObjectCasterBase* GetCaster(const std::type_info& BaseInfo, const std::type_info& DerivedInfo) const
+        {
+            BaseContainer::const_iterator FoundBaseIt = Casters.find( std::type_index(BaseInfo) );
+            if( FoundBaseIt != Casters.end() ) {
+                const DerivedContainer& FoundBase = (*FoundBaseIt).second;
+                DerivedContainer::const_iterator FoundDerivedIt = std::find_if(FoundBase.begin(),FoundBase.end(),
+                    [&](CasterBaseType* Caster) -> Boole {
+                        return Caster->CanUpcast(BaseInfo,DerivedInfo);
+                    }
+                );
+                if( FoundDerivedIt != FoundBase.end() ) {
+                    return (*FoundDerivedIt);
+                }
+            }
+            return nullptr;
+        }
+
+        template<class Base, class Derived>
+        ObjectCasterBase* GetCaster() const
+        {
+            return this->GetCaster( typeid(Base), typeid(Derived) );
+        }
+    };//PolymorphicCasterHolder
+
+    PolymorphicCasterHolder& GetPolymorphicCasterHolder();
+    PolymorphicCasterHolder& GetPolymorphicCasterHolder()
+    {
+        static PolymorphicCasterHolder Store;
+        return Store;
     }
 
-    /// @brief Deserialize the next xml tag in the stream into a specific in memory class instance.
-    /// @details "void ProtoDeSerialize(const XML::Node&)" and "static String GetSerializableName() const" must be implemented on
-    /// the class instance that is passed in for this to work
-    /// @param Stream The istream to extract the required data from
-    /// @param Converted The Class member that is deserialized.
-    /// @return This returns the istream that provided the serialized data.
-    template <class T>
-    std::istream& DeSerialize(std::istream& Stream, T& Converted)
+    template<class Base, class Derived>
+    class ObjectCaster final : public ObjectCasterBase
     {
-        Mezzanine::String OneTag( Mezzanine::XML::GetOneTag(Stream) );
-        Mezzanine::CountedPtr<Mezzanine::XML::Document> Doc( Mezzanine::XML::PreParseClassFromSingleTag("Mezzanine::", Converted.GetSerializableName(), OneTag) );
+    public:
+        static_assert( std::is_base_of_v<Base,Derived>, "\"Base\" is not a base class of Derived" );
 
-        Converted.ProtoDeSerialize(Doc->GetFirstChild());
+        ~ObjectCaster() = default;
+        Boole CanUpcast(const std::type_info& BaseType, const std::type_info& DerivedType) const
+        {
+            return ( BaseType == typeid(Base) && DerivedType == typeid(Derived) );
+        }
+        void Serialize(const StringView Name,
+                       const MemberTags Tags,
+                       void* ToCast,
+                       const Int32 Version,
+                       ObjectWalker& Walker)
+        {
+            Derived* Casted = static_cast<Derived*>( static_cast<Base*>(ToCast) );
+            Serialization::Serialize(Name,std::forward<Derived*>(Casted),Tags,Version,Walker);
+        }
+        void Deserialize(void* ToCast,
+                         const Int32 Version,
+                         ObjectWalker& Walker)
+        {
+            Derived* Casted = static_cast<Derived*>( static_cast<Base*>(ToCast) );
+            Serialization::Deserialize(std::forward<Derived*>(Casted),Version,Walker);
+        }
+    };//ObjectCaster
+#else
+    template<class Derived>
+    class ObjectCaster
+    {
+    public:
+        static constexpr const std::type_info& GetType()
+        {
+            return typeid(Derived);
+        }
+        static constexpr std::type_index GetTypeIndex()
+        {
+            return std::type_index( GetType() );
+        }
+        template< class Base, typename = std::enable_if_t< std::is_base_of<Base,Derived> > >
+        static constexpr Derived* Upcast(Base* ToUpcast)
+        {
+            return static_cast<Derived*>(ToUpcast);
+        }
+    };//ObjectCaster
 
-        return Stream;
+    template<class Base>
+
+#endif
+    ///////////////////////////////////////////////////////////////////////////////
+    // PointerTracker
+
+    class MEZZ_LIB PointerTracker
+    {
+    public:
+        using PtrType = void*;
+        using PointerContainer = std::set<PtrType>;
+        using PointerIterator = PointerContainer::const_iterator;
+    protected:
+        PointerContainer TrackedPointers;
+    public:
+        PointerTracker() = default;
+        PointerTracker(const PointerTracker& Other) = delete;
+        PointerTracker(PointerTracker&& Other) = delete;
+        ~PointerTracker() = default;
+
+        PointerTracker& operator=(const PointerTracker& Other) = delete;
+        PointerTracker& operator=(PointerTracker&& Other) = delete;
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Tracking
+
+        Boole TrackPointer(PtrType ToTrack)
+        {
+            std::pair<PointerIterator,Boole> Pair = TrackedPointers.insert(ToTrack);
+            return Pair.second;
+        }
+        Boole IsTracked(PtrType ToCheck)
+        {
+            return TrackedPointers.count(ToCheck) != 0;
+        }
+    };//PointerTracker
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // Serialization Helpers
+
+    namespace Impl
+    {
+        ///////////////////////////////////////////////////////////////////////////////
+        // Serialize Helpers
+
+        template<class SerializeType>
+        void SerializeSimpleMember(const StringView Name,
+                                   const SerializeType& ToSerialize,
+                                   const MemberTags Tags,
+                                   Serialization::ObjectWalker& Walker)
+        {
+            Walker.Attribute(Name,Tags,ToSerialize);
+        }
+
+        template<class SerializeType>
+        void SerializePointerMember(const StringView Name,
+                                    const SerializeType ToSerialize,
+                                    const MemberTags Tags,
+                                    Serialization::ObjectWalker& Walker)
+        {
+            (void)Name;
+            (void)ToSerialize;
+            (void)Tags;
+            (void)Walker;
+        }
+
+        template<class SerializeType>
+        void SerializeAllMembers(const SerializeType& ToSerialize,
+                                 Serialization::ObjectWalker& Walker)
+        {
+            if constexpr( IsRegistered<SerializeType>() ) {
+                DoForAllMembers<SerializeType>([&](const auto& Member) {
+                    const MemberTags Tags = Member.GetTags();
+                    if( ( Tags & MemberTags::Ignore ) != MemberTags::None ) {
+                        return;
+                    }
+                    const Int32 Version = ObjectVersion::Latest;
+                    Serialization::Serialize(Member.GetName(),Member.GetValue(ToSerialize),Tags,Version,Walker);
+                });
+            }
+        }
+
+        template<class SerializeType>
+        void SerializeGenericClass(const StringView Name,
+                                   const SerializeType& ToSerialize,
+                                   const MemberTags Tags,
+                                   const Int32 Version,
+                                   Serialization::ObjectWalker& Walker)
+        {
+            (void)Version;
+            if constexpr( IsRegistered<SerializeType>() ) {
+                ScopedObjectNode Node(Name,Tags,Walker);
+                if( Node.IsValid() ) {
+                    Serialization::Impl::SerializeAllMembers(ToSerialize,Walker);
+                }
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Deserialize Helpers
+
+
+    }//Impl
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // Serialize
+
+    template< typename SerializeType,
+              typename = std::enable_if_t< !std::is_pointer_v< std::decay_t<SerializeType> > > >
+    void Serialize(const StringView Name,
+                   const SerializeType& ToSerialize,
+                   const MemberTags Tags,
+                   const Int32 Version,
+                   ObjectWalker& Walker)
+    {
+        if constexpr( std::is_arithmetic_v<SerializeType> ) { // Basic Number Types
+            (void)Version;
+            Impl::SerializeSimpleMember(Name,ToSerialize,Tags,Walker);
+        //}else if constexpr(  ) {
+
+        }else if constexpr( StringTools::is_string_v<SerializeType> ) { // Strings
+            (void)Version;
+            Impl::SerializeSimpleMember(Name,ToSerialize,Tags,Walker);
+        }else{ // Generic Class
+            Impl::SerializeGenericClass(Name,ToSerialize,Tags,Version,Walker);
+        }
+    }
+    template< typename SerializeType,
+              typename = std::enable_if_t< std::is_pointer_v< std::decay_t<SerializeType> > > >
+    void Serialize(const StringView Name,
+                   const SerializeType ToSerialize,
+                   const MemberTags Tags,
+                   const Int32 Version,
+                   ObjectWalker& Walker)
+    {
+        if constexpr( std::is_polymorphic_v<SerializeType> ) {
+            const std::type_info& BaseInfo = typeid(ToSerialize);
+            const std::type_info& DerivedInfo = typeid(*ToSerialize);
+            if( std::type_index(BaseInfo) != std::type_index(DerivedInfo) ) {
+                ObjectCasterBase* Caster = GetPolymorphicCasterHolder().GetCaster(BaseInfo,DerivedInfo);
+                if( Caster != nullptr ) {
+                    Caster->Serialize(Name,ToSerialize,Tags,Version,Walker);
+                }else{
+                    throw std::runtime_error("No caster found for polymorphic object.");
+                }
+            }else{
+                Serialization::Serialize(Name,*ToSerialize,Tags,Version,Walker);
+            }
+        }else{
+            Serialization::Serialize(Name,*ToSerialize,Tags,Version,Walker);
+        }
+    }
+    template< typename SerializeType >
+    void Serialize(const StringView Name,
+                   const std::shared_ptr<SerializeType> ToSerialize,
+                   const MemberTags Tags,
+                   const Int32 Version,
+                   ObjectWalker& Walker)
+    {
+        (void)Name;
+        (void)Tags;
+        (void)ToSerialize;
+        (void)Version;
+        (void)Walker;
     }
 
-    /// @internal
-    /// @brief Used to interface with a previous version of the serialization code.
-    /// @details The older serialization was implemented entirely in streaming operators. This uses those, however inneficient to get the XML::Node that
-    /// the current serialization solution is centered around.
-    /// @param Converted The class implementing older serialization code.
-    /// @param CurrentRoot The place in the xml hiearchy to append the items to be sloppily ProtoSerialized.
-    template <class T>
-    void SloppyProtoSerialize(const T& Converted, XML::Node& CurrentRoot)
-    {
-        std::stringstream Depot;         //Make a place to store serialized XML
-        XML::Document Staging;      //Make a place to convert from XML to an xml node
-        Depot << Converted;         //Use old conversion tools to convert to serialized XML as if writing to a file
-        Staging.Load(Depot);        //Load To the staging area as if loading XML form a file or whatever.
+    ///////////////////////////////////////////////////////////////////////////////
+    // Deserialize
 
-        CurrentRoot.AppendCopy(Staging.DocumentElement()); //Append our work as an XML::node to the desired place in the xml Hierarchy.
+    template< typename SerializeType,
+              typename = std::enable_if_t< !std::is_pointer_v< std::decay_t<SerializeType> > > >
+    void Deserialize(SerializeType& ToDeserialize,
+                     const Int32 Version,
+                     Serialization::ObjectWalker& Walker)
+    {
+        (void)ToDeserialize;
+        (void)Version;
+        (void)Walker;
+    }
+    template< typename SerializeType,
+              typename = std::enable_if_t< std::is_pointer_v< std::decay_t<SerializeType> > > >
+    void Deserialize(SerializeType ToDeserialize,
+                     const Int32 Version,
+                     Serialization::ObjectWalker& Walker)
+    {
+        (void)ToDeserialize;
+        (void)Version;
+        (void)Walker;
+    }
+    template< typename SerializeType >
+    void Deserialize(std::shared_ptr<SerializeType> ToDeserialize,
+                     const Int32 Version,
+                     Serialization::ObjectWalker& Walker)
+    {
+        (void)ToDeserialize;
+        (void)Version;
+        (void)Walker;
     }
 
-    /// @brief Simply does some string concatenation, then throws an Exception
-    /// @param FailedTo What failed to happed for example "create testnode" or "acquire a mutex"
-    /// @param ClassName The name of the class throw the exception
-    /// @param SOrD Defaults to true, and if true uses the word "Serialization", otherwise uses the word "DeSerialization"
-    /// @throw A Mezzanine::Exception with the message "Could not {FailedTo} during {ClassName} [De]Serialization.""Could not {FailedTo} during {ClassName} [De]Serialization."
-    void MEZZ_LIB SerializeError(const String& FailedTo, const String& ClassName, Boole SOrD = true);
+}//Serialization
 
-    /// @brief Simply does some string concatenation, then throws an Exception
-    /// @param FailedTo What failed to happed for example "create testnode" or "acquire a mutex"
-    /// @param ClassName The name of the class throw the exception
-    /// @param SOrD Defaults to false, and if true uses the word "Serialization", otherwise uses the word "DeSerialization"
-    /// @throw A Mezzanine::Exception with the message "Could not {FailedTo} during {ClassName} [De]Serialization."
-    /// @details This just calls SerializeError() with the third parameter false. This exists solely to make code
-    /// A little more readable.
-    void MEZZ_LIB DeSerializeError(const String& FailedTo, const String& ClassName, Boole SOrD = false);
+    ///////////////////////////////////////////////////////////////////////////////
+    // Caster Registration
+
+    template<class Base, class Derived>
+    void RegisterCaster()
+    {
+        Serialization::ObjectCaster<Base,Derived>* NewCaster = new Serialization::ObjectCaster<Base,Derived>();
+        Serialization::GetPolymorphicCasterHolder().RegisterCaster(NewCaster);
+    }
+
+    template<class Base, class... Deriveds>
+    void RegisterCasters()
+    {
+        ( RegisterCaster<Base,Deriveds>() , ... );
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // Serialize
+
+    template< typename SerializeType,
+              typename = std::enable_if_t< !std::is_pointer_v< std::decay_t<SerializeType> > > >
+    void Serialize(const StringView Name,
+                   const SerializeType& ToSerialize,
+                   const Int32 Version,
+                   Serialization::ObjectWalker& Walker)
+    {
+        Serialization::Serialize(Name,MemberTags::None,ToSerialize,Version,Walker);
+    }
+    template< typename SerializeType,
+              typename = std::enable_if_t< std::is_pointer_v< std::decay_t<SerializeType> > > >
+    void Serialize(const StringView Name,
+                   const SerializeType ToSerialize,
+                   const Int32 Version,
+                   Serialization::ObjectWalker& Walker)
+    {
+        Serialization::Serialize(Name,MemberTags::None,ToSerialize,Version,Walker);
+    }
+    template< typename SerializeType >
+    void Serialize(const StringView Name,
+                   const std::shared_ptr<SerializeType> ToSerialize,
+                   const Int32 Version,
+                   Serialization::ObjectWalker& Walker)
+    {
+        Serialization::Serialize(Name,MemberTags::None,ToSerialize,Version,Walker);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // Deserialize
+
+    template< typename SerializeType,
+              typename = std::enable_if_t< !std::is_pointer_v< std::decay_t<SerializeType> > > >
+    void Deserialize(SerializeType& ToDeserialize,
+                     const Int32 Version,
+                     Serialization::ObjectWalker& Walker)
+    {
+        Serialization::Deserialize(ToDeserialize,Version,Walker);
+    }
+    template< typename SerializeType,
+              typename = std::enable_if_t< std::is_pointer_v< std::decay_t<SerializeType> > > >
+    void Deserialize(SerializeType ToDeserialize,
+                     const Int32 Version,
+                     Serialization::ObjectWalker& Walker)
+    {
+        Serialization::Deserialize(ToDeserialize,Version,Walker);
+    }
+    template< typename SerializeType >
+    void Deserialize(std::shared_ptr<SerializeType> ToDeserialize,
+                     const Int32 Version,
+                     Serialization::ObjectWalker& Walker)
+    {
+        Serialization::Deserialize(ToDeserialize,Version,Walker);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // Serializer
+
+    class Serializer
+    {
+    protected:
+        Serialization::BackendBase* Backend = nullptr;
+        Serialization::ContextBase* Context = nullptr;
+    public:
+        Serializer(Serialization::BackendBase* Back) :
+            Backend(Back)
+            {  }
+
+
+        Serialization::ContextBase* GetContext() const
+            { return this->Context; }
+
+        template<typename ObjectType, typename IDType>
+        ObjectType* FindContextObject(const IDType ID)
+        {
+            if( this->Context != nullptr ) {
+                void* Found = this->Context->FindContextObject(ID,std::type_index(typeid(ObjectType)));
+                return reinterpret_cast<ObjectType>(Found);
+            }
+            return nullptr;
+        }
+    };//Serializer
+
+    /// @}
 }//Mezzanine
-
-/*
-/// @brief This will call convert an XML::Node into Text in a stream
-/// @param Stream The std::ostream that the serializable will be stuffed into.
-/// @param OneNode The xml to be converted
-/// @return This returns Stream that is passed in, with the additional data of the serialized object.
-//template <>
-std::ostream& MEZZ_LIB operator<< <Mezzanine::XML::Node> (std::ostream& Stream, const Mezzanine::XML::Node& OneNode)
-{
-    OneNode.Print(Stream);
-    return Stream;
-}
-*/
 
 #endif
