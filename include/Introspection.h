@@ -1561,5 +1561,3 @@ namespace Mezzanine {
 }// Mezzanine
 
 #endif
-#endif // header guard
-

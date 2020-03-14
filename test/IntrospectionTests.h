@@ -677,5 +677,3 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
 }
 
 #endif
-#endif // header guard
-

@@ -1,6 +1,3 @@
-#ifndef HEADER_3D8337A4CB4EC078
-#define HEADER_3D8337A4CB4EC078
-
 // © Copyright 2010 - 2020 BlackTopp Studios Inc.
 /* This file is part of The Mezzanine Engine.
 
@@ -182,5 +179,3 @@ AUTOMATIC_TEST_GROUP(SerializationTests,Serialization)
 }
 
 #endif
-#endif // header guard
-

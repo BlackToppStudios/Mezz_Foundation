@@ -1,6 +1,3 @@
-#ifndef HEADER_76EDFAD2100F5386
-#define HEADER_76EDFAD2100F5386
-
 // © Copyright 2010 - 2020 BlackTopp Studios Inc.
 /* This file is part of The Mezzanine Engine.
 
@@ -937,5 +934,3 @@ namespace Serialization {
 }//Mezzanine
 
 #endif
-#endif // header guard
-
