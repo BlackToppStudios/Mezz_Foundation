@@ -1,3 +1,6 @@
+#ifndef HEADER_5E861F9F8EB2480
+#define HEADER_5E861F9F8EB2480
+
 // © Copyright 2010 - 2019 BlackTopp Studios Inc.
 /* This file is part of The Mezzanine Engine.
 
@@ -441,7 +444,7 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
                     std::runtime_error,
                     [&](){ NoSetAccessor.SetValue(TestStruct,5); } );
         TEST_NO_THROW( "MemberAccessor::GetValue()-NoSet-NoThrow",
-                       [&](){ NoSetAccessor.GetValue(TestStruct); } );
+                       [&](){ static_cast<void>( NoSetAccessor.GetValue(TestStruct) ); } );
 
         using NoGetMethodType = decltype(&BaseStruct::FloatVar);
         using NoGetType = MemberAccessor<NoGetMethodType,NoGetMethodType,MemberTags::None>;
@@ -450,7 +453,7 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
                        [&](){ NoGetAccessor.SetValue(TestStruct,5.0f); } );
         TEST_THROW( "MemberAccessor::GetValue()-NoGet-NoThrow",
                     std::runtime_error,
-                    [&](){ NoGetAccessor.GetValue(TestStruct); } );
+                    [&](){ static_cast<void>( NoGetAccessor.GetValue(TestStruct) ); } );
 
         using NoSetOrGetMethodType = decltype(&BaseStruct::StringVar);
         using NoSetOrGetType = MemberAccessor<NoSetOrGetMethodType,NoSetOrGetMethodType,MemberTags::None>;
@@ -460,7 +463,7 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
                     [&](){ NoSetOrGetAccessor.SetValue(TestStruct,String("Oh noes!")); } );
         TEST_THROW( "MemberAccessor::GetValue()-NoSetOrGet-Throw",
                     std::runtime_error,
-                    [&](){ NoSetOrGetAccessor.GetValue(TestStruct); } );
+                    [&](){ static_cast<void>( NoSetOrGetAccessor.GetValue(TestStruct) ); } );
     }// MemberAccessor/BaseStruct Throw Tests
 
     {// MakeMemberAccessor/BaseStruct
@@ -677,3 +680,5 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
 }
 
 #endif
+#endif // header guard
+

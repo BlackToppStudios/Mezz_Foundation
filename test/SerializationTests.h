@@ -1,3 +1,6 @@
+#ifndef HEADER_3D8337A4CB4EC078
+#define HEADER_3D8337A4CB4EC078
+
 // © Copyright 2010 - 2020 BlackTopp Studios Inc.
 /* This file is part of The Mezzanine Engine.
 
@@ -49,6 +52,20 @@
 
 namespace SerializationTest {
     using namespace Mezzanine;
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // Test Backend
+
+    class Backend : public Serialization::BackendBase
+    {
+    protected:
+    public:
+        Backend() = default;
+        virtual ~Backend() = default;
+    };//Backend
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // Classes to Seriailze
 
     struct Simple
     {
@@ -165,3 +182,5 @@ AUTOMATIC_TEST_GROUP(SerializationTests,Serialization)
 }
 
 #endif
+#endif // header guard
+

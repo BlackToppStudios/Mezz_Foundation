@@ -1,3 +1,6 @@
+#ifndef HEADER_76EDFAD2100F5386
+#define HEADER_76EDFAD2100F5386
+
 // © Copyright 2010 - 2020 BlackTopp Studios Inc.
 /* This file is part of The Mezzanine Engine.
 
@@ -46,15 +49,52 @@
 #ifndef SWIG
     #include "Introspection.h"
     #include "StringTools.h"
+
+    #include <unordered_map>
 #endif
 
 namespace Mezzanine {
-//namespace Serialization {
+namespace Serialization {
     /// @addtogroup Serialization
     /// @{
 
     ///////////////////////////////////////////////////////////////////////////////
-    // ForwardDeclares
+    // Forward Declares
+
+    class AttributeWalker;
+    class ObjectWalker;
+
+    template<typename SerializeType, typename = std::enable_if_t<!std::is_pointer_v<SerializeType>>>
+    void Serialize(const StringView Name,
+                   const SerializeType& ToSerialize,
+                   const MemberTags Tags,
+                   const Int32 Version,
+                   Serialization::ObjectWalker& Walker);
+    template<typename SerializeType, typename = std::enable_if_t<std::is_pointer_v<SerializeType>>>
+    void Serialize(const StringView Name,
+                   const SerializeType ToSerialize,
+                   const MemberTags Tags,
+                   const Int32 Version,
+                   Serialization::ObjectWalker& Walker);
+    template<typename SerializeType>
+    void Serialize(const StringView Name,
+                   const std::shared_ptr<SerializeType> ToSerialize,
+                   const MemberTags Tags,
+                   const Int32 Version,
+                   Serialization::ObjectWalker& Walker);
+
+    template<typename SerializeType, typename = std::enable_if_t<!std::is_pointer_v<SerializeType>>>
+    void Deserialize(SerializeType& ToDeserialize,
+                     const Int32 Version,
+                     Serialization::ObjectWalker& Walker);
+    template<typename SerializeType, typename = std::enable_if_t<std::is_pointer_v<SerializeType>>>
+    void Deserialize(SerializeType ToDeserialize,
+                     const Int32 Version,
+                     Serialization::ObjectWalker& Walker);
+    template<typename SerializeType>
+    void Deserialize(std::shared_ptr<SerializeType> ToDeserialize,
+                     const Int32 Version,
+                     Serialization::ObjectWalker& Walker);
 
     ///////////////////////////////////////////////////////////////////////////////
     // Convenience type traits
@@ -62,7 +102,8 @@ namespace Mezzanine {
     /// @brief Convenience type trait that decays the checked type before passing it to std::is_class.
     /// @tparam CheckType The type to decay and check if it is a class.
     template<class CheckType>
-    struct is_class_decayed : std::is_class< std::remove_cv_t< std::remove_reference_t<CheckType> > >
+    struct is_class_decayed :
+        std::is_class< std::remove_cv_t< std::remove_reference_t<CheckType> > >
         {  };
 
     /// @brief Convenience inline variable for getting just the bool of the is_class_decayed check.
@@ -73,7 +114,8 @@ namespace Mezzanine {
     /// @brief A type trait that checks to see if a type is a class that isn't a String or StringView.
     /// @tparam CheckType The type to check if it is any class type other than String or StringView.
     template<class CheckType>
-    struct is_generic_serializable : std::bool_constant<!is_string_v<CheckType> && is_class_decayed_v<CheckType>>
+    struct is_generic_serializable :
+        std::bool_constant< !StringTools::is_string_v<CheckType> && is_class_decayed_v<CheckType> >
         {  };
 
     /// @brief Convenience inline variable for getting just the bool of the is_non_string_class check.
@@ -112,144 +154,461 @@ namespace Mezzanine {
     using HasIdentificationName = std::is_detected<GetIdentification_t,Class>;
 
     ///////////////////////////////////////////////////////////////////////////////
+    // Convenience constants
+
+    /// @brief A simple enum for the constants used for versioning objects that are serialized.
+    enum ObjectVersion
+    {
+        Latest = 0  ///< The latest version available to the current build. Not useful for Deserialization.
+    };
+
+    ///////////////////////////////////////////////////////////////////////////////
     // Backend Interface
+
+    // Needs ObjectNode forward declare
 
     class BackendBase
     {
     public:
+        ///////////////////////////////////////////////////////////////////////////////
+        // Query
 
+        virtual StringView GetImplementationName() const = 0;
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Root Object
+
+        virtual ObjectWalker& GetWalker() const = 0;
     };//BackendBase
 
     ///////////////////////////////////////////////////////////////////////////////
-    // Object
+    // SerializerContext
 
-    class ObjectNode
+    class ContextBase
     {
     public:
-        StringView GetName() const = 0;
+        virtual ContextBase* GetParentContext() const = 0;
 
-        AttributeNode* CreateAttribute(const StringView Name) = 0;
-    };//Object
+        virtual Boole IsSame(void* ObjectPtr, const std::type_info& Info) const = 0;
+
+        virtual void* FindContextObject(const StringView Name, const std::type_index Type) const = 0;
+        virtual void* FindContextObject(const UInt64 ID, const std::type_index Type) const = 0;
+    };//SerializerContextBase
+
+    template<typename SpecialContext>
+    class Context : public ContextBase
+        {  };
+
+    template<typename SpecialContext>
+    ContextBase* UpdateContext(const ContextBase* Current, const SpecialContext* ToUpdate)
+    {
+        using ContextType = Context<SpecialContext>;
+        if constexpr( !std::is_abstract_v<ContextType> ) {
+            static_assert( std::is_constructible_v<ContextType,ContextBase*,SpecialContext*>,
+                           "SerializerContext type lacks well-formed constructor." );
+            if( Current != nullptr && !Current->IsSame(ToUpdate,typeid(SpecialContext)) ) {
+                return new ContextType(Current,ToUpdate);
+            }
+        }
+        return Current;
+    }
+
+    template<typename SpecialContext>
+    ContextBase* RevertContext(const ContextBase* Current, const SpecialContext* ToRevert)
+    {
+        using ContextType = Context<SpecialContext>;
+        if constexpr( !std::is_abstract_v<ContextType> ) {
+            if( Current != nullptr && Current->IsSame(ToRevert,typeid(SpecialContext)) ) {
+                ContextBase* Reverted = Current->GetParentContext();
+                delete Current;
+                return Reverted;
+            }
+        }
+        return Current;
+    }
 
     ///////////////////////////////////////////////////////////////////////////////
-    // Root Object
-    // Can be handled by backend?  Is it needed?
+    // Tree Walkers
 
-    ///////////////////////////////////////////////////////////////////////////////
-    // Attribute
-
-    class AttributeNode
+    class MEZZ_LIB AttributeWalker
     {
     public:
+        ///////////////////////////////////////////////////////////////////////////////
+        // Name Operations
+
         virtual void SetName(const StringView Name) = 0;
+        [[nodiscard]]
         virtual StringView GetName() const = 0;
 
-        virtual void SetValue(const StringView Value) = 0;
-        virtual StringView GetValue() const = 0;
+        ///////////////////////////////////////////////////////////////////////////////
+        // Value Operations
 
-        virtual void SetValue(const long double Value) = 0;
-        virtual long double GetValue() const = 0;
+        virtual void SetString(const StringView Value) = 0;
+        [[nodiscard]]
+        virtual std::optional<StringView> GetString() const = 0;
 
-        virtual void SetValue(const double Value) = 0;
-        virtual double GetValue() const = 0;
+        virtual void SetLongDouble(const long double Value) = 0;
+        [[nodiscard]]
+        virtual std::optional<long double> GetLongDouble() const = 0;
 
-        virtual void SetValue(const float Value) = 0;
-        virtual float GetValue() const = 0;
+        virtual void SetDouble(const double Value) = 0;
+        [[nodiscard]]
+        virtual std::optional<double> GetDouble() const = 0;
 
-        virtual void SetValue(const UInt64 Value) = 0;
-        virtual UInt64 GetValue() const = 0;
+        virtual void SetFloat(const float Value) = 0;
+        [[nodiscard]]
+        virtual std::optional<float> GetFloat() const = 0;
 
-        virtual void SetValue(const Int64 Value) = 0;
-        virtual Int64 GetValue() const = 0;
+        virtual void SetUInt64(const UInt64 Value) = 0;
+        [[nodiscard]]
+        virtual std::optional<UInt64> GetUInt64() const = 0;
 
-        virtual void SetValue(const UInt32 Value) = 0;
-        virtual UInt32 GetValue() const = 0;
+        virtual void SetInt64(const Int64 Value) = 0;
+        [[nodiscard]]
+        virtual std::optional<Int64> GetInt64() const = 0;
 
-        virtual void SetValue(const Int32 Value) = 0;
-        virtual Int32 GetValue() const = 0;
+        virtual void SetUInt32(const UInt32 Value) = 0;
+        [[nodiscard]]
+        virtual std::optional<UInt32> GetUInt32() const = 0;
 
-        virtual void SetValue(const UInt16 Value) = 0;
-        virtual UInt16 GetValue() const = 0;
+        virtual void SetInt32(const Int32 Value) = 0;
+        [[nodiscard]]
+        virtual std::optional<Int32> GetInt32() const = 0;
 
-        virtual void SetValue(const Int16 Value) = 0;
-        virtual Int16 GetValue() const = 0;
+        virtual void SetUInt16(const UInt16 Value) = 0;
+        [[nodiscard]]
+        virtual std::optional<UInt16> GetUInt16() const = 0;
 
-        virtual void SetValue(const UInt8 Value) = 0;
-        virtual UInt8 GetValue() const = 0;
+        virtual void SetInt16(const Int16 Value) = 0;
+        [[nodiscard]]
+        virtual std::optional<Int16> GetInt16() const = 0;
 
-        virtual void SetValue(const Int8 Value) = 0;
-        virtual Int8 GetValue() const = 0;
-    };//Attribute
+        virtual void SetUInt8(const UInt8 Value) = 0;
+        [[nodiscard]]
+        virtual std::optional<UInt8> GetUInt8() const = 0;
+
+        virtual void SetInt8(const Int8 Value) = 0;
+        [[nodiscard]]
+        virtual std::optional<Int8> GetInt8() const = 0;
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Navigation
+
+        virtual AttributeWalker& Next() = 0;
+        virtual AttributeWalker& Previous() = 0;
+        [[nodiscard]]
+        virtual Boole AtBegin() const = 0;
+        [[nodiscard]]
+        virtual Boole AtEnd() const = 0;
+    };//AttributeWalker
+
+    namespace Attribute {
+        ///////////////////////////////////////////////////////////////////////////////
+        // Attribute Helpers
+
+        template<typename Datum>
+        void SetValue(AttributeWalker& Walker, const Datum Value)
+            { (void)Walker;  (void)Value; }
+        template<typename Datum>
+        [[nodiscard]]
+        std::optional<Datum> GetValue(const AttributeWalker& Walker)
+            { return std::optional<Datum>(); }
+
+        template<>
+        void SetValue<StringView>(AttributeWalker& Walker, const StringView Value)
+            { Walker.SetString(Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<StringView> GetValue<StringView>(const AttributeWalker& Walker)
+            { return Walker.GetString(); }
+
+        template<>
+        void SetValue<long double>(AttributeWalker& Walker, const long double Value)
+            { Walker.SetLongDouble(Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<long double> GetValue<long double>(const AttributeWalker& Walker)
+            { return Walker.GetLongDouble(); }
+
+        template<>
+        void SetValue<double>(AttributeWalker& Walker, const double Value)
+            { Walker.SetDouble(Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<double> GetValue<double>(const AttributeWalker& Walker)
+            { return Walker.GetDouble(); }
+
+        template<>
+        void SetValue<float>(AttributeWalker& Walker, const float Value)
+            { Walker.SetFloat(Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<float> GetValue<float>(const AttributeWalker& Walker)
+            { return Walker.GetFloat(); }
+
+        template<>
+        void SetValue<UInt64>(AttributeWalker& Walker, const UInt64 Value)
+            { Walker.SetUInt64(Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<UInt64> GetValue<UInt64>(const AttributeWalker& Walker)
+            { return Walker.GetUInt64(); }
+
+        template<>
+        void SetValue<Int64>(AttributeWalker& Walker, const Int64 Value)
+            { Walker.SetInt64(Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<Int64> GetValue<Int64>(const AttributeWalker& Walker)
+            { return Walker.GetInt64(); }
+
+        template<>
+        void SetValue<UInt32>(AttributeWalker& Walker, const UInt32 Value)
+            { Walker.SetUInt32(Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<UInt32> GetValue<UInt32>(const AttributeWalker& Walker)
+            { return Walker.GetUInt32(); }
+
+        template<>
+        void SetValue<Int32>(AttributeWalker& Walker, const Int32 Value)
+            { Walker.SetInt32(Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<Int32> GetValue<Int32>(const AttributeWalker& Walker)
+            { return Walker.GetInt32(); }
+
+        template<>
+        void SetValue<UInt16>(AttributeWalker& Walker, const UInt16 Value)
+            { Walker.SetUInt16(Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<UInt16> GetValue<UInt16>(const AttributeWalker& Walker)
+            { return Walker.GetUInt16(); }
+
+        template<>
+        void SetValue<Int16>(AttributeWalker& Walker, const Int16 Value)
+            { Walker.SetInt16(Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<Int16> GetValue<Int16>(const AttributeWalker& Walker)
+            { return Walker.GetInt16(); }
+
+        template<>
+        void SetValue<UInt8>(AttributeWalker& Walker, const UInt8 Value)
+            { Walker.SetUInt8(Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<UInt8> GetValue<UInt8>(const AttributeWalker& Walker)
+            { return Walker.GetUInt8(); }
+
+        template<>
+        void SetValue<Int8>(AttributeWalker& Walker, const Int8 Value)
+            { Walker.SetInt8(Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<Int8> GetValue<Int8>(const AttributeWalker& Walker)
+            { return Walker.GetInt8(); }
+    }
+
+    class MEZZ_LIB ObjectWalker
+    {
+    public:
+        ///////////////////////////////////////////////////////////////////////////////
+        // Object Operations
+
+        virtual void SetName(const StringView Name) = 0;
+        [[nodiscard]]
+        virtual StringView GetName() const = 0;
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Object Navigation
+
+        [[nodiscard]]
+        virtual Boole AtRoot() const = 0;
+        [[nodiscard]]
+        virtual Boole AtBegin() const = 0;
+        [[nodiscard]]
+        virtual Boole AtEnd() const = 0;
+        [[nodiscard]]
+        virtual Boole HasChildren() const = 0;
+        [[nodiscard]]
+        virtual Boole HasChild(const StringView Name) const = 0;
+
+        virtual ObjectWalker& Next() = 0;
+        virtual ObjectWalker& Previous() = 0;
+        virtual ObjectWalker& Parent() = 0;
+        virtual ObjectWalker& FirstChild() = 0;
+        virtual ObjectWalker& Child(const StringView Name) = 0;
+
+        [[nodiscard]]
+        virtual Boole CreateChild(const StringView Name, const MemberTags Tags, const Boole Move) = 0;
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Attributes
+
+        [[nodiscard]]
+        virtual Boole HasAttributes() const = 0;
+        [[nodiscard]]
+        virtual AttributeWalker& GetAttributes() const = 0;
+        [[nodiscard]]
+        virtual AttributeWalker& GetAttribute(const StringView Name) const = 0;
+        [[nodiscard]]
+        virtual Boole CreateAttribute(const StringView Name, const MemberTags Tags) = 0;
+
+        template<typename AttributeType>
+        void Attribute(const StringView Name, const MemberTags Tags, AttributeType&& Attrib)
+        {
+            if( this->CreateAttribute(Name,Tags) ) {
+                AttributeWalker& Walker = this->GetAttribute(Name);
+                Serialization::Attribute::SetValue<AttributeType>( Walker, std::forward<AttributeType>(Attrib) );
+            }
+        }
+    };//ObjectWalker
 
     ///////////////////////////////////////////////////////////////////////////////
-    // Object Link (for handling non-owned pointers between objects)
+    // ObjectLink (for handling non-owned pointers between objects)
+
+    struct MEZZ_LIB ObjectLink
+    {
+        String TypeName;
+        String InstanceName;
+        Boole IsConstructed = false;
+    };
 
     ///////////////////////////////////////////////////////////////////////////////
-    // Polymorphic Store
+    // ObjectJoin (for handling shared ownership pointers between objects)
+
+    struct MEZZ_LIB ObjectJoin
+    {
+        Boole IsConstructed = false;
+    };
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // Serialization Tree Navigation Helpers
+
+    class MEZZ_LIB ScopedObjectNode
+    {
+    protected:
+        Serialization::ObjectWalker* Node = nullptr;
+    public:
+        ScopedObjectNode(const StringView Name, const MemberTags Tags, Serialization::ObjectWalker& Walker)
+        {
+            if( Walker.CreateChild(Name,Tags,true) ) {
+                this->Node = &Walker;
+            }
+        }
+        ~ScopedObjectNode()
+        {
+            if( this->IsValid() ) {
+                this->Node->Parent();
+            }
+        }
+
+        Boole IsValid() const
+            { return ( this->Node != nullptr ); }
+    };
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // PolymorphicCasterHolder
 #if 1
     template<class Base, class Derived>
     class ObjectCaster;
 
-    template<class Base>
     class ObjectCasterBase
     {
     public:
         virtual ~ObjectCasterBase() = default;
-        virtual Boole CanUpcast(const std::type_info& DerivedType) const = 0;
-        virtual void Serialize(const StringView Name, void* ToCast, const Integer Version, SerializerData Data) = 0;
-        virtual void Deserialize(const StringView Name, void* ToCast, const Integer Version, SerializerData Data) = 0;
+        virtual Boole CanUpcast(const std::type_info& BaseType, const std::type_info& DerivedType) const = 0;
+        virtual void Serialize(const StringView Name,
+                               const MemberTags Tags,
+                               void* ToCast,
+                               const Integer Version,
+                               Serialization::ObjectWalker& Walker) = 0;
+        virtual void Deserialize(void* ToCast,
+                                 const Integer Version,
+                                 Serialization::ObjectWalker& Walker) = 0;
     };//ObjectCasterBase
 
-    template<class Base>
-    struct PolymorphicStore
+    struct PolymorphicCasterHolder
     {
-        using CasterBaseType = ObjectCasterBase<Base>;
-        using CasterContainer = std::vector<CasterBaseType*>;
+        using CasterBaseType = ObjectCasterBase;
+        using DerivedContainer = std::vector<CasterBaseType*>;
+        using BaseContainer = std::unordered_map< std::type_index, DerivedContainer >;
 
-        static CasterContainer Casters;
+        BaseContainer Casters;
 
-        template<class Derived>
-        static void RegisterCaster(ObjectCaster<Base,Derived>* NewCaster)
+        PolymorphicCasterHolder() = default;
+        PolymorphicCasterHolder(const PolymorphicCasterHolder& Other) = delete;
+        PolymorphicCasterHolder(PolymorphicCasterHolder&& Other) = delete;
+        ~PolymorphicCasterHolder() = default;
+
+        PolymorphicCasterHolder& operator=(const PolymorphicCasterHolder& Other) = delete;
+        PolymorphicCasterHolder& operator=(PolymorphicCasterHolder&& Other) = delete;
+
+        template<class Base, class Derived>
+        void RegisterCaster(ObjectCaster<Base,Derived>* NewCaster)
         {
-            Casters.push_back(NewCaster);
+            Casters[ std::type_index( typeid(Base) ) ].push_back(NewCaster);
         }
-    };//PolymorphicStore
 
-    template<class Base>
-    typename PolymorphicStore<Base>::CasterContainer PolymorphicStore<Base>::Casters;
+        ObjectCasterBase* GetCaster(const std::type_info& BaseInfo, const std::type_info& DerivedInfo) const
+        {
+            BaseContainer::const_iterator FoundBaseIt = Casters.find( std::type_index(BaseInfo) );
+            if( FoundBaseIt != Casters.end() ) {
+                const DerivedContainer& FoundBase = (*FoundBaseIt).second;
+                DerivedContainer::const_iterator FoundDerivedIt = std::find_if(FoundBase.begin(),FoundBase.end(),
+                    [&](CasterBaseType* Caster) -> Boole {
+                        return Caster->CanUpcast(BaseInfo,DerivedInfo);
+                    }
+                );
+                if( FoundDerivedIt != FoundBase.end() ) {
+                    return (*FoundDerivedIt);
+                }
+            }
+            return nullptr;
+        }
 
-    template<class Base, class Derived>
-    void RegisterCaster()
+        template<class Base, class Derived>
+        ObjectCasterBase* GetCaster() const
+        {
+            return this->GetCaster( typeid(Base), typeid(Derived) );
+        }
+    };//PolymorphicCasterHolder
+
+    PolymorphicCasterHolder& GetPolymorphicCasterHolder();
+    PolymorphicCasterHolder& GetPolymorphicCasterHolder()
     {
-        PolymorphicStore<Base>::RegisterCaster( new ObjectCaster<Base,Derived>() );
+        static PolymorphicCasterHolder Store;
+        return Store;
     }
 
-    template<class Base, class... Deriveds>
-    void RegisterCasters()
-    {
-        ( RegisterCaster<Base,Deriveds>() , ... );
-    }
-
     template<class Base, class Derived>
-    class ObjectCaster final : public ObjectCasterBase<Base>
+    class ObjectCaster final : public ObjectCasterBase
     {
     public:
         static_assert( std::is_base_of_v<Base,Derived>, "\"Base\" is not a base class of Derived" );
 
         ~ObjectCaster() = default;
-        Boole CanUpcast(const std::type_info& DerivedType) const
+        Boole CanUpcast(const std::type_info& BaseType, const std::type_info& DerivedType) const
         {
-            return ( DerivedType == typeid(Derived) );
+            return ( BaseType == typeid(Base) && DerivedType == typeid(Derived) );
         }
-        void Serialize(const StringView Name, void* ToCast, const Integer Version, SerializerData Data)
+        void Serialize(const StringView Name,
+                       const MemberTags Tags,
+                       void* ToCast,
+                       const Int32 Version,
+                       ObjectWalker& Walker)
         {
             Derived* Casted = static_cast<Derived*>( static_cast<Base*>(ToCast) );
-            Mezzanine::Serialize(Name,Casted,Version,Data);
+            Serialization::Serialize(Name,std::forward<Derived*>(Casted),Tags,Version,Walker);
         }
-        void Deserialize(const StringView Name, void* ToCast, const Integer Version, SerializerData Data)
+        void Deserialize(void* ToCast,
+                         const Int32 Version,
+                         ObjectWalker& Walker)
         {
             Derived* Casted = static_cast<Derived*>( static_cast<Base*>(ToCast) );
-            Mezzanine::Deserialize(Name,Casted,Version,Data);
+            Serialization::Deserialize(std::forward<Derived*>(Casted),Version,Walker);
         }
     };//ObjectCaster
 #else
@@ -276,119 +635,274 @@ namespace Mezzanine {
 
 #endif
     ///////////////////////////////////////////////////////////////////////////////
-    // SerializerContext
+    // PointerTracker
 
-    class SerializerContextBase
+    class MEZZ_LIB PointerTracker
     {
     public:
-        virtual SerializerContextBase* GetParentContext() const = 0;
+        using PtrType = void*;
+        using PointerContainer = std::set<PtrType>;
+        using PointerIterator = PointerContainer::const_iterator;
+    protected:
+        PointerContainer TrackedPointers;
+    public:
+        PointerTracker() = default;
+        PointerTracker(const PointerTracker& Other) = delete;
+        PointerTracker(PointerTracker&& Other) = delete;
+        ~PointerTracker() = default;
 
-        virtual Boole IsSame(void* ObjectPtr, const std::type_info& Info) const = 0;
+        PointerTracker& operator=(const PointerTracker& Other) = delete;
+        PointerTracker& operator=(PointerTracker&& Other) = delete;
 
-        virtual void* FindContextObject(const StringView Name, const std::type_index Type) const = 0;
-        virtual void* FindContextObject(const UInt64 ID, const std::type_index Type) const = 0;
-    };//SerializerContextBase
+        ///////////////////////////////////////////////////////////////////////////////
+        // Tracking
 
-    template<typename SpecialContext>
-    class SerializerContext : public SerializerContextBase
-        {  };
-
-    template<typename SpecialContext>
-    SerializerContextBase* UpdateContext(const SerializerContextBase* Current, const SpecialContext* ToUpdate)
-    {
-        using ContextType = SerializerContext<SpecialContext>;
-        if constexpr( !std::is_abstract_v<ContextType> ) {
-            static_assert( std::is_constructible_v<ContextType,SerializerContextBase*,SpecialContext*> ,
-                           "SerializerContext type lacks well-formed constructor." );
-            if( Current != nullptr && !Current->IsSame(ToUpdate,typeid(SpecialContext)) ) {
-                return new ContextType(Current,ToUpdate);
-            }
+        Boole TrackPointer(PtrType ToTrack)
+        {
+            std::pair<PointerIterator,Boole> Pair = TrackedPointers.insert(ToTrack);
+            return Pair.second;
         }
-        return Current;
-    }
-
-    template<typename SpecialContext>
-    SerializerContextBase* RevertContext(const SerializerContextBase* Current, const SpecialContext* ToRevert)
-    {
-        using ContextType = SerializerContext<SpecialContext>;
-        if constexpr( !std::is_abstract_v<ContextType> ) {
-            if( Current != nullptr && Current->IsSame(ToRevert,typeid(SpecialContext)) ) {
-                SerializerContextBase* Reverted = Current->GetParentContext();
-                delete Current;
-                return Reverted;
-            }
+        Boole IsTracked(PtrType ToCheck)
+        {
+            return TrackedPointers.count(ToCheck) != 0;
         }
-        return Current;
-    }
+    };//PointerTracker
 
     ///////////////////////////////////////////////////////////////////////////////
-    // SerializerData
+    // Serialization Helpers
 
-    struct MEZZ_LIB SerializerData
+    namespace Impl
     {
-        BackendBase* Backend = nullptr;
-        SerializerContextBase* Context = nullptr;
+        ///////////////////////////////////////////////////////////////////////////////
+        // Serialize Helpers
 
-        SerializerData() = default;
-        SerializerData(BackendBase* Back) :
-            Backend(Back)
-            {  }
-    };
+        template<class SerializeType>
+        void SerializeSimpleMember(const StringView Name,
+                                   const SerializeType& ToSerialize,
+                                   const MemberTags Tags,
+                                   Serialization::ObjectWalker& Walker)
+        {
+            Walker.Attribute(Name,Tags,ToSerialize);
+        }
+
+        template<class SerializeType>
+        void SerializePointerMember(const StringView Name,
+                                    const SerializeType ToSerialize,
+                                    const MemberTags Tags,
+                                    Serialization::ObjectWalker& Walker)
+        {
+            (void)Name;
+            (void)ToSerialize;
+            (void)Tags;
+            (void)Walker;
+        }
+
+        template<class SerializeType>
+        void SerializeAllMembers(const SerializeType& ToSerialize,
+                                 Serialization::ObjectWalker& Walker)
+        {
+            if constexpr( IsRegistered<SerializeType>() ) {
+                DoForAllMembers<SerializeType>([&](const auto& Member) {
+                    const MemberTags Tags = Member.GetTags();
+                    if( ( Tags & MemberTags::Ignore ) != MemberTags::None ) {
+                        return;
+                    }
+                    const Int32 Version = ObjectVersion::Latest;
+                    Serialization::Serialize(Member.GetName(),Member.GetValue(ToSerialize),Tags,Version,Walker);
+                });
+            }
+        }
+
+        template<class SerializeType>
+        void SerializeGenericClass(const StringView Name,
+                                   const SerializeType& ToSerialize,
+                                   const MemberTags Tags,
+                                   const Int32 Version,
+                                   Serialization::ObjectWalker& Walker)
+        {
+            (void)Version;
+            if constexpr( IsRegistered<SerializeType>() ) {
+                ScopedObjectNode Node(Name,Tags,Walker);
+                if( Node.IsValid() ) {
+                    Serialization::Impl::SerializeAllMembers(ToSerialize,Walker);
+                }
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Deserialize Helpers
+
+
+    }//Impl
 
     ///////////////////////////////////////////////////////////////////////////////
     // Serialize
 
-    template<class SerializeType, typename = std::enable_if_t< is_generic_serializable_v<SerializeType> > >
-    void Serialize(const StringView Name, const SerializeType& ToSerialize, const Integer Version, SerializerData Data)
+    template< typename SerializeType,
+              typename = std::enable_if_t< !std::is_pointer_v< std::decay_t<SerializeType> > > >
+    void Serialize(const StringView Name,
+                   const SerializeType& ToSerialize,
+                   const MemberTags Tags,
+                   const Int32 Version,
+                   ObjectWalker& Walker)
     {
-        SerializeAllMembers(ToSerialize,Version,Data);
-    }
-    template<class SerializeType, typename = std::enable_if_t< std::is_pointer_v<SerializeType> > >
-    void Serialize(const StringView Name, const SerializeType ToSerialize, const Integer Version, SerializerData Data)
-    {
-        if constexpr( std::is_polymorphic_v< SerializeType > ) {
+        if constexpr( std::is_arithmetic_v<SerializeType> ) { // Basic Number Types
+            (void)Version;
+            Impl::SerializeSimpleMember(Name,ToSerialize,Tags,Walker);
+        //}else if constexpr(  ) {
 
+        }else if constexpr( StringTools::is_string_v<SerializeType> ) { // Strings
+            (void)Version;
+            Impl::SerializeSimpleMember(Name,ToSerialize,Tags,Walker);
+        }else{ // Generic Class
+            Impl::SerializeGenericClass(Name,ToSerialize,Tags,Version,Walker);
+        }
+    }
+    template< typename SerializeType,
+              typename = std::enable_if_t< std::is_pointer_v< std::decay_t<SerializeType> > > >
+    void Serialize(const StringView Name,
+                   const SerializeType ToSerialize,
+                   const MemberTags Tags,
+                   const Int32 Version,
+                   ObjectWalker& Walker)
+    {
+        if constexpr( std::is_polymorphic_v<SerializeType> ) {
+            const std::type_info& BaseInfo = typeid(ToSerialize);
+            const std::type_info& DerivedInfo = typeid(*ToSerialize);
+            if( std::type_index(BaseInfo) != std::type_index(DerivedInfo) ) {
+                ObjectCasterBase* Caster = GetPolymorphicCasterHolder().GetCaster(BaseInfo,DerivedInfo);
+                if( Caster != nullptr ) {
+                    Caster->Serialize(Name,ToSerialize,Tags,Version,Walker);
+                }else{
+                    throw std::runtime_error("No caster found for polymorphic object.");
+                }
+            }else{
+                Serialization::Serialize(Name,*ToSerialize,Tags,Version,Walker);
+            }
         }else{
-
+            Serialization::Serialize(Name,*ToSerialize,Tags,Version,Walker);
         }
     }
-    template<class SerializeType, typename = std::enable_if_t< is_string_v<SerializeType> > >
-    void Serialize(const StringView Name, const SerializeType& ToSerialize, const Integer Version, SerializerData Data)
+    template< typename SerializeType >
+    void Serialize(const StringView Name,
+                   const std::shared_ptr<SerializeType> ToSerialize,
+                   const MemberTags Tags,
+                   const Int32 Version,
+                   ObjectWalker& Walker)
     {
-
-    }
-    template<class SerializeType, typename = std::enable_if_t< std::is_arithmetic_v<SerializeType> > >
-    void Serialize(const StringView Name, const SerializeType& ToSerialize, const Integer Version, SerializerData Data)
-    {
-
-    }
-    template<class SerializeType>
-    void SerializeAllMembers(const SerializeType& ToSerialize, const Integer Version, SerializerData Data)
-    {
-        if constexpr( IsRegistered<SerializeType>() ) {
-            DoForAllMembers([=](const auto& Member){
-                Serialize( Member.GetName(), Member.GetValue(), Version, Data );
-            });
-        }
+        (void)Name;
+        (void)Tags;
+        (void)ToSerialize;
+        (void)Version;
+        (void)Walker;
     }
 
     ///////////////////////////////////////////////////////////////////////////////
     // Deserialize
 
-    template<class SerializeType>
-    void Deserialize(SerializeType& ToSerialize, SerializerContextBase* Context, BackendBase* Backend)
+    template< typename SerializeType,
+              typename = std::enable_if_t< !std::is_pointer_v< std::decay_t<SerializeType> > > >
+    void Deserialize(SerializeType& ToDeserialize,
+                     const Int32 Version,
+                     Serialization::ObjectWalker& Walker)
     {
-
+        (void)ToDeserialize;
+        (void)Version;
+        (void)Walker;
     }
-    template<class SerializeType>
-    void Deserialize(SerializeType* ToSerialize, SerializerContextBase* Context, BackendBase* Back)
+    template< typename SerializeType,
+              typename = std::enable_if_t< std::is_pointer_v< std::decay_t<SerializeType> > > >
+    void Deserialize(SerializeType ToDeserialize,
+                     const Int32 Version,
+                     Serialization::ObjectWalker& Walker)
     {
-
+        (void)ToDeserialize;
+        (void)Version;
+        (void)Walker;
     }
-    template<class SerializeType>
-    void Deserialize(SerializeType* ToSerialize, SerializerContextBase* Context, BackendBase* Back)
+    template< typename SerializeType >
+    void Deserialize(std::shared_ptr<SerializeType> ToDeserialize,
+                     const Int32 Version,
+                     Serialization::ObjectWalker& Walker)
     {
+        (void)ToDeserialize;
+        (void)Version;
+        (void)Walker;
+    }
 
+}//Serialization
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // Caster Registration
+
+    template<class Base, class Derived>
+    void RegisterCaster()
+    {
+        Serialization::ObjectCaster<Base,Derived>* NewCaster = new Serialization::ObjectCaster<Base,Derived>();
+        Serialization::GetPolymorphicCasterHolder().RegisterCaster(NewCaster);
+    }
+
+    template<class Base, class... Deriveds>
+    void RegisterCasters()
+    {
+        ( RegisterCaster<Base,Deriveds>() , ... );
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // Serialize
+
+    template< typename SerializeType,
+              typename = std::enable_if_t< !std::is_pointer_v< std::decay_t<SerializeType> > > >
+    void Serialize(const StringView Name,
+                   const SerializeType& ToSerialize,
+                   const Int32 Version,
+                   Serialization::ObjectWalker& Walker)
+    {
+        Serialization::Serialize(Name,MemberTags::None,ToSerialize,Version,Walker);
+    }
+    template< typename SerializeType,
+              typename = std::enable_if_t< std::is_pointer_v< std::decay_t<SerializeType> > > >
+    void Serialize(const StringView Name,
+                   const SerializeType ToSerialize,
+                   const Int32 Version,
+                   Serialization::ObjectWalker& Walker)
+    {
+        Serialization::Serialize(Name,MemberTags::None,ToSerialize,Version,Walker);
+    }
+    template< typename SerializeType >
+    void Serialize(const StringView Name,
+                   const std::shared_ptr<SerializeType> ToSerialize,
+                   const Int32 Version,
+                   Serialization::ObjectWalker& Walker)
+    {
+        Serialization::Serialize(Name,MemberTags::None,ToSerialize,Version,Walker);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // Deserialize
+
+    template< typename SerializeType,
+              typename = std::enable_if_t< !std::is_pointer_v< std::decay_t<SerializeType> > > >
+    void Deserialize(SerializeType& ToDeserialize,
+                     const Int32 Version,
+                     Serialization::ObjectWalker& Walker)
+    {
+        Serialization::Deserialize(ToDeserialize,Version,Walker);
+    }
+    template< typename SerializeType,
+              typename = std::enable_if_t< std::is_pointer_v< std::decay_t<SerializeType> > > >
+    void Deserialize(SerializeType ToDeserialize,
+                     const Int32 Version,
+                     Serialization::ObjectWalker& Walker)
+    {
+        Serialization::Deserialize(ToDeserialize,Version,Walker);
+    }
+    template< typename SerializeType >
+    void Deserialize(std::shared_ptr<SerializeType> ToDeserialize,
+                     const Int32 Version,
+                     Serialization::ObjectWalker& Walker)
+    {
+        Serialization::Deserialize(ToDeserialize,Version,Walker);
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -397,21 +911,22 @@ namespace Mezzanine {
     class Serializer
     {
     protected:
-        SerializerData Data;
+        Serialization::BackendBase* Backend = nullptr;
+        Serialization::ContextBase* Context = nullptr;
     public:
-        Serializer(BackendBase* Backend) :
-            Data(Backend)
+        Serializer(Serialization::BackendBase* Back) :
+            Backend(Back)
             {  }
 
 
-        SerializerContextBase* GetContext() const
-            { return this->Data.Context; }
+        Serialization::ContextBase* GetContext() const
+            { return this->Context; }
 
         template<typename ObjectType, typename IDType>
         ObjectType* FindContextObject(const IDType ID)
         {
-            if( this->Data.Context != nullptr ) {
-                void* Found = this->Data.Context->FindContextObject(ID,std::type_index(typeid(ObjectType)));
+            if( this->Context != nullptr ) {
+                void* Found = this->Context->FindContextObject(ID,std::type_index(typeid(ObjectType)));
                 return reinterpret_cast<ObjectType>(Found);
             }
             return nullptr;
@@ -419,7 +934,8 @@ namespace Mezzanine {
     };//Serializer
 
     /// @}
-//}//Serialization
 }//Mezzanine
 
 #endif
+#endif // header guard
+

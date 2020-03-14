@@ -1,3 +1,6 @@
+#ifndef HEADER_540BD085BBC24CD9
+#define HEADER_540BD085BBC24CD9
+
 // © Copyright 2010 - 2019 BlackTopp Studios Inc.
 /* This file is part of The Mezzanine Engine.
 
@@ -272,10 +275,11 @@ namespace Mezzanine {
     enum class MemberTags
     {
         None       = EnumBit(0), ///< Nothing special about the member.
-        Local      = EnumBit(1), ///< Member is only of use on the local host and should not be shared.
-        Generated  = EnumBit(2), ///< Member is a cache generated from other members and can be regenerated.
-        Deprecated = EnumBit(3), ///< Member is deprecated and it's use should be avoided.
-        NotOwned   = EnumBit(4)  ///< Member is a Pointer or Reference to an object not owned by the parent object.
+        Ignore     = EnumBit(1), ///< Member has been explicitly requested to be ignored.
+        Local      = EnumBit(2), ///< Member is only of use on the local host and should not be shared.
+        Generated  = EnumBit(3), ///< Member is a cache generated from other members and can be regenerated.
+        Deprecated = EnumBit(4), ///< Member is deprecated and it's use should be avoided.
+        NotOwned   = EnumBit(5)  ///< Member is a Pointer or Reference to an object not owned by the parent object.
     };
     ENABLE_BITMASK_OPERATORS_INSIDE_MEZZANINE(MemberTags)
 
@@ -361,6 +365,7 @@ namespace Mezzanine {
         /// @tparam ConstructFrom The setter or getter method type to be tested.
         /// @return Returns true if ConstructFrom can be used as a setter and getter method, false otherwise.
         template<typename ConstructFrom>
+        [[nodiscard]]
         static constexpr Boole CanMemberPtrInitialize()
         {
             return std::is_same_v<ConstructFrom,MemberPtrType<ClassType,MemberType>> &&
@@ -371,6 +376,7 @@ namespace Mezzanine {
         /// @tparam ConstructFrom The setter or getter method type to be tested.
         /// @return Returns true if ConstructFrom can be used as a setter and getter method, false otherwise.
         template<typename ConstructFrom>
+        [[nodiscard]]
         static constexpr Boole CanRefReturnInitialize()
         {
             return std::is_same_v<ConstructFrom,NonConstRefGetterPtrType<ClassType,MemberType>> &&
@@ -381,6 +387,7 @@ namespace Mezzanine {
         /// @tparam ConstructFrom The setter or getter method type to be tested.
         /// @return Returns true if ConstructFrom can be used as a setter and getter method, false otherwise.
         template<typename ConstructFrom>
+        [[nodiscard]]
         static constexpr Boole CanSingleMemberInitialize()
         {
             return MemberAccessor::CanMemberPtrInitialize<ConstructFrom>() ||
@@ -390,9 +397,20 @@ namespace Mezzanine {
         /// @tparam SetFrom The value type to test.
         /// @return Returns true if the template parameter type can be use to construct or assign to a member type.
         template<typename SetFrom>
+        [[nodiscard]]
         static constexpr Boole CanSetFrom()
         {
             return std::is_convertible_v<SetFrom,MemberType>;
+        }
+        /// @brief Tests whether or not a const getter is available.
+        /// @tparam ClassToGetFrom The type to check the setter of.
+        /// @return Returns true if there is a const getter set for that type.
+        template<typename ClassToGetFrom>
+        [[nodiscard]]
+        static constexpr Boole CanConstGet()
+        {
+            return std::is_same_v<ClassToGetFrom,ClassType> &&
+                   !std::is_same_v<GetterAccessPtr,NonConstRefGetterPtrType<ClassType,MemberType>>;
         }
     private:
         /// @brief A pointer to the function setting the member or to the member itself.
@@ -458,10 +476,32 @@ namespace Mezzanine {
             }
         }
         /// @brief Gets the value of a member on an initialized object.
+        /// @tparam ObjectType Expected to match ClassType on the MemberAccessor.
         /// @exception If the Getter Access pointer is nullptr, then an std::runtime_error will be thrown.
         /// @param Object The object to retrieve the member value from.
         /// @return Returns the value of the member.
-        ReturnType GetValue(ClassType& Object) const
+        template<typename ObjectType, typename = std::enable_if_t< CanConstGet<ObjectType>() >>
+        [[nodiscard]]
+        ReturnType GetValue(const ObjectType& Object) const
+        {
+            if( this->HasGetter() ) {
+                if constexpr( std::is_same_v<GetterAccessPtr,MemberPtrType<ClassType,MemberType>> ) {
+                    return (Object.*GetterPtr);
+                }else{
+                    return (Object.*GetterPtr)();
+                }
+            }else{
+                throw std::runtime_error("Cannot Get Member value, no getter provided.");
+            }
+        }
+        /// @brief Gets the value of a member on an initialized object.
+        /// @tparam ObjectType Expected to match ClassType on the MemberAccessor.
+        /// @exception If the Getter Access pointer is nullptr, then an std::runtime_error will be thrown.
+        /// @param Object The object to retrieve the member value from.
+        /// @return Returns the value of the member.
+        template<typename ObjectType, typename = std::enable_if_t< !CanConstGet<ObjectType>() >>
+        [[nodiscard]]
+        ReturnType GetValue(ObjectType& Object) const
         {
             if( this->HasGetter() ) {
                 if constexpr( std::is_same_v<GetterAccessPtr,MemberPtrType<ClassType,MemberType>> ) {
@@ -479,19 +519,23 @@ namespace Mezzanine {
 
         /// @brief Gets the name of the member being accessed.
         /// @return Returns a C-String containing the name of the member.
+        [[nodiscard]]
         constexpr StringView GetName() const
             { return this->MemberName; }
         /// @brief Checks to see if a "setter" method has been set.
         /// @return Returns true if a value can be assigned with this accessor, false otherwise.
+        [[nodiscard]]
         Boole HasSetter() const
             { return this->SetterPtr != nullptr; }
         /// @brief Checks to see if a "getter" method has been set.
         /// @return Returns true if a value can be retrieved with this accessor, false otherwise.
+        [[nodiscard]]
         Boole HasGetter() const
             { return this->GetterPtr != nullptr; }
 
         /// @brief Retrieves the metadata tags associated with this member.
         /// @return Returns a MemberTags value or mask of values describing extra details about the member.
+        [[nodiscard]]
         static constexpr MemberTags GetTags()
             { return Tags; }
     };//MemberAccessor
@@ -777,6 +821,7 @@ namespace Mezzanine {
     /// @tparam Class The class type to check.
     /// @return Returns true if introspection is possible for members of the given class, false otherwise.
     template<typename Class>
+    [[nodiscard]]
     constexpr Boole IsRegistered()
     {
         using TupleType = decltype(IntrospectionHelpers::GetMembers<Class>());
@@ -787,6 +832,7 @@ namespace Mezzanine {
     /// @tparam Class The class to check.
     /// @return Returns the registered name of the class, or an empty String if no name is registered.
     template<typename Class>
+    [[nodiscard]]
     constexpr StringView GetRegisteredName()
     {
         return IntrospectionHelpers::GetName<Class>();
@@ -796,6 +842,7 @@ namespace Mezzanine {
     /// @tparam Class The class to check.
     /// @return Returns the amount of members that have been registered for the class specified.
     template<typename Class>
+    [[nodiscard]]
     constexpr size_t GetMemberCount()
     {
         using TupleType = decltype(IntrospectionHelpers::GetMembers<Class>());
@@ -806,6 +853,7 @@ namespace Mezzanine {
     /// @tparam Class The class to retrieve accessors for.
     /// @return Returns a const reference to a tuple of member accessor types for each registered member.
     template<typename Class>
+    [[nodiscard]]
     const auto& GetRegisteredMembers()
     {
         using TupleType = decltype(IntrospectionHelpers::GetMembers<Class>());
@@ -887,6 +935,7 @@ namespace Mezzanine {
     /// @param Name The name of the member to check for.
     /// @return Returns true of the specified class has a registered member with the provided name, false otherwise.
     template<typename Class>
+    [[nodiscard]]
     Boole HasMember(const StringView Name)
     {
         Boole Found = false;
@@ -906,6 +955,7 @@ namespace Mezzanine {
     /// @param Obj The object instance to get the value from.
     /// @param Name The name of the member to retrieve on the object.
     template<typename MemberType, typename Class>
+    [[nodiscard]]
     MemberType GetMemberValue(Class& Obj, const StringView Name)
     {
         MemberType Value{};
@@ -1510,3 +1560,5 @@ namespace Mezzanine {
 }// Mezzanine
 
 #endif
+#endif // header guard
+
