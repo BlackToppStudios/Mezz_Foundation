@@ -554,6 +554,7 @@ namespace Mezzanine {
     /// @param Common A member pointer to the common set/get method for the member.
     /// @return Returns a new MemberAccessor initialized with the provided values.
     template<typename CommonMethod>
+    [[nodiscard]]
     constexpr auto MakeMemberAccessor(const StringView Name, CommonMethod Common)
         { return MemberAccessor<CommonMethod,CommonMethod,MemberTags::None>(Name,Common); }
     /// @brief Convenience method to initialize a MemberAccessor from deduced types.
@@ -565,6 +566,7 @@ namespace Mezzanine {
     /// @param Common A member pointer to the common set/get method for the member.
     /// @return Returns a new MemberAccessor initialized with the provided values.
     template<MemberTags Tags, typename CommonMethod>
+    [[nodiscard]]
     constexpr auto MakeMemberAccessor(const StringView Name, CommonMethod Common)
         { return MemberAccessor<CommonMethod,CommonMethod,Tags>(Name,Common); }
     /// @brief Convenience method to initialize a MemberAccessor from deduced types.
@@ -577,6 +579,7 @@ namespace Mezzanine {
     /// @param Getter A member pointer to be used to retrieve the member value.
     /// @return Returns a new MemberAccessor initialized with the provided values.
     template<typename SetterMethod, typename GetterMethod>
+    [[nodiscard]]
     constexpr auto MakeMemberAccessor(const StringView Name, SetterMethod Setter, GetterMethod Getter)
         { return MemberAccessor<SetterMethod,GetterMethod,MemberTags::None>(Name,Setter,Getter); }
     /// @brief Convenience method to initialize a MemberAccessor from deduced types.
@@ -590,6 +593,7 @@ namespace Mezzanine {
     /// @param Getter A member pointer to be used to retrieve the member value.
     /// @return Returns a new MemberAccessor initialized with the provided values.
     template<MemberTags Tags, typename SetterMethod, typename GetterMethod>
+    [[nodiscard]]
     constexpr auto MakeMemberAccessor(const StringView Name, SetterMethod Setter, GetterMethod Getter)
         { return MemberAccessor<SetterMethod,GetterMethod,Tags>(Name,Setter,Getter); }
 
