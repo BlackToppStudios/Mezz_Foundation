@@ -307,7 +307,7 @@ namespace Serialization {
         virtual std::optional<Int8> GetInt8() const = 0;
 
         template<typename SetType>
-        void SetValue(const SetType&& ToSet);
+        void SetValue(SetType&& ToSet);
 
         template<typename ReturnType>
         [[nodiscard]]
@@ -434,7 +434,7 @@ namespace Serialization {
     // AttributeWalker Implementations
 
     template<typename SetType>
-    void AttributeWalker::SetValue(const SetType&& ToSet)
+    void AttributeWalker::SetValue(SetType&& ToSet)
     {
         AttributeHelpers::SetValue<SetType>(*this,std::forward<SetType>(ToSet));
     }
@@ -499,7 +499,7 @@ namespace Serialization {
         {
             if( this->CreateAttribute(Name,Tags) ) {
                 AttributeWalker& Walker = this->GetAttribute(Name);
-                Serialization::Attribute::SetValue<AttributeType>( Walker, std::forward<AttributeType>(Attrib) );
+                Walker.SetValue(std::forward<AttributeType>(Attrib));
             }
         }
     };//ObjectWalker
@@ -744,7 +744,7 @@ namespace Serialization {
                     constexpr MemberTags Tags = std::remove_reference_t<decltype(Member)>::GetTags();
                     if( ( Tags & MemberTags::Ignore ) == MemberTags::None ) {
                         const Int32 Version = ObjectVersion::Latest;
-                        Serialization::Serialize(Member.GetName(),Member.GetValue(ToSerialize),Tags,Version,Walker);
+                        Mezzanine::Serialize(Member.GetName(),Member.GetValue(ToSerialize),Tags,Version,Walker);
                     }
                 });
             }
@@ -798,7 +798,7 @@ namespace Serialization {
                    const SerializeType& ToSerialize,
                    const MemberTags Tags,
                    const Int32 Version,
-                   ObjectWalker& Walker)
+                   Serialization::ObjectWalker& Walker)
     {
         namespace Impl = Mezzanine::Serialization::Impl;
         if constexpr( std::is_arithmetic_v<SerializeType> ) { // Basic Number Types
@@ -819,7 +819,7 @@ namespace Serialization {
                    const SerializeType ToSerialize,
                    const MemberTags Tags,
                    const Int32 Version,
-                   ObjectWalker& Walker)
+                   Serialization::ObjectWalker& Walker)
     {
         if constexpr( std::is_polymorphic_v<SerializeType> ) {
             const std::type_info& BaseInfo = typeid(ToSerialize);
@@ -844,7 +844,7 @@ namespace Serialization {
                    const std::shared_ptr<SerializeType> ToSerialize,
                    const MemberTags Tags,
                    const Int32 Version,
-                   ObjectWalker& Walker)
+                   Serialization::ObjectWalker& Walker)
     {
         (void)Name;
         (void)Tags;
