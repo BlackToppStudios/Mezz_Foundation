@@ -491,7 +491,7 @@ namespace Mezzanine {
                     return (Object.*GetterPtr)();
                 }
             }else{
-                throw std::runtime_error("Cannot Get Member value, no getter provided.");
+                MEZZ_EXCEPTION(IntrospectionNullptrCode, "Cannot Get Member value, no getter provided.")
             }
         }
         /// @brief Gets the value of a member on an initialized object.
