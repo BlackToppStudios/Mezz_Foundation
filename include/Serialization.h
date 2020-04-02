@@ -44,6 +44,7 @@
 /// @brief The collection of utilities that form the Serialization front-end.
 
 #ifndef SWIG
+    #include "ContainerTools.h"
     #include "Introspection.h"
     #include "StringTools.h"
 
@@ -112,8 +113,50 @@ namespace Serialization {
 
 namespace Serialization {
     ///////////////////////////////////////////////////////////////////////////////
-    // Convenience type traits
+    // Convenience detection traits
 
+    /// @brief Convenience type for GetName function detection.
+    /// @tparam Class The class to test.
+    template<typename Class>
+    using GetNameFunct_t = decltype(std::declval<Class&>().GetName());
+    /// @brief Type for is_detected that tests for the existence of GetName on a class.
+    /// @tparam Class The class that will be checked for the presence of a GetName function.
+    template<typename Class>
+    using HasGetName = std::is_detected<GetNameFunct_t,Class>;
+    /// @brief Convenience inline variable for the value of a HasGetName check.
+    /// @tparam Class The class that will be checked for the presence of a GetName function.
+    template<typename Class>
+    inline constexpr Boole HasGetName_v = HasGetName<Class>::value;
+
+    /// @brief Convenience type for GetID function detection.
+    /// @tparam Class The class to test.
+    template<typename Class>
+    using GetIDFunct_t = decltype(std::declval<Class&>().GetID());
+    /// @brief Type for is_detected that tests for the existence of GetID on a class.
+    /// @tparam Class The class that will be checked for the presence of a GetID function.
+    template<typename Class>
+    using HasGetID = std::is_detected<GetIDFunct_t,Class>;
+    /// @brief Convenience inline variable for the value of a HasGetID check.
+    /// @tparam Class The class that will be checked for the presence of a GetID function.
+    template<typename Class>
+    inline constexpr Boole HasGetID_v = HasGetID<Class>::value;
+
+    /// @brief Convenience type for GetIdentification function detection.
+    /// @tparam Class The class to test.
+    template<typename Class>
+    using GetIdentificationFunct_t = decltype(std::declval<Class&>().GetIdentification());
+    /// @brief Type for is_detected that tests for the existence of GetIdentification on a class.
+    /// @tparam Class The class that will be checked for the presence of a GetIdentification function.
+    template<typename Class>
+    using HasGetIdentification = std::is_detected<GetIdentificationFunct_t,Class>;
+    /// @brief Convenience inline variable for the value of a HasGetIdentification check.
+    /// @tparam Class The class that will be checked for the presence of a GetIdentification function.
+    template<typename Class>
+    inline constexpr Boole HasGetIdentification_v = HasGetIdentification<Class>::value;
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // Convenience type traits
+/*
     /// @brief Convenience type trait that decays the checked type before passing it to std::is_class.
     /// @tparam CheckType The type to decay and check if it is a class.
     template<class CheckType>
@@ -133,49 +176,34 @@ namespace Serialization {
         std::bool_constant< !StringTools::is_string_v<CheckType> && is_class_decayed_v<CheckType> >
         {  };
 
-    /// @brief Convenience inline variable for getting just the bool of the is_non_string_class check.
+    /// @brief Convenience inline variable for getting just the bool of the is_generic_serializable check.
     /// @tparam CheckType The type to check if it is a non-string class type.
     template<class CheckType>
-    inline constexpr Boole is_generic_serializable_v = is_generic_serializable<CheckType>::value;
+    inline constexpr Boole is_generic_serializable_v = is_generic_serializable<CheckType>::value;*/
 
     ///////////////////////////////////////////////////////////////////////////////
-    // Convenience detection traits
+    // Convenience Constants
 
-    /// @brief Convenience type for GetName method detection.
-    /// @tparam Class The class to test.
-    template<typename Class>
-    using GetName_t = decltype(std::declval<Class&>().GetName());
-    /// @brief Convenience type for is_detected that tests for the existence of GetName on a class.
-    /// @tparam Class The class that will be checked for the presence of a GetName method.
-    template<typename Class>
-    using HasGetName = std::is_detected<GetName_t,Class>;
-
-    /// @brief Convenience type for GetID method detection.
-    /// @tparam Class The class to test.
-    template<typename Class>
-    using GetID_t = decltype(std::declval<Class&>().GetID());
-    /// @brief Convenience type for is_detected that tests for the existence of GetID on a class.
-    /// @tparam Class The class that will be checked for the presence of a GetID method.
-    template<typename Class>
-    using HasGetID = std::is_detected<GetID_t,Class>;
-
-    /// @brief Convenience type for GetIdentification method detection.
-    /// @tparam Class The class to test.
-    template<typename Class>
-    using GetIdentification_t = decltype(std::declval<Class&>().GetIdentification());
-    /// @brief Convenience type for is_detected that tests for the existence of GetIdentification on a class.
-    /// @tparam Class The class that will be checked for the presence of a GetIdentification method.
-    template<typename Class>
-    using HasIdentificationName = std::is_detected<GetIdentification_t,Class>;
+    /// @brief An integer constant to represent the value for the latest version available for serialization.
+    inline constexpr Integer LatestVersion = 0;
 
     ///////////////////////////////////////////////////////////////////////////////
-    // Convenience constants
+    // MemberTag Checks
 
-    /// @brief A simple enum for the constants used for versioning objects that are serialized.
-    enum ObjectVersion
+    /// @brief Convenience check for the Ignore tag in a MemberTags bitfield.
+    /// @param Tags The bitfield to check.
+    /// @return Returns true if the Ignore tag is present in the provided bitfield, false otherwise.
+    constexpr Boole IsIgnorable(const MemberTags Tags)
     {
-        Latest = 0  ///< The latest version available to the current build. Not useful for Deserialization.
-    };
+        return ( Tags & MemberTags::Ignore ) == MemberTags::None;
+    }
+    /// @brief Convenience check for the NotOwned tag in a MemberTags bitfield.
+    /// @param Tags The bitfield to check.
+    /// @return Returns true if the NotOwned tag is present in the provided bitfield, false otherwise.
+    constexpr Boole IsNotOwned(const MemberTags Tags)
+    {
+        return ( Tags & MemberTags::NotOwned ) == MemberTags::None;
+    }
 
     ///////////////////////////////////////////////////////////////////////////////
     // Backend Interface
@@ -244,6 +272,9 @@ namespace Serialization {
 
     ///////////////////////////////////////////////////////////////////////////////
     // Tree Walkers
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // AttributeWalker
 
     class MEZZ_LIB AttributeWalker
     {
@@ -525,18 +556,18 @@ namespace Serialization {
     ///////////////////////////////////////////////////////////////////////////////
     // Serialization Tree Navigation Helpers
 
-    class MEZZ_LIB ScopedObjectNode
+    class MEZZ_LIB ScopedSerializationNode
     {
     protected:
         Serialization::ObjectWalker* Node = nullptr;
     public:
-        ScopedObjectNode(const StringView Name, const MemberTags Tags, Serialization::ObjectWalker& Walker)
+        ScopedSerializationNode(const StringView Name, const MemberTags Tags, Serialization::ObjectWalker& Walker)
         {
             if( Walker.CreateChild(Name,Tags,true) ) {
                 this->Node = &Walker;
             }
         }
-        ~ScopedObjectNode()
+        ~ScopedSerializationNode()
         {
             if( this->IsValid() ) {
                 this->Node->Parent();
@@ -711,6 +742,20 @@ namespace Serialization {
 
     namespace Impl
     {
+        template<typename SerializeType>
+        auto GetObjectID(const SerializeType& ToID)
+        {
+            if constexpr( HasGetName_v<SerializeType> ) {
+                return ToID.GetName();
+            }else if constexpr( HasGetID_v<SerializeType> ) {
+                return ToID.GetID();
+            }else if constexpr( HasGetIdentification_v<SerializeType> ) {
+                return ToID.GetIdentification();
+            }else{
+                return;
+            }
+        }
+
         ///////////////////////////////////////////////////////////////////////////////
         // Serialize Helpers
 
@@ -724,29 +769,106 @@ namespace Serialization {
         }
 
         template<class SerializeType>
-        void SerializePointerMember(const StringView Name,
-                                    const SerializeType ToSerialize,
-                                    const MemberTags Tags,
-                                    Serialization::ObjectWalker& Walker)
+        void SerializeOwnedPointer(const StringView Name,
+                                   const SerializeType ToSerialize,
+                                   const MemberTags Tags,
+                                   const Int32 Version,
+                                   Serialization::ObjectWalker& Walker)
         {
-            (void)Name;
-            (void)ToSerialize;
-            (void)Tags;
-            (void)Walker;
+            Mezzanine::Serialize(Name,*ToSerialize,Tags,Version,Walker);
+        }
+
+        template<class SerializeType>
+        void SerializeNonOwnedPointer(const StringView Name,
+                                      const SerializeType ToSerialize,
+                                      const MemberTags Tags,
+                                      Serialization::ObjectWalker& Walker)
+        {
+            using DecayedType = std::remove_pointer_t<SerializeType>;
+            using IDReturn = decltype( GetObjectID( std::declval<DecayedType&>() ) );
+            if constexpr( IsRegistered<DecayedType>() && !std::is_void_v<IDReturn> ) {
+                ScopedSerializationNode Node(Name,Tags,&Walker);
+                if( Node.IsValid() ) {
+                    Walker.Attribute("IsNotOwned",MemberTags::None,true);
+                    Walker.Attribute("TypeName",MemberTags::None,GetRegisteredName<DecayedType>());
+                    Walker.Attribute("InstanceID",MemberTags::None,GetObjectID(*ToSerialize));
+                }
+            }
         }
 
         template<class SerializeType>
         void SerializeAllMembers(const SerializeType& ToSerialize,
                                  Serialization::ObjectWalker& Walker)
         {
-            if constexpr( IsRegistered<SerializeType>() ) {
-                DoForAllMembers<SerializeType>([&](const auto& Member) {
+            using DecayedType = std::decay_t<SerializeType>;
+            if constexpr( IsRegistered<DecayedType>() ) {
+                DoForAllMembers<DecayedType>([&](const auto& Member) {
                     constexpr MemberTags Tags = std::remove_reference_t<decltype(Member)>::GetTags();
-                    if( ( Tags & MemberTags::Ignore ) == MemberTags::None ) {
-                        const Int32 Version = ObjectVersion::Latest;
-                        Mezzanine::Serialize(Member.GetName(),Member.GetValue(ToSerialize),Tags,Version,Walker);
+                    if( !IsIgnorable( Tags ) ) {
+                        Mezzanine::Serialize(Member.GetName(),Member.GetValue(ToSerialize),Tags,LatestVersion,Walker);
                     }
                 });
+            }
+        }
+
+        template<class SerializeType>
+        void SerializeClassValidation(const SerializeType& ToSerialize,
+                                      const Int32 Version,
+                                      Serialization::ObjectWalker& Walker)
+        {
+            (void)ToSerialize;
+            using DecayedType = std::decay_t<SerializeType>;
+            if constexpr( IsRegistered<DecayedType>() ) {
+                ScopedSerializationNode Node("Validation",MemberTags::None,Walker);
+                if( Node.IsValid() ) {
+                    Walker.Attribute("TypeName",MemberTags::None,GetRegisteredName<DecayedType>());
+                    Walker.Attribute("Version",MemberTags::None,Version);
+                }
+            }
+        }
+
+        template<class SerializeType,
+                 typename = std::enable_if_t< is_associative_container_v<SerializeType> >,
+                 typename = void>
+        void SerializeContainer(const StringView Name,
+                                const SerializeType& ToSerialize,
+                                const MemberTags Tags,
+                                Serialization::ObjectWalker& Walker)
+        {
+            ScopedSerializationNode ContainerNode(Name,Tags,Walker);
+            if( ContainerNode.IsValid() ) {
+                Whole Count = 0;
+                for( auto& CurrElement : ToSerialize )
+                {
+                    StringStream Namer;
+                    Namer << "Element" << Count;
+                    ScopedSerializationNode ElementNode(Namer.str(),MemberTags::None,Walker);
+                    if( ElementNode.IsValid() ) {
+                        Mezzanine::Serialize("Key",CurrElement.first,MemberTags::None,LatestVersion,Walker);
+                        Mezzanine::Serialize("Value",CurrElement.second,MemberTags::None,LatestVersion,Walker);
+                        ++Count;
+                    }
+                }
+            }
+        }
+
+        template<class SerializeType,
+                 typename = std::enable_if_t< is_non_associative_container_v<SerializeType> > >
+        void SerializeContainer(const StringView Name,
+                                const SerializeType& ToSerialize,
+                                const MemberTags Tags,
+                                Serialization::ObjectWalker& Walker)
+        {
+            ScopedSerializationNode Node(Name,Tags,Walker);
+            if( Node.IsValid() ) {
+                Whole Count = 0;
+                for( auto& CurrElement : ToSerialize )
+                {
+                    StringStream Namer;
+                    Namer << "Element" << Count;
+                    Mezzanine::Serialize(Namer.str(),CurrElement,MemberTags::None,LatestVersion,Walker);
+                    ++Count;
+                }
             }
         }
 
@@ -757,10 +879,11 @@ namespace Serialization {
                                    const Int32 Version,
                                    Serialization::ObjectWalker& Walker)
         {
-            (void)Version;
-            if constexpr( IsRegistered<SerializeType>() ) {
-                ScopedObjectNode Node(Name,Tags,Walker);
+            using DecayedType = std::decay_t<SerializeType>;
+            if constexpr( IsRegistered<DecayedType>() ) {
+                ScopedSerializationNode Node(Name,Tags,Walker);
                 if( Node.IsValid() ) {
+                    Serialization::Impl::SerializeClassValidation(ToSerialize,Version,Walker);
                     Serialization::Impl::SerializeAllMembers(ToSerialize,Walker);
                 }
             }
@@ -800,17 +923,17 @@ namespace Serialization {
                    const Int32 Version,
                    Serialization::ObjectWalker& Walker)
     {
+        (void)Version;
         namespace Impl = Mezzanine::Serialization::Impl;
-        if constexpr( std::is_arithmetic_v<SerializeType> ) { // Basic Number Types
-            (void)Version;
+        using DecayedType = std::decay_t<SerializeType>;
+        if constexpr( std::is_arithmetic_v<DecayedType> ) { // Basic Number Types
             Impl::SerializeSimpleMember(Name,ToSerialize,Tags,Walker);
-        //}else if constexpr(  ) {
-
-        }else if constexpr( StringTools::is_string_v<SerializeType> ) { // Strings
-            (void)Version;
+        }else if constexpr( StringTools::is_string_v<DecayedType> ) { // Strings
             Impl::SerializeSimpleMember(Name,ToSerialize,Tags,Walker);
+        }else if constexpr( Mezzanine::is_container_v<DecayedType> ) { // Generic Containers
+            Impl::SerializeContainer(Name,ToSerialize,Tags,Walker);
         }else{ // Generic Class
-            Impl::SerializeGenericClass(Name,ToSerialize,Tags,Version,Walker);
+            Impl::SerializeGenericClass(Name,ToSerialize,Tags,1,Walker);
         }
     }
     template< typename SerializeType,
@@ -821,6 +944,7 @@ namespace Serialization {
                    const Int32 Version,
                    Serialization::ObjectWalker& Walker)
     {
+        namespace Impl = Mezzanine::Serialization::Impl;
         if constexpr( std::is_polymorphic_v<SerializeType> ) {
             const std::type_info& BaseInfo = typeid(ToSerialize);
             const std::type_info& DerivedInfo = typeid(*ToSerialize);
@@ -833,7 +957,11 @@ namespace Serialization {
                     throw std::runtime_error("No caster found for polymorphic object.");
                 }
             }else{
-                Mezzanine::Serialize(Name,*ToSerialize,Tags,Version,Walker);
+                if( Serialization::IsNotOwned(Tags) ) {
+                    Impl::SerializeNonOwnedPointer(Name,*ToSerialize,Tags,Walker);
+                }else{
+                    Mezzanine::Serialize(Name,*ToSerialize,Tags,Version,Walker);
+                }
             }
         }else{
             Mezzanine::Serialize(Name,*ToSerialize,Tags,Version,Walker);
