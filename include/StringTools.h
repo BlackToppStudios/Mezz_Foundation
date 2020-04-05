@@ -103,7 +103,7 @@ namespace StringTools {
 
     /// @brief Convenience inline variable for getting just the bool of the is_char check.
     /// @tparam CheckType The type to check if it is a character type.
-    template<typename CheckType>
+    template<class CheckType>
     inline constexpr Boole is_char_v = is_char<CheckType>::value;
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -136,7 +136,7 @@ namespace StringTools {
 
     /// @brief Convenience inline variable for getting just the bool of the is_string check.
     /// @tparam CheckType The type to check if it is a string type.
-    template<typename CheckType>
+    template<class CheckType>
     inline constexpr Boole is_string_v = is_string<CheckType>::value;
 
     ///////////////////////////////////////////////////////////////////////////////

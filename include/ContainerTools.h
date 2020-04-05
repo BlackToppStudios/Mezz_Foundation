@@ -45,6 +45,12 @@
     #include "DetectionTraits.h"
 #endif
 
+SAVE_WARNING_STATE
+// Clang likes to complain about the inline variables here
+SUPPRESS_CLANG_WARNING("-Wmissing-variable-declarations")
+ // Clang incorrectly thinks the inline variables and using aliases shouldn't have tparam docs
+//SUPPRESS_CLANG_WARNING("-Wdocumentation")
+
 namespace Mezzanine {
 namespace ContainerDetect {
     /// @brief Convenience type for begin function detection.
@@ -128,7 +134,7 @@ namespace ContainerDetect {
     inline constexpr Boole is_container_v = is_container<CheckType>::value;
 
     /// @brief Dummy/failure type for detecting if a class is a key/value pair for associative containers.
-    /// @tparam The value_type stored by the container being tested.
+    /// @tparam ValueType The value_type stored by the container being tested.
     /// @remarks This is used by the is_associative_container_impl struct as a failure case when testing a
     /// containers value_type member.
     template<typename ValueType>
@@ -205,5 +211,7 @@ namespace ContainerDetect {
     template<typename CheckType>
     inline constexpr Boole is_non_associative_container_v = is_non_associative_container<CheckType>::value;
 }//Mezzanine
+
+RESTORE_WARNING_STATE
 
 #endif // Mezz_Foundation_ContainerTools_h

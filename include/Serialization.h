@@ -51,6 +51,10 @@
     #include <unordered_map>
 #endif
 
+SAVE_WARNING_STATE
+// MSVC doesn't like default arguments being included in the forward declarations, but other platforms need them
+SUPPRESS_VC_WARNING(4348)
+
 namespace Mezzanine {
     /// @addtogroup Serialization
     /// @{
@@ -1074,5 +1078,7 @@ namespace Serialization {
 
     /// @}
 }//Mezzanine
+
+RESTORE_WARNING_STATE
 
 #endif
