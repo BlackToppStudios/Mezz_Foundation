@@ -48,7 +48,7 @@
 SAVE_WARNING_STATE
 // Clang likes to complain about the inline variables not being marked inline here
 SUPPRESS_CLANG_WARNING("-Wmissing-variable-declarations")
- // Clang incorrectly thinks the inline variables and using aliases shouldn't have tparam docs
+// Clang incorrectly thinks the inline variables and using aliases shouldn't have tparam docs
 //SUPPRESS_CLANG_WARNING("-Wdocumentation")
 
 namespace Mezzanine {

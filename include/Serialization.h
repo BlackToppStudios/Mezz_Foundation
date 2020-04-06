@@ -54,7 +54,7 @@
 SAVE_WARNING_STATE
 // MSVC doesn't like default arguments being included in the forward declarations, but other platforms need them
 SUPPRESS_VC_WARNING(4348)
-// Clang likes to complain about the inline variables not being marked inline here
+// Clang likes to complain about the inline variables not being marked extern here
 SUPPRESS_CLANG_WARNING("-Wmissing-variable-declarations")
 
 namespace Mezzanine {
@@ -255,7 +255,7 @@ namespace Serialization {
         {  };
 
     template<typename SpecialContext>
-    ContextBase* UpdateContext(const ContextBase* Current, const SpecialContext* ToUpdate)
+    const ContextBase* UpdateContext(const ContextBase* Current, const SpecialContext* ToUpdate)
     {
         using ContextType = Context<SpecialContext>;
         if constexpr( !std::is_abstract_v<ContextType> ) {
@@ -269,7 +269,7 @@ namespace Serialization {
     }
 
     template<typename SpecialContext>
-    ContextBase* RevertContext(const ContextBase* Current, const SpecialContext* ToRevert)
+    const ContextBase* RevertContext(const ContextBase* Current, const SpecialContext* ToRevert)
     {
         using ContextType = Context<SpecialContext>;
         if constexpr( !std::is_abstract_v<ContextType> ) {
@@ -291,6 +291,9 @@ namespace Serialization {
     class MEZZ_LIB AttributeWalker
     {
     public:
+        /// @brief Class destructor.
+        virtual ~AttributeWalker() = default;
+
         ///////////////////////////////////////////////////////////////////////////////
         // Name Operations
 
@@ -374,7 +377,7 @@ namespace Serialization {
         template<typename Datum>
         [[nodiscard]]
         std::optional<Datum> GetValue(const AttributeWalker& Walker)
-            { return std::optional<Datum>(); }
+            { (void)Walker; return std::optional<Datum>(); }
 
         template<>
         void SetValue<StringView>(AttributeWalker& Walker, const StringView Value)
@@ -495,6 +498,9 @@ namespace Serialization {
     class MEZZ_LIB ObjectWalker
     {
     public:
+        /// @brief Class destructor.
+        virtual ~ObjectWalker() = default;
+
         ///////////////////////////////////////////////////////////////////////////////
         // Object Operations
 
@@ -657,12 +663,18 @@ namespace Serialization {
         }
     };//PolymorphicCasterHolder
 
+SAVE_WARNING_STATE
+// Yes clang, we know.  It's a singleton pattern.
+SUPPRESS_CLANG_WARNING("-Wexit-time-destructors")
+
     PolymorphicCasterHolder& GetPolymorphicCasterHolder();
     PolymorphicCasterHolder& GetPolymorphicCasterHolder()
     {
         static PolymorphicCasterHolder Store;
         return Store;
     }
+
+RESTORE_WARNING_STATE
 
     template<class Base, class Derived>
     class ObjectCaster final : public ObjectCasterBase
