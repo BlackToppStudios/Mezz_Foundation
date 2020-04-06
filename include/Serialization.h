@@ -54,6 +54,8 @@
 SAVE_WARNING_STATE
 // MSVC doesn't like default arguments being included in the forward declarations, but other platforms need them
 SUPPRESS_VC_WARNING(4348)
+// Clang likes to complain about the inline variables not being marked inline here
+SUPPRESS_CLANG_WARNING("-Wmissing-variable-declarations")
 
 namespace Mezzanine {
     /// @addtogroup Serialization
@@ -217,6 +219,9 @@ namespace Serialization {
     class BackendBase
     {
     public:
+        /// @brief Class destructor.
+        virtual ~BackendBase() = default;
+
         ///////////////////////////////////////////////////////////////////////////////
         // Query
 
@@ -234,6 +239,9 @@ namespace Serialization {
     class ContextBase
     {
     public:
+        /// @brief Class destructor.
+        virtual ~ContextBase() = default;
+
         virtual ContextBase* GetParentContext() const = 0;
 
         virtual Boole IsSame(void* ObjectPtr, const std::type_info& Info) const = 0;
