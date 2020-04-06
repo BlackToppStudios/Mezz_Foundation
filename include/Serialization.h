@@ -53,7 +53,7 @@
 
 SAVE_WARNING_STATE
 // MSVC doesn't like default arguments being included in the forward declarations, but other platforms need them
-SUPPRESS_VC_WARNING(4348)
+//SUPPRESS_VC_WARNING(4348)
 // Clang likes to complain about the inline variables not being marked extern here
 SUPPRESS_CLANG_WARNING("-Wmissing-variable-declarations")
 
@@ -811,7 +811,7 @@ RESTORE_WARNING_STATE
             using DecayedType = std::remove_pointer_t<SerializeType>;
             using IDReturn = decltype( GetObjectID( std::declval<DecayedType&>() ) );
             if constexpr( IsRegistered<DecayedType>() && !std::is_void_v<IDReturn> ) {
-                ScopedSerializationNode Node(Name,Tags,&Walker);
+                ScopedSerializationNode Node(Name,Tags,Walker);
                 if( Node.IsValid() ) {
                     Walker.Attribute("IsNotOwned",MemberTags::None,true);
                     Walker.Attribute("TypeName",MemberTags::None,GetRegisteredName<DecayedType>());
@@ -940,7 +940,7 @@ RESTORE_WARNING_STATE
     // Serialize
 
     template< typename SerializeType,
-              typename = std::enable_if_t< !std::is_pointer_v< std::decay_t<SerializeType> > > >
+              typename>// = std::enable_if_t< !std::is_pointer_v< std::decay_t<SerializeType> > > >
     void Serialize(const StringView Name,
                    const SerializeType& ToSerialize,
                    const MemberTags Tags,
@@ -961,7 +961,7 @@ RESTORE_WARNING_STATE
         }
     }
     template< typename SerializeType,
-              typename = std::enable_if_t< std::is_pointer_v< std::decay_t<SerializeType> > > >
+              typename>// = std::enable_if_t< std::is_pointer_v< std::decay_t<SerializeType> > > >
     void Serialize(const StringView Name,
                    const SerializeType ToSerialize,
                    const MemberTags Tags,
@@ -1009,7 +1009,7 @@ RESTORE_WARNING_STATE
     // Serialize - No Tags
 
     template< typename SerializeType,
-              typename = std::enable_if_t< !std::is_pointer_v< std::decay_t<SerializeType> > > >
+              typename>// = std::enable_if_t< !std::is_pointer_v< std::decay_t<SerializeType> > > >
     void Serialize(const StringView Name,
                    const SerializeType& ToSerialize,
                    const Int32 Version,
@@ -1018,7 +1018,7 @@ RESTORE_WARNING_STATE
         Mezzanine::Serialize(Name,MemberTags::None,ToSerialize,Version,Walker);
     }
     template< typename SerializeType,
-              typename = std::enable_if_t< std::is_pointer_v< std::decay_t<SerializeType> > > >
+              typename>// = std::enable_if_t< std::is_pointer_v< std::decay_t<SerializeType> > > >
     void Serialize(const StringView Name,
                    const SerializeType ToSerialize,
                    const Int32 Version,
@@ -1039,7 +1039,7 @@ RESTORE_WARNING_STATE
     // Deserialize
 
     template< typename SerializeType,
-              typename = std::enable_if_t< !std::is_pointer_v< std::decay_t<SerializeType> > > >
+              typename>// = std::enable_if_t< !std::is_pointer_v< std::decay_t<SerializeType> > > >
     void Deserialize(SerializeType& ToDeserialize,
                      const Int32 Version,
                      Serialization::ObjectWalker& Walker)
@@ -1049,7 +1049,7 @@ RESTORE_WARNING_STATE
         (void)Walker;
     }
     template< typename SerializeType,
-              typename = std::enable_if_t< std::is_pointer_v< std::decay_t<SerializeType> > > >
+              typename>// = std::enable_if_t< std::is_pointer_v< std::decay_t<SerializeType> > > >
     void Deserialize(SerializeType ToDeserialize,
                      const Int32 Version,
                      Serialization::ObjectWalker& Walker)
