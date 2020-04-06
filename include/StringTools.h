@@ -54,9 +54,9 @@ namespace StringTools {
     /// @brief Convenience type used by functions in this namespace for a const String iterator.
     using ConstStrIter = String::const_iterator;
 
-SAVE_WARNING_STATE
-// Clang likes to complain about the inline variables not being marked inline here
-SUPPRESS_CLANG_WARNING("-Wmissing-variable-declarations")
+//SAVE_WARNING_STATE
+// Clang likes to complain about the inline variables not being marked extern here
+//SUPPRESS_CLANG_WARNING("-Wmissing-variable-declarations")
 
     ///////////////////////////////////////////////////////////////////////////////
     // Character Type Traits
@@ -105,10 +105,12 @@ SUPPRESS_CLANG_WARNING("-Wmissing-variable-declarations")
     struct is_char : is_char_helper< std::remove_cv_t< std::remove_reference_t<CheckType> > >
         {  };
 
-    /// @brief Convenience inline variable for getting just the bool of the is_char check.
+    /// @brief Convenience function for getting just the bool of the is_char check.
     /// @tparam CheckType The type to check if it is a character type.
+    /// @return Returns true if the CheckType is a character type, false otherwise.
     template<class CheckType>
-    inline constexpr Boole is_char_v = is_char<CheckType>::value;
+    constexpr Boole IsChar()
+        { return is_char<CheckType>::value; }
 
     ///////////////////////////////////////////////////////////////////////////////
     // String Type Traits
@@ -138,12 +140,14 @@ SUPPRESS_CLANG_WARNING("-Wmissing-variable-declarations")
     struct is_string : is_string_helper< std::remove_cv_t< std::remove_reference_t<CheckType> > >
         {  };
 
-    /// @brief Convenience inline variable for getting just the bool of the is_string check.
+    /// @brief Convenience function for getting just the bool of the is_string check.
     /// @tparam CheckType The type to check if it is a string type.
-    template<class CheckType>
-    inline constexpr Boole is_string_v = is_string<CheckType>::value;
+    /// @return Returns true if the CheckType is a std::string or std::string_view, false otherwise.
+    template<typename CheckType>
+    constexpr Boole IsString()
+        { return is_string<CheckType>::value; }
 
-RESTORE_WARNING_STATE
+//RESTORE_WARNING_STATE
 
     ///////////////////////////////////////////////////////////////////////////////
     // Character Checks

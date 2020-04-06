@@ -52,8 +52,6 @@
 #endif
 
 SAVE_WARNING_STATE
-// MSVC doesn't like default arguments being included in the forward declarations, but other platforms need them
-//SUPPRESS_VC_WARNING(4348)
 // Clang likes to complain about the inline variables not being marked extern here
 SUPPRESS_CLANG_WARNING("-Wmissing-variable-declarations")
 
@@ -128,11 +126,13 @@ namespace Serialization {
     /// @brief Type for is_detected that tests for the existence of GetName on a class.
     /// @tparam Class The class that will be checked for the presence of a GetName function.
     template<typename Class>
-    using HasGetName = std::is_detected<GetNameFunct_t,Class>;
-    /// @brief Convenience inline variable for the value of a HasGetName check.
+    using HasGetName_t = std::is_detected<GetNameFunct_t,Class>;
+    /// @brief Convenience function for the value of a HasGetName check.
     /// @tparam Class The class that will be checked for the presence of a GetName function.
+    /// @return Returns true if the Class to check has a "GetName()" member function, false otherwise.
     template<typename Class>
-    inline constexpr Boole HasGetName_v = HasGetName<Class>::value;
+    constexpr Boole HasGetName()
+        { return HasGetName_t<Class>::value; }
 
     /// @brief Convenience type for GetID function detection.
     /// @tparam Class The class to test.
@@ -141,11 +141,13 @@ namespace Serialization {
     /// @brief Type for is_detected that tests for the existence of GetID on a class.
     /// @tparam Class The class that will be checked for the presence of a GetID function.
     template<typename Class>
-    using HasGetID = std::is_detected<GetIDFunct_t,Class>;
-    /// @brief Convenience inline variable for the value of a HasGetID check.
+    using HasGetID_t = std::is_detected<GetIDFunct_t,Class>;
+    /// @brief Convenience function for the value of a HasGetID check.
     /// @tparam Class The class that will be checked for the presence of a GetID function.
+    /// @return Returns true if the Class to check has a "GetID()" member function, false otherwise.
     template<typename Class>
-    inline constexpr Boole HasGetID_v = HasGetID<Class>::value;
+    constexpr Boole HasGetID()
+        { return HasGetID_t<Class>::value; }
 
     /// @brief Convenience type for GetIdentification function detection.
     /// @tparam Class The class to test.
@@ -154,11 +156,13 @@ namespace Serialization {
     /// @brief Type for is_detected that tests for the existence of GetIdentification on a class.
     /// @tparam Class The class that will be checked for the presence of a GetIdentification function.
     template<typename Class>
-    using HasGetIdentification = std::is_detected<GetIdentificationFunct_t,Class>;
-    /// @brief Convenience inline variable for the value of a HasGetIdentification check.
+    using HasGetIdentification_t = std::is_detected<GetIdentificationFunct_t,Class>;
+    /// @brief Convenience function for the value of a HasGetIdentification check.
     /// @tparam Class The class that will be checked for the presence of a GetIdentification function.
+    /// @return Returns true if the Class to check has a "GetIdentification()" member function, false otherwise.
     template<typename Class>
-    inline constexpr Boole HasGetIdentification_v = HasGetIdentification<Class>::value;
+    constexpr Boole HasGetIdentification()
+        { return HasGetIdentification_t<Class>::value; }
 
     ///////////////////////////////////////////////////////////////////////////////
     // Convenience type traits
@@ -769,11 +773,11 @@ RESTORE_WARNING_STATE
         template<typename SerializeType>
         auto GetObjectID(const SerializeType& ToID)
         {
-            if constexpr( HasGetName_v<SerializeType> ) {
+            if constexpr( HasGetName<SerializeType>() ) {
                 return ToID.GetName();
-            }else if constexpr( HasGetID_v<SerializeType> ) {
+            }else if constexpr( HasGetID<SerializeType>() ) {
                 return ToID.GetID();
-            }else if constexpr( HasGetIdentification_v<SerializeType> ) {
+            }else if constexpr( HasGetIdentification<SerializeType>() ) {
                 return ToID.GetIdentification();
             }else{
                 return;
@@ -852,7 +856,7 @@ RESTORE_WARNING_STATE
         }
 
         template<class SerializeType,
-                 typename = std::enable_if_t< is_associative_container_v<SerializeType> >,
+                 typename = std::enable_if_t< IsAssociativeContainer<SerializeType>() >,
                  typename = void>
         void SerializeContainer(const StringView Name,
                                 const SerializeType& ToSerialize,
@@ -877,7 +881,7 @@ RESTORE_WARNING_STATE
         }
 
         template<class SerializeType,
-                 typename = std::enable_if_t< is_non_associative_container_v<SerializeType> > >
+                 typename = std::enable_if_t< IsNonAssociativeContainer<SerializeType>() > >
         void SerializeContainer(const StringView Name,
                                 const SerializeType& ToSerialize,
                                 const MemberTags Tags,
@@ -952,9 +956,9 @@ RESTORE_WARNING_STATE
         using DecayedType = std::decay_t<SerializeType>;
         if constexpr( std::is_arithmetic_v<DecayedType> ) { // Basic Number Types
             Impl::SerializeSimpleMember(Name,ToSerialize,Tags,Walker);
-        }else if constexpr( StringTools::is_string_v<DecayedType> ) { // Strings
+        }else if constexpr( StringTools::is_string<DecayedType>::value ) { // Strings
             Impl::SerializeSimpleMember(Name,ToSerialize,Tags,Walker);
-        }else if constexpr( Mezzanine::is_container_v<DecayedType> ) { // Generic Containers
+        }else if constexpr( Mezzanine::is_container<DecayedType>::value ) { // Generic Containers
             Impl::SerializeContainer(Name,ToSerialize,Tags,Walker);
         }else{ // Generic Class
             Impl::SerializeGenericClass(Name,ToSerialize,Tags,1,Walker);

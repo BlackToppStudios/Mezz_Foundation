@@ -45,10 +45,10 @@
     #include "DetectionTraits.h"
 #endif
 
-SAVE_WARNING_STATE
-// Clang likes to complain about the inline variables not being marked inline here
-SUPPRESS_CLANG_WARNING("-Wmissing-variable-declarations")
-// Clang incorrectly thinks the inline variables and using aliases shouldn't have tparam docs
+//SAVE_WARNING_STATE
+// Clang likes to complain about the inline variables not being marked extern here
+//SUPPRESS_CLANG_WARNING("-Wmissing-variable-declarations")
+// Clang incorrectly thinks the inline variables shouldn't have tparam docs
 //SUPPRESS_CLANG_WARNING("-Wdocumentation")
 
 namespace Mezzanine {
@@ -60,11 +60,13 @@ namespace ContainerDetect {
     /// @brief Type for is_detected that tests for the existence of begin on a class.
     /// @tparam Class The class that will be checked for the presence of a begin function.
     template<typename Class>
-    using HasBegin = std::is_detected<BeginFunct_t,Class>;
-    /// @brief Convenience inline variable for the value of a HasBegin check.
-    /// @tparam Class The class that will be checked for the presence of a begin function.
+    using HasBegin_t = std::is_detected<BeginFunct_t,Class>;
+    /// @brief Convenience function for the value of a HasBegin check.
+    /// @tparam Class The class that will be checked for the presence of a "begin()" function.
+    /// @return Returns true if the provided type has a "begin()" member function, false otherwise.
     template<typename Class>
-    inline constexpr Boole HasBegin_v = HasBegin<Class>::value;
+    constexpr Boole HasBegin()
+        { return HasBegin_t<Class>::value; }
 
     /// @brief Convenience type for end function detection.
     /// @tparam Class The class to test.
@@ -73,11 +75,13 @@ namespace ContainerDetect {
     /// @brief Type for is_detected that tests for the existence of end on a class.
     /// @tparam Class The class that will be checked for the presence of a end function.
     template<typename Class>
-    using HasEnd = std::is_detected<EndFunct_t,Class>;
-    /// @brief Convenience inline variable for the value of a HasEnd check.
-    /// @tparam Class The class that will be checked for the presence of a end function.
+    using HasEnd_t = std::is_detected<EndFunct_t,Class>;
+    /// @brief Convenience function for the value of a HasEnd check.
+    /// @tparam Class The class that will be checked for the presence of a "end()" function.
+    /// @return Returns true if the provided type has a "end()" member function, false otherwise.
     template<typename Class>
-    inline constexpr Boole HasEnd_v = HasEnd<Class>::value;
+    constexpr Boole HasEnd()
+        { return HasEnd_t<Class>::value; }
 
     /// @brief Convenience type for size function detection.
     /// @tparam Class The class to test.
@@ -86,25 +90,34 @@ namespace ContainerDetect {
     /// @brief Type for is_detected that tests for the existence of size on a class.
     /// @tparam Class The class that will be checked for the presence of a size function.
     template<typename Class>
-    using HasSize = std::is_detected<SizeFunct_t,Class>;
-    /// @brief Convenience inline variable for the value of a HasSize check.
-    /// @tparam Class The class that will be checked for the presence of a size function.
+    using HasSize_t = std::is_detected<SizeFunct_t,Class>;
+    /// @brief Convenience function for the value of a HasSize check.
+    /// @tparam Class The class that will be checked for the presence of a "size()" function.
+    /// @return Returns true if the provided type has a "size()" member function, false otherwise.
     template<typename Class>
-    inline constexpr Boole HasSize_v = HasSize<Class>::value;
+    constexpr Boole HasSize()
+        { return HasSize_t<Class>::value; }
 
     /// @brief Dummy/failure type for detecting if a class has a "value_type" defined.
     /// @tparam Class The class to be tested.
     template<typename Class, typename = void>
-    struct HasValueType : std::false_type
+    struct DetectValueType : std::false_type
         {  };
     /// @brief Success type for detecting if a class has a "value_type" defined.
     /// @tparam Class The class to be tested.
     template<typename Class>
-    struct HasValueType<Class,std::void_t<typename Class::value_type>> : std::true_type
+    struct DetectValueType<Class,std::void_t<typename Class::value_type>> : std::true_type
         {  };
-    /// @brief Convenience
+    /// @brief Type for detecting the existance of a "value_type" member on a class.
+    /// @tparam Class The class to be tested.
     template<typename Class>
-    inline constexpr Boole HasValueType_v = HasValueType<Class>::value;
+    using HasValueType_t = DetectValueType<Class>;
+    /// @brief Convenience function for the value of a HasValueType check.
+    /// @tparam Class The class that will be checked for the presence of a "value_type" member.
+    /// @return Returns true if the provided type has a "value_type" member, false otherwise.
+    template<typename Class>
+    constexpr Boole HasValueType()
+        { return HasValueType_t<Class>::value; }
 }//ContainerDetect
 
     /// @brief A type trait that checks to see if a type is/has a range of elements.
@@ -112,26 +125,31 @@ namespace ContainerDetect {
     /// @remarks This tests for the presence of begin() and end() member functions on the type.
     template<typename CheckType>
     struct is_range :
-        std::bool_constant< ContainerDetect::HasBegin_v<CheckType> && ContainerDetect::HasEnd_v<CheckType> >
+        std::bool_constant< ContainerDetect::HasBegin<CheckType>() &&
+                            ContainerDetect::HasEnd<CheckType>() >
         {  };
-    /// @brief Convenience inline variable for getting just the bool of a is_range check.
+    /// @brief Convenience function for getting just the bool of a is_range check.
     /// @tparam CheckType The type that will be checked.
+    /// @return Returns true if CheckType has "begin()" and "end()" member functions, false otherwise.
     template<typename CheckType>
-    inline constexpr Boole is_range_v = is_range<CheckType>::value;
+    constexpr Boole IsRange()
+        { return is_range<CheckType>::value; }
 
     /// @brief A type trait that checks to see if it meets the minimal requirements for a container.
     /// @tparam CheckType The type that will be checked.
     /// @remarks This tests for the presence of begin(), end(), size(), and a value_type member on the type.
     template<typename CheckType>
     struct is_container :
-        std::bool_constant< is_range_v<CheckType> &&
-                            ContainerDetect::HasSize_v<CheckType> &&
-                            ContainerDetect::HasValueType_v<CheckType> >
+        std::bool_constant< IsRange<CheckType>() &&
+                            ContainerDetect::HasSize<CheckType>() &&
+                            ContainerDetect::HasValueType<CheckType>() >
         {  };
-    /// @brief Convenience inline variable for getting just the bool of a is_container check.
+    /// @brief Convenience function for getting just the bool of a is_container check.
     /// @tparam CheckType The type that will be checked.
+    /// @return Returns true if CheckType is a range and has "size()" and "value_type" members, false otherwise.
     template<typename CheckType>
-    inline constexpr Boole is_container_v = is_container<CheckType>::value;
+    constexpr Boole IsContainer()
+        { return is_container<CheckType>::value; }
 
     /// @brief Dummy/failure type for detecting if a class is a key/value pair for associative containers.
     /// @tparam ValueType The value_type stored by the container being tested.
@@ -148,10 +166,12 @@ namespace ContainerDetect {
     template<typename KeyType, typename ElementType>
     struct is_key_value_pair< std::pair<const KeyType, ElementType> > : std::true_type
         {  };
-    /// @brief Convenience inline variable for getting just the bool of a is_key_value_pair check.
+    /// @brief Convenience function for getting just the bool of a is_key_value_pair check.
     /// @tparam CheckType The type that will be checked.
+    /// @return Returns true if CheckType is an std::pair with the first type being const, false otherwise.
     template<typename CheckType>
-    inline constexpr Boole is_key_value_pair_v = is_key_value_pair<CheckType>::value;
+    constexpr Boole IsKeyValuePair()
+        { return is_key_value_pair<CheckType>::value; }
 
     /// @brief Dummy/failure type for detecting if a type is a container.
     /// @tparam IsContainer Whether or not the CheckType parameter is a container type.
@@ -168,19 +188,21 @@ namespace ContainerDetect {
     /// is_key_value_pair struct to determine if it is a key/value pair used in associative containers.
     template<typename CheckType>
     struct is_associative_container_impl<true,CheckType> :
-        std::bool_constant< is_key_value_pair_v<typename CheckType::value_type> >
+        std::bool_constant< IsKeyValuePair<typename CheckType::value_type>() >
         {  };
     /// @brief A type trait that detects if a type is an associative container.
     /// @tparam CheckType The type to be checked if it is an associative container.
     /// @remarks This performs all the same tests as is_container, but additionally checks to see if the
     /// value_type member matches the check performed by is_key_value_pair.
     template<typename CheckType>
-    struct is_associative_container : is_associative_container_impl< is_container_v<CheckType>, CheckType>
+    struct is_associative_container : is_associative_container_impl< IsContainer<CheckType>(), CheckType>
         {  };
-    /// @brief Convenience inline variable for getting just the bool of an is_associative_container check.
+    /// @brief Convenience function for getting just the bool of an is_associative_container check.
     /// @tparam CheckType The type to be checked if it is an associative container.
+    /// @return Returns true if CheckType is a container and it's value type is a key-value pair, false otherwise.
     template<typename CheckType>
-    inline constexpr Boole is_associative_container_v = is_associative_container<CheckType>::value;
+    constexpr Boole IsAssociativeContainer()
+        { return is_associative_container<CheckType>::value; }
 
     /// @brief Dummy/failure type for detecting if a type is a container.
     /// @tparam IsContainer Whether or not the CheckType parameter is a container type.
@@ -197,21 +219,23 @@ namespace ContainerDetect {
     /// is_key_value_pair struct to determine if it is a key/value pair used in associative containers.
     template<typename CheckType>
     struct is_non_associative_container_impl<true,CheckType> :
-        std::bool_constant< !is_key_value_pair_v<typename CheckType::value_type> >
+        std::bool_constant< !IsKeyValuePair<typename CheckType::value_type>() >
         {  };
     /// @brief A type trait that detects if a type is a non-associative container.
     /// @tparam CheckType The type to be checked if it is a non-associative container.
     /// @remarks This performs all the same tests as is_container, but additionally checks to see if the
     /// value_type member does not match the check performed by is_key_value_pair.
     template<typename CheckType>
-    struct is_non_associative_container : is_non_associative_container_impl< is_container_v<CheckType>, CheckType>
+    struct is_non_associative_container : is_non_associative_container_impl< IsContainer<CheckType>(), CheckType>
         {  };
-    /// @brief Convenience inline variable for getting just the bool of an is_non_associative_container check.
+    /// @brief Convenience function for getting just the bool of an is_non_associative_container check.
     /// @tparam CheckType The type to be checked if it is a non-associative container.
+    /// @return Returns true if CheckType is a container and it's value type is NOT a key-value pair, false otherwise.
     template<typename CheckType>
-    inline constexpr Boole is_non_associative_container_v = is_non_associative_container<CheckType>::value;
+    constexpr Boole IsNonAssociativeContainer()
+        { return is_non_associative_container<CheckType>::value; }
 }//Mezzanine
 
-RESTORE_WARNING_STATE
+//RESTORE_WARNING_STATE
 
 #endif // Mezz_Foundation_ContainerTools_h
