@@ -123,6 +123,7 @@ namespace SerializationTest {
 
     struct SimpleDerivedTwo : public SimpleBase
     {
+        UInt32 PaddingVar = 8765309;
         UInt32 UIntVar = 120000;
         Int32 IntVar = -120000;
         UInt16 ShortUIntVar = 42;
@@ -137,6 +138,7 @@ namespace SerializationTest {
             return MergeMembers(
                 SimpleBase::RegisterMembers(),
                 Members(
+                    MakeMemberAccessor("PaddingVar",&SimpleDerivedTwo::PaddingVar),
                     MakeMemberAccessor("UIntVar",&SimpleDerivedTwo::UIntVar),
                     MakeMemberAccessor("IntVar",&SimpleDerivedTwo::IntVar),
                     MakeMemberAccessor("ShortUIntVar",&SimpleDerivedTwo::ShortUIntVar),
