@@ -70,6 +70,11 @@ IncludeJagatiPackage("Test")
 ########################################################################################################################
 # Setup Exception Sources
 
+# This if is for upgrading from the version of the Jagati without this to a version that has it.
+if(COMMAND IntializeExceptions)
+    IntializeExceptions()
+endif(COMMAND IntializeExceptions)
+
 # This uses as a goal and description design for creating nest hierarchies of exceptions. It seems more desirable to
 # catch all Container or all IO errors rather than all Index or Range errors? Following this thought prcoess Argument,
 # Index, Range, and Name errors can be handled as subclasses of the more important system level categorization.
@@ -84,6 +89,8 @@ AddJagatiException("Encoding" "Base" "Base Exception for converting data from on
 # Graphics
 AddJagatiException("InputOutput" "Base" "Base Exception for all IO.")
 AddJagatiException("Introspection" "Base" "Base Exception for everyhing related to the introspection system.")
+# TODO: When multiple inheritance is supported add std::logic_error
+AddJagatiException("LogicError" "Base" "Base Exception for exceptions that almost certainly indicate bugs")
 # Math
 # Physics
 # Security
@@ -129,10 +136,8 @@ AddJagatiException("HexConversion" "Encoding" "A problem convert to or from hex 
 AddJagatiException("IntrospectionNullptr" "Introspection" "Base Exception for everyhing related.")
 
 
-
-
-
 ##########################################################
+# Post Exception Cleanup.
 EmitExceptionSource()
 AddExceptionSource()
 
