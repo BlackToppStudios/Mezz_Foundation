@@ -471,7 +471,7 @@ AUTOMATIC_TEST_GROUP(Base64Tests,Base64)
         using TimeType = ClockType::time_point;
         using DurationType = ClockType::duration;
 
-        const Whole TestCount = 10000;
+        const Whole TestCount = 100000;
 
         String OutputS; //To prevent optimizing this whole chunk away.
         BinaryBuffer OutputB; //To prevent optimizing this whole chunk away.

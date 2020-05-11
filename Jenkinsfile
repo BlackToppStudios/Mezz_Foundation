@@ -111,8 +111,8 @@ pipeline {
                         }
                     }
                 }
-                stage('windows7Mingw32') {
-                    agent { label "windows7Mingw32" }
+                stage('Windows10Mingw32') {
+                    agent { label "Windows10Mingw32" }
                     steps {
                         checkout scm
                         bat 'if not exist "build-debug" mkdir build-debug'
@@ -128,8 +128,8 @@ pipeline {
                         }
                     }
                 }
-                stage('windows7Mingw64') {
-                    agent { label "windows7Mingw64" }
+                stage('Windows10Mingw64') {
+                    agent { label "Windows10Mingw64" }
                     steps {
                         checkout scm
                         bat 'if not exist "build-debug" mkdir build-debug'
@@ -145,8 +145,8 @@ pipeline {
                         }
                     }
                 }
-                stage('windows7msvc') {
-                    agent { label "windows7msvc" }
+                stage('Windows10msvc') {
+                    agent { label "Windows10msvc" }
                     steps {
                         checkout scm
                         bat 'if not exist "build-debug" mkdir build-debug'
@@ -268,8 +268,8 @@ pipeline {
                         }
                     }
                 }
-                stage('windows7Mingw32') {
-                    agent { label "windows7Mingw32" }
+                stage('Windows10Mingw32') {
+                    agent { label "Windows10Mingw32" }
                     steps {
                         checkout scm
                         bat 'if not exist "build-release" mkdir build-release'
@@ -285,8 +285,8 @@ pipeline {
                         }
                     }
                 }
-                stage('windows7Mingw64') {
-                    agent { label "windows7Mingw64" }
+                stage('Windows10Mingw64') {
+                    agent { label "Windows10Mingw64" }
                     steps {
                         checkout scm
                         bat 'if not exist "build-release" mkdir build-release'
@@ -302,8 +302,8 @@ pipeline {
                         }
                     }
                 }
-                stage('windows7msvc') {
-                    agent { label "windows7msvc" }
+                stage('Windows10msvc') {
+                    agent { label "Windows10msvc" }
                     steps {
                         checkout scm
                         bat 'if not exist "build-release" mkdir build-release'
