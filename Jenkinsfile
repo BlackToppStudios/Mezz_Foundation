@@ -145,8 +145,8 @@ pipeline {
                         }
                     }
                 }
-                stage('Windows10msvc') {
-                    agent { label "Windows10msvc" }
+                stage('Windows10MSVC') {
+                    agent { label "Windows10MSVC" }
                     steps {
                         checkout scm
                         bat 'if not exist "build-debug" mkdir build-debug'
@@ -302,8 +302,8 @@ pipeline {
                         }
                     }
                 }
-                stage('Windows10msvc') {
-                    agent { label "Windows10msvc" }
+                stage('Windows10MSVC') {
+                    agent { label "Windows10MSVC" }
                     steps {
                         checkout scm
                         bat 'if not exist "build-release" mkdir build-release'
