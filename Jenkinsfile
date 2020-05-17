@@ -45,7 +45,7 @@ pipeline {
                         }
                     }
                 }
-                stage('Raspbian') {
+                stage('RaspbianDebug') {
                     agent { label "Raspbian" }
                     steps {
                         checkout scm
@@ -61,6 +61,25 @@ pipeline {
                     post {
                          always {
                              junit "build-debug/**/Mezz*.xml"
+                         }
+                    }
+                }
+                stage('RaspbianRelease') {
+                    agent { label "Raspbian" }
+                    steps {
+                        checkout scm
+                        sh 'mkdir -p build-release'
+                        dir('build-release') { sh """
+                            hostname &&
+                            export MEZZ_PACKAGE_DIR=/home/pi/Code/ &&
+                            cmake -E env CXXFLAGS="-fno-var-tracking-assignments" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
+                            ninja &&
+                            ./Foundation_Tester xml
+                         """ }
+                    }
+                    post {
+                         always {
+                             junit "build-release/**/Mezz*.xml"
                          }
                     }
                 }
