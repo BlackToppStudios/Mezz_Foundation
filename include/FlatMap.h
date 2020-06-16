@@ -47,34 +47,11 @@
     #include "DataTypes.h"
     #include "BinaryFind.h"
     #include "MezzException.h"
+    #include "ContainerTools.h"
 #endif
 
 namespace Mezzanine
 {
-    /// @brief A simple type trait that'll reduce any number of types to void.
-    /// @note This can be replaced with std::void_t in C++17.
-    template<typename...>
-    struct Voider
-        { using type = void; };
-    /// @brief A simple type trait value that gets the "type" member of Voider.
-    /// @note This can be replaced with std::void_t in C++17.
-    template<typename... Types>
-    using Voider_t = typename Voider<Types...>::type;
-
-    /// @brief Type trait for detecting of a comparator is transparent.
-    /// @tparam Comp The comparator functor to check.
-    /// @tparam KeyType The key being used.
-    /// @details This is the dummy trait for failure cases.
-    template<typename Comp, typename KeyType, typename = Voider_t<>>
-    struct Is_Transparent : std::false_type
-        {  };
-    /// @brief Type trait specialization for detecting of a comparator is transparent.
-    /// @tparam Comp The comparator functor to check.
-    /// @tparam KeyType The key being used.
-    template<typename Comp, typename KeyType>
-    struct Is_Transparent<Comp,KeyType,Voider_t<typename Comp::is_transparent>> : std::true_type
-        {  };
-
     ///////////////////////////////////////////////////////////////////////////////
     /// @brief A simple comparison functor that stores (and uses) another functor.
     /// @details This is used by the FlatMap as a indirect so we can use stl algorithms in the map
@@ -157,7 +134,7 @@ namespace Mezzanine
         /// @param Key The key to compare to the stored pair.
         /// @param Pair The pair whose key will be used for the comparison.
         /// @return Returns true if the Left key should be sorted before the Right key, false otherwise.
-        template<class alt_key, typename = std::enable_if_t<Is_Transparent<CompareType,alt_key>::value>>
+        template<class alt_key, typename = std::enable_if_t<comp_is_transparent<CompareType,alt_key>::value>>
         Boole operator()(const alt_key& Key, const StoredType& Pair)
             { return CompFunct( Key, Pair.first ); }
         /// @brief Compares a key on a stored type to a standalone key to see which one should be sorted before the other.
@@ -165,7 +142,7 @@ namespace Mezzanine
         /// @param Pair The pair whose key will be used for the comparison.
         /// @param Key The key to compare to the stored pair.
         /// @return Returns true if the Left key should be sorted before the Right key, false otherwise.
-        template<class alt_key, typename = std::enable_if_t<Is_Transparent<CompareType,alt_key>::value>>
+        template<class alt_key, typename = std::enable_if_t<comp_is_transparent<CompareType,alt_key>::value>>
         Boole operator()(const StoredType& Pair, const alt_key& Key)
             { return CompFunct( Pair.first, Key ); }
     };//FlatPairCompare
@@ -441,7 +418,7 @@ namespace Mezzanine
         /// @tparam alt_key An type not matching key_type but is still equivalent comparable.
         /// @param Key The key to check for.
         /// @return Returns the number of stored pairs that match the specified key.
-        template<class alt_key, typename = std::enable_if_t<Is_Transparent<Compare,alt_key>::value>>
+        template<class alt_key, typename = std::enable_if_t<comp_is_transparent<Compare,alt_key>::value>>
         size_type count(const alt_key& Key) const
             { return ( find(Key) != end() ? 1 : 0 ); }
 
@@ -459,14 +436,14 @@ namespace Mezzanine
         /// @tparam alt_key An type not matching key_type but is still equivalent comparable.
         /// @param Key The key to search for.
         /// @return Returns an iterator to to the pair matching the specified key, or end() if no pair was found.
-        template<class alt_key, typename = std::enable_if_t<Is_Transparent<Compare,alt_key>::value>>
+        template<class alt_key, typename = std::enable_if_t<comp_is_transparent<Compare,alt_key>::value>>
         iterator find(const alt_key& Key)
             { return binary_find(begin(),end(),Key,GetCompareObj()); }
         /// @brief Gets an iterator to the stored pair with a specific key.
         /// @tparam alt_key An type not matching key_type but is still equivalent comparable.
         /// @param Key The key to search for.
         /// @return Returns an const iterator to to the pair matching the specified key, or end() if no pair was found.
-        template<class alt_key, typename = std::enable_if_t<Is_Transparent<Compare,alt_key>::value>>
+        template<class alt_key, typename = std::enable_if_t<comp_is_transparent<Compare,alt_key>::value>>
         const_iterator find(const alt_key& Key) const
             { return binary_find(begin(),end(),Key,GetCompareObj()); }
 
@@ -479,7 +456,7 @@ namespace Mezzanine
         /// @tparam alt_key An type not matching key_type but is still equivalent comparable.
         /// @param Key The key to search for.
         /// @return Returns true if the key was found inside this container, false otherwise.
-        template<class alt_key, typename = std::enable_if_t<Is_Transparent<Compare,alt_key>::value>>
+        template<class alt_key, typename = std::enable_if_t<comp_is_transparent<Compare,alt_key>::value>>
         Boole contains(const alt_key& Key) const
             { return ( find(Key) != end() ); }
 
@@ -506,7 +483,7 @@ namespace Mezzanine
         /// @param Key The key to search for.
         /// @return Returns a pair of iterators containing the range of elements equal to the
         /// specified key.
-        template<class alt_key, typename = std::enable_if_t<Is_Transparent<Compare,alt_key>::value>>
+        template<class alt_key, typename = std::enable_if_t<comp_is_transparent<Compare,alt_key>::value>>
         iterator_pair equal_range(const alt_key& Key)
             { return std::equal_range(begin(),end(),Key,GetCompareObj()); }
         /// @brief Gets an iterator pair representing the range of elements equal to the key.
@@ -516,7 +493,7 @@ namespace Mezzanine
         /// @param Key The key to search for.
         /// @return Returns a pair of const iterators containing the range of elements equal
         /// to the specified key.
-        template<class alt_key, typename = std::enable_if_t<Is_Transparent<Compare,alt_key>::value>>
+        template<class alt_key, typename = std::enable_if_t<comp_is_transparent<Compare,alt_key>::value>>
         const_iterator_pair equal_range(const alt_key& Key) const
             { return std::equal_range(begin(),end(),Key,GetCompareObj()); }
 
@@ -537,7 +514,7 @@ namespace Mezzanine
         /// @param Key The key to search for.
         /// @return Returns an iterator to first element that is not less than the key specified,
         /// or the end iterator if no such match could be found.
-        template<class alt_key, typename = std::enable_if_t<Is_Transparent<Compare,alt_key>::value>>
+        template<class alt_key, typename = std::enable_if_t<comp_is_transparent<Compare,alt_key>::value>>
         iterator lower_bound(const alt_key& Key)
             { return std::lower_bound(begin(),end(),Key,GetCompareObj()); }
         /// @brief Gets an iterator to the first element that doesn't compare less than the key.
@@ -545,7 +522,7 @@ namespace Mezzanine
         /// @param Key The key to search for.
         /// @return Returns a const iterator to first element that is not less than the key
         /// specified, or the end iterator if no such match could be found.
-        template<class alt_key, typename = std::enable_if_t<Is_Transparent<Compare,alt_key>::value>>
+        template<class alt_key, typename = std::enable_if_t<comp_is_transparent<Compare,alt_key>::value>>
         const_iterator lower_bound(const alt_key& Key) const
             { return std::lower_bound(begin(),end(),Key,GetCompareObj()); }
 
@@ -566,7 +543,7 @@ namespace Mezzanine
         /// @param Key The key to search for.
         /// @return Returns an iterator to the first element greater than the key specified,
         /// or the end iterator if no such match could be made.
-        template<class alt_key, typename = std::enable_if_t<Is_Transparent<Compare,alt_key>::value>>
+        template<class alt_key, typename = std::enable_if_t<comp_is_transparent<Compare,alt_key>::value>>
         iterator upper_bound(const alt_key& Key)
             { return std::upper_bound(begin(),end(),Key,GetCompareObj()); }
         /// @brief Gets an iterator to the first element that compares greater than the key.
@@ -574,7 +551,7 @@ namespace Mezzanine
         /// @param Key The key to search for.
         /// @return Returns a const iterator to the first element greater than the key specified,
         /// or the end iterator if no such match could be made.
-        template<class alt_key, typename = std::enable_if_t<Is_Transparent<Compare,alt_key>::value>>
+        template<class alt_key, typename = std::enable_if_t<comp_is_transparent<Compare,alt_key>::value>>
         const_iterator upper_bound(const alt_key& Key) const
             { return std::upper_bound(begin(),end(),Key,GetCompareObj()); }
 

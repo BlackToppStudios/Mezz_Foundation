@@ -52,6 +52,7 @@ SUPPRESS_CLANG_WARNING("-Wpadded")
 
 namespace SerializationTest {
     using namespace Mezzanine;
+    class SuperComposed;
 
     ///////////////////////////////////////////////////////////////////////////////
     // Test Backend
@@ -72,7 +73,7 @@ namespace SerializationTest {
         Integer IntVarOne = -100;
         Integer IntVarTwo = 100;
 
-        static StringView RegisterName()
+        static constexpr StringView RegisterName()
             { return "Simple"; }
 
         static auto RegisterMembers()
@@ -89,7 +90,7 @@ namespace SerializationTest {
     {
         String StringVar = "Base";
 
-        static StringView RegisterName()
+        static constexpr StringView RegisterName()
             { return "SimpleBase"; }
 
         static auto RegisterMembers()
@@ -107,7 +108,7 @@ namespace SerializationTest {
         float FloatVarOne = -3.14f;
         float FloatVarTwo = 3.14f;
 
-        static StringView RegisterName()
+        static constexpr StringView RegisterName()
             { return "SimpleDerivedOne"; }
 
         static auto RegisterMembers()
@@ -131,7 +132,7 @@ namespace SerializationTest {
         UInt16 ShortUIntVar = 42;
         Int16 ShortIntVar = -42;
 
-        static StringView RegisterName()
+        static constexpr StringView RegisterName()
             { return "SimpleDerivedTwo"; }
 
         static auto RegisterMembers()
@@ -149,28 +150,135 @@ namespace SerializationTest {
         }
     };//SimpleDerivedTwo
 
-    class Composed
+    struct SimpleDerivedThree : public SimpleDerivedTwo
+    {
+        double DoubleVar = 8.675309;
+
+        static constexpr StringView RegisterName()
+            { return "SimpleDerivedThree"; }
+
+        static auto RegisterMembers()
+        {
+            using namespace Mezzanine;
+            return MergeMembers(
+                SimpleDerivedTwo::RegisterMembers(),
+                Members(
+                    MakeMemberAccessor("DoubleVar",&SimpleDerivedThree::DoubleVar)
+                )
+            );
+        }
+    };//SimpleDerivedThree
+
+    class ComposedOne
     {
     protected:
         Simple SimpleObj;
         SimpleBase* SimplePtr;
+        SuperComposed* Parent;
     public:
-        Composed(SimpleBase* Ptr) :
-            SimplePtr(Ptr)
+        ComposedOne(SimpleBase* Ptr, SuperComposed* Creator) :
+            SimplePtr(Ptr),
+            Parent(Creator)
             {  }
 
-        static StringView RegisterName()
-            { return "Composed"; }
+        static constexpr StringView RegisterName()
+            { return "ComposedOne"; }
 
         static auto RegisterMembers()
         {
             using namespace Mezzanine;
             return Members(
-                MakeMemberAccessor("SimpleObj",&Composed::SimpleObj),
-                MakeMemberAccessor("SimplePtr",&Composed::SimplePtr)
+                MakeMemberAccessor("SimpleObj",&ComposedOne::SimpleObj),
+                MakeMemberAccessor<MemberTags::NotOwned>("SimplePtr",&ComposedOne::SimplePtr),
+                MakeMemberAccessor<MemberTags::NotOwned>("Parent",&ComposedOne::Parent)
             );
         }
-    };//Composed
+    };//ComposedOne
+
+    class ComposedTwo
+    {
+    protected:
+        ComposedOne* OwnedComposed;
+        SimpleBase* NonOwnedSimpleObj;
+        SuperComposed* Parent;
+        std::shared_ptr<Simple> SharedSimplePtr;
+    public:
+        ComposedTwo(ComposedOne* Owned, SimpleBase* NonOwned, SuperComposed* Super, std::shared_ptr<Simple> Shared) :
+            OwnedComposed(Owned),
+            NonOwnedSimpleObj(NonOwned),
+            Parent(Super),
+            SharedSimplePtr(Shared)
+            {  }
+
+        ~ComposedTwo()
+            { delete OwnedComposed; }
+
+        static constexpr StringView RegisterName()
+            { return "ComposedTwo"; }
+
+        static auto RegisterMembers()
+        {
+            using namespace Mezzanine;
+            return Members(
+                MakeMemberAccessor("OwnedComposed",&ComposedTwo::OwnedComposed),
+                MakeMemberAccessor<MemberTags::NotOwned>("NonOwnedSimpleObj",&ComposedTwo::NonOwnedSimpleObj),
+                MakeMemberAccessor("SharedSimplePtr",&ComposedTwo::SharedSimplePtr),
+                MakeMemberAccessor<MemberTags::NotOwned>("Parent",&ComposedTwo::Parent)
+            );
+        }
+    };//ComposedTwo
+
+    class SuperComposed
+    {
+    protected:
+        std::vector<ComposedTwo*> ComposedVector;
+        std::map<int,ComposedOne> ComposedMap;
+        SimpleDerivedThree FirstDerived;
+        SimpleDerivedTwo SecondDerived;
+        SimpleDerivedOne ThirdDerived;
+    public:
+        SuperComposed()
+        {
+            std::shared_ptr<Simple> SharedSimple = std::make_shared<Simple>();
+            // Populate the ComposedVector
+            ComposedVector.push_back(
+                new ComposedTwo( new ComposedOne(&FirstDerived,this), &SecondDerived, this, SharedSimple )
+            );
+            ComposedVector.push_back(
+                new ComposedTwo( new ComposedOne(&SecondDerived,this), &FirstDerived, this, SharedSimple )
+            );
+            ComposedVector.push_back(
+                new ComposedTwo( new ComposedOne(&FirstDerived,this), &FirstDerived, this, SharedSimple )
+            );
+            ComposedVector.push_back(
+                new ComposedTwo( new ComposedOne(&SecondDerived,this), &SecondDerived, this, SharedSimple )
+            );
+            // Populate the ComposedMap
+            ComposedMap.try_emplace(1,&FirstDerived,this);
+            ComposedMap.try_emplace(2,&SecondDerived,this);
+        }
+
+        ~SuperComposed()
+        {
+            for( ComposedTwo* CurrBase : ComposedVector )
+                { delete CurrBase; }
+        }
+
+        static constexpr StringView RegisterName()
+            { return "SuperComposed"; }
+
+        static auto RegisterMembers()
+        {
+            using namespace Mezzanine;
+            return Members(
+                MakeMemberAccessor("ComposedVector",&SuperComposed::ComposedVector),
+                MakeMemberAccessor("ComposedMap",&SuperComposed::ComposedMap),
+                MakeMemberAccessor("FirstDerived",&SuperComposed::FirstDerived),
+                MakeMemberAccessor("SecondDerived",&SuperComposed::SecondDerived),
+                MakeMemberAccessor("ThirdDerived",&SuperComposed::ThirdDerived)
+            );
+        }
+    };//SuperComposed
 }//SerializationTest
 
 RESTORE_WARNING_STATE
@@ -181,6 +289,8 @@ AUTOMATIC_TEST_GROUP(SerializationTests,Serialization)
     using namespace SerializationTest;
 
     RegisterCasters<SimpleBase,SimpleDerivedOne,SimpleDerivedTwo>();
+
+    SuperComposed FakeManager;
 }
 
 #endif

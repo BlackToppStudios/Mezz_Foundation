@@ -45,12 +45,6 @@
     #include "DetectionTraits.h"
 #endif
 
-//SAVE_WARNING_STATE
-// Clang likes to complain about the inline variables not being marked extern here
-//SUPPRESS_CLANG_WARNING("-Wmissing-variable-declarations")
-// Clang incorrectly thinks the inline variables shouldn't have tparam docs
-//SUPPRESS_CLANG_WARNING("-Wdocumentation")
-
 namespace Mezzanine {
 namespace ContainerDetect {
     /// @brief Convenience type for begin function detection.
@@ -98,6 +92,51 @@ namespace ContainerDetect {
     constexpr Boole HasSize()
         { return HasSize_t<Class>::value; }
 
+    /// @brief Convenience type for resize function detection.
+    /// @tparam Class The class to test.
+    template<typename Class>
+    using ResizeFunct_t = decltype(std::declval<Class&>().resize(std::declval<size_t>()));
+    /// @brief Type for is_detected that tests for the existence of resize on a class.
+    /// @tparam Class The class that will be checked for the presence of a resize function.
+    template<typename Class>
+    using HasResize_t = std::is_detected<ResizeFunct_t,Class>;
+    /// @brief Convenience function for the value of a HasResize check.
+    /// @tparam Class The class that will be checked for the presence of a "resize()" function.
+    /// @return Returns true if the provided type has a "resize()" member function, false otherwise.
+    template<typename Class>
+    constexpr Boole HasResize()
+        { return HasResize_t<Class>::value; }
+
+    /// @brief Convenience type for reserve function detection.
+    /// @tparam Class The class to test.
+    template<typename Class>
+    using ReserveFunct_t = decltype(std::declval<Class&>().reserve(std::declval<size_t>()));
+    /// @brief Type for is_detected that tests for the existence of reserve on a class.
+    /// @tparam Class The class that will be checked for the presence of a reserve function.
+    template<typename Class>
+    using HasReserve_t = std::is_detected<ReserveFunct_t,Class>;
+    /// @brief Convenience function for the value of a HasReserve check.
+    /// @tparam Class The class that will be checked for the presence of a "reserve()" function.
+    /// @return Returns true if the provided type has a "reserve()" member function, false otherwise.
+    template<typename Class>
+    constexpr Boole HasReserve()
+        { return HasReserve_t<Class>::value; }
+
+    /// @brief Convenience type for clear function detection.
+    /// @tparam Class The class to test.
+    template<typename Class>
+    using ClearFunct_t = decltype(std::declval<Class&>().clear());
+    /// @brief Type for is_detected that tests for the existence of clear on a class.
+    /// @tparam Class The class that will be checked for the presence of a clear function.
+    template<typename Class>
+    using HasClear_t = std::is_detected<ClearFunct_t,Class>;
+    /// @brief Convenience function for the value of a HasClear check.
+    /// @tparam Class The class that will be checked for the presence of a "clear()" function.
+    /// @return Returns true if the provided type has a "clear()" member function, false otherwise.
+    template<typename Class>
+    constexpr Boole HasClear()
+        { return HasClear_t<Class>::value; }
+
     /// @brief Dummy/failure type for detecting if a class has a "value_type" defined.
     /// @tparam Class The class to be tested.
     template<typename Class, typename = void>
@@ -118,6 +157,48 @@ namespace ContainerDetect {
     template<typename Class>
     constexpr Boole HasValueType()
         { return HasValueType_t<Class>::value; }
+
+    /// @brief Dummy/failure type for detecting if a class has a "key_type" defined.
+    /// @tparam Class The class to be tested.
+    template<typename Class, typename = void>
+    struct DetectKeyType : std::false_type
+        {  };
+    /// @brief Success type for detecting if a class has a "key_type" defined.
+    /// @tparam Class The class to be tested.
+    template<typename Class>
+    struct DetectKeyType<Class,std::void_t<typename Class::key_type>> : std::true_type
+        {  };
+    /// @brief Type for detecting the existance of a "key_type" member on a class.
+    /// @tparam Class The class to be tested.
+    template<typename Class>
+    using HasKeyType_t = DetectKeyType<Class>;
+    /// @brief Convenience function for the value of a HasKeyType check.
+    /// @tparam Class The class that will be checked for the presence of a "key_type" member.
+    /// @return Returns true if the provided type has a "key_type" member, false otherwise.
+    template<typename Class>
+    constexpr Boole HasKeyType()
+        { return HasKeyType_t<Class>::value; }
+
+    /// @brief Dummy/failure type for detecting if a class has a "mapped_type" defined.
+    /// @tparam Class The class to be tested.
+    template<typename Class, typename = void>
+    struct DetectMappedType : std::false_type
+        {  };
+    /// @brief Success type for detecting if a class has a "mapped_type" defined.
+    /// @tparam Class The class to be tested.
+    template<typename Class>
+    struct DetectMappedType<Class,std::void_t<typename Class::value_type>> : std::true_type
+        {  };
+    /// @brief Type for detecting the existance of a "mapped_type" member on a class.
+    /// @tparam Class The class to be tested.
+    template<typename Class>
+    using HasMappedType_t = DetectMappedType<Class>;
+    /// @brief Convenience function for the value of a HasMappedType check.
+    /// @tparam Class The class that will be checked for the presence of a "mapped_type" member.
+    /// @return Returns true if the provided type has a "mapped_type" member, false otherwise.
+    template<typename Class>
+    constexpr Boole HasMappedType()
+        { return HasMappedType_t<Class>::value; }
 }//ContainerDetect
 
     /// @brief A type trait that checks to see if a type is/has a range of elements.
@@ -134,6 +215,36 @@ namespace ContainerDetect {
     template<typename CheckType>
     constexpr Boole IsRange()
         { return is_range<CheckType>::value; }
+
+    /// @brief A type trait that checks to see if a type has contiguous internal storage that can be resized.
+    /// @tparam CheckType The type that will be checked.
+    /// @remarks This tests for the presence of resize() and reserve() member functions on the type.
+    template<typename CheckType>
+    struct is_resizable_contiguous :
+        std::bool_constant< ContainerDetect::HasResize<CheckType>() &&
+                            ContainerDetect::HasReserve<CheckType>() >
+        {  };
+    /// @brief Convenience function for getting just the bool of a is_resizable_contiguous check.
+    /// @tparam CheckType The type that will be checked.
+    /// @return Returns true if CheckType has "resize()" and "reserve()" member functions, false otherwise.
+    template<typename CheckType>
+    constexpr Boole IsResizableContiguous()
+        { return is_resizable_contiguous<CheckType>::value; }
+
+    /// @brief A type trait that checks to see if a type has noncontiguous internal storage that can be resized.
+    /// @tparam CheckType The type that will be checked.
+    /// @remarks This tests for the presence of a resize() member on the type, but not reserve().
+    template<typename CheckType>
+    struct is_resizable_noncontiguous :
+        std::bool_constant< ContainerDetect::HasResize<CheckType>() &&
+                            !ContainerDetect::HasReserve<CheckType>() >
+        {  };
+    /// @brief Convenience function for getting just the bool of a is_resizable_noncontiguous.
+    /// @tparam CheckType The type that will be checked.
+    /// @return Returns true if CheckType has "resize()" and "reserve()" member functions, false otherwise.
+    template<typename CheckType>
+    constexpr Boole IsResizableNonContiguous()
+        { return is_resizable_noncontiguous<CheckType>::value; }
 
     /// @brief A type trait that checks to see if it meets the minimal requirements for a container.
     /// @tparam CheckType The type that will be checked.
@@ -188,7 +299,9 @@ namespace ContainerDetect {
     /// is_key_value_pair struct to determine if it is a key/value pair used in associative containers.
     template<typename CheckType>
     struct is_associative_container_impl<true,CheckType> :
-        std::bool_constant< IsKeyValuePair<typename CheckType::value_type>() >
+        std::bool_constant< ContainerDetect::HasKeyType<CheckType>() &&
+                            ContainerDetect::HasMappedType<CheckType>() &&
+                            IsKeyValuePair<typename CheckType::value_type>() >
         {  };
     /// @brief A type trait that detects if a type is an associative container.
     /// @tparam CheckType The type to be checked if it is an associative container.
@@ -234,8 +347,20 @@ namespace ContainerDetect {
     template<typename CheckType>
     constexpr Boole IsNonAssociativeContainer()
         { return is_non_associative_container<CheckType>::value; }
-}//Mezzanine
 
-//RESTORE_WARNING_STATE
+    /// @brief Type trait for detecting of a comparator is transparent.
+    /// @tparam Comp The comparator functor to check.
+    /// @tparam KeyType The key being used.
+    /// @details This is the dummy trait for failure cases.
+    template<typename Comp, typename KeyType, typename = std::void_t<>>
+    struct comp_is_transparent : std::false_type
+        {  };
+    /// @brief Type trait specialization for detecting of a comparator is transparent.
+    /// @tparam Comp The comparator functor to check.
+    /// @tparam KeyType The key being used.
+    template<typename Comp, typename KeyType>
+    struct comp_is_transparent<Comp,KeyType,std::void_t<typename Comp::is_transparent>> : std::true_type
+        {  };
+}//Mezzanine
 
 #endif // Mezz_Foundation_ContainerTools_h

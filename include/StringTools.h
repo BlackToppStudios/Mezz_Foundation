@@ -54,10 +54,6 @@ namespace StringTools {
     /// @brief Convenience type used by functions in this namespace for a const String iterator.
     using ConstStrIter = String::const_iterator;
 
-//SAVE_WARNING_STATE
-// Clang likes to complain about the inline variables not being marked extern here
-//SUPPRESS_CLANG_WARNING("-Wmissing-variable-declarations")
-
     ///////////////////////////////////////////////////////////////////////////////
     // Character Type Traits
 
@@ -146,8 +142,6 @@ namespace StringTools {
     template<typename CheckType>
     constexpr Boole IsString()
         { return is_string<CheckType>::value; }
-
-//RESTORE_WARNING_STATE
 
     ///////////////////////////////////////////////////////////////////////////////
     // Character Checks

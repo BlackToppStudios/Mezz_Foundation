@@ -101,6 +101,84 @@ AUTOMATIC_TEST_GROUP(ContainerToolsTests,ContainerTools)
                    false,IsRange<TestSharedPtr>());
     }//is_range
 
+    {//is_resizable_contiguous
+        TEST_EQUAL("is_resizable_contiguous-Array",
+                   false,IsResizableContiguous<TestArray>());
+        TEST_EQUAL("is_resizable_contiguous-Vector",
+                   true,IsResizableContiguous<TestVector>());
+        TEST_EQUAL("is_resizable_contiguous-Deque",
+                   false,IsResizableContiguous<TestDeque>());
+        TEST_EQUAL("is_resizable_contiguous-List",
+                   false,IsResizableContiguous<TestList>());
+        TEST_EQUAL("is_resizable_contiguous-Set",
+                   false,IsResizableContiguous<TestSet>());
+        TEST_EQUAL("is_resizable_contiguous-MultiSet",
+                   false,IsResizableContiguous<TestMultiSet>());
+        TEST_EQUAL("is_resizable_contiguous-Map",
+                   false,IsResizableContiguous<TestMap>());
+        TEST_EQUAL("is_resizable_contiguous-MultiMap",
+                   false,IsResizableContiguous<TestMultiMap>());
+        TEST_EQUAL("is_resizable_contiguous-UnorderedSet",
+                   false,IsResizableContiguous<TestUnorderedSet>());
+        TEST_EQUAL("is_resizable_contiguous-UnorderedMultiSet",
+                   false,IsResizableContiguous<TestUnorderedMultiSet>());
+        TEST_EQUAL("is_resizable_contiguous-UnorderedMap",
+                   false,IsResizableContiguous<TestUnorderedMap>());
+        TEST_EQUAL("is_resizable_contiguous-UnorderedMultiMap",
+                   false,IsResizableContiguous<TestUnorderedMultiMap>());
+        TEST_EQUAL("is_resizable_contiguous-FlatMap",
+                   false,IsResizableContiguous<TestFlatMap>());
+        TEST_EQUAL("is_resizable_contiguous-ManagedArray",
+                   false,IsResizableContiguous<TestManagedArray>());
+        TEST_EQUAL("is_resizable_contiguous-SortedManagedArray",
+                   false,IsResizableContiguous<TestSortedManagedArray>());
+        TEST_EQUAL("is_resizable_contiguous-SortedVector",
+                   false,IsResizableContiguous<TestSortedVector>());
+        TEST_EQUAL("is_resizable_contiguous-String",
+                   true,IsResizableContiguous<TestString>());
+        TEST_EQUAL("is_resizable_contiguous-SharedPtr",
+                   false,IsResizableContiguous<TestSharedPtr>());
+    }//is_resizable_contiguous
+
+    {//is_resizable_noncontiguous
+        TEST_EQUAL("is_resizable_noncontiguous-Array",
+                   false,IsResizableNonContiguous<TestArray>());
+        TEST_EQUAL("is_resizable_noncontiguous-Vector",
+                   false,IsResizableNonContiguous<TestVector>());
+        TEST_EQUAL("is_resizable_noncontiguous-Deque",
+                   true,IsResizableNonContiguous<TestDeque>());
+        TEST_EQUAL("is_resizable_noncontiguous-List",
+                   true,IsResizableNonContiguous<TestList>());
+        TEST_EQUAL("is_resizable_noncontiguous-Set",
+                   false,IsResizableNonContiguous<TestSet>());
+        TEST_EQUAL("is_resizable_noncontiguous-MultiSet",
+                   false,IsResizableNonContiguous<TestMultiSet>());
+        TEST_EQUAL("is_resizable_noncontiguous-Map",
+                   false,IsResizableNonContiguous<TestMap>());
+        TEST_EQUAL("is_resizable_noncontiguous-MultiMap",
+                   false,IsResizableNonContiguous<TestMultiMap>());
+        TEST_EQUAL("is_resizable_noncontiguous-UnorderedSet",
+                   false,IsResizableNonContiguous<TestUnorderedSet>());
+        TEST_EQUAL("is_resizable_noncontiguous-UnorderedMultiSet",
+                   false,IsResizableNonContiguous<TestUnorderedMultiSet>());
+        TEST_EQUAL("is_resizable_noncontiguous-UnorderedMap",
+                   false,IsResizableNonContiguous<TestUnorderedMap>());
+        TEST_EQUAL("is_resizable_noncontiguous-UnorderedMultiMap",
+                   false,IsResizableNonContiguous<TestUnorderedMultiMap>());
+        TEST_EQUAL("is_resizable_noncontiguous-FlatMap",
+                   false,IsResizableNonContiguous<TestFlatMap>());
+        TEST_EQUAL("is_resizable_noncontiguous-ManagedArray",
+                   false,IsResizableNonContiguous<TestManagedArray>());
+        TEST_EQUAL("is_resizable_noncontiguous-SortedManagedArray",
+                   false,IsResizableNonContiguous<TestSortedManagedArray>());
+        TEST_EQUAL("is_resizable_noncontiguous-SortedVector",
+                   false,IsResizableNonContiguous<TestSortedVector>());
+        TEST_EQUAL("is_resizable_noncontiguous-String",
+                   false,IsResizableNonContiguous<TestString>());
+        TEST_EQUAL("is_resizable_noncontiguous-SharedPtr",
+                   false,IsResizableNonContiguous<TestSharedPtr>());
+    }//is_resizable_noncontiguous
+
     {//is_container
         TEST_EQUAL("is_container-Array",
                    true,IsContainer<TestArray>());

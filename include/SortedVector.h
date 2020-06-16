@@ -46,6 +46,7 @@
 #ifndef SWIG
     #include "DataTypes.h"
     #include "BinaryFind.h"
+    #include "ContainerTools.h"
 #endif
 
 namespace Mezzanine
@@ -73,6 +74,8 @@ namespace Mezzanine
         using reverse_iterator = typename StorageVector::reverse_iterator;
         /// @brief Type of const reverse iterator for random access. Invalidated on all insertions.
         using const_reverse_iterator = typename StorageVector::const_reverse_iterator;
+        /// @brief Type for a minor ElementType parameter optimization.
+        using AddParam = std::conditional_t<(sizeof(ElementType)>sizeof(void*)),const ElementType&,const ElementType>;
     private:
         /// @brief The actual vector that does most of the interesting work.
         StorageVector InternalStorage;
@@ -170,12 +173,10 @@ namespace Mezzanine
 
         /// @brief Since this container has no array-like concept this inserts the item where it needs to go.
         /// @details This has all the potential allocation slow downs of push_back
-        /// and costs of finding the required place to insert. This sorts the whole container after
-        /// adding items, so calling this after for a many additions is really slow, use
-        /// @ref add_range to only sort once.
+        /// and costs of finding the required place to insert.
         /// @param value The value to put into the vector.
         /// @return Returns an iterator to the added element.
-        iterator add(ElementType value)
+        iterator add(AddParam value)
         {
             const_iterator InsertPos = std::lower_bound(begin(),end(),value,Sorter());
             return InternalStorage.insert(InsertPos,value);
@@ -241,6 +242,18 @@ namespace Mezzanine
         /// @return A const iterator to an item, can be adjusted by random access.
         const_iterator find(const ElementType& value) const
             { return binary_find(begin(),end(),value,Sorter()); }
+        /// @brief Get and iterator to a specific item, operates in fast logarithmic time.
+        /// @param value The item to get the location of.
+        /// @return A mutable iterator to an item, can be adjusted by random access.
+        template<class alt_key, typename = std::enable_if_t<comp_is_transparent<Sorter,alt_key>::value>>
+        iterator find(const alt_key& value)
+            { return binary_find(begin(),end(),value,Sorter()); }
+        /// @brief Get and interator to a specific item, operates in fast logarithmic time.
+        /// @param value The item to get the location of.
+        /// @return A const iterator to an item, can be adjusted by random access.
+        template<class alt_key, typename = std::enable_if_t<comp_is_transparent<Sorter,alt_key>::value>>
+        const_iterator find(const alt_key& value) const
+            { return binary_find(begin(),end(),value,Sorter()); }
 
         /// @brief A convenience method for invoking std::find_if with all the elements of this container.
         /// @tparam UnaryPredicate The type of invokable that will perform the checks.
@@ -263,6 +276,12 @@ namespace Mezzanine
         /// @param value The item in question.
         /// @return True if present false otherwise.
         Boole contains(const ElementType& value) const
+            { return std::binary_search(begin(),end(),value); }
+        /// @brief Does the item exist in this vector?
+        /// @param value The item in question.
+        /// @return True if present false otherwise.
+        template<class alt_key, typename = std::enable_if_t<comp_is_transparent<Sorter,alt_key>::value>>
+        Boole contains(const alt_key& value) const
             { return std::binary_search(begin(),end(),value); }
 
         /// @brief Empty the Vector discarding all data.
