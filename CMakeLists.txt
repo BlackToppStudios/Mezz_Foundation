@@ -70,6 +70,11 @@ IncludeJagatiPackage("Test")
 ########################################################################################################################
 # Setup Exception Sources
 
+# This if is for upgrading from the version of the Jagati without this to a version that has it.
+if(COMMAND IntializeExceptions)
+    IntializeExceptions()
+endif(COMMAND IntializeExceptions)
+
 # This uses as a goal and description design for creating nest hierarchies of exceptions. It seems more desirable to
 # catch all Container or all IO errors rather than all Index or Range errors? Following this thought prcoess Argument,
 # Index, Range, and Name errors can be handled as subclasses of the more important system level categorization.
