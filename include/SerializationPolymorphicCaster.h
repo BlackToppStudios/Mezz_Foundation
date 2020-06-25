@@ -166,12 +166,11 @@ RESTORE_WARNING_STATE
     class PolymorphicCasterImpl final : public PolymorphicCaster
     {
     public:
+        static_assert( std::is_base_of_v<Base,Derived>, "\"Base\" is not a base class of Derived" );
         static_assert( std::is_constructible_v<Derived,const Int32,ObjectWalker&> ||
                        std::is_default_constructible_v<Derived>,
                        "Derived type must be default constructable or have a constructor that accepts "
                        "an Int and ObjectWalker." );
-    public:
-        static_assert( std::is_base_of_v<Base,Derived>, "\"Base\" is not a base class of Derived" );
 
         ~PolymorphicCasterImpl() = default;
         StringView GetBaseTypeName() const
@@ -208,7 +207,7 @@ RESTORE_WARNING_STATE
             Derived* UpCasted = nullptr;
             if( ToDeserialize == nullptr ) {
                 if constexpr( std::is_constructible_v<Derived,decltype(Version),decltype(Walker)> ) {
-                    UpCasted = new Derived(Walker);
+                    UpCasted = new Derived(Version,Walker);
                 }else if constexpr( std::is_default_constructible_v<Derived> ) {
                     UpCasted = new Derived();
                 }

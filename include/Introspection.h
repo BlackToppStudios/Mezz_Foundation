@@ -169,7 +169,7 @@ namespace Mezzanine {
         /// @brief The object to which the member belongs.
         using ObjectType = Object;
         /// @brief The member type being pointed to.
-        using ArgumentType = Member;
+        using ArgumentType = Member&;
         /// @brief The decayed type of Member, stripped of reference and const qualifiers.
         using DecayedType = std::decay_t<Member>;
     };//DeduceSetterTypes
@@ -217,7 +217,7 @@ namespace Mezzanine {
         /// @brief The object to which the member belongs.
         using ObjectType = Object;
         /// @brief The member type being pointed to.
-        using ReturnType = Member;
+        using ReturnType = Member&;
         /// @brief The decayed type of Member, stripped of reference and const qualifiers.
         using DecayedType = std::decay_t<Member>;
     };//DeduceGetterTypes

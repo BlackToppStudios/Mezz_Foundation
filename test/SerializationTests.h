@@ -57,6 +57,181 @@ namespace SerializationTest {
     ///////////////////////////////////////////////////////////////////////////////
     // Test Backend
 
+    class Attribute
+    {
+    public:
+        static const char SeparatorChar = ' ';
+        static const char LinkChar = ':';
+    protected:
+        String Name;
+        String Value;
+    public:
+        Attribute() = default;
+        Attribute(const StringView AttribName, const StringView AttribValue) :
+            Name(AttribName),
+            Value(AttribValue)
+            {  }
+        ~Attribute() = default;
+
+        void SetName(const StringView NewName)
+            { this->Name = NewName; }
+        const String& GetName() const
+            { return this->Name; }
+        void SetValue(const StringView NewValue)
+            { this->Value = NewValue; }
+        const String& GetValue() const
+            { return this->Value; }
+    };//Attribute
+
+    std::ostream& operator<<(std::ostream& Stream, const Attribute& ToSerialize);
+    std::ostream& operator<<(std::ostream& Stream, const Attribute& ToSerialize)
+    {
+        Stream << ToSerialize.GetName() << ":" << ToSerialize.GetValue();
+        return Stream;
+    }
+    std::istream& operator>>(std::istream& Stream, Attribute& ToDeserialize);
+    std::istream& operator>>(std::istream& Stream, Attribute& ToDeserialize)
+    {
+        String Temp;
+        std::getline(Stream,Temp,Attribute::LinkChar);
+        ToDeserialize.SetName(Temp);
+        std::getline(Stream,Temp,Attribute::SeparatorChar);
+        ToDeserialize.SetValue(Temp);
+        return Stream;
+    }
+
+    class Node
+    {
+    public:
+        static const char AttributeStartChar = '[';
+        static const char AttributeEndChar = ']';
+        static const char NodeStartChar = '{';
+        static const char NodeEndChar = '}';
+        static const StringView Indent = "    ";
+    protected:
+        String Name;
+        std::vector<Attribute> Attributes;
+        std::vector<Node> Nodes;
+        Node* Parent;
+    public:
+        Node(Node* Creator) :
+            Parent(Creator)
+            {  }
+
+        void SetName(const StringView NewName)
+            { this->Name = NewName; }
+        const String& GetName() const
+            { return this->Name; }
+
+        Boole IsRoot() const
+            { return this->Parent == nullptr; }
+        Node* GetParent() const
+            { return this->Parent; }
+        size_t GetDepth() const
+            { return ( this->Parent ? this->Parent->GetDepth() + 1 : 0 ); }
+
+        Node& CreateChildNode()
+            { return this->Nodes.emplace_back(this); }
+        size_t GetNumNodes() const
+            { return this->Nodes.size(); }
+        Node& GetNode(const size_t Index)
+            { return this->Nodes[Index]; }
+        const Node& GetNode(const size_t Index) const
+            { return this->Nodes[Index]; }
+        Node& GetFirstNode()
+            { return this->Nodes.front(); }
+        const Node& GetFirstNode() const
+            { return this->Nodes.front(); }
+        Node& GetLastNode()
+            { return this->Nodes.back(); }
+        const Node& GetLastNode() const
+            { return this->Nodes.back(); }
+        void ClearNodes()
+            { this->Nodes.clear(); }
+
+        Attribute& CreateChildAttribute()
+            { return this->Attributes.emplace_back(); }
+        Attribute& CreateChildAttribute(const String& AttribName, const String& AttribValue)
+            { return this->Attributes.emplace_back(AttribName,AttribValue); }
+        size_t GetNumAttributes() const
+            { return this->Attributes.size(); }
+        Attribute& GetAttribute(const size_t Index)
+            { return this->Attributes[Index]; }
+        const Attribute& GetAttribute(const size_t Index) const
+            { return this->Attributes[Index]; }
+        Attribute& GetFirstAttribute()
+            { return this->Attributes.front(); }
+        const Attribute& GetFirstAttribute() const
+            { return this->Attributes.front(); }
+        Attribute& GetLastAttribute()
+            { return this->Attributes.back(); }
+        const Attribute& GetLastAttribute() const
+            { return this->Attributes.back(); }
+        void ClearAttributes()
+            { this->Attributes.clear(); }
+    };//Node
+
+    std::ostream& operator<<(std::ostream& Stream, const Node& ToSerialize);
+    std::ostream& operator<<(std::ostream& Stream, const Node& ToSerialize)
+    {
+        Stream << '\n';
+        size_t NodeDepth = ToSerialize.GetDepth();
+        for( size_t IndentCount = 0 ; IndentCount < NodeDepth ; ++IndentCount )
+            { Stream << Node::Indent; }
+        Stream << Node::NodeStartChar << ToSerialize.GetName() << Attribute::SeparatorChar;
+        if( ToSerialize.GetNumAttributes() > 0 ) {
+            Stream << Node::AttributeStartChar << Attribute::SeparatorChar;
+            for( size_t AttribIndex = 0 ; AttribIndex < ToSerialize.GetNumAttributes() ; ++AttribIndex )
+                { Stream << ToSerialize.GetAttribute(AttribIndex) << Attribute::SeparatorChar; }
+            Stream << Node::AttributeEndChar;
+        }
+        for( size_t NodeIndex = 0 ; NodeIndex < ToSerialize.GetNumNodes() ; ++NodeIndex )
+            { Stream << ToSerialize.GetNode(NodeIndex); }
+        Stream << '\n';
+        for( size_t IndentCount = 0 ; IndentCount < NodeDepth ; ++IndentCount )
+            { Stream << Node::Indent; }
+        Stream << Node::NodeEndChar;
+        return Stream;
+    }
+    std::istream& operator>>(std::istream& Stream, Node& ToDeserialize);
+    std::istream& operator>>(std::istream& Stream, Node& ToDeserialize)
+    {
+        String Temp;
+        Stream.ignore(std::numeric_limits<std::streamsize>::max(),Node::NodeStartChar);
+        std::getline(Stream,Temp,Attribute::SeparatorChar);
+        ToDeserialize.SetName(Temp);
+        while( Stream.peek() != Node::NodeEndChar || Stream.peek() != std::istream::traits_type::eof() )
+        {
+            if( Stream.peek() == Node::AttributeStartChar ) {
+                Stream.ignore(2);
+                while( Stream.peek() != Node::AttributeEndChar )
+                    { Stream >> ToDeserialize.CreateChildAttribute(); }
+                Stream.ignore();
+            }else if( Stream.peek() == Node::NodeStartChar ) {
+                Stream >> ToDeserialize.CreateChildNode();
+            }else{
+                Stream.ignore();
+            }
+        }
+        return Stream;
+    }
+
+    class BackendAttribute : public Serialization::AttributeWalker
+    {
+    protected:
+    public:
+        BackendAttribute() = default;
+        virtual ~BackendAttribute() = default;
+    };//BackendAttribute
+
+    class BackendNode : public Serialization::ObjectWalker
+    {
+    protected:
+    public:
+        BackendNode() = default;
+        virtual ~BackendNode() = default;
+    };//BackendNode
+
     class Backend : public Serialization::BackendBase
     {
     protected:

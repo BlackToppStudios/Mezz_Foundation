@@ -366,6 +366,10 @@ namespace Serialization {
         virtual Boole HasChildren() const = 0;
         [[nodiscard]]
         virtual Boole HasChild(const StringView Name) const = 0;
+        [[nodiscard]]
+        virtual Boole HasNextSibling() const = 0;
+        [[nodiscard]]
+        virtual Boole HasPreviousSibling() const = 0;
 
         virtual ObjectWalker& Next() = 0;
         virtual ObjectWalker& Previous() = 0;

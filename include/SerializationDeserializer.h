@@ -54,7 +54,7 @@ namespace Mezzanine {
 namespace Serialization {
     /// @addtogroup Serialization
     /// @{
-
+/*
     namespace Impl {
         template<class SerializeType>
         void DeserializeClassValidation(const SerializeType& ToDeserialize,
@@ -90,6 +90,19 @@ namespace Serialization {
             }
         }
 
+        template<class SerializeType, class Setter, class Getter>
+        void DeserializeSimpleMember(const StringView Name,
+                                     SerializeType& ToDeserialize,
+                                     MemberAccessor<Setter,Getter>& Accessor,
+                                     Serialization::ObjectWalker& Walker)
+        {
+            using MemberType = decltype(Accessor)::MemberType;
+            std::optional<MemberType> SimpleAttrib = Walker.Attribute<MemberType>(Name);
+            if( SimpleAttrib ) {
+                Accessor.SetValue(ToDeserialize,SimpleAttrib.value());
+            }
+        }
+
         template<class SerializeType>
         void DeserializeAllMembers(const SerializeType& ToDeserialize,
                                    Serialization::ObjectWalker& Walker)
@@ -98,10 +111,19 @@ namespace Serialization {
             if constexpr( IsRegistered<DecayedType>() ) {
                 DoForAllMembers<DecayedType>([&](const auto& Member) {
                     constexpr MemberTags Tags = std::remove_reference_t<decltype(Member)>::GetTags();
-                    if( !IsIgnorable( Tags ) ) {
-                        Mezzanine::Deserialize(Member.GetName(), )
+                    if constexpr( !IsIgnorable( Tags ) ) {
+                        // The normal deserialization interface is only friendly to types passed by reference.
+                        if constexpr( std::is_reference_v< decltype(Member)::ReturnType ) > ) {
+                            Mezzanine::Deserialize(Member.GetName(),Member.GetValue(ToSerialize),Version,Walker);
+                        }else if constexpr( std::is_arithmetic_v<DecayedType> ) {
+                            Serialization::Impl::DeserializeSimpleMember(Name,ToDeserialize,Member,Walker);
+                        }else if constexpr( StringTools::is_string<DecayedType>::value ) {
+                            Serialization::Impl::DeserializeSimpleMember(Name,ToDeserialize,Member,Walker);
+                        }else if constexpr( Mezzanine::is_container<DecayedType>::value ) {
 
-                        Mezzanine::Serialize(Member.GetName(),Member.GetValue(ToSerialize),Tags,LatestVersion,Walker);
+                        }else{
+
+                        }
                     }
                 });
             }
@@ -142,33 +164,15 @@ namespace Serialization {
                     throw std::runtime_error("TypeName mismatch when deserializing container values.");
                 }
 
-                size_t ElementCount = ;
-                size_t ElementsVisited = 0;
-                for( size_t ElementsVisited = 0 ; ElementsVisited < ElementCount ; ++ElementsVisited )
-                {
-                    StringStream Namer;
-                    Namer << "Element" << ElementsVisited;
-                    Mezzanine::Deserialize(Namer.str(),,,Walker);
-                }
-
-
-                {
-                    ScopedDeserializationNode ChildNode(Walker);
-                    while(  )
-                    {
-
-                    }
-                }
-
-                for( Walker.FirstChild() ; !Walker.IsLastChild() ; Walker.Next() )
-                {
-
-                }
-
                 Walker.FirstChild();
                 do{
 
-                }while( !Walker.IsLastChild() )
+
+                    Boole GoToNext = !Walker.IsLastChild();
+                    if( GoToNext ) {
+                        Walker.Next();
+                    }
+                }while( GoToNext )
                 Walker.Parent();
             }
 
@@ -368,7 +372,7 @@ namespace Serialization {
                      Serialization::ObjectWalker& Walker)
     {
         Deserialize(Name,ToDeserialize,MemberTags::None,Version,Walker);
-    }
+    }//*/
 
     /// @}
 }//Mezzanine
