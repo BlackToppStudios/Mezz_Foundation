@@ -135,7 +135,7 @@ pipeline {
                         sh 'mkdir -p build-debug'
                         dir('build-debug') { sh """#!/bin/bash
                             hostname &&
-                            cmake -E env CXXFLAGS="-fno-var-tracking-assignments" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=ON &&
+                            cmake -E env CXXFLAGS="-fno-var-tracking" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=ON &&
                             ninja  &&
                             ./Foundation_Tester xml &&
                             bash <(curl -s https://codecov.io/bash) -t ${env.CODECOV_TOKEN}
@@ -154,7 +154,7 @@ pipeline {
                         sh 'mkdir -p build-release'
                         dir('build-release') { sh """#!/bin/bash
                             hostname &&
-                            cmake -E env CXXFLAGS="-fno-var-tracking-assignments" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
+                            cmake -E env CXXFLAGS="-fno-var-tracking" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
                             ninja  &&
                             ./Foundation_Tester xml
                          """ }
@@ -173,7 +173,7 @@ pipeline {
                         sh 'mkdir -p build-debug'
                         dir('build-debug') { sh """#!/bin/bash
                             hostname &&
-                            cmake -E env EMCC_DEBUG=2 CXXFLAGS="-v -fno-var-tracking-assignments -s WASM=1 -s ALLOW_MEMORY_GROWTH" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=ON &&
+                            cmake -E env EMCC_DEBUG=2 CXXFLAGS="-v -fno-var-tracking -s WASM=1 -s ALLOW_MEMORY_GROWTH" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=ON &&
                             ninja &&
                             node Foundation_Tester.js NoThreads &&
                             bash <(curl -s https://codecov.io/bash) -t ${env.CODECOV_TOKEN}
@@ -188,7 +188,7 @@ pipeline {
                         sh 'mkdir -p build-release'
                         dir('build-release') { sh """#!/bin/bash
                             hostname &&
-                            cmake -E env CXXFLAGS="-v -fno-var-tracking-assignments -s WASM=1 -s ALLOW_MEMORY_GROWTH" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
+                            cmake -E env CXXFLAGS="-v -fno-var-tracking -s WASM=1 -s ALLOW_MEMORY_GROWTH" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
                             ninja &&
                             node Foundation_Tester.js NoThreads
                         """ }
