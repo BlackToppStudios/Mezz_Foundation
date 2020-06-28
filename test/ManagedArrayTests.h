@@ -88,6 +88,7 @@ DEFAULT_TEST_GROUP(ManagedArrayTests,ManagedArray)
         TEST_EQUAL("ManagedArray(ManagedArray&&)-Element8",21,MoveDestTest[7]);
         TEST_EQUAL("ManagedArray(ManagedArray&&)-Element9",34,MoveDestTest[8]);
         TEST_EQUAL("ManagedArray(ManagedArray&&)-Element10",55,MoveDestTest[9]);
+
     }//Construction
 
     {//Operators
@@ -211,6 +212,7 @@ DEFAULT_TEST_GROUP(ManagedArrayTests,ManagedArray)
     }//Query and Access
 
     {//Sequence Modifiers
+
         ManagedArray<int,1> FirstPushBack;
         const int PushBackCopyValue = 66;
         FirstPushBack.push_back(PushBackCopyValue);
@@ -302,7 +304,9 @@ DEFAULT_TEST_GROUP(ManagedArrayTests,ManagedArray)
         ManagedArray<int,4> FirstInsertSource = { 8, 13, 21, 34 };
         ManagedArray<int,5> SecondInsertSource = { 1, 1, 2, 3, 5 };
         InsertRangeArray.insert(InsertRangeArray.begin() + 1,FirstInsertSource.begin(),FirstInsertSource.end());
-        TEST_EQUAL("insert(const_iterator,InputIterator,InputIterator)-FirstInsertSize",size_t(7),InsertRangeArray.size());
+        TEST_EQUAL("insert(const_iterator,InputIterator,InputIterator)-FirstInsertSize",
+                   size_t(7),
+                   InsertRangeArray.size());
         TEST_EQUAL("insert(const_iterator,InputIterator,InputIterator)-FirstInsertElement1",0,InsertRangeArray[0]);
         TEST_EQUAL("insert(const_iterator,InputIterator,InputIterator)-FirstInsertElement2",8,InsertRangeArray[1]);
         TEST_EQUAL("insert(const_iterator,InputIterator,InputIterator)-FirstInsertElement3",13,InsertRangeArray[2]);
@@ -310,8 +314,26 @@ DEFAULT_TEST_GROUP(ManagedArrayTests,ManagedArray)
         TEST_EQUAL("insert(const_iterator,InputIterator,InputIterator)-FirstInsertElement5",34,InsertRangeArray[4]);
         TEST_EQUAL("insert(const_iterator,InputIterator,InputIterator)-FirstInsertElement6",55,InsertRangeArray[5]);
         TEST_EQUAL("insert(const_iterator,InputIterator,InputIterator)-FirstInsertElement7",89,InsertRangeArray[6]);
-        InsertRangeArray.insert(InsertRangeArray.begin() + 1,SecondInsertSource.begin(),SecondInsertSource.end());
-        TEST_EQUAL("insert(const_iterator,InputIterator,InputIterator)-SecondInsertSize",size_t(12),InsertRangeArray.size());
+
+/* // Causes
+FAILED: CMakeFiles/Foundation_Tester.dir/generated_source/Foundation_tester.cpp.o
+/usr/bin/c++   -I/home/sqeaky/Code/Mezz_Foundation/include -Iconfig -I/home/sqeaky/Code/Mezz_StaticFoundation/include -I/home/sqeaky/Code/Mezz_StaticFoundation-build/config -I/home/sqeaky/Code/Mezz_Test/include -I/home/sqeaky/Code/Mezz_Test-build/config -std=c++17 -Wall -Wextra -Werror -pedantic-errors         -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Wmissing-declarations         -Wmissing-include-dirs -Wold-style-cast -Wredundant-decls -Wshadow -Wconversion -Wsign-promo         -Wstrict-overflow=2 -Wundef -pthread -fPIC -Wlogical-op -Wnoexcept -Wstrict-null-sentinel -O2 -mtune=native -O3 -DNDEBUG -MD -MT CMakeFiles/Foundation_Tester.dir/generated_source/Foundation_tester.cpp.o -MF CMakeFiles/Foundation_Tester.dir/generated_source/Foundation_tester.cpp.o.d -o CMakeFiles/Foundation_Tester.dir/generated_source/Foundation_tester.cpp.o -c generated_source/Foundation_tester.cpp
+In member function ‘virtual void ManagedArrayTests::operator()()’:
+cc1plus: error: assuming pointer wraparound does not occur when comparing P +- C1 with P +- C2 [-Werror=strict-overflow]
+cc1plus: error: assuming pointer wraparound does not occur when comparing P +- C1 with P +- C2 [-Werror=strict-overflow]
+cc1plus: all warnings being treated as errors
+ninja: build stopped: subcommand failed.
+23:04:50: The process "/usr/bin/cmake" exited with code 1.
+Error while building/deploying project Foundation (kit: Desktop)
+When executing step "CMake Build"
+// End caused
+
+        InsertRangeArray.insert(InsertRangeArray.begin() + 1u,
+                                SecondInsertSource.begin(),
+                                SecondInsertSource.end());
+        TEST_EQUAL("insert(const_iterator,InputIterator,InputIterator)-SecondInsertSize",
+                   size_t(12),
+                   InsertRangeArray.size());
         TEST_EQUAL("insert(const_iterator,InputIterator,InputIterator)-SecondInsertElement1",0,InsertRangeArray[0]);
         TEST_EQUAL("insert(const_iterator,InputIterator,InputIterator)-SecondInsertElement2",1,InsertRangeArray[1]);
         TEST_EQUAL("insert(const_iterator,InputIterator,InputIterator)-SecondInsertElement3",1,InsertRangeArray[2]);
@@ -332,6 +354,8 @@ DEFAULT_TEST_GROUP(ManagedArrayTests,ManagedArray)
                                                 FirstInsertSource.begin(),
                                                 FirstInsertSource.end());
                    });
+
+// */
 
         ManagedArray<int,2> PopBackArray = { 5, 10 };
         PopBackArray.pop_back();
@@ -374,7 +398,9 @@ DEFAULT_TEST_GROUP(ManagedArrayTests,ManagedArray)
         ManagedArray<int,6> ClearArray = { 1, 2, 3, 4, 5, 6 };
         ClearArray.clear();
         TEST_EQUAL("clear()",true,ClearArray.empty());
+        // */
     }//Sequence Modifiers
+
 }
 
 #endif

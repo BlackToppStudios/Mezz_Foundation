@@ -180,6 +180,7 @@ ShowList("Doxygen Input Files:" "\t" "${FoundationDoxFiles}")
 AddJagatiLibrary()
 CreateCoverageTarget(${FoundationLib} "${FoundationSourceFiles}")
 
+AddTestFile("Base64Benchmarks.h")
 AddTestFile("Base64Tests.h")
 AddTestFile("BinaryBufferTests.h")
 AddTestFile("BitFieldToolsTests.h")

@@ -56,7 +56,7 @@ pipeline {
                         dir('build-debug') { sh """#!/bin/bash
                             hostname &&
                             export PATH='$PATH:/usr/local/bin/' &&
-                            cmake -E env CXXFLAGS="-fno-var-tracking-assignments" cmake -G"Xcode" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=ON &&
+                            cmake -E env CXXFLAGS="-fno-var-tracking" cmake -G"Xcode" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=ON &&
                             cmake --build . &&
                            ./Foundation_Tester xml &&
                            bash <(curl -s https://codecov.io/bash) -t ${env.CODECOV_TOKEN}
@@ -76,7 +76,7 @@ pipeline {
                         dir('build-release') { sh """#!/bin/bash
                             hostname &&
                             export PATH='$PATH:/usr/local/bin/' &&
-                            cmake -E env CXXFLAGS="-fno-var-tracking-assignments" cmake -G"Xcode" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
+                            cmake -E env CXXFLAGS="-fno-var-tracking" cmake -G"Xcode" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
                             cmake --build . &&
                            ./Foundation_Tester xml
                         """ }
