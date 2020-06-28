@@ -52,10 +52,10 @@ if(NOT JAGATI_Download)
     option(JAGATI_Download "Should the Jagati be downloaded automatically" ON)
 endif(NOT JAGATI_Download)
 if(JAGATI_Download)
-    set(JAGATI_Checksum "404c78d4a4bce87e5ffe2321c86e8ef74951a8e69536d4e55c2\
-bdfb9298a9cef1237d4d349487b1d66df4267c868f54cb6d499eacf854f05308c9398b4e0e77e"
+    set(JAGATI_Checksum "f993c986a9a5ddb3caac6e19f4b64d29ff12f820503b4036303\
+2279b124aa7f5c837907cc218227e58ff0df4228ecb549202a5c670dc7d8938cc7b9437dbe13e"
         CACHE STRING "Check that when the Jagati is downloaded the right one is used (for consistency and security).")
-    set(JAGATI_Url "https://raw.githubusercontent.com/BlackToppStudios/Jagati/0.29.0/Jagati.cmake"
+    set(JAGATI_Url "https://raw.githubusercontent.com/BlackToppStudios/Jagati/0.30.1/Jagati.cmake"
         CACHE STRING "Where to download the Jagati from.")
     file(DOWNLOAD "${JAGATI_Url}" "${JAGATI_File}" EXPECTED_HASH SHA512=${JAGATI_Checksum})
 endif(JAGATI_Download)
@@ -69,6 +69,11 @@ IncludeJagatiPackage("Test")
 
 ########################################################################################################################
 # Setup Exception Sources
+
+# This if is for upgrading from the version of the Jagati without this to a version that has it.
+if(COMMAND IntializeExceptions)
+    IntializeExceptions()
+endif(COMMAND IntializeExceptions)
 
 # This uses as a goal and description design for creating nest hierarchies of exceptions. It seems more desirable to
 # catch all Container or all IO errors rather than all Index or Range errors? Following this thought prcoess Argument,
@@ -84,6 +89,8 @@ AddJagatiException("Encoding" "Base" "Base Exception for converting data from on
 # Graphics
 AddJagatiException("InputOutput" "Base" "Base Exception for all IO.")
 AddJagatiException("Introspection" "Base" "Base Exception for everyhing related to the introspection system.")
+# TODO: When multiple inheritance is supported add std::logic_error
+AddJagatiException("LogicError" "Base" "Base Exception for exceptions that almost certainly indicate bugs")
 # Math
 # Physics
 # Security
@@ -129,10 +136,8 @@ AddJagatiException("HexConversion" "Encoding" "A problem convert to or from hex 
 AddJagatiException("IntrospectionNullptr" "Introspection" "Base Exception for everyhing related.")
 
 
-
-
-
 ##########################################################
+# Post Exception Cleanup.
 EmitExceptionSource()
 AddExceptionSource()
 
@@ -183,6 +188,7 @@ ShowList("Doxygen Input Files:" "\t" "${FoundationDoxFiles}")
 AddJagatiLibrary()
 CreateCoverageTarget(${FoundationLib} "${FoundationSourceFiles}")
 
+AddTestFile("Base64Benchmarks.h")
 AddTestFile("Base64Tests.h")
 AddTestFile("BinaryBufferTests.h")
 AddTestFile("BitFieldToolsTests.h")
@@ -194,6 +200,7 @@ AddTestFile("ExceptionTests.h")
 AddTestFile("FlatMapTests.h")
 AddTestFile("IntrospectionTests.h")
 AddTestFile("ManagedArrayTests.h")
+AddTestFile("ManagedArraySequenceTests.h")
 AddTestFile("MurmurHashTests.h")
 AddTestFile("SerializationTests.h")
 AddTestFile("SortedManagedArrayTests.h")
