@@ -47,6 +47,7 @@
 
 #include "Base64.h"
 #include "MezzException.h"
+#include "RuntimeStatics.h"
 
 // This ought to be replaced with "SUPPRESS_ALL_WARNINGS" when that becomes available.
 // This is reference code from other people and we're not responsible for it, in fact
@@ -271,7 +272,7 @@ BENCHMARK_TEST_GROUP(Base64Benchmarks,Base64Benchmarks)
     TestLog << "The new decoding algorithm takes about "
             << double( ( BTSDecodeTime * 1000) / (ReneDecodeTime) ) / 10 << "% as long as the original.\n\n";
 
-    TEST_WARN( "DecodeTime", BTSDecodeTime < ReneDecodeTime );
+    TEST_WARN( "DecodeTime", Mezzanine::RuntimeStatic::Debug() ? true : BTSDecodeTime < ReneDecodeTime);
 
     //Debug on tachyon Intel 6970hq
     /*  Decoding With Rene's algorithm took 745425 microseconds for 10000 iterations and results like: Four score and seven...rish from the earth.

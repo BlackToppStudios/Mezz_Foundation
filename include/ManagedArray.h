@@ -429,7 +429,7 @@ namespace Mezzanine
 
             iterator Ret = const_cast<iterator>(Pos);
             if( ToInsert > 0 ) {
-                // This may need to be refactored
+                // This may need to be refactored. In the mean time the tests are shortened.
                 // https://stackoverflow.com/questions/22798709/g-strict-overflow-optimization-and-warnings
 
                 DifferenceType ToMoveConstruct = end() - Pos;
