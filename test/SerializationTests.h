@@ -107,7 +107,7 @@ namespace SerializationTest {
         static const char AttributeEndChar = ']';
         static const char NodeStartChar = '{';
         static const char NodeEndChar = '}';
-        static const StringView Indent = "    ";
+        static const StringView Indent;
     protected:
         String Name;
         std::vector<Attribute> Attributes;
@@ -128,7 +128,7 @@ namespace SerializationTest {
         Node* GetParent() const
             { return this->Parent; }
         size_t GetDepth() const
-            { return ( this->Parent ? this->Parent->GetDepth() + 1 : 0 ); }
+            { return ( this->Parent ? this->Parent->GetDepth() + 1 : 1 ); }
 
         Node& CreateChildNode()
             { return this->Nodes.emplace_back(this); }
@@ -170,6 +170,8 @@ namespace SerializationTest {
         void ClearAttributes()
             { this->Attributes.clear(); }
     };//Node
+
+    const StringView Node::Indent = "    ";
 
     std::ostream& operator<<(std::ostream& Stream, const Node& ToSerialize);
     std::ostream& operator<<(std::ostream& Stream, const Node& ToSerialize)
@@ -219,9 +221,108 @@ namespace SerializationTest {
     class BackendAttribute : public Serialization::AttributeWalker
     {
     protected:
+        SerializationTest::Attribute Attrib;
     public:
         BackendAttribute() = default;
         virtual ~BackendAttribute() = default;
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Name Operations
+
+        virtual void SetName(const StringView Name)
+            {  }
+        [[nodiscard]]
+        virtual StringView GetName() const
+            {  }
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Value Operations
+
+        virtual void SetString(const StringView Value)
+            {  }
+        [[nodiscard]]
+        virtual std::optional<StringView> GetString() const
+            {  }
+
+        virtual void SetLongDouble(const long double Value)
+            {  }
+        [[nodiscard]]
+        virtual std::optional<long double> GetLongDouble() const
+            {  }
+
+        virtual void SetDouble(const double Value)
+            {  }
+        [[nodiscard]]
+        virtual std::optional<double> GetDouble() const
+            {  }
+
+        virtual void SetFloat(const float Value)
+            {  }
+        [[nodiscard]]
+        virtual std::optional<float> GetFloat() const
+            {  }
+
+        virtual void SetUInt64(const UInt64 Value)
+            {  }
+        [[nodiscard]]
+        virtual std::optional<UInt64> GetUInt64() const
+            {  }
+
+        virtual void SetInt64(const Int64 Value)
+            {  }
+        [[nodiscard]]
+        virtual std::optional<Int64> GetInt64() const
+            {  }
+
+        virtual void SetUInt32(const UInt32 Value)
+            {  }
+        [[nodiscard]]
+        virtual std::optional<UInt32> GetUInt32() const
+            {  }
+
+        virtual void SetInt32(const Int32 Value)
+            {  }
+        [[nodiscard]]
+        virtual std::optional<Int32> GetInt32() const
+            {  }
+
+        virtual void SetUInt16(const UInt16 Value)
+            {  }
+        [[nodiscard]]
+        virtual std::optional<UInt16> GetUInt16() const
+            {  }
+
+        virtual void SetInt16(const Int16 Value)
+            {  }
+        [[nodiscard]]
+        virtual std::optional<Int16> GetInt16() const
+            {  }
+
+        virtual void SetUInt8(const UInt8 Value)
+            {  }
+        [[nodiscard]]
+        virtual std::optional<UInt8> GetUInt8() const
+            {  }
+
+        virtual void SetInt8(const Int8 Value)
+            {  }
+        [[nodiscard]]
+        virtual std::optional<Int8> GetInt8() const
+            {  }
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Navigation
+
+        virtual AttributeWalker& Next()
+            {  }
+        virtual AttributeWalker& Previous()
+            {  }
+        [[nodiscard]]
+        virtual Boole AtBegin() const
+            {  }
+        [[nodiscard]]
+        virtual Boole AtEnd() const
+            {  }
     };//BackendAttribute
 
     class BackendNode : public Serialization::ObjectWalker
@@ -230,6 +331,75 @@ namespace SerializationTest {
     public:
         BackendNode() = default;
         virtual ~BackendNode() = default;
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Object Operations
+
+        virtual void SetName(const StringView Name)
+            {  }
+        [[nodiscard]]
+        virtual StringView GetName() const
+            {  }
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Object Navigation
+
+        [[nodiscard]]
+        virtual Boole AtRoot() const
+            {  }
+        [[nodiscard]]
+        virtual Boole IsFirstChild() const
+            {  }
+        [[nodiscard]]
+        virtual Boole IsLastChild() const
+            {  }
+        [[nodiscard]]
+        virtual Boole HasChildren() const
+            {  }
+        [[nodiscard]]
+        virtual Boole HasChild(const StringView Name) const
+            {  }
+        [[nodiscard]]
+        virtual Boole HasNextSibling() const
+            {  }
+        [[nodiscard]]
+        virtual Boole HasPreviousSibling() const
+            {  }
+
+        virtual ObjectWalker& Next()
+            {  }
+        virtual ObjectWalker& Previous()
+            {  }
+        virtual ObjectWalker& Parent()
+            {  }
+        virtual ObjectWalker& FirstChild()
+            {  }
+        [[nodiscard]]
+        virtual Boole Child(const StringView Name)
+            {  }
+
+        [[nodiscard]]
+        virtual Boole CreateChild(const StringView Name, const MemberTags Tags, const Boole Move)
+            {  }
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Attributes
+
+        [[nodiscard]]
+        virtual Boole HasAttributes() const
+            {  }
+        [[nodiscard]]
+        virtual Boole HasAttribute(const StringView Name) const
+            {  }
+        [[nodiscard]]
+        virtual AttributeWalker& GetAttributes() const
+            {  }
+        [[nodiscard]]
+        virtual AttributeWalker& GetAttribute(const StringView Name) const
+            {  }
+        [[nodiscard]]
+        virtual Boole CreateAttribute(const StringView Name, const MemberTags Tags)
+            {  }
     };//BackendNode
 
     class Backend : public Serialization::BackendBase
@@ -238,6 +408,18 @@ namespace SerializationTest {
     public:
         Backend() = default;
         virtual ~Backend() = default;
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Query
+
+        virtual StringView GetImplementationName() const
+            {  }
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Root Object
+
+        virtual ObjectWalker& GetWalker() const
+            {  }
     };//Backend
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -465,7 +647,14 @@ AUTOMATIC_TEST_GROUP(SerializationTests,Serialization)
 
     RegisterCasters<SimpleBase,SimpleDerivedOne,SimpleDerivedTwo>();
 
-    SuperComposed FakeManager;
+    SuperComposed FakeManagerOne;
+    SuperComposed FakeManagerTwo;
+
+    Backend Serializer;
+
+    Mezzanine::Serialize("FakeManager",FakeManagerOne,Serialization::LatestVersion,Serializer.GetWalker());
+    StringStream SerializedManager;
+    Serializer.Write(SerializedManager);
 }
 
 #endif
