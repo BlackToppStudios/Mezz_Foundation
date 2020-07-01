@@ -76,6 +76,13 @@ namespace Serialization {
         // Root Object
 
         virtual ObjectWalker& GetWalker() const = 0;
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Input and Output
+
+        virtual void Read(std::istream& Input) = 0;
+
+        virtual void Write(std::ostream& Output) = 0;
     };//BackendBase
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -207,12 +214,13 @@ namespace Serialization {
         ///////////////////////////////////////////////////////////////////////////////
         // Navigation
 
-        virtual AttributeWalker& Next() = 0;
-        virtual AttributeWalker& Previous() = 0;
         [[nodiscard]]
         virtual Boole AtBegin() const = 0;
         [[nodiscard]]
         virtual Boole AtEnd() const = 0;
+
+        virtual AttributeWalker& Next() = 0;
+        virtual AttributeWalker& Previous() = 0;
     };//AttributeWalker
 
     namespace AttributeHelpers {
@@ -347,14 +355,14 @@ namespace Serialization {
         virtual ~ObjectWalker() = default;
 
         ///////////////////////////////////////////////////////////////////////////////
-        // Object Operations
+        // Name Operations
 
         virtual void SetName(const StringView Name) = 0;
         [[nodiscard]]
         virtual StringView GetName() const = 0;
 
         ///////////////////////////////////////////////////////////////////////////////
-        // Object Navigation
+        // Navigation
 
         [[nodiscard]]
         virtual Boole AtRoot() const = 0;

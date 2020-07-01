@@ -111,12 +111,14 @@ namespace SerializationTest {
     protected:
         String Name;
         std::vector<Attribute> Attributes;
-        std::vector<Node> Nodes;
-        Node* Parent;
+        std::vector<Node*> Nodes; // Storing pointers is ick, but we need to avoid invalidation issues.
+        Node* Parent; // Because of this member.
     public:
         Node(Node* Creator) :
             Parent(Creator)
             {  }
+        ~Node()
+            { this->ClearNodes(); }
 
         void SetName(const StringView NewName)
             { this->Name = NewName; }
@@ -125,29 +127,33 @@ namespace SerializationTest {
 
         Boole IsRoot() const
             { return this->Parent == nullptr; }
-        Node* GetParent() const
-            { return this->Parent; }
+        Node& GetParent() const
+            { return *( this->Parent ); }
         size_t GetDepth() const
             { return ( this->Parent ? this->Parent->GetDepth() + 1 : 1 ); }
 
         Node& CreateChildNode()
-            { return this->Nodes.emplace_back(this); }
+            { return *( this->Nodes.emplace_back( new Node(this) ) ); }
         size_t GetNumNodes() const
             { return this->Nodes.size(); }
         Node& GetNode(const size_t Index)
-            { return this->Nodes[Index]; }
+            { return *( this->Nodes[Index] ); }
         const Node& GetNode(const size_t Index) const
-            { return this->Nodes[Index]; }
+            { return *( this->Nodes[Index] ); }
         Node& GetFirstNode()
-            { return this->Nodes.front(); }
+            { return *( this->Nodes.front() ); }
         const Node& GetFirstNode() const
-            { return this->Nodes.front(); }
+            { return *( this->Nodes.front() ); }
         Node& GetLastNode()
-            { return this->Nodes.back(); }
+            { return *( this->Nodes.back() ); }
         const Node& GetLastNode() const
-            { return this->Nodes.back(); }
+            { return *( this->Nodes.back() ); }
         void ClearNodes()
-            { this->Nodes.clear(); }
+        {
+            for( Node* Ptr : Nodes )
+                { delete Ptr; }
+            this->Nodes.clear();
+        }
 
         Attribute& CreateChildAttribute()
             { return this->Attributes.emplace_back(); }
@@ -218,193 +224,324 @@ namespace SerializationTest {
         return Stream;
     }
 
+    ///////////////////////////////////////////////////////////////////////////////
+    // Interface Implementation
+
     class BackendAttribute : public Serialization::AttributeWalker
     {
-    protected:
-        SerializationTest::Attribute Attrib;
     public:
-        BackendAttribute() = default;
+        using NodeRef = std::reference_wrapper<SerializationTest::Node>;
+    protected:
+        NodeRef ParentNode;
+        size_t Index = 0;
+
+        SerializationTest::Attribute& GetAttrib()
+            { return this->ParentNode.get().GetAttribute(Index); }
+        const SerializationTest::Attribute& GetAttrib() const
+            { return this->ParentNode.get().GetAttribute(Index); }
+    public:
+        BackendAttribute(NodeRef Parent, const size_t AttribIndex) :
+            ParentNode(Parent),
+            Index(AttribIndex)
+            {  }
         virtual ~BackendAttribute() = default;
 
         ///////////////////////////////////////////////////////////////////////////////
         // Name Operations
 
         virtual void SetName(const StringView Name)
-            {  }
+            { this->GetAttrib().SetName(Name); }
         [[nodiscard]]
         virtual StringView GetName() const
-            {  }
+            { return this->GetAttrib().GetName(); }
 
         ///////////////////////////////////////////////////////////////////////////////
         // Value Operations
 
         virtual void SetString(const StringView Value)
-            {  }
+            { this->GetAttrib().SetValue(Value); }
         [[nodiscard]]
         virtual std::optional<StringView> GetString() const
-            {  }
+            { return this->GetAttrib().GetValue(); }
 
         virtual void SetLongDouble(const long double Value)
-            {  }
+            { this->GetAttrib().SetValue( StringTools::ConvertToString(Value) ); }
         [[nodiscard]]
         virtual std::optional<long double> GetLongDouble() const
-            {  }
+            { return StringTools::ConvertFromString<long double>( this->GetAttrib().GetValue() ); }
 
         virtual void SetDouble(const double Value)
-            {  }
+            { this->GetAttrib().SetValue( StringTools::ConvertToString(Value) ); }
         [[nodiscard]]
         virtual std::optional<double> GetDouble() const
-            {  }
+            { return StringTools::ConvertFromString<double>( this->GetAttrib().GetValue() ); }
 
         virtual void SetFloat(const float Value)
-            {  }
+            { this->GetAttrib().SetValue( StringTools::ConvertToString(Value) ); }
         [[nodiscard]]
         virtual std::optional<float> GetFloat() const
-            {  }
+            { return StringTools::ConvertFromString<float>( this->GetAttrib().GetValue() ); }
 
         virtual void SetUInt64(const UInt64 Value)
-            {  }
+            { this->GetAttrib().SetValue( StringTools::ConvertToString(Value) ); }
         [[nodiscard]]
         virtual std::optional<UInt64> GetUInt64() const
-            {  }
+            { return StringTools::ConvertFromString<UInt64>( this->GetAttrib().GetValue() ); }
 
         virtual void SetInt64(const Int64 Value)
-            {  }
+            { this->GetAttrib().SetValue( StringTools::ConvertToString(Value) ); }
         [[nodiscard]]
         virtual std::optional<Int64> GetInt64() const
-            {  }
+            { return StringTools::ConvertFromString<Int64>( this->GetAttrib().GetValue() ); }
 
         virtual void SetUInt32(const UInt32 Value)
-            {  }
+            { this->GetAttrib().SetValue( StringTools::ConvertToString(Value) ); }
         [[nodiscard]]
         virtual std::optional<UInt32> GetUInt32() const
-            {  }
+            { return StringTools::ConvertFromString<UInt32>( this->GetAttrib().GetValue() ); }
 
         virtual void SetInt32(const Int32 Value)
-            {  }
+            { this->GetAttrib().SetValue( StringTools::ConvertToString(Value) ); }
         [[nodiscard]]
         virtual std::optional<Int32> GetInt32() const
-            {  }
+            { return StringTools::ConvertFromString<Int32>( this->GetAttrib().GetValue() ); }
 
         virtual void SetUInt16(const UInt16 Value)
-            {  }
+            { this->GetAttrib().SetValue( StringTools::ConvertToString(Value) ); }
         [[nodiscard]]
         virtual std::optional<UInt16> GetUInt16() const
-            {  }
+            { return StringTools::ConvertFromString<UInt16>( this->GetAttrib().GetValue() ); }
 
         virtual void SetInt16(const Int16 Value)
-            {  }
+            { this->GetAttrib().SetValue( StringTools::ConvertToString(Value) ); }
         [[nodiscard]]
         virtual std::optional<Int16> GetInt16() const
-            {  }
+            { return StringTools::ConvertFromString<Int16>( this->GetAttrib().GetValue() ); }
 
         virtual void SetUInt8(const UInt8 Value)
-            {  }
+            { this->GetAttrib().SetValue( StringTools::ConvertToString(Value) ); }
         [[nodiscard]]
         virtual std::optional<UInt8> GetUInt8() const
-            {  }
+            { return StringTools::ConvertFromString<UInt8>( this->GetAttrib().GetValue() ); }
 
         virtual void SetInt8(const Int8 Value)
-            {  }
+            { this->GetAttrib().SetValue( StringTools::ConvertToString(Value) ); }
         [[nodiscard]]
         virtual std::optional<Int8> GetInt8() const
-            {  }
+            { return StringTools::ConvertFromString<Int8>( this->GetAttrib().GetValue() ); }
 
         ///////////////////////////////////////////////////////////////////////////////
         // Navigation
 
-        virtual AttributeWalker& Next()
-            {  }
-        virtual AttributeWalker& Previous()
-            {  }
         [[nodiscard]]
         virtual Boole AtBegin() const
-            {  }
+            { return ( Index ==  0 ); }
         [[nodiscard]]
         virtual Boole AtEnd() const
-            {  }
+            { return ( Index == this->ParentNode.get().GetNumAttributes() - 1 ); }
+
+        virtual Serialization::AttributeWalker& Next()
+        {
+            if( !AtEnd() ) {
+                ++Index;
+            }
+            return *this;
+        }
+        virtual Serialization::AttributeWalker& Previous()
+        {
+            if( !AtBegin() ) {
+                --Index;
+            }
+            return *this;
+        }
     };//BackendAttribute
 
     class BackendNode : public Serialization::ObjectWalker
     {
-    protected:
     public:
-        BackendNode() = default;
+        using NodeRef = std::reference_wrapper<SerializationTest::Node>;
+    protected:
+        NodeRef SerialNode;
+        size_t SelfIndex;
+
+        Node& GetSelfNode()
+            { return this->SerialNode.get(); }
+        const Node& GetSelfNode() const
+            { return this->SerialNode.get(); }
+
+        Node& GetParentNode()
+            { return this->SerialNode.get().GetParent(); }
+        const Node& GetParentNode() const
+            { return this->SerialNode.get().GetParent(); }
+    public:
+        BackendNode(NodeRef Internal, const size_t Index) :
+            SerialNode(Internal),
+            SelfIndex(Index)
+            {  }
         virtual ~BackendNode() = default;
 
         ///////////////////////////////////////////////////////////////////////////////
-        // Object Operations
+        // Name Operations
 
         virtual void SetName(const StringView Name)
-            {  }
+            { this->GetSelfNode().SetName(Name); }
         [[nodiscard]]
         virtual StringView GetName() const
-            {  }
+            { return this->GetSelfNode().GetName(); }
 
         ///////////////////////////////////////////////////////////////////////////////
-        // Object Navigation
+        // Navigation
 
         [[nodiscard]]
         virtual Boole AtRoot() const
-            {  }
+            { return this->GetSelfNode().IsRoot(); }
         [[nodiscard]]
         virtual Boole IsFirstChild() const
-            {  }
+            { return ( &( this->GetParentNode().GetFirstNode() ) == &( this->GetSelfNode() ) ); }
         [[nodiscard]]
         virtual Boole IsLastChild() const
-            {  }
+            { return ( &( this->GetParentNode().GetLastNode() ) == &( this->GetSelfNode() ) ); }
         [[nodiscard]]
         virtual Boole HasChildren() const
-            {  }
+            { return ( this->GetSelfNode().GetNumNodes() > 0 ); }
         [[nodiscard]]
         virtual Boole HasChild(const StringView Name) const
-            {  }
+        {
+            for( size_t Index = 0 ; Index < this->GetSelfNode().GetNumNodes() ; ++Index )
+            {
+                if( this->GetSelfNode().GetNode(Index).GetName() == Name ) {
+                    return true;
+                }
+            }
+            return false;
+        }
         [[nodiscard]]
         virtual Boole HasNextSibling() const
-            {  }
+        {
+            return ( this->SelfIndex < this->GetParentNode().GetNumNodes() - 1 );
+        }
         [[nodiscard]]
         virtual Boole HasPreviousSibling() const
-            {  }
+        {
+            return ( this->SelfIndex > 0 );
+        }
 
-        virtual ObjectWalker& Next()
-            {  }
-        virtual ObjectWalker& Previous()
-            {  }
-        virtual ObjectWalker& Parent()
-            {  }
-        virtual ObjectWalker& FirstChild()
-            {  }
+        virtual Serialization::ObjectWalker& Next()
+        {
+            if( this->HasNextSibling() ) {
+                this->SelfIndex++;
+                this->SerialNode = this->GetParentNode().GetNode(this->SelfIndex);
+            }
+            return *this;
+        }
+        virtual Serialization::ObjectWalker& Previous()
+        {
+            if( this->HasPreviousSibling() ) {
+                this->SelfIndex--;
+                this->SerialNode = this->GetParentNode().GetNode(this->SelfIndex);
+            }
+            return *this;
+        }
+        virtual Serialization::ObjectWalker& Parent()
+        {
+            Node& Parent = this->GetParentNode();
+            for( size_t Index = 0 ; Index < Parent.GetNumNodes() ; ++Index )
+            {
+                if( &( Parent.GetNode(Index) ) == &( this->GetSelfNode() ) ) {
+                    this->SelfIndex = Index;
+                    break;
+                }
+            }
+            this->SerialNode = Parent;
+            return *this;
+        }
+        virtual Serialization::ObjectWalker& FirstChild()
+        {
+            this->SerialNode = this->GetSelfNode().GetNode(0);
+            this->SelfIndex = 0;
+            return *this;
+        }
         [[nodiscard]]
         virtual Boole Child(const StringView Name)
-            {  }
+        {
+            for( size_t Index = 0 ; Index < this->GetSelfNode().GetNumNodes() ; ++Index )
+            {
+                Node& CurrNode = this->GetSelfNode().GetNode(Index);
+                if( CurrNode.GetName() == Name ) {
+                    this->SelfIndex = Index;
+                    this->SerialNode = CurrNode;
+                    return true;
+                }
+            }
+            return false;
+        }
 
         [[nodiscard]]
         virtual Boole CreateChild(const StringView Name, const MemberTags Tags, const Boole Move)
-            {  }
+        {
+            (void)Tags;
+            for( size_t Index = 0 ; Index < this->GetSelfNode().GetNumNodes() ; ++Index )
+            {
+                if( this->GetSelfNode().GetNode(Index).GetName() == Name ) {
+                    return false;
+                }
+            }
+            if( Move ) {
+                this->SelfIndex = this->GetSelfNode().GetNumNodes();
+                this->SerialNode = this->GetSelfNode().CreateChildNode();
+                this->GetSelfNode().SetName(Name);
+            }else{
+                this->GetSelfNode().CreateChildNode().SetName(Name);
+            }
+            return true;
+        }
 
         ///////////////////////////////////////////////////////////////////////////////
         // Attributes
 
         [[nodiscard]]
         virtual Boole HasAttributes() const
-            {  }
+            { return ( this->GetSelfNode().GetNumAttributes() > 0 ); }
         [[nodiscard]]
         virtual Boole HasAttribute(const StringView Name) const
-            {  }
+        {
+            for( size_t Index = 0 ; Index < this->GetSelfNode().GetNumAttributes() ; ++Index )
+            {
+                if( this->GetSelfNode().GetAttribute(Index).GetName() == Name ) {
+                    return true;
+                }
+            }
+            return false;
+        }
         [[nodiscard]]
-        virtual AttributeWalker& GetAttributes() const
-            {  }
+        virtual Serialization::AttributeWalker& GetAttributes() const
+        {
+
+        }
         [[nodiscard]]
-        virtual AttributeWalker& GetAttribute(const StringView Name) const
-            {  }
+        virtual Serialization::AttributeWalker& GetAttribute(const StringView Name) const
+        {
+
+        }
         [[nodiscard]]
         virtual Boole CreateAttribute(const StringView Name, const MemberTags Tags)
-            {  }
+        {
+            (void)Tags;
+            for( size_t Index = 0 ; Index < this->GetSelfNode().GetNumAttributes() ; ++Index )
+            {
+                if( this->GetSelfNode().GetAttribute(Index).GetName() == Name ) {
+                    return false;
+                }
+            }
+            this->GetSelfNode().CreateChildAttribute().SetName(Name);
+            return true;
+        }
     };//BackendNode
 
     class Backend : public Serialization::BackendBase
     {
     protected:
+        BackendNode RootNode = { nullptr };
     public:
         Backend() = default;
         virtual ~Backend() = default;
@@ -413,12 +550,21 @@ namespace SerializationTest {
         // Query
 
         virtual StringView GetImplementationName() const
-            {  }
+            { return "TestBackend"; }
 
         ///////////////////////////////////////////////////////////////////////////////
         // Root Object
 
-        virtual ObjectWalker& GetWalker() const
+        virtual Serialization::ObjectWalker& GetWalker() const
+            {  }
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Input and Output
+
+        virtual void Read(std::istream& Input)
+            {  }
+
+        virtual void Write(std::ostream& Output)
             {  }
     };//Backend
 
