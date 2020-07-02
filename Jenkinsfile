@@ -237,6 +237,7 @@ pipeline {
                 stage('Windows10Mingw32-Debug') {
                     agent { label "Windows10Mingw32" }
                     steps {
+                        bat 'hostname'
                         checkout scm
                         bat 'if not exist "build-debug" mkdir build-debug'
                         dir('build-debug') {
@@ -254,6 +255,7 @@ pipeline {
                 stage('Windows10Mingw32-Release') {
                     agent { label "Windows10Mingw32" }
                     steps {
+                        bat 'hostname'
                         checkout scm
                         bat 'if not exist "build-release" mkdir build-release'
                         dir('build-release') {
@@ -272,6 +274,7 @@ pipeline {
                 stage('Windows10Mingw64-Debug') {
                     agent { label "Windows10Mingw64" }
                     steps {
+                        bat 'hostname'
                         checkout scm
                         bat 'if not exist "build-debug" mkdir build-debug'
                         dir('build-debug') {
@@ -289,6 +292,7 @@ pipeline {
                 stage('Windows10Mingw64-Release') {
                     agent { label "Windows10Mingw64" }
                     steps {
+                        bat 'hostname'
                         checkout scm
                         bat 'if not exist "build-release" mkdir build-release'
                         dir('build-release') {
@@ -307,6 +311,7 @@ pipeline {
                 stage('Windows10MSVC-Debug') {
                     agent { label "Windows10MSVC" }
                     steps {
+                        bat 'hostname'
                         checkout scm
                         bat 'if not exist "build-debug" mkdir build-debug'
                         dir('build-debug') {
@@ -323,6 +328,7 @@ pipeline {
                 stage('Windows10MSVC-Release') {
                     agent { label "Windows10MSVC" }
                     steps {
+                        bat 'hostname'
                         checkout scm
                         bat 'if not exist "build-release" mkdir build-release'
                         dir('build-release') {
