@@ -356,7 +356,7 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
                            1.0,PackedTest.DoubleVar)
         DoubleAccessor.SetValue(PackedTest,NewDoubleValue)
         TEST_EQUAL_EPSILON("MemberAccessor::SetValue(T)-DoubleVar-After",
-                           NewDoubleValue,PackedTest.DoubleVar);
+                           NewDoubleValue,PackedTest.DoubleVar)
         TEST_EQUAL_EPSILON("MemberAccessor::GetValue()_const-DoubleVar",
                            NewDoubleValue,DoubleAccessor.GetValue(PackedTest))
 

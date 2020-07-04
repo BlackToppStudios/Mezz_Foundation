@@ -92,7 +92,7 @@ DEFAULT_TEST_GROUP(SortedManagedArrayTests,SortedManagedArray)
 
         SortedManagedArray<int,15> MoveSourceTest = { 1, 1, 2, 3, 5, 8, 13, 21, 34, 55 };
         SortedManagedArray<int,15> MoveDestTest( std::move( MoveSourceTest ) );
-        TEST_EQUAL("SortedManagedArray(SortedManagedArray&&)-ResultSize",size_t(10),MoveDestTest.size());
+        TEST_EQUAL("SortedManagedArray(SortedManagedArray&&)-ResultSize",size_t(10),MoveDestTest.size())
         TEST_EQUAL("SortedManagedArray(SortedManagedArray&&)-Element1",1,MoveDestTest[0])
         TEST_EQUAL("SortedManagedArray(SortedManagedArray&&)-Element2",1,MoveDestTest[1])
         TEST_EQUAL("SortedManagedArray(SortedManagedArray&&)-Element3",2,MoveDestTest[2])
@@ -325,7 +325,7 @@ DEFAULT_TEST_GROUP(SortedManagedArrayTests,SortedManagedArray)
 
         StringTest.add("D");
         TEST_EQUAL("size()-StringAdd",size_t(3),StringTest.size())
-        TEST_EQUAL("add()-Strings",String("D"),StringTest[2]);
+        TEST_EQUAL("add()-Strings",String("D"),StringTest[2])
 
         SortedManagedArray<String,10>::iterator FindC = StringTest.find("C");
         TEST_EQUAL("find()-C",String("C"),*FindC)

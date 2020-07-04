@@ -606,7 +606,7 @@ void FlatMapTests::TestCopyInsert()
     const SequenceMapValue FailCopyInsertValue(3,"Twelve");
     SequenceMapType CopyInsertMap = { CopyInsertValueOne, CopyInsertValueThree };
     TEST_EQUAL( "insert(const_value_type&)-BeforeCount",
-                2u, CopyInsertMap.size() );
+                2u, CopyInsertMap.size() )
     InsertPairResult NewCopyInsertResult = CopyInsertMap.insert(CopyInsertValueTwo);
     InsertPairResult OldCopyInsertResult = CopyInsertMap.insert(FailCopyInsertValue);
     SequenceMapIter CopyInsertBegin = CopyInsertMap.begin();
