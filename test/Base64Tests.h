@@ -263,7 +263,7 @@ AUTOMATIC_TEST_GROUP(Base64Tests,Base64)
         BytesWritten = Base64::EncodeRawBuffer(AddressStrBuf,GettysburgAddress.length(),
                                                AddressEncodeBuf,AddressEncodeBufSize);
         TEST_EQUAL( "EncodeRawBuffer(const_UInt8*,const_SizeType,Char8*,const_SizeType)-Gettysburg-BytesWritten",
-                    AddressEncodeBufSize,BytesWritten );
+                    AddressEncodeBufSize,BytesWritten )
         TEST_EQUAL( "EncodeRawBuffer(const_UInt8*,const_SizeType,Char8*,const_SizeType)-Gettysburg-ContentMatch",
                     true,String(AddressEncodeBuf,AddressEncodeBufSize) == GettysburgAddressBase64 )
 

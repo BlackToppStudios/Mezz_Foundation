@@ -488,76 +488,76 @@ void FlatMapTests::TestLookup()
     AltStringType XeniaAltKey = { 'X', 'e', 'n', 'i', 'a' };
 
     TEST_EQUAL( "count(const_key_type&)_const-Pass",
-                1u, LookupMap.count("Earth") );
+                1u, LookupMap.count("Earth") )
     TEST_EQUAL( "count(const_key_type&)_const-Fail",
-                0u, LookupMap.count("Pluto") );
+                0u, LookupMap.count("Pluto") )
     TEST_EQUAL( "count(const_alt_key&)_const-Pass",
-                1u, LookupMap.count(EarthAltKey) );
+                1u, LookupMap.count(EarthAltKey) )
     TEST_EQUAL( "count(const_alt_key&)_const-Fail",
-                0u, LookupMap.count(PlutoAltKey) );
+                0u, LookupMap.count(PlutoAltKey) )
 
     TEST_EQUAL( "find(const_key_type&)-Pass",
-                4, GetPos( LookupMap.find("Venus") ) );
+                4, GetPos( LookupMap.find("Venus") ) )
     TEST_EQUAL( "find(const_key_type&)-Fail",
-                5, GetPos( LookupMap.find("Uranus") ) );
+                5, GetPos( LookupMap.find("Uranus") ) )
     TEST_EQUAL( "find(const_key_type&)_const-Pass",
-                0, GetConstPos( ConstLookupMap.find("Neptune") ) );
+                0, GetConstPos( ConstLookupMap.find("Neptune") ) )
     TEST_EQUAL( "find(const_key_type&)_const-Fail",
-                4, GetConstPos( ConstLookupMap.find("Mars") ) );
+                4, GetConstPos( ConstLookupMap.find("Mars") ) )
     TEST_EQUAL( "find(const_alt_key&)-Pass",
-                1, GetPos( LookupMap.find(JupiterAltKey) ) );
+                1, GetPos( LookupMap.find(JupiterAltKey) ) )
     TEST_EQUAL( "find(const_alt_key&)-Fail",
-                5, GetPos( LookupMap.find(PlutoAltKey) ) );
+                5, GetPos( LookupMap.find(PlutoAltKey) ) )
     TEST_EQUAL( "find(const_alt_key&)_const-Pass",
-                2, GetConstPos( ConstLookupMap.find(SaturnAltKey) ) );
+                2, GetConstPos( ConstLookupMap.find(SaturnAltKey) ) )
     TEST_EQUAL( "find(const_alt_key&)_const-Fail",
-                4, GetConstPos( ConstLookupMap.find(MercuryAltKey) ) );
+                4, GetConstPos( ConstLookupMap.find(MercuryAltKey) ) )
 
     TEST_EQUAL( "contains(const_key_type&)_const-Pass",
-                true, ConstLookupMap.contains("Pluto") );
+                true, ConstLookupMap.contains("Pluto") )
     TEST_EQUAL( "contains(const_key_type&)_const-Fail",
-                false, ConstLookupMap.contains("Mars") );
+                false, ConstLookupMap.contains("Mars") )
     TEST_EQUAL( "contains(const_alt_key&)_const-Pass",
-                true, ConstLookupMap.contains(PlutoAltKey) );
+                true, ConstLookupMap.contains(PlutoAltKey) )
     TEST_EQUAL( "contains(const_alt_key&)_const-Fail",
-                false, ConstLookupMap.contains(MarsAltKey) );
+                false, ConstLookupMap.contains(MarsAltKey) )
 
-    MapPairType PairRet = LookupMap.equal_range("Mars");
+    MapPairType PairRet = LookupMap.equal_range("Mars")
     TEST_EQUAL( "equal_range(const_key_type&)-Pass-First",
                 2, GetPos( PairRet.first ) )
     TEST_EQUAL( "equal_range(const_key_type&)-Pass-Second",
                 3, GetPos( PairRet.second ) )
-    PairRet = LookupMap.equal_range("Xenia");
+    PairRet = LookupMap.equal_range("Xenia")
     TEST_EQUAL( "equal_range(const_key_type&)-Fail-First",
                 5, GetPos( PairRet.first ) )
     TEST_EQUAL( "equal_range(const_key_type&)-Fail-Second",
                 5, GetPos( PairRet.second ) )
-    ConstMapPairType ConstPairRet = ConstLookupMap.equal_range("Saturn");
+    ConstMapPairType ConstPairRet = ConstLookupMap.equal_range("Saturn")
     TEST_EQUAL( "equal_range(const_key_type&)_const-Pass-First",
                 2, GetConstPos( ConstPairRet.first ) )
     TEST_EQUAL( "equal_range(const_key_type&)_const-Pass-Second",
                 3, GetConstPos( ConstPairRet.second ) )
-    ConstPairRet = ConstLookupMap.equal_range("Mercury");
+    ConstPairRet = ConstLookupMap.equal_range("Mercury")
     TEST_EQUAL( "equal_range(const_key_type&)_const-Fail-First",
                 0, GetConstPos( ConstPairRet.first ) )
     TEST_EQUAL( "equal_range(const_key_type&)_const-Fail-Second",
                 0, GetConstPos( ConstPairRet.second ) )
-    PairRet = LookupMap.equal_range(MarsAltKey);
+    PairRet = LookupMap.equal_range(MarsAltKey)
     TEST_EQUAL( "equal_range(const_alt_key&)-Pass-First",
                 2, GetPos( PairRet.first ) )
     TEST_EQUAL( "equal_range(const_alt_key&)-Pass-Second",
                 3, GetPos( PairRet.second ) )
-    PairRet = LookupMap.equal_range(AgniaAltKey);
+    PairRet = LookupMap.equal_range(AgniaAltKey)
     TEST_EQUAL( "equal_range(const_alt_key&)-Fail-First",
                 0, GetPos( PairRet.first ) )
     TEST_EQUAL( "equal_range(const_alt_key&)-Fail-Second",
                 0, GetPos( PairRet.second ) )
-    ConstPairRet = ConstLookupMap.equal_range(NeptuneAltKey);
+    ConstPairRet = ConstLookupMap.equal_range(NeptuneAltKey)
     TEST_EQUAL( "equal_range(const_alt_key&)_const-Pass-First",
                 0, GetConstPos( ConstPairRet.first ) )
     TEST_EQUAL( "equal_range(const_alt_key&)_const-Pass-Second",
                 1, GetConstPos( ConstPairRet.second ) )
-    ConstPairRet = ConstLookupMap.equal_range(XeniaAltKey);
+    ConstPairRet = ConstLookupMap.equal_range(XeniaAltKey)
     TEST_EQUAL( "equal_range(const_alt_key&)_const-Fail-First",
                 4, GetConstPos( ConstPairRet.first ) )
     TEST_EQUAL( "equal_range(const_alt_key&)_const-Fail-Second",
@@ -651,7 +651,7 @@ void FlatMapTests::TestMoveInsert()
     TEST_EQUAL( "insert(value_type&&)-NewResult-First",
                 1, std::distance( MoveInsertBegin, NewMoveInsertResult.first ) )
     TEST_EQUAL( "insert(value_type&&)-NewResult-Second",
-                true, NewMoveInsertResult.second );
+                true, NewMoveInsertResult.second )
     TEST_EQUAL( "insert(value_type&&)-OldResult-First",
                 0, std::distance( MoveInsertBegin, OldMoveInsertResult.first ) )
     TEST_EQUAL( "insert(value_type&&)-OldResult-Second",
@@ -831,7 +831,7 @@ void FlatMapTests::TestHintMoveInsert()
     TEST_EQUAL( "insert(const_iterator,value_type&&)-Element4-First",
                 MoveHintValueEight.first, ( HintMoveInsertMap.begin() + 3 )->first )
     TEST_EQUAL( "insert(const_iterator,value_type&&)-Element4-Second",
-                "Neptune", ( HintMoveInsertMap.begin() + 3 )->second );
+                "Neptune", ( HintMoveInsertMap.begin() + 3 )->second )
     TEST_EQUAL( "insert(const_iterator,value_type&&)-Element5-First",
                 MoveHintValueNine.first, ( HintMoveInsertMap.begin() + 4 )->first )
     TEST_EQUAL( "insert(const_iterator,value_type&&)-Element5-Second",
