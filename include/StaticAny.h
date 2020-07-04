@@ -45,6 +45,7 @@
 
 #ifndef SWIG
     #include "DataTypes.h"
+    #include "MezzException.h"
 #endif
 
 namespace Mezzanine
@@ -498,7 +499,7 @@ RESTORE_WARNING_STATE
     inline ElementType& StaticAnyCast(StaticAny<AnyCastSize,AnyCastAlign>& Any)
     {
         if( std::type_index( typeid(ElementType) ) != std::type_index( Any.get_type() ) ) {
-            MEZZ_EXCEPTION(BadCastCode, "Invalid StaticAnyCast (&).");
+            MEZZ_EXCEPTION(BadCastCode, "Invalid StaticAnyCast (&).")
         }
         return *reinterpret_cast<ElementType*>( Any.GetStoragePtr() );
     }
@@ -517,7 +518,7 @@ RESTORE_WARNING_STATE
     inline const ElementType& StaticAnyCast(const StaticAny<AnyCastSize,AnyCastAlign>& Any)
     {
         if( std::type_index( typeid(ElementType) ) != std::type_index( Any.get_type() ) ) {
-            MEZZ_EXCEPTION(BadCastCode, "Invalid StaticAnyCast (const&).");
+            MEZZ_EXCEPTION(BadCastCode, "Invalid StaticAnyCast (const&).")
         }
         return *reinterpret_cast<const ElementType*>( Any.GetStoragePtr() );
     }
@@ -536,7 +537,7 @@ RESTORE_WARNING_STATE
     inline ElementType* StaticAnyCast(StaticAny<AnyCastSize,AnyCastAlign>* Any)
     {
         if( std::type_index( typeid(ElementType) ) != std::type_index( Any->get_type() ) ) {
-            MEZZ_EXCEPTION(BadCastCode, "Invalid StaticAnyCast (*).");
+            MEZZ_EXCEPTION(BadCastCode, "Invalid StaticAnyCast (*).")
         }
         return reinterpret_cast<ElementType*>( Any->GetStoragePtr() );
     }
@@ -555,7 +556,7 @@ RESTORE_WARNING_STATE
     inline const ElementType* StaticAnyCast(const StaticAny<AnyCastSize,AnyCastAlign>* Any)
     {
         if( std::type_index( typeid(ElementType) ) != std::type_index( Any->get_type() ) ) {
-            MEZZ_EXCEPTION(BadCastCode, "Invalid StaticAnyCast (const*).");
+            MEZZ_EXCEPTION(BadCastCode, "Invalid StaticAnyCast (const*).")
         }
         return reinterpret_cast<const ElementType*>( Any->GetStoragePtr() );
     }

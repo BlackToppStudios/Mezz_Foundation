@@ -59,7 +59,7 @@ DEFAULT_TEST_GROUP(ExceptionTests,Exception)
 
     try
     {
-        MEZZ_EXCEPTION(InputOutputCode, "Test Message");
+        MEZZ_EXCEPTION(InputOutputCode, "Test Message")
     } catch (const Mezzanine::Exception::InputOutput&) {
         TEST("BaseExceptionCanBeThro"
              "wnWithMEZZ_EXCEPTION", true)
