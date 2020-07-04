@@ -54,7 +54,7 @@ DEFAULT_TEST_GROUP(ExceptionTests,Exception)
     {
         throw Mezzanine::Exception::Base("TestException", "TestFunction", "TestFile", 0);
     } catch (const std::exception&) {
-        TEST("BaseExceptionCanBeThrownAndCaught", true);
+        TEST("BaseExceptionCanBeThrownAndCaught", true)
     }
 
     try
@@ -62,7 +62,7 @@ DEFAULT_TEST_GROUP(ExceptionTests,Exception)
         MEZZ_EXCEPTION(InputOutputCode, "Test Message");
     } catch (const Mezzanine::Exception::InputOutput&) {
         TEST("BaseExceptionCanBeThro"
-             "wnWithMEZZ_EXCEPTION", true);
+             "wnWithMEZZ_EXCEPTION", true)
     }
 
 // still need to test members and add the rest of the Foundation Exceptions
@@ -73,17 +73,17 @@ DEFAULT_TEST_GROUP(ExceptionTests,Exception)
 
     TEST_EQUAL("CodeToString-Base",
                String("Base"),
-               ExceptionClassNameFromCode(ExceptionCode::BaseCode));
+               ExceptionClassNameFromCode(ExceptionCode::BaseCode))
     TEST_EQUAL("StringToCode-Base",
                ExceptionCode::BaseCode,
-               ExceptionCodeFromClassname("Base"));
+               ExceptionCodeFromClassname("Base"))
 
     TEST_EQUAL("CodeToString-InputOutput",
                String("InputOutput"),
-               ExceptionClassNameFromCode(ExceptionCode::InputOutputCode));
+               ExceptionClassNameFromCode(ExceptionCode::InputOutputCode))
     TEST_EQUAL("StringToCode-InputOutput",
                ExceptionCode::InputOutputCode,
-               ExceptionCodeFromClassname("InputOutput"));
+               ExceptionCodeFromClassname("InputOutput"))
 
 /*  // UB!
     TEST_EQUAL("CodeToString-Invalid",
@@ -91,7 +91,7 @@ DEFAULT_TEST_GROUP(ExceptionTests,Exception)
                ExceptionClassNameFromCode(static_cast<ExceptionCode>(99999999)));*/
     TEST_EQUAL("StringToCode-Invalid",
                ExceptionCode::NotAnExceptionCode,
-               ExceptionCodeFromClassname("Not a valid class name."));
+               ExceptionCodeFromClassname("Not a valid class name."))
 
 }
 

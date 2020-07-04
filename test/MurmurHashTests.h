@@ -429,19 +429,19 @@ AUTOMATIC_TEST_GROUP(MurmurHashTests,MurmurHash)
         MurmurHash3_x86_32(TinyText.data(),TinyTextSize,FirstSeed,&AapplebyTiny);
         UInt32 MezzTiny = Hashing::MurmurHash3_x86_32(TinyText.data(),TinyText.size(),FirstSeed);
         TEST_EQUAL("MurmurHash3_x86_32(const_void*,const_Integer,const_UInt32)-Text-Tiny",
-                   AapplebyTiny,MezzTiny);
+                   AapplebyTiny,MezzTiny)
 
         UInt32 AapplebySmall{};
         MurmurHash3_x86_32(SmallText.data(),SmallTextSize,FirstSeed,&AapplebySmall);
         UInt32 MezzSmall = Hashing::MurmurHash3_x86_32(SmallText.data(),SmallText.size(),FirstSeed);
         TEST_EQUAL("MurmurHash3_x86_32(const_void*,const_Integer,const_UInt32)-Text-Small",
-                   AapplebySmall,MezzSmall);
+                   AapplebySmall,MezzSmall)
 
         UInt32 AapplebyLarge{};
         MurmurHash3_x86_32(LargeText.data(),LargeTextSize,FirstSeed,&AapplebyLarge);
         UInt32 MezzLarge = Hashing::MurmurHash3_x86_32(LargeText.data(),LargeText.size(),FirstSeed);
         TEST_EQUAL("MurmurHash3_x86_32(const_void*,const_Integer,const_UInt32)-Text-Large",
-                   AapplebyLarge,MezzLarge);
+                   AapplebyLarge,MezzLarge)
     }// x86_32 - Text
 
     {// x86_32 - Binary
@@ -449,19 +449,19 @@ AUTOMATIC_TEST_GROUP(MurmurHashTests,MurmurHash)
         MurmurHash3_x86_32(TinyBinary.data(),TinyBinarySize,SecondSeed,&AapplebyTiny);
         UInt32 MezzTiny = Hashing::MurmurHash3_x86_32(TinyBinary.data(),TinyBinary.size(),SecondSeed);
         TEST_EQUAL("MurmurHash3_x86_32(const_void*,const_Integer,const_UInt32)-Binary-Tiny",
-                   AapplebyTiny,MezzTiny);
+                   AapplebyTiny,MezzTiny)
 
         UInt32 AapplebySmall{};
         MurmurHash3_x86_32(SmallBinary.data(),SmallBinarySize,SecondSeed,&AapplebySmall);
         UInt32 MezzSmall = Hashing::MurmurHash3_x86_32(SmallBinary.data(),SmallBinary.size(),SecondSeed);
         TEST_EQUAL("MurmurHash3_x86_32(const_void*,const_Integer,const_UInt32)-Binary-Small",
-                   AapplebySmall,MezzSmall);
+                   AapplebySmall,MezzSmall)
 
         UInt32 AapplebyLarge{};
         MurmurHash3_x86_32(LargeBinary.data(),LargeBinarySize,SecondSeed,&AapplebyLarge);
         UInt32 MezzLarge = Hashing::MurmurHash3_x86_32(LargeBinary.data(),LargeBinary.size(),SecondSeed);
         TEST_EQUAL("MurmurHash3_x86_32(const_void*,const_Integer,const_UInt32)-Binary-Large",
-                   AapplebyLarge,MezzLarge);
+                   AapplebyLarge,MezzLarge)
     }// x86_32 - Binary
 
     {// x86_128 - Text
@@ -469,37 +469,37 @@ AUTOMATIC_TEST_GROUP(MurmurHashTests,MurmurHash)
         MurmurHash3_x86_128(TinyText.data(),TinyTextSize,FirstSeed,&AapplebyTiny.Hash[0]);
         Result_x86 MezzTiny = Hashing::MurmurHash3_x86_128(TinyText.data(),TinyText.size(),FirstSeed);
         TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Text-Tiny-Index0",
-                   AapplebyTiny.Hash[0],MezzTiny.Hash[0]);
+                   AapplebyTiny.Hash[0],MezzTiny.Hash[0])
         TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Text-Tiny-Index1",
-                   AapplebyTiny.Hash[1],MezzTiny.Hash[1]);
+                   AapplebyTiny.Hash[1],MezzTiny.Hash[1])
         TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Text-Tiny-Index2",
-                   AapplebyTiny.Hash[2],MezzTiny.Hash[2]);
+                   AapplebyTiny.Hash[2],MezzTiny.Hash[2])
         TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Text-Tiny-Index3",
-                   AapplebyTiny.Hash[3],MezzTiny.Hash[3]);
+                   AapplebyTiny.Hash[3],MezzTiny.Hash[3])
 
         Result_x86 AapplebySmall;
         MurmurHash3_x86_128(SmallText.data(),SmallTextSize,FirstSeed,&AapplebySmall.Hash[0]);
         Result_x86 MezzSmall = Hashing::MurmurHash3_x86_128(SmallText.data(),SmallText.size(),FirstSeed);
         TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Text-Small-Index0",
-                   AapplebySmall.Hash[0],MezzSmall.Hash[0]);
+                   AapplebySmall.Hash[0],MezzSmall.Hash[0])
         TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Text-Small-Index1",
-                   AapplebySmall.Hash[1],MezzSmall.Hash[1]);
+                   AapplebySmall.Hash[1],MezzSmall.Hash[1])
         TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Text-Small-Index2",
-                   AapplebySmall.Hash[2],MezzSmall.Hash[2]);
+                   AapplebySmall.Hash[2],MezzSmall.Hash[2])
         TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Text-Small-Index3",
-                   AapplebySmall.Hash[3],MezzSmall.Hash[3]);
+                   AapplebySmall.Hash[3],MezzSmall.Hash[3])
 
         Result_x86 AapplebyLarge;
         MurmurHash3_x86_128(LargeText.data(),LargeTextSize,FirstSeed,&AapplebyLarge.Hash[0]);
         Result_x86 MezzLarge = Hashing::MurmurHash3_x86_128(LargeText.data(),LargeText.size(),FirstSeed);
         TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Text-Large-Index0",
-                   AapplebyLarge.Hash[0],MezzLarge.Hash[0]);
+                   AapplebyLarge.Hash[0],MezzLarge.Hash[0])
         TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Text-Large-Index1",
-                   AapplebyLarge.Hash[1],MezzLarge.Hash[1]);
+                   AapplebyLarge.Hash[1],MezzLarge.Hash[1])
         TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Text-Large-Index2",
-                   AapplebyLarge.Hash[2],MezzLarge.Hash[2]);
+                   AapplebyLarge.Hash[2],MezzLarge.Hash[2])
         TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Text-Large-Index3",
-                   AapplebyLarge.Hash[3],MezzLarge.Hash[3]);
+                   AapplebyLarge.Hash[3],MezzLarge.Hash[3])
     }// x86_128 - Text
 
     {// x86_128 - Binary
@@ -507,37 +507,37 @@ AUTOMATIC_TEST_GROUP(MurmurHashTests,MurmurHash)
         MurmurHash3_x86_128(TinyBinary.data(),TinyBinarySize,SecondSeed,&AapplebyTiny.Hash[0]);
         Result_x86 MezzTiny = Hashing::MurmurHash3_x86_128(TinyBinary.data(),TinyBinary.size(),SecondSeed);
         TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Binary-Tiny-Index0",
-                   AapplebyTiny.Hash[0],MezzTiny.Hash[0]);
+                   AapplebyTiny.Hash[0],MezzTiny.Hash[0])
         TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Binary-Tiny-Index1",
-                   AapplebyTiny.Hash[1],MezzTiny.Hash[1]);
+                   AapplebyTiny.Hash[1],MezzTiny.Hash[1])
         TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Binary-Tiny-Index2",
-                   AapplebyTiny.Hash[2],MezzTiny.Hash[2]);
+                   AapplebyTiny.Hash[2],MezzTiny.Hash[2])
         TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Binary-Tiny-Index3",
-                   AapplebyTiny.Hash[3],MezzTiny.Hash[3]);
+                   AapplebyTiny.Hash[3],MezzTiny.Hash[3])
 
         Result_x86 AapplebySmall;
         MurmurHash3_x86_128(SmallBinary.data(),SmallBinarySize,SecondSeed,&AapplebySmall.Hash[0]);
         Result_x86 MezzSmall = Hashing::MurmurHash3_x86_128(SmallBinary.data(),SmallBinary.size(),SecondSeed);
         TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Binary-Small-Index0",
-                   AapplebySmall.Hash[0],MezzSmall.Hash[0]);
+                   AapplebySmall.Hash[0],MezzSmall.Hash[0])
         TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Binary-Small-Index1",
-                   AapplebySmall.Hash[1],MezzSmall.Hash[1]);
+                   AapplebySmall.Hash[1],MezzSmall.Hash[1])
         TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Binary-Small-Index2",
-                   AapplebySmall.Hash[2],MezzSmall.Hash[2]);
+                   AapplebySmall.Hash[2],MezzSmall.Hash[2])
         TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Binary-Small-Index3",
-                   AapplebySmall.Hash[3],MezzSmall.Hash[3]);
+                   AapplebySmall.Hash[3],MezzSmall.Hash[3])
 
         Result_x86 AapplebyLarge;
         MurmurHash3_x86_128(LargeBinary.data(),LargeBinarySize,SecondSeed,&AapplebyLarge.Hash[0]);
         Result_x86 MezzLarge = Hashing::MurmurHash3_x86_128(LargeBinary.data(),LargeBinary.size(),SecondSeed);
         TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Binary-Large-Index0",
-                   AapplebyLarge.Hash[0],MezzLarge.Hash[0]);
+                   AapplebyLarge.Hash[0],MezzLarge.Hash[0])
         TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Binary-Large-Index1",
-                   AapplebyLarge.Hash[1],MezzLarge.Hash[1]);
+                   AapplebyLarge.Hash[1],MezzLarge.Hash[1])
         TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Binary-Large-Index2",
-                   AapplebyLarge.Hash[2],MezzLarge.Hash[2]);
+                   AapplebyLarge.Hash[2],MezzLarge.Hash[2])
         TEST_EQUAL("MurmurHash3_x86_128(const_void*,const_Integer,const_UInt32)-Binary-Large-Index3",
-                   AapplebyLarge.Hash[3],MezzLarge.Hash[3]);
+                   AapplebyLarge.Hash[3],MezzLarge.Hash[3])
     }// x86_128 - Binary
 
     {// x64_128 - Text
@@ -545,25 +545,25 @@ AUTOMATIC_TEST_GROUP(MurmurHashTests,MurmurHash)
         MurmurHash3_x64_128(TinyText.data(),TinyTextSize,FirstSeed,&AapplebyTiny.Hash[0]);
         Result_x64 MezzTiny = Hashing::MurmurHash3_x64_128(TinyText.data(),TinyText.size(),FirstSeed);
         TEST_EQUAL("MurmurHash3_x64_128(const_void*,const_Integer,const_UInt32)-Text-Tiny-Index0",
-                   AapplebyTiny.Hash[0],MezzTiny.Hash[0]);
+                   AapplebyTiny.Hash[0],MezzTiny.Hash[0])
         TEST_EQUAL("MurmurHash3_x64_128(const_void*,const_Integer,const_UInt32)-Text-Tiny-Index1",
-                   AapplebyTiny.Hash[1],MezzTiny.Hash[1]);
+                   AapplebyTiny.Hash[1],MezzTiny.Hash[1])
 
         Result_x64 AapplebySmall;
         MurmurHash3_x64_128(SmallText.data(),SmallTextSize,FirstSeed,&AapplebySmall.Hash[0]);
         Result_x64 MezzSmall = Hashing::MurmurHash3_x64_128(SmallText.data(),SmallText.size(),FirstSeed);
         TEST_EQUAL("MurmurHash3_x64_128(const_void*,const_Integer,const_UInt32)-Text-Small-Index0",
-                   AapplebySmall.Hash[0],MezzSmall.Hash[0]);
+                   AapplebySmall.Hash[0],MezzSmall.Hash[0])
         TEST_EQUAL("MurmurHash3_x64_128(const_void*,const_Integer,const_UInt32)-Text-Small-Index1",
-                   AapplebySmall.Hash[1],MezzSmall.Hash[1]);
+                   AapplebySmall.Hash[1],MezzSmall.Hash[1])
 
         Result_x64 AapplebyLarge;
         MurmurHash3_x64_128(LargeText.data(),LargeTextSize,FirstSeed,&AapplebyLarge.Hash[0]);
         Result_x64 MezzLarge = Hashing::MurmurHash3_x64_128(LargeText.data(),LargeText.size(),FirstSeed);
         TEST_EQUAL("MurmurHash3_x64_128(const_void*,const_Integer,const_UInt32)-Text-Large-Index0",
-                   AapplebyLarge.Hash[0],MezzLarge.Hash[0]);
+                   AapplebyLarge.Hash[0],MezzLarge.Hash[0])
         TEST_EQUAL("MurmurHash3_x64_128(const_void*,const_Integer,const_UInt32)-Text-Large-Index1",
-                   AapplebyLarge.Hash[1],MezzLarge.Hash[1]);
+                   AapplebyLarge.Hash[1],MezzLarge.Hash[1])
     }// x64_128 - Text
 
     {// x64_128 - Binary
@@ -571,25 +571,25 @@ AUTOMATIC_TEST_GROUP(MurmurHashTests,MurmurHash)
         MurmurHash3_x64_128(TinyBinary.data(),TinyBinarySize,SecondSeed,&AapplebyTiny.Hash[0]);
         Result_x64 MezzTiny = Hashing::MurmurHash3_x64_128(TinyBinary.data(),TinyBinary.size(),SecondSeed);
         TEST_EQUAL("MurmurHash3_x64_128(const_void*,const_Integer,const_UInt32)-Binary-Tiny-Index0",
-                   AapplebyTiny.Hash[0],MezzTiny.Hash[0]);
+                   AapplebyTiny.Hash[0],MezzTiny.Hash[0])
         TEST_EQUAL("MurmurHash3_x64_128(const_void*,const_Integer,const_UInt32)-Binary-Tiny-Index1",
-                   AapplebyTiny.Hash[1],MezzTiny.Hash[1]);
+                   AapplebyTiny.Hash[1],MezzTiny.Hash[1])
 
         Result_x64 AapplebySmall;
         MurmurHash3_x64_128(SmallBinary.data(),SmallBinarySize,SecondSeed,&AapplebySmall.Hash[0]);
         Result_x64 MezzSmall = Hashing::MurmurHash3_x64_128(SmallBinary.data(),SmallBinary.size(),SecondSeed);
         TEST_EQUAL("MurmurHash3_x64_128(const_void*,const_Integer,const_UInt32)-Binary-Small-Index0",
-                   AapplebySmall.Hash[0],MezzSmall.Hash[0]);
+                   AapplebySmall.Hash[0],MezzSmall.Hash[0])
         TEST_EQUAL("MurmurHash3_x64_128(const_void*,const_Integer,const_UInt32)-Binary-Small-Index1",
-                   AapplebySmall.Hash[1],MezzSmall.Hash[1]);
+                   AapplebySmall.Hash[1],MezzSmall.Hash[1])
 
         Result_x64 AapplebyLarge;
         MurmurHash3_x64_128(LargeBinary.data(),LargeBinarySize,SecondSeed,&AapplebyLarge.Hash[0]);
         Result_x64 MezzLarge = Hashing::MurmurHash3_x64_128(LargeBinary.data(),LargeBinary.size(),SecondSeed);
         TEST_EQUAL("MurmurHash3_x64_128(const_void*,const_Integer,const_UInt32)-Binary-Large-Index0",
-                   AapplebyLarge.Hash[0],MezzLarge.Hash[0]);
+                   AapplebyLarge.Hash[0],MezzLarge.Hash[0])
         TEST_EQUAL("MurmurHash3_x64_128(const_void*,const_Integer,const_UInt32)-Binary-Large-Index1",
-                   AapplebyLarge.Hash[1],MezzLarge.Hash[1]);
+                   AapplebyLarge.Hash[1],MezzLarge.Hash[1])
     }// x64_128 - Binary
 }
 

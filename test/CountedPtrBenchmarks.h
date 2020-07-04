@@ -223,7 +223,7 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
         /////////////////////////////////////
         // Comparison of Benchmark Results
 
-        TEST_WARN( "FixMe", true );
+        TEST_WARN( "FixMe", true )
 
         /*
         TestLog << "Checking that raw pointers are fastest for sanity.\n";
