@@ -129,7 +129,7 @@ namespace Mezzanine
     BinaryBuffer::Byte& BinaryBuffer::at(const SizeType Index)
     {
         if( Index >= this->Size ) {
-            MEZZ_EXCEPTION(OutOfRangeCode, "Attempted access beyond range of BinaryBuffer.");
+            MEZZ_EXCEPTION(OutOfRangeCode, "Attempted access beyond range of BinaryBuffer.")
         }
         return *(this->Binary + Index);
     }
@@ -137,7 +137,7 @@ namespace Mezzanine
     const BinaryBuffer::Byte& BinaryBuffer::at(const SizeType Index) const
     {
         if( Index >= this->Size ) {
-            MEZZ_EXCEPTION(OutOfRangeCode, "Attempted access beyond range of BinaryBuffer (const).");
+            MEZZ_EXCEPTION(OutOfRangeCode, "Attempted access beyond range of BinaryBuffer (const).")
         }
         return *(this->Binary + Index);
     }
@@ -151,7 +151,7 @@ namespace Mezzanine
         if( this->Size != 0 ) {
             this->Binary = new Byte[this->Size * sizeof(Byte)];
         }else{
-            MEZZ_EXCEPTION(InvalidLengthCode, "Cannot create zero size BinaryBuffer.");
+            MEZZ_EXCEPTION(InvalidLengthCode, "Cannot create zero size BinaryBuffer.")
         }
     }
 

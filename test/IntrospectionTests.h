@@ -262,173 +262,173 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
 
         auto StringAccessor = MakeMemberAccessor<MemberTags::Local>("StringVar",&PackedStruct::StringVar);
         TEST_EQUAL("MemberAccessor::GetName()_const-StringVar",
-                   String("StringVar"),StringAccessor.GetName());
+                   String("StringVar"),StringAccessor.GetName())
         TEST_EQUAL("MemberAccessor::GetTags()-StringVar",
-                   MemberTags::Local,StringAccessor.GetTags());
+                   MemberTags::Local,StringAccessor.GetTags())
         std::string NewStringValue = "Goodbye";
         TEST_EQUAL("MemberAccessor::SetValue(T)-StringVar-Before",
-                   "Hello",PackedTest.StringVar);
+                   "Hello",PackedTest.StringVar)
         StringAccessor.SetValue(PackedTest,NewStringValue);
         TEST_EQUAL("MemberAccessor::SetValue(T)-StringVar-After",
-                   NewStringValue,PackedTest.StringVar);
+                   NewStringValue,PackedTest.StringVar)
         TEST_EQUAL("MemberAccessor::GetValue()_const-StringVar",
-                   NewStringValue,StringAccessor.GetValue(PackedTest));//*/
+                   NewStringValue,StringAccessor.GetValue(PackedTest))
 
         auto VectorAccessor = MakeMemberAccessor("VectorVar",&PackedStruct::VectorVar);
         TEST_EQUAL("MemberAccessor::GetName()_const-VectorVar",
-                   String("VectorVar"),VectorAccessor.GetName());
+                   String("VectorVar"),VectorAccessor.GetName())
         TEST_EQUAL("MemberAccessor::GetTags()-VectorVar",
-                   MemberTags::None,VectorAccessor.GetTags());
+                   MemberTags::None,VectorAccessor.GetTags())
         std::vector<SingleVarStruct> NewVectorValue = { {9} };
         TEST_EQUAL("MemberAccessor::SetValue(T)-VectorVar-Before-Size",
-                   PackedTest.VectorVar.size(),size_t(2));
+                   PackedTest.VectorVar.size(),size_t(2))
         TEST_EQUAL("MemberAccessor::SetValue(T)-VectorVar-Before-Element1",
-                   PackedTest.VectorVar[0],SingleVarStruct{1});
+                   PackedTest.VectorVar[0],SingleVarStruct{1})
         TEST_EQUAL("MemberAccessor::SetValue(T)-VectorVar-Before-Element2",
-                   PackedTest.VectorVar[1],SingleVarStruct{2});
+                   PackedTest.VectorVar[1],SingleVarStruct{2})
         VectorAccessor.SetValue(PackedTest,NewVectorValue);
         TEST_EQUAL("MemberAccessor::SetValue(T)-VectorVar-After-Size",
-                   NewVectorValue.size(),PackedTest.VectorVar.size());
+                   NewVectorValue.size(),PackedTest.VectorVar.size())
         TEST_EQUAL("MemberAccessor::SetValue(T)-VectorVar-After-Element1",
-                   NewVectorValue[0],PackedTest.VectorVar[0]);
+                   NewVectorValue[0],PackedTest.VectorVar[0])
         TEST_EQUAL("MemberAccessor::GetValue()_const-VectorVar-Size",
-                   NewVectorValue.size(),VectorAccessor.GetValue(PackedTest).size());
+                   NewVectorValue.size(),VectorAccessor.GetValue(PackedTest).size())
         TEST_EQUAL("MemberAccessor::GetValue()_const-VectorVar-Element1",
-                   NewVectorValue[0],VectorAccessor.GetValue(PackedTest)[0]);//*/
+                   NewVectorValue[0],VectorAccessor.GetValue(PackedTest)[0])
 
         auto MapAccessor = MakeMemberAccessor<MemberTags::Local>("MapVar",&PackedStruct::MapVar);
         TEST_EQUAL("MemberAccessor::GetName()_const-MapVar",
-                   String("MapVar"),MapAccessor.GetName());
+                   String("MapVar"),MapAccessor.GetName())
         TEST_EQUAL("MemberAccessor::GetTags()-MapVar",
-                   MemberTags::Local,MapAccessor.GetTags());
+                   MemberTags::Local,MapAccessor.GetTags())
         std::map<std::string,unsigned int> NewMapValue = { {"Tenth",10} };
         TEST_EQUAL("MemberAccessor::SetValue(T)-MapVar-Before-Size",
-                   size_t(2),PackedTest.MapVar.size());
+                   size_t(2),PackedTest.MapVar.size())
         TEST_EQUAL("MemberAccessor::SetValue(T)-MapVar-Before-Element1-First",
-                   std::string("First"),std::next(PackedTest.MapVar.begin(),0)->first);
+                   std::string("First"),std::next(PackedTest.MapVar.begin(),0)->first)
         TEST_EQUAL("MemberAccessor::SetValue(T)-MapVar-Before-Element1-Second",
-                   1u,std::next(PackedTest.MapVar.begin(),0)->second);
+                   1u,std::next(PackedTest.MapVar.begin(),0)->second)
         TEST_EQUAL("MemberAccessor::SetValue(T)-MapVar-Before-Element2-First",
-                   std::string("Second"),std::next(PackedTest.MapVar.begin(),1)->first);
+                   std::string("Second"),std::next(PackedTest.MapVar.begin(),1)->first)
         TEST_EQUAL("MemberAccessor::SetValue(T)-MapVar-Before-Element2-Second",
-                   2u,std::next(PackedTest.MapVar.begin(),1)->second);
+                   2u,std::next(PackedTest.MapVar.begin(),1)->second)
         MapAccessor.SetValue(PackedTest,NewMapValue);
         TEST_EQUAL("MemberAccessor::SetValue(T)-MapVar-After-Size",
                    NewMapValue.size(),
-                   PackedTest.MapVar.size());
+                   PackedTest.MapVar.size())
         TEST_EQUAL("MemberAccessor::SetValue(T)-MapVar-After-Element1-First",
                    std::next(NewMapValue.begin(),0)->first,
-                   std::next(PackedTest.MapVar.begin(),0)->first);
+                   std::next(PackedTest.MapVar.begin(),0)->first)
         TEST_EQUAL("MemberAccessor::SetValue(T)-MapVar-After-Element1-Second",
                    std::next(NewMapValue.begin(),0)->second,
-                   std::next(PackedTest.MapVar.begin(),0)->second);
+                   std::next(PackedTest.MapVar.begin(),0)->second)
         TEST_EQUAL("MemberAccessor::GetValue()_const-MapVar-Size",
                    NewMapValue.size(),
-                   MapAccessor.GetValue(PackedTest).size());
+                   MapAccessor.GetValue(PackedTest).size())
         TEST_EQUAL("MemberAccessor::GetValue()_const-MapVar-Element1-First",
                    std::next(NewMapValue.begin(),0)->first,
-                   std::next(MapAccessor.GetValue(PackedTest).begin(),0)->first);
+                   std::next(MapAccessor.GetValue(PackedTest).begin(),0)->first)
         TEST_EQUAL("MemberAccessor::GetValue()_const-MapVar-Element1-Second",
                    std::next(NewMapValue.begin(),0)->second,
-                   std::next(MapAccessor.GetValue(PackedTest).begin(),0)->second);//*/
+                   std::next(MapAccessor.GetValue(PackedTest).begin(),0)->second)
 
         auto BigDoubleAccessor = MakeMemberAccessor("BigDoubleVar",&PackedStruct::BigDoubleVar);
         TEST_EQUAL("MemberAccessor::GetName()_const-BigDoubleVar",
-                   String("BigDoubleVar"),BigDoubleAccessor.GetName());
+                   String("BigDoubleVar"),BigDoubleAccessor.GetName())
         TEST_EQUAL("MemberAccessor::GetTags()-BigDoubleVar",
-                   MemberTags::None,BigDoubleAccessor.GetTags());
+                   MemberTags::None,BigDoubleAccessor.GetTags())
         long double NewBigDoubleValue = 25.0l;
         TEST_EQUAL_EPSILON("MemberAccessor::SetValue(T)-BigDoubleVar-Before",
-                           1.0l,PackedTest.BigDoubleVar);
+                           1.0l,PackedTest.BigDoubleVar)
         BigDoubleAccessor.SetValue(PackedTest,NewBigDoubleValue);
         TEST_EQUAL_EPSILON("MemberAccessor::SetValue(T)-BigDoubleVar-After",
-                           NewBigDoubleValue,PackedTest.BigDoubleVar);
+                           NewBigDoubleValue,PackedTest.BigDoubleVar)
         TEST_EQUAL_EPSILON("MemberAccessor::GetValue()_const-BigDoubleVar",
-                           NewBigDoubleValue,BigDoubleAccessor.GetValue(PackedTest));//*/
+                           NewBigDoubleValue,BigDoubleAccessor.GetValue(PackedTest))
 
         auto DoubleAccessor = MakeMemberAccessor("DoubleVar",&PackedStruct::DoubleVar);
         TEST_EQUAL("MemberAccessor::GetName()_const-DoubleVar",
-                   String("DoubleVar"),DoubleAccessor.GetName());
+                   String("DoubleVar"),DoubleAccessor.GetName())
         TEST_EQUAL("MemberAccessor::GetTags()-DoubleVar",
-                   MemberTags::None,DoubleAccessor.GetTags());
+                   MemberTags::None,DoubleAccessor.GetTags())
         double NewDoubleValue = 15.0;
         TEST_EQUAL_EPSILON("MemberAccessor::SetValue(T)-DoubleVar-Before",
-                           1.0,PackedTest.DoubleVar);
-        DoubleAccessor.SetValue(PackedTest,NewDoubleValue);
+                           1.0,PackedTest.DoubleVar)
+        DoubleAccessor.SetValue(PackedTest,NewDoubleValue)
         TEST_EQUAL_EPSILON("MemberAccessor::SetValue(T)-DoubleVar-After",
-                           NewDoubleValue,PackedTest.DoubleVar);
+                           NewDoubleValue,PackedTest.DoubleVar)
         TEST_EQUAL_EPSILON("MemberAccessor::GetValue()_const-DoubleVar",
-                           NewDoubleValue,DoubleAccessor.GetValue(PackedTest));//*/
+                           NewDoubleValue,DoubleAccessor.GetValue(PackedTest))
 
         auto BigUIntAccessor = MakeMemberAccessor<MemberTags::Generated>("BigUIntVar",&PackedStruct::BigUIntVar);
         TEST_EQUAL("MemberAccessor::GetName()_const-BigUIntVar",
-                   String("BigUIntVar"),BigUIntAccessor.GetName());
+                   String("BigUIntVar"),BigUIntAccessor.GetName())
         TEST_EQUAL("MemberAccessor::GetTags()-BigUIntVar",
-                   MemberTags::Generated,BigUIntAccessor.GetTags());
+                   MemberTags::Generated,BigUIntAccessor.GetTags())
         long unsigned int NewBigUIntValue = 5;
         TEST_EQUAL("MemberAccessor::SetValue(T)-BigUIntVar-Before",
-                   0lu,PackedTest.BigUIntVar);
+                   0lu,PackedTest.BigUIntVar)
         BigUIntAccessor.SetValue(PackedTest,NewBigUIntValue);
         TEST_EQUAL("MemberAccessor::SetValue(T)-BigUIntVar-After",
-                   NewBigUIntValue,PackedTest.BigUIntVar);
+                   NewBigUIntValue,PackedTest.BigUIntVar)
         TEST_EQUAL("MemberAccessor::GetValue()_const-BigUIntVar",
-                   NewBigUIntValue,BigUIntAccessor.GetValue(PackedTest));//*/
+                   NewBigUIntValue,BigUIntAccessor.GetValue(PackedTest))
 
         auto FloatAccessor = MakeMemberAccessor("FloatVar",&PackedStruct::FloatVar);
         TEST_EQUAL("MemberAccessor::GetName()_const-FloatVar",
-                   String("FloatVar"),FloatAccessor.GetName());
+                   String("FloatVar"),FloatAccessor.GetName())
         TEST_EQUAL("MemberAccessor::GetTags()-FloatVar",
-                   MemberTags::None,FloatAccessor.GetTags());
+                   MemberTags::None,FloatAccessor.GetTags())
         float NewFloatValue = 5.0f;
         TEST_EQUAL_EPSILON("MemberAccessor::SetValue(T)-FloatVar-Before",
-                           1.0f,PackedTest.FloatVar);
+                           1.0f,PackedTest.FloatVar)
         FloatAccessor.SetValue(PackedTest,NewFloatValue);
         TEST_EQUAL_EPSILON("MemberAccessor::SetValue(T)-FloatVar-After",
-                           NewFloatValue,PackedTest.FloatVar);
+                           NewFloatValue,PackedTest.FloatVar)
         TEST_EQUAL_EPSILON("MemberAccessor::GetValue()_const-FloatVar",
-                           NewFloatValue,FloatAccessor.GetValue(PackedTest));//*/
+                           NewFloatValue,FloatAccessor.GetValue(PackedTest))
 
         auto UIntAccessor = MakeMemberAccessor<MemberTags::Local>("UIntVar",&PackedStruct::UIntVar);
         TEST_EQUAL("MemberAccessor::GetName()_const-UIntVar",
-                   String("UIntVar"),UIntAccessor.GetName());
+                   String("UIntVar"),UIntAccessor.GetName())
         TEST_EQUAL("MemberAccessor::GetTags()-UIntVar",
-                   MemberTags::Local,UIntAccessor.GetTags());
+                   MemberTags::Local,UIntAccessor.GetTags())
         unsigned int NewUIntValue = 5;
         TEST_EQUAL("MemberAccessor::SetValue(T)-UIntVar-Before",
-                   0u,PackedTest.UIntVar);
+                   0u,PackedTest.UIntVar)
         UIntAccessor.SetValue(PackedTest,NewUIntValue);
         TEST_EQUAL("MemberAccessor::SetValue(T)-UIntVar-After",
-                   NewUIntValue,PackedTest.UIntVar);
+                   NewUIntValue,PackedTest.UIntVar)
         TEST_EQUAL("MemberAccessor::GetValue()_const-UIntVar",
-                   NewUIntValue,UIntAccessor.GetValue(PackedTest));//*/
+                   NewUIntValue,UIntAccessor.GetValue(PackedTest))
 
         auto UShortAccessor = MakeMemberAccessor("UShortVar",&PackedStruct::UShortVar);
         TEST_EQUAL("MemberAccessor::GetName()_const-UShortVar",
-                   String("UShortVar"),UShortAccessor.GetName());
+                   String("UShortVar"),UShortAccessor.GetName())
         TEST_EQUAL("MemberAccessor::GetTags()-UShortVar",
-                   MemberTags::None,UShortAccessor.GetTags());
+                   MemberTags::None,UShortAccessor.GetTags())
         short NewUShortValue = 15;
         TEST_EQUAL("MemberAccessor::SetValue(T)-UShortVar-Before",
-                   short(0),PackedTest.UShortVar);
+                   short(0),PackedTest.UShortVar)
         UShortAccessor.SetValue(PackedTest,NewUShortValue);
         TEST_EQUAL("MemberAccessor::SetValue(T)-UShortVar-After",
-                   NewUShortValue,PackedTest.UShortVar);
+                   NewUShortValue,PackedTest.UShortVar)
         TEST_EQUAL("MemberAccessor::GetValue()_const-UShortVar",
-                   NewUShortValue,UShortAccessor.GetValue(PackedTest));//*/
+                   NewUShortValue,UShortAccessor.GetValue(PackedTest))
 
         auto CharAccessor = MakeMemberAccessor("CharVar",&PackedStruct::CharVar);
         TEST_EQUAL("MemberAccessor::GetName()_const-CharVar",
-                   String("CharVar"),CharAccessor.GetName());
+                   String("CharVar"),CharAccessor.GetName())
         TEST_EQUAL("MemberAccessor::GetTags()-CharVar",
-                   MemberTags::None,CharAccessor.GetTags());
+                   MemberTags::None,CharAccessor.GetTags())
         char NewCharValue = 'Z';
         TEST_EQUAL("MemberAccessor::SetValue(T)-CharVar-Before",
-                   'A',PackedTest.CharVar);
+                   'A',PackedTest.CharVar)
         CharAccessor.SetValue(PackedTest,NewCharValue);
         TEST_EQUAL("MemberAccessor::SetValue(T)-CharVar-After",
-                   NewCharValue,PackedTest.CharVar);
+                   NewCharValue,PackedTest.CharVar)
         TEST_EQUAL("MemberAccessor::GetValue()_const-CharVar",
-                   NewCharValue,CharAccessor.GetValue(PackedTest));//*/
+                   NewCharValue,CharAccessor.GetValue(PackedTest))
     }// MemberAccessor/PackedStruct Tests
 
     {// MemberAccessor/BaseStruct Throw Tests
@@ -439,28 +439,28 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
         NoSetType NoSetAccessor("InvalidIntVar",nullptr,&BaseStruct::IntVar);
         TEST_THROW( "MemberAccessor::SetValue(T)-NoSet-Throw",
                     Mezzanine::Exception::IntrospectionNullptr,
-                    [&](){ NoSetAccessor.SetValue(TestStruct,5); } );
+                    [&](){ NoSetAccessor.SetValue(TestStruct,5); } )
         TEST_NO_THROW( "MemberAccessor::GetValue()-NoSet-NoThrow",
-                       [&](){ NoSetAccessor.GetValue(TestStruct); } );
+                       [&](){ NoSetAccessor.GetValue(TestStruct); } )
 
         using NoGetMethodType = decltype(&BaseStruct::FloatVar);
         using NoGetType = MemberAccessor<NoGetMethodType,NoGetMethodType,MemberTags::None>;
         NoGetType NoGetAccessor("InvalidFloatVar",&BaseStruct::FloatVar,nullptr);
         TEST_NO_THROW( "MemberAccessor::SetValue(T)-NoGet-Throw",
-                       [&](){ NoGetAccessor.SetValue(TestStruct,5.0f); } );
+                       [&](){ NoGetAccessor.SetValue(TestStruct,5.0f); } )
         TEST_THROW( "MemberAccessor::GetValue()-NoGet-NoThrow",
                     Mezzanine::Exception::IntrospectionNullptr,
-                    [&](){ NoGetAccessor.GetValue(TestStruct); } );
+                    [&](){ NoGetAccessor.GetValue(TestStruct); } )
 
         using NoSetOrGetMethodType = decltype(&BaseStruct::StringVar);
         using NoSetOrGetType = MemberAccessor<NoSetOrGetMethodType,NoSetOrGetMethodType,MemberTags::None>;
         NoSetOrGetType NoSetOrGetAccessor("InvalidStringVar",nullptr,nullptr);
         TEST_THROW( "MemberAccessor::SetValue(T)-NoSetOrGet-Throw",
                     Mezzanine::Exception::IntrospectionNullptr,
-                    [&](){ NoSetOrGetAccessor.SetValue(TestStruct,String("Oh noes!")); } );
+                    [&](){ NoSetOrGetAccessor.SetValue(TestStruct,String("Oh noes!")); } )
         TEST_THROW( "MemberAccessor::GetValue()-NoSetOrGet-Throw",
                     Mezzanine::Exception::IntrospectionNullptr,
-                    [&](){ NoSetOrGetAccessor.GetValue(TestStruct); } );
+                    [&](){ NoSetOrGetAccessor.GetValue(TestStruct); } )
     }// MemberAccessor/BaseStruct Throw Tests
 
     {// MakeMemberAccessor/BaseStruct
@@ -486,22 +486,22 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
         Boole SecondResult = std::is_same_v<SecondMemberType,decltype(SecondAccessor)>;
         Boole ThirdResult = std::is_same_v<ThirdMemberType,decltype(ThirdAccessor)>;
         Boole FourthResult = std::is_same_v<FourthMemberType,decltype(FourthAccessor)>;
-        TEST_EQUAL("MakeMemberAccessor(const_StringView,SetterType,GetterType)-FirstMember",true,FirstResult);
-        TEST_EQUAL("MakeMemberAccessor(const_StringView,SetterType,GetterType)-SecondMember",true,SecondResult);
-        TEST_EQUAL("MakeMemberAccessor(const_StringView,SetterType,GetterType)-ThirdMember",true,ThirdResult);
-        TEST_EQUAL("MakeMemberAccessor(const_StringView,SetterType,GetterType)-FourthMember",true,FourthResult);
+        TEST_EQUAL("MakeMemberAccessor(const_StringView,SetterType,GetterType)-FirstMember",true,FirstResult)
+        TEST_EQUAL("MakeMemberAccessor(const_StringView,SetterType,GetterType)-SecondMember",true,SecondResult)
+        TEST_EQUAL("MakeMemberAccessor(const_StringView,SetterType,GetterType)-ThirdMember",true,ThirdResult)
+        TEST_EQUAL("MakeMemberAccessor(const_StringView,SetterType,GetterType)-FourthMember",true,FourthResult)
     }// MakeMemberAccessor/BaseStruct
 
     {// Registration Methods/ContainerStruct
         TEST_EQUAL("RegisterName()-Dummy",
-                   StringView(""),RegisterName<std::vector<int>>());
+                   StringView(""),RegisterName<std::vector<int>>())
 
         const Boole FirstMatch = std::is_same_v<std::tuple<>,decltype(RegisterMembers<std::vector<int>>())>;
         TEST_EQUAL("RegisterMembers()-Dummy",
-                   true,FirstMatch);
+                   true,FirstMatch)
 
         TEST_EQUAL("RegisterName()-ContainerStruct",
-                   StringView("ContainerStruct"),RegisterName<ContainerStruct>());
+                   StringView("ContainerStruct"),RegisterName<ContainerStruct>())
 
         constexpr MemberTags Local = MemberTags::Local;
         using ContainerVectorType = decltype(MakeMemberAccessor<Local>("Test",&ContainerStruct::GetVectorVar));
@@ -509,36 +509,36 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
         using ContainerMembersType = std::tuple<ContainerVectorType,ContainerStringType>;
         const Boole SecondMatch = std::is_same_v<ContainerMembersType,decltype(RegisterMembers<ContainerStruct>())>;
         TEST_EQUAL("RegisterMembers()-ContainerStruct",
-                   true,SecondMatch);
+                   true,SecondMatch)
     }// Registration Methods/ContainerStruct
 
     {// Registration Query
         TEST_EQUAL("IsRegistered()-DerivedStructA",
-                   true,IsRegistered<DerivedStructA>());
+                   true,IsRegistered<DerivedStructA>())
         TEST_EQUAL("IsRegistered()-ContainerStruct",
-                   true,IsRegistered<ContainerStruct>());
+                   true,IsRegistered<ContainerStruct>())
         TEST_EQUAL("IsRegistered()-vector",
-                   false,IsRegistered<std::vector<int>>());
+                   false,IsRegistered<std::vector<int>>())
 
         TEST_EQUAL("GetRegisteredName()-DerivedStructB",
-                   StringView("DerivedStructB"),GetRegisteredName<DerivedStructB>());
+                   StringView("DerivedStructB"),GetRegisteredName<DerivedStructB>())
         TEST_EQUAL("GetRegisteredName()-ContainerStruct",
-                   StringView("ContainerStruct"),GetRegisteredName<ContainerStruct>());
+                   StringView("ContainerStruct"),GetRegisteredName<ContainerStruct>())
         TEST_EQUAL("GetRegisteredName()-vector",
-                   StringView(""),GetRegisteredName<std::vector<int>>());
+                   StringView(""),GetRegisteredName<std::vector<int>>())
 
         TEST_EQUAL("GetMemberCount()-BaseStruct",
-                   size_t(3),GetMemberCount<BaseStruct>());
+                   size_t(3),GetMemberCount<BaseStruct>())
         TEST_EQUAL("GetMemberCount()-DerivedStructA",
-                   size_t(6),GetMemberCount<DerivedStructA>());
+                   size_t(6),GetMemberCount<DerivedStructA>())
         TEST_EQUAL("GetMemberCount()-DerivedStructB",
-                   size_t(6),GetMemberCount<DerivedStructB>());
+                   size_t(6),GetMemberCount<DerivedStructB>())
         TEST_EQUAL("GetMemberCount()-DiamondStruct",
-                   size_t(11),GetMemberCount<DiamondStruct>());
+                   size_t(11),GetMemberCount<DiamondStruct>())
         TEST_EQUAL("GetMemberCount()-ContainerStruct",
-                   size_t(2),GetMemberCount<ContainerStruct>());
+                   size_t(2),GetMemberCount<ContainerStruct>())
         TEST_EQUAL("GetMemberCount()-vector",
-                   size_t(0),GetMemberCount<std::vector<int>>());
+                   size_t(0),GetMemberCount<std::vector<int>>())
     }// Registration Query
 
     {// GetRegisteredMembers/HasMember
@@ -546,31 +546,31 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
         using BaseGetType = std::decay_t<decltype(GetRegisteredMembers<BaseStruct>())>;
         constexpr Boole BaseResult = std::is_same_v<BaseRegisterType,BaseGetType>;
         TEST_EQUAL("GetMembers()-BaseStruct",
-                   true,BaseResult);
+                   true,BaseResult)
 
         using ContainerRegisterType = decltype(RegisterMembers<ContainerStruct>());
         using ContainerGetType = std::decay_t<decltype(GetRegisteredMembers<ContainerStruct>())>;
         constexpr Boole ContainerResult = std::is_same_v<ContainerRegisterType,ContainerGetType>;
         TEST_EQUAL("GetMembers()-ContainerStruct",
-                   true,ContainerResult);
+                   true,ContainerResult)
 
         using VectorGetType = decltype(GetRegisteredMembers<std::vector<int>>());
         constexpr Boole VectorResult = std::is_same_v<std::tuple<>,VectorGetType>;
         TEST_EQUAL("GetMembers()-vector",
-                   false,VectorResult);
+                   false,VectorResult)
 
         TEST_EQUAL("HasMember()-BaseStruct-Pass",
-                   true,HasMember<BaseStruct>("IntVar"));
+                   true,HasMember<BaseStruct>("IntVar"))
         TEST_EQUAL("HasMember()-BaseStruct-Fail",
-                   false,HasMember<BaseStruct>("StringViewVar"));
+                   false,HasMember<BaseStruct>("StringViewVar"))
 
         TEST_EQUAL("HasMember()-ContainerStruct-Pass",
-                   true,HasMember<ContainerStruct>("VectorVar"));
+                   true,HasMember<ContainerStruct>("VectorVar"))
         TEST_EQUAL("HasMember()-ContainerStruct-Fail",
-                   false,HasMember<ContainerStruct>("MapVar"));
+                   false,HasMember<ContainerStruct>("MapVar"))
 
         TEST_EQUAL("HasMember()-vector",
-                   false,HasMember<std::vector<int>>("Start"));
+                   false,HasMember<std::vector<int>>("Start"))
     }// GetRegisteredMembers/HasMember
 
     {// Do For Members
@@ -582,97 +582,97 @@ AUTOMATIC_TEST_GROUP(IntrospectionTests,Introspection)
             ForwardNames.push_back( Member.GetName() );
         } );
         TEST_EQUAL("DoForAllMembers-DiamondStruct-Count",
-                   size_t(11),ForwardNames.size());
+                   size_t(11),ForwardNames.size())
         TEST_EQUAL("DoForAllMembers-DiamondStruct-Element1",
-                   StringView("IntVar"),ForwardNames[0]);
+                   StringView("IntVar"),ForwardNames[0])
         TEST_EQUAL("DoForAllMembers-DiamondStruct-Element2",
-                   StringView("FloatVar"),ForwardNames[1]);
+                   StringView("FloatVar"),ForwardNames[1])
         TEST_EQUAL("DoForAllMembers-DiamondStruct-Element3",
-                   StringView("StringVar"),ForwardNames[2]);
+                   StringView("StringVar"),ForwardNames[2])
         TEST_EQUAL("DoForAllMembers-DiamondStruct-Element4",
-                   StringView("DerivedAFloatVar"),ForwardNames[3]);
+                   StringView("DerivedAFloatVar"),ForwardNames[3])
         TEST_EQUAL("DoForAllMembers-DiamondStruct-Element5",
-                   StringView("DerivedAIntVar"),ForwardNames[4]);
+                   StringView("DerivedAIntVar"),ForwardNames[4])
         TEST_EQUAL("DoForAllMembers-DiamondStruct-Element6",
-                   StringView("DerivedAUnsignedVar"),ForwardNames[5]);
+                   StringView("DerivedAUnsignedVar"),ForwardNames[5])
         TEST_EQUAL("DoForAllMembers-DiamondStruct-Element7",
-                   StringView("DerivedBFloatVar"),ForwardNames[6]);
+                   StringView("DerivedBFloatVar"),ForwardNames[6])
         TEST_EQUAL("DoForAllMembers-DiamondStruct-Element8",
-                   StringView("DerivedBShortVar"),ForwardNames[7]);
+                   StringView("DerivedBShortVar"),ForwardNames[7])
         TEST_EQUAL("DoForAllMembers-DiamondStruct-Element9",
-                   StringView("DerivedBCharArrayVar"),ForwardNames[8]);
+                   StringView("DerivedBCharArrayVar"),ForwardNames[8])
         TEST_EQUAL("DoForAllMembers-DiamondStruct-Element10",
-                   StringView("DiamondStringVar"),ForwardNames[9]);
+                   StringView("DiamondStringVar"),ForwardNames[9])
         TEST_EQUAL("DoForAllMembers-DiamondStruct-Element11",
-                   StringView("DiamondStringVarDos"),ForwardNames[10]);
+                   StringView("DiamondStringVarDos"),ForwardNames[10])
 
         std::vector<StringView> ReverseNames;
         DoForAllMembersReverse<DiamondStruct>( [&](const auto& Member) {
             ReverseNames.push_back( Member.GetName() );
         } );
         TEST_EQUAL("DoForAllMembersReverse-DiamondStruct-Count",
-                   size_t(11),ForwardNames.size());
+                   size_t(11),ForwardNames.size())
         TEST_EQUAL("DoForAllMembersReverse-DiamondStruct-Element1",
-                   StringView("DiamondStringVarDos"),ReverseNames[0]);
+                   StringView("DiamondStringVarDos"),ReverseNames[0])
         TEST_EQUAL("DoForAllMembersReverse-DiamondStruct-Element2",
-                   StringView("DiamondStringVar"),ReverseNames[1]);
+                   StringView("DiamondStringVar"),ReverseNames[1])
         TEST_EQUAL("DoForAllMembersReverse-DiamondStruct-Element3",
-                   StringView("DerivedBCharArrayVar"),ReverseNames[2]);
+                   StringView("DerivedBCharArrayVar"),ReverseNames[2])
         TEST_EQUAL("DoForAllMembersReverse-DiamondStruct-Element4",
-                   StringView("DerivedBShortVar"),ReverseNames[3]);
+                   StringView("DerivedBShortVar"),ReverseNames[3])
         TEST_EQUAL("DoForAllMembersReverse-DiamondStruct-Element5",
-                   StringView("DerivedBFloatVar"),ReverseNames[4]);
+                   StringView("DerivedBFloatVar"),ReverseNames[4])
         TEST_EQUAL("DoForAllMembersReverse-DiamondStruct-Element6",
-                   StringView("DerivedAUnsignedVar"),ReverseNames[5]);
+                   StringView("DerivedAUnsignedVar"),ReverseNames[5])
         TEST_EQUAL("DoForAllMembersReverse-DiamondStruct-Element7",
-                   StringView("DerivedAIntVar"),ReverseNames[6]);
+                   StringView("DerivedAIntVar"),ReverseNames[6])
         TEST_EQUAL("DoForAllMembersReverse-DiamondStruct-Element8",
-                   StringView("DerivedAFloatVar"),ReverseNames[7]);
+                   StringView("DerivedAFloatVar"),ReverseNames[7])
         TEST_EQUAL("DoForAllMembersReverse-DiamondStruct-Element9",
-                   StringView("StringVar"),ReverseNames[8]);
+                   StringView("StringVar"),ReverseNames[8])
         TEST_EQUAL("DoForAllMembersReverse-DiamondStruct-Element10",
-                   StringView("FloatVar"),ReverseNames[9]);
+                   StringView("FloatVar"),ReverseNames[9])
         TEST_EQUAL("DoForAllMembersReverse-DiamondStruct-Element11",
-                   StringView("IntVar"),ReverseNames[10]);
+                   StringView("IntVar"),ReverseNames[10])
 
         std::string StrMemberValue;
         DoForMember<DiamondStruct,std::string>( "DiamondStringVar", [&](const auto& Member) {
             StrMemberValue = Member.GetValue(TestStruct);
         } );
         TEST_EQUAL("DoForMember-DiamondStruct-DiamondStringVar",
-                   std::string("Goodbye"),StrMemberValue);//*/
+                   std::string("Goodbye"),StrMemberValue)
     }// Do For Members
 
     {// (Get/Set)MemberValue
         UInt32 FirstOldVal = 50;
         SingleVarStruct FirstTestStruct(FirstOldVal);
         TEST_EQUAL("GetMemberValue-SingleVarStruct-UInt32",
-                   FirstOldVal,GetMemberValue<UInt32>(FirstTestStruct,"UIntVar"));
+                   FirstOldVal,GetMemberValue<UInt32>(FirstTestStruct,"UIntVar"))
 
         UInt32 FirstNewVal = 100;
         SetMemberValue<UInt32>(FirstTestStruct,"UIntVar",FirstNewVal);
         TEST_EQUAL("SetMemberValue-SingleVarStruct-UInt32",
-                   FirstNewVal,FirstTestStruct.UIntVar);
+                   FirstNewVal,FirstTestStruct.UIntVar)
 
         std::string SecondOldVal = "Hello";
         ContainerStruct SecondTestStruct;
         TEST_EQUAL("GetMemberValue-ContainerStruct-String",
-                   SecondOldVal,GetMemberValue<String>(SecondTestStruct,"StringVar"));
+                   SecondOldVal,GetMemberValue<String>(SecondTestStruct,"StringVar"))
 
         std::string SecondNewVal = "kkthxbye";
         SetMemberValue<std::string>(SecondTestStruct,"StringVar",SecondNewVal);
         TEST_EQUAL("SetMemberValue-ContainerStruct-String",
-                   SecondNewVal,SecondTestStruct.StringVar);
+                   SecondNewVal,SecondTestStruct.StringVar)
 
         std::string ThirdOldVal = "Hello";
         BaseStruct ThirdTestStruct;
         TEST_EQUAL("GetMemberValue-BaseStruct-String",
-                   ThirdOldVal,GetMemberValue<std::string>(ThirdTestStruct,"StringVar"));
+                   ThirdOldVal,GetMemberValue<std::string>(ThirdTestStruct,"StringVar"))
 
         std::string ThirdNewVal = "ohai";
         SetMemberValue<std::string>(ThirdTestStruct,"StringVar",ThirdNewVal);
         TEST_EQUAL("SetMemberValue-BaseStruct-String",
-                   ThirdNewVal,ThirdTestStruct.StringVar);
+                   ThirdNewVal,ThirdTestStruct.StringVar)
     }// (Get/Set)MemberValue
 }
 
