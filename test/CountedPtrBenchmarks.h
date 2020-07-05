@@ -304,11 +304,10 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
             { return; }
 
         // Internal Percentage based comparisons
-        // Is 80% as much work close enough?
         TEST_WARN( "InternalDoesASimilarAmountOfCreateIterationsToRawPointers",
-                   80 < InternalToRawPercentageCreate )
+                   75 < InternalToRawPercentageCreate )
         TEST_WARN( "InternalDoesASimilarAmountOfWorkIterationsToRawPointers",
-                   80 < InternalToRawPercentageCopy )
+                   75 < InternalToRawPercentageCopy )
 
         TEST_WARN( "InternalDoesMoreCreateIterationsThanExternalReferenceCountOrIsClose",
                    95 < InternalToExternalPercentageCreate )
