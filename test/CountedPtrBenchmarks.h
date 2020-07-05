@@ -304,16 +304,16 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
             { return; }
 
         // Internal Percentage based comparisons
-        // Is 85% as much work close enough?
+        // Is 80% as much work close enough?
         TEST_WARN( "InternalDoesASimilarAmountOfCreateIterationsToRawPointers",
-                   85 < InternalToRawPercentageCreate )
+                   80 < InternalToRawPercentageCreate )
         TEST_WARN( "InternalDoesASimilarAmountOfWorkIterationsToRawPointers",
-                   85 < InternalToRawPercentageCopy )
+                   80 < InternalToRawPercentageCopy )
 
         TEST_WARN( "InternalDoesMoreCreateIterationsThanExternalReferenceCountOrIsClose",
-                   99 < InternalToExternalPercentageCreate )
+                   95 < InternalToExternalPercentageCreate )
         TEST_WARN( "InternalDoesMoreWorkIterationsThanExternalReferenceCountOrIsClose",
-                   99 < InternalToExternalPercentageCopy )
+                   95 < InternalToExternalPercentageCopy )
 
         TEST_WARN( "InternalDoesMoreCreateIterationsThanSharedpointers",
                    100 < InternalToSharedPercentageCreate )
