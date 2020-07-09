@@ -156,7 +156,7 @@ pipeline {
                             cmake -G"Ninja" .. -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
                             ninja  &&
                             ./Foundation_Tester xml &&
-                            valgrind ./Filesystem_Tester
+                            valgrind ./Foundation_Tester
                          """ }
                      }
                      post {
@@ -227,7 +227,7 @@ pipeline {
                             cmake -G"Ninja" .. -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
                             ninja &&
                             ./Foundation_Tester xml &&
-                            valgrind ./Filesystem_Tester
+                            valgrind ./Foundation_Tester
                         """ }
                     }
                     post {
