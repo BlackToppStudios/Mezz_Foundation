@@ -318,14 +318,14 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
                    100 < InternalToSharedPercentageCreate )
         TEST_WARN( "InternalDoesMoreWorkIterationsThanSharedpointers",
                    100 < InternalToSharedPercentageCopy )
-        TEST_WARN( "InternalDoesMoreCreateIterationsThanMakeSharedpointers",
-                   100 < InternalToMakeSharedPercentageCreate )
+        TEST_WARN( "InternalDoesMoreOrASimilarAmountOfCreateIterationsThanMakeSharedpointers",
+                   95 < InternalToMakeSharedPercentageCreate )
         TEST_WARN( "InternalDoesMoreWorkIterationsThanMakeSharedpointers",
                    100 < InternalToMakeSharedPercentageCopy )
 
         // External Percentage based comparisons
-        TEST_WARN( "ExternalDoesMoreCreateIterationsThanSharedpointers",
-                   99 < ExternalToSharedPercentageCreate )
+        TEST_WARN( "ExternalDoesAboutAsManyOrMoreCreateIterationsThanSharedpointers",
+                   95 < ExternalToSharedPercentageCreate )
         TEST_WARN( "ExternalDoesMoreWorkIterationsThanSharedpointers",
                    99 < ExternalToSharedPercentageCopy )
         TEST_WARN( "InternalDoesntSuckAtCreateIterationsComparedToMakeSharedpointers",
