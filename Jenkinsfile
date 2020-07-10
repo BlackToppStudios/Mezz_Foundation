@@ -155,7 +155,8 @@ pipeline {
                             hostname &&
                             cmake -G"Ninja" .. -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
                             ninja  &&
-                            ./Foundation_Tester xml
+                            ./Foundation_Tester xml &&
+                            valgrind ./Foundation_Tester
                          """ }
                      }
                      post {
@@ -225,7 +226,8 @@ pipeline {
                             hostname &&
                             cmake -G"Ninja" .. -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF &&
                             ninja &&
-                            ./Foundation_Tester xml
+                            ./Foundation_Tester xml &&
+                            valgrind ./Foundation_Tester
                         """ }
                     }
                     post {
@@ -238,10 +240,11 @@ pipeline {
                 stage('Windows10Mingw32-Debug') {
                     agent { label "Windows10Mingw32" }
                     steps {
+                        bat 'hostname'
                         checkout scm
                         bat 'if not exist "build-debug" mkdir build-debug'
                         dir('build-debug') {
-                            bat 'cmake -E env CXXFLAGS="-fno-var-tracking-assignments" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF'
+                            bat 'cmake -E env CXXFLAGS="-fno-var-tracking-assignments" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=DEBUG -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF -DMEZZ_ForceGcc32Bit=ON'
                             bat 'ninja'
                             bat 'Foundation_Tester xml'
                         }
@@ -255,10 +258,11 @@ pipeline {
                 stage('Windows10Mingw32-Release') {
                     agent { label "Windows10Mingw32" }
                     steps {
+                        bat 'hostname'
                         checkout scm
                         bat 'if not exist "build-release" mkdir build-release'
                         dir('build-release') {
-                            bat 'cmake -E env CXXFLAGS="-fno-var-tracking-assignments" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF'
+                            bat 'cmake -E env CXXFLAGS="-fno-var-tracking-assignments" cmake -G"Ninja" .. -DCMAKE_BUILD_TYPE=RELEASE -DMEZZ_BuildDoxygen=OFF -DMEZZ_CodeCoverage=OFF -DMEZZ_ForceGcc32Bit=ON'
                             bat 'ninja'
                             bat 'Foundation_Tester xml'
                         }
@@ -273,6 +277,7 @@ pipeline {
                 stage('Windows10Mingw64-Debug') {
                     agent { label "Windows10Mingw64" }
                     steps {
+                        bat 'hostname'
                         checkout scm
                         bat 'if not exist "build-debug" mkdir build-debug'
                         dir('build-debug') {
@@ -290,6 +295,7 @@ pipeline {
                 stage('Windows10Mingw64-Release') {
                     agent { label "Windows10Mingw64" }
                     steps {
+                        bat 'hostname'
                         checkout scm
                         bat 'if not exist "build-release" mkdir build-release'
                         dir('build-release') {
@@ -308,6 +314,7 @@ pipeline {
                 stage('Windows10MSVC-Debug') {
                     agent { label "Windows10MSVC" }
                     steps {
+                        bat 'hostname'
                         checkout scm
                         bat 'if not exist "build-debug" mkdir build-debug'
                         dir('build-debug') {
@@ -324,6 +331,7 @@ pipeline {
                 stage('Windows10MSVC-Release') {
                     agent { label "Windows10MSVC" }
                     steps {
+                        bat 'hostname'
                         checkout scm
                         bat 'if not exist "build-release" mkdir build-release'
                         dir('build-release') {
