@@ -161,9 +161,9 @@ namespace Serialization {
     {
     public:
         using LinkContainer = SortedVector<ObjectLink,TrackerPredicate<ObjectLink>>;
-        using LinkIterator = LinkContainer::const_iterator;
+        using LinkIterator = LinkContainer::iterator;
         using JoinContainer = SortedVector<ObjectJoin,TrackerPredicate<ObjectJoin>>;
-        using JoinIterator = JoinContainer::const_iterator;
+        using JoinIterator = JoinContainer::iterator;
     protected:
         LinkContainer TrackedLinks;
         JoinContainer TrackedJoins;
@@ -182,7 +182,7 @@ namespace Serialization {
             return *TrackIt;
         }
         template<typename PtrType>
-        ObjectLink& GetOrCreateJoin(uintptr_t PtrID)
+        ObjectJoin& GetOrCreateJoin(uintptr_t PtrID)
         {
             JoinIterator TrackIt = TrackedJoins.find(PtrID);
             if( TrackIt == TrackedJoins.end() ) {
@@ -239,7 +239,7 @@ namespace Serialization {
             return PtrID;
         }
         template<typename PtrType>
-        Boole TrackPointer(std::shared_ptr<PtrType>& ToTrack, const Boole IsOwner)
+        uintptr_t TrackPointer(std::shared_ptr<PtrType>& ToTrack, const Boole IsOwner)
         {
             static_assert(std::is_pointer_v<PtrType>,"Provided type is NOT a pointer.");
 

@@ -75,7 +75,7 @@ namespace Serialization {
         ///////////////////////////////////////////////////////////////////////////////
         // Root Object
 
-        virtual ObjectWalker& GetWalker() const = 0;
+        virtual ObjectWalker& GetWalker() = 0;
 
         ///////////////////////////////////////////////////////////////////////////////
         // Input and Output
@@ -204,6 +204,10 @@ namespace Serialization {
         [[nodiscard]]
         virtual std::optional<Int8> GetInt8() const = 0;
 
+        virtual void SetBool(const Boole Value) = 0;
+        [[nodiscard]]
+        virtual std::optional<Boole> GetBool() const = 0;
+
         template<typename SetType>
         void SetValue(SetType&& ToSet);
 
@@ -327,6 +331,14 @@ namespace Serialization {
         [[nodiscard]]
         std::optional<Int8> GetValue<Int8>(const AttributeWalker& Walker)
             { return Walker.GetInt8(); }
+
+        template<>
+        void SetValue<Boole>(AttributeWalker& Walker, const Boole Value)
+            { Walker.SetBool(Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<Boole> GetValue<Boole>(const AttributeWalker& Walker)
+            { return Walker.GetBool(); }
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -335,7 +347,8 @@ namespace Serialization {
     template<typename SetType>
     void AttributeWalker::SetValue(SetType&& ToSet)
     {
-        AttributeHelpers::SetValue<SetType>(*this,std::forward<SetType>(ToSet));
+        using DecayedType = std::decay_t<SetType>;
+        AttributeHelpers::SetValue<DecayedType>(*this,std::forward<SetType>(ToSet));
     }
 
     template<typename ReturnType>
@@ -397,13 +410,14 @@ namespace Serialization {
         [[nodiscard]]
         virtual Boole HasAttribute(const StringView Name) const = 0;
         [[nodiscard]]
-        virtual AttributeWalker& GetAttributes() const = 0;
+        virtual AttributeWalker& GetAttributes() = 0;
         [[nodiscard]]
-        virtual AttributeWalker& GetAttribute(const StringView Name) const = 0;
+        virtual AttributeWalker& GetAttribute(const StringView Name) = 0;
         [[nodiscard]]
         virtual Boole CreateAttribute(const StringView Name, const MemberTags Tags) = 0;
 
-        template<typename AttributeType>
+        template<typename AttributeType,
+                 typename = std::enable_if_t< !std::is_same_v<std::decay_t<AttributeType>,String> > >
         void Attribute(const StringView Name, const MemberTags Tags, AttributeType&& Attrib)
         {
             if( this->CreateAttribute(Name,Tags) ) {
@@ -411,12 +425,23 @@ namespace Serialization {
                 Walker.SetValue(std::forward<AttributeType>(Attrib));
             }
         }
-        template<typename AttributeType>
+        void Attribute(const StringView Name, const MemberTags Tags, const String& Attrib)
+        {
+            StringView AttribView(Attrib.data(),Attrib.size());
+            this->Attribute(Name,Tags,AttribView);
+        }
+        template<typename AttributeType,
+                 typename = std::enable_if_t< !std::is_same_v<std::decay_t<AttributeType>,String> > >
         void Attribute(const StringView Name, AttributeType&& Attrib)
         {
             this->Attribute(Name,MemberTags::None,std::forward<AttributeType>(Attrib));
         }
+        void Attribute(const StringView Name, const String& Attrib)
+        {
+            this->Attribute(Name,MemberTags::None,Attrib);
+        }
         template<typename AttributeType>
+        [[nodiscard]]
         std::optional<AttributeType> Attribute(const StringView Name)
         {
             if( this->HasAttribute(Name) ) {
@@ -426,75 +451,6 @@ namespace Serialization {
             return std::optional<AttributeType>();
         }
     };//ObjectWalker
-
-    class MEZZ_LIB TreeWalker
-    {
-    public:
-
-    };//TreeWalker
-
-    ///////////////////////////////////////////////////////////////////////////////
-    // Serialization Tree Navigation Helpers
-
-    class MEZZ_LIB ScopedSerializationNode
-    {
-    protected:
-        Serialization::ObjectWalker* Node = nullptr;
-    public:
-        ScopedSerializationNode(const StringView Name, const MemberTags Tags, Serialization::ObjectWalker& Walker)
-        {
-            if( Walker.CreateChild(Name,Tags,true) ) {
-                this->Node = &Walker;
-            }
-        }
-        ScopedSerializationNode(const StringView Name, Serialization::ObjectWalker& Walker) :
-            ScopedSerializationNode(Name,MemberTags::None,Walker)
-            {  }
-        ~ScopedSerializationNode()
-        {
-            if( this->IsValid() ) {
-                this->Node->Parent();
-            }
-        }
-
-        Boole IsValid() const
-            { return ( this->Node != nullptr ); }
-
-        explicit operator bool() const
-            { return ( this->Node != nullptr ); }
-    };
-
-    class MEZZ_LIB ScopedDeserializationNode
-    {
-    protected:
-        Serialization::ObjectWalker* Node = nullptr;
-    public:
-        ScopedDeserializationNode(Serialization::ObjectWalker& Walker)
-        {
-            if( Walker.HasChildren() ) {
-                Walker.FirstChild();
-                this->Node = &Walker;
-            }
-        }
-        ScopedDeserializationNode(const StringView Name, Serialization::ObjectWalker& Walker)
-        {
-            if( Walker.Child(Name) ) {
-                this->Node = &Walker;
-            }
-        }
-        ~ScopedDeserializationNode()
-        {
-            if( this->IsValid() ) {
-                this->Node->Parent();
-            }
-        }
-
-        Boole IsValid() const
-            { return ( this->Node != nullptr ); }
-
-        explicit operator bool() const
-            { return ( this->Node != nullptr ); }
-    };
 
     /// @}
 }//Serialization

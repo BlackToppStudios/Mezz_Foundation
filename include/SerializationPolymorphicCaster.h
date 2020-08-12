@@ -74,12 +74,12 @@ namespace Serialization {
                                void* ToSerialize,
                                const MemberTags Tags,
                                const Integer Version,
-                               Serialization::ObjectWalker& Walker) = 0;
-        virtual void Deserialize(const StringView Name,
+                               Serialization::SerializerWalker& Walker) = 0;
+        /*virtual void Deserialize(const StringView Name,
                                  void*& ToDeserialize,
                                  const MemberTags Tags,
                                  const Integer Version,
-                                 Serialization::ObjectWalker& Walker) = 0;
+                                 Serialization::DeserializerWalker& Walker) = 0;//*/
     };//PolymorphicCaster
 
     struct MEZZ_LIB PolymorphicCasterHolder
@@ -193,16 +193,16 @@ RESTORE_WARNING_STATE
                        void* ToSerialize,
                        const MemberTags Tags,
                        const Int32 Version,
-                       ObjectWalker& Walker)
+                       Serialization::SerializerWalker& Walker)
         {
             Derived* Casted = static_cast<Derived*>( static_cast<Base*>(ToSerialize) );
             Mezzanine::Serialize(Name,std::forward<Derived*>(Casted),Tags,Version,Walker);
         }
-        void Deserialize(const StringView Name,
+        /*void Deserialize(const StringView Name,
                          void*& ToDeserialize,
                          const MemberTags Tags,
                          const Int32 Version,
-                         ObjectWalker& Walker)
+                         Serialization::DeserializerWalker& Walker)
         {
             Derived* UpCasted = nullptr;
             if( ToDeserialize == nullptr ) {
@@ -216,7 +216,7 @@ RESTORE_WARNING_STATE
                 UpCasted = static_cast<Derived*>( static_cast<Base*>(ToDeserialize) );
             }
             Mezzanine::Deserialize(Name,std::forward<Derived*>(UpCasted),Tags,Version,Walker);
-        }
+        }//*/
     };//PolymorphicCasterImpl
 #else
     template<class Derived>

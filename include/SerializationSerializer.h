@@ -48,12 +48,185 @@
     #include "SerializationPolymorphicCaster.h"
     #include "SerializationPointerTracker.h"
     #include "StringTools.h"
+    #include "StreamLogging.h"
 #endif // SWIG
 
 namespace Mezzanine {
 namespace Serialization {
     /// @addtogroup Serialization
     /// @{
+
+    class MEZZ_LIB SerializerWalker
+    {
+    public:
+        using WalkerRef = std::reference_wrapper<Serialization::ObjectWalker>;
+    protected:
+        SerializerPointerTracker Tracker;
+        LogStream Logger;
+        WalkerRef Walker;
+
+        Serialization::ObjectWalker& GetWalker()
+            { return this->Walker; }
+        const Serialization::ObjectWalker& GetWalker() const
+            { return this->Walker; }
+    public:
+        SerializerWalker(Serialization::ObjectWalker& ToWrap) :
+            Logger(nullptr),
+            Walker(ToWrap)
+            {  }
+        SerializerWalker(std::ostream& Log, Serialization::ObjectWalker& ToWrap) :
+            Logger(Log.rdbuf()),
+            Walker(ToWrap)
+            {  }
+        ~SerializerWalker() = default;
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Logging
+
+        [[nodiscard]]
+        LogStream& GetLogger()
+            { return this->Logger; }
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Pointer Tracking
+
+        void TrackPointer(void* ToTrack, const Boole IsOwner)
+            { this->Tracker.TrackPointer(ToTrack,IsOwner); }
+
+        void TrackPointer(std::shared_ptr<void> ToTrack, const Boole IsOwner)
+            { this->Tracker.TrackPointer(ToTrack,IsOwner); }
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Name Operations
+
+        void SetName(const StringView Name)
+            { this->GetWalker().SetName(Name); }
+        [[nodiscard]]
+        StringView GetName() const
+            { return this->GetWalker().GetName(); }
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Navigation
+
+        [[nodiscard]]
+        Boole AtRoot() const
+            { return this->GetWalker().AtRoot(); }
+        [[nodiscard]]
+        Boole IsFirstChild() const
+            { return this->GetWalker().IsFirstChild(); }
+        [[nodiscard]]
+        Boole IsLastChild() const
+            { return this->GetWalker().IsLastChild(); }
+        [[nodiscard]]
+        Boole HasChildren() const
+            { return this->GetWalker().HasChildren(); }
+        [[nodiscard]]
+        Boole HasChild(const StringView Name) const
+            { return this->GetWalker().HasChild(Name); }
+        [[nodiscard]]
+        Boole HasNextSibling() const
+            { return this->GetWalker().HasNextSibling(); }
+        [[nodiscard]]
+        Boole HasPreviousSibling() const
+            { return this->GetWalker().HasPreviousSibling(); }
+
+        ObjectWalker& Next()
+            { return this->GetWalker().Next(); }
+        ObjectWalker& Previous()
+            { return this->GetWalker().Previous(); }
+        ObjectWalker& Parent()
+            { return this->GetWalker().Parent(); }
+        ObjectWalker& FirstChild()
+            { return this->GetWalker().FirstChild(); }
+        [[nodiscard]]
+        Boole Child(const StringView Name)
+            { return this->GetWalker().Child(Name); }
+
+        [[nodiscard]]
+        Boole CreateChild(const StringView Name, const MemberTags Tags, const Boole Move)
+            { return this->GetWalker().CreateChild(Name,Tags,Move); }
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Attributes
+
+        [[nodiscard]]
+        Boole HasAttributes() const
+            { return this->GetWalker().HasAttributes(); }
+        [[nodiscard]]
+        Boole HasAttribute(const StringView Name) const
+            { return this->GetWalker().HasAttribute(Name); }
+        [[nodiscard]]
+        AttributeWalker& GetAttributes()
+            { return this->GetWalker().GetAttributes(); }
+        [[nodiscard]]
+        AttributeWalker& GetAttribute(const StringView Name)
+            { return this->GetWalker().GetAttribute(Name); }
+        [[nodiscard]]
+        Boole CreateAttribute(const StringView Name, const MemberTags Tags)
+            { return this->GetWalker().CreateAttribute(Name,Tags); }
+
+        template<typename AttributeType,
+                 typename = std::enable_if_t< !std::is_same_v<std::decay_t<AttributeType>,String> > >
+        void Attribute(const StringView Name, const MemberTags Tags, AttributeType&& Attrib)
+            { this->GetWalker().Attribute(Name,Tags,std::forward<AttributeType>(Attrib)); }
+        void Attribute(const StringView Name, const MemberTags Tags, const String& Attrib)
+            { this->GetWalker().Attribute(Name,Tags,Attrib); }
+        template<typename AttributeType,
+                 typename = std::enable_if_t< !std::is_same_v<std::decay_t<AttributeType>,String> > >
+        void Attribute(const StringView Name, AttributeType&& Attrib)
+            { this->GetWalker().Attribute(Name,std::forward<AttributeType>(Attrib)); }
+        void Attribute(const StringView Name, const String& Attrib)
+            { this->GetWalker().Attribute(Name,Attrib); }
+        template<typename AttributeType>
+        [[nodiscard]]
+        std::optional<AttributeType> Attribute(const StringView Name)
+            { return this->GetWalker().Attribute<AttributeType>(Name); }
+    };//SerializerWalker
+
+    /// @brief Helper class scope-based navigation of a serialization tree during serialization.
+    class MEZZ_LIB ScopedSerializationNode
+    {
+    protected:
+        /// @brief Pointer to the walker used to navigate the serialization tree.
+        SerializerWalker* Node = nullptr;
+    public:
+        /// @brief Child create constructor.
+        /// @remarks This constructor will attempt to create a new child with the specified name.
+        /// @param Name The name of the node to be created.
+        /// @param Tags Member tags used by the backend to determine custom backend behavior for the node.
+        /// @param Walker The walker being used to navigate the serialization tree.
+        ScopedSerializationNode(const StringView Name, const MemberTags Tags, SerializerWalker& Walker)
+        {
+            if( Walker.CreateChild(Name,Tags,true) ) {
+                this->Node = &Walker;
+            }
+        }
+        /// @brief Tagless child create constructor.
+        /// @remarks This constructor will attempt to create a new child with the specified name.
+        /// @param Name The name of the node to be created.
+        /// @param Walker The walker being used to navigate the serialization tree.
+        ScopedSerializationNode(const StringView Name, SerializerWalker& Walker) :
+            ScopedSerializationNode(Name,MemberTags::None,Walker)
+            {  }
+        /// @brief Class destructor.
+        /// @remarks This will navigate the walker to the parent node.
+        ~ScopedSerializationNode()
+        {
+            if( this->IsValid() ) {
+                this->Node->Parent();
+            }
+        }
+
+        /// @brief Verifies this scoped node is safe to use.
+        /// @return Returns true if this scoped node has a valid reference to a walker and can be used.
+        Boole IsValid() const
+            { return ( this->Node != nullptr ); }
+
+        /// @brief Bool operator validity check.
+        /// @remarks This is a convenience operator that simply checks the validity of this node.
+        explicit operator bool() const
+            { return ( this->Node != nullptr ); }
+    };//ScopedSerializationNode
 
     namespace Impl {
         /// @brief
@@ -66,8 +239,9 @@ namespace Serialization {
         template<class SerializeType>
         void SerializeClassValidation(const SerializeType& ToSerialize,
                                       const Int32 Version,
-                                      Serialization::ObjectWalker& Walker)
+                                      Serialization::SerializerWalker& Walker)
         {
+            std::cout << "\nEntering \"SerializeClassValidation\".\n";
             (void)ToSerialize;
             using DecayedType = std::decay_t<SerializeType>;
             if constexpr( IsRegistered<DecayedType>() ) {
@@ -77,12 +251,13 @@ namespace Serialization {
                     Walker.Attribute("Version",Version);
                 //}
             }
+            std::cout << "\nExiting \"SerializeClassValidation\".\n";
         }
-        /// @brief
+        /// @brief Serializes a String or primitive type.
         /// @tparam SerializeType
         /// @remarks This function will not create a sub-node in the serialization tree and instead will
         /// append directly to the current node pointed to by Walker.
-        /// @param Name
+        /// @param Name The name of the member to serialize.
         /// @param ToSerialize
         /// @param Tags
         /// @param Walker
@@ -90,7 +265,7 @@ namespace Serialization {
         void SerializeSimpleMember(const StringView Name,
                                    const SerializeType& ToSerialize,
                                    const MemberTags Tags,
-                                   Serialization::ObjectWalker& Walker)
+                                   Serialization::SerializerWalker& Walker)
         {
             Walker.Attribute(Name,Tags,ToSerialize);
         }
@@ -102,9 +277,10 @@ namespace Serialization {
         /// @param Walker
         template<class SerializeType>
         void SerializeAllMembers(const SerializeType& ToSerialize,
-                                 Serialization::ObjectWalker& Walker)
+                                 Serialization::SerializerWalker& Walker)
         {
             using DecayedType = std::decay_t<SerializeType>;
+            std::cout << "\nEntering \"SerializeAllMembers\" for type \"" << GetRegisteredName<DecayedType>() << "\".\n";
             if constexpr( IsRegistered<DecayedType>() ) {
                 DoForAllMembers<DecayedType>([&](const auto& Member) {
                     constexpr MemberTags Tags = std::remove_reference_t<decltype(Member)>::GetTags();
@@ -113,6 +289,7 @@ namespace Serialization {
                     }
                 });
             }
+            std::cout << "\nExiting \"SerializeAllMembers\" for type \"" << GetRegisteredName<DecayedType>() << "\".\n";
         }
         /// @brief
         /// @tparam SerializeType
@@ -126,13 +303,13 @@ namespace Serialization {
                  typename = std::enable_if_t< IsAssociativeContainer<SerializeType>() >,
                  typename = void>
         void SerializeContainer(const SerializeType& ToSerialize,
-                                Serialization::ObjectWalker& Walker)
+                                Serialization::SerializerWalker& Walker)
         {
             using DecayedType = std::decay_t<SerializeType>;
             Whole Count = 0;
             Walker.Attribute("ElementCount",ToSerialize.size());
-            Walker.Attribute("KeyType",GetRegisteredName<DecayedType::key_type>());
-            Walker.Attribute("ValueType",GetRegisteredName<DecayedType::mapped_type>());
+            Walker.Attribute("KeyType",GetSerializableTypeIdentity<typename DecayedType::key_type>());
+            Walker.Attribute("ValueType",GetSerializableTypeIdentity<typename DecayedType::mapped_type>());
             for( auto& CurrElement : ToSerialize )
             {
                 StringStream Namer;
@@ -156,12 +333,12 @@ namespace Serialization {
         template<class SerializeType,
                  typename = std::enable_if_t< IsNonAssociativeContainer<SerializeType>() > >
         void SerializeContainer(const SerializeType& ToSerialize,
-                                Serialization::ObjectWalker& Walker)
+                                Serialization::SerializerWalker& Walker)
         {
             using DecayedType = std::decay_t<SerializeType>;
             Whole Count = 0;
             Walker.Attribute("ElementCount",ToSerialize.size());
-            Walker.Attribute("ElementType",GetRegisteredName<DecayedType::value_type>());
+            Walker.Attribute("ElementType",GetSerializableTypeIdentity<typename DecayedType::value_type>());
             for( auto& CurrElement : ToSerialize )
             {
                 StringStream Namer;
@@ -173,7 +350,7 @@ namespace Serialization {
         /// @brief
         /// @tparam SerializeType
         /// @remarks
-        /// @param Name
+        /// @param Name The name of the member to serialize.
         /// @param ToSerialize
         /// @param Tags
         /// @param Walker
@@ -183,16 +360,16 @@ namespace Serialization {
         void SerializeContainerWithNode(const StringView Name,
                                         const SerializeType& ToSerialize,
                                         const MemberTags Tags,
-                                        Serialization::ObjectWalker& Walker)
+                                        Serialization::SerializerWalker& Walker)
         {
             ScopedSerializationNode ContainerNode(Name,Tags,Walker);
             if( ContainerNode ) {
-                Serialization::Impl::SerializeContainer(Name,ToSerialize,Tags,Walker);
+                Serialization::Impl::SerializeContainer(ToSerialize,Walker);
             }
         }
         /// @brief
         /// @tparam SerializeType
-        /// @param Name
+        /// @param Name The name of the member to serialize.
         /// @param ToSerialize
         /// @param Tags
         /// @param Walker
@@ -201,11 +378,11 @@ namespace Serialization {
         void SerializeContainerWithNode(const StringView Name,
                                         const SerializeType& ToSerialize,
                                         const MemberTags Tags,
-                                        Serialization::ObjectWalker& Walker)
+                                        Serialization::SerializerWalker& Walker)
         {
             ScopedSerializationNode Node(Name,Tags,Walker);
             if( Node ) {
-                Serialization::Impl::SerializeContainer(Name,ToSerialize,Tags,Walker);
+                Serialization::Impl::SerializeContainer(ToSerialize,Walker);
             }
         }
         /// @brief
@@ -220,17 +397,19 @@ namespace Serialization {
         template<class SerializeType>
         void SerializeGenericClass(const SerializeType& ToSerialize,
                                    const Int32 Version,
-                                   Serialization::ObjectWalker& Walker)
+                                   Serialization::SerializerWalker& Walker)
         {
+            std::cout << "\nEntering \"SerializeGenericClass\".\n";
             using DecayedType = std::decay_t<SerializeType>;
             if constexpr( IsRegistered<DecayedType>() ) {
                 Serialization::Impl::SerializeClassValidation(ToSerialize,Version,Walker);
                 Serialization::Impl::SerializeAllMembers(ToSerialize,Walker);
             }
+            std::cout << "\nExiting \"SerializeGenericClass\".\n";
         }
         /// @brief
         /// @tparam SerializeType
-        /// @param Name
+        /// @param Name The name of the member to serialize.
         /// @param ToSerialize
         /// @param Tags
         /// @param Version
@@ -240,7 +419,7 @@ namespace Serialization {
                                            const SerializeType& ToSerialize,
                                            const MemberTags Tags,
                                            const Int32 Version,
-                                           Serialization::ObjectWalker& Walker)
+                                           Serialization::SerializerWalker& Walker)
         {
             using DecayedType = std::decay_t<SerializeType>;
             if constexpr( IsRegistered<DecayedType>() ) {
@@ -253,7 +432,7 @@ namespace Serialization {
         /// @brief
         /// @tparam SerializeType
         /// @remarks
-        /// @param Name
+        /// @param Name The name of the member to serialize.
         /// @param ToSerialize
         /// @param Tags
         /// @param Version
@@ -263,7 +442,7 @@ namespace Serialization {
                                    const SerializeType ToSerialize,
                                    const MemberTags Tags,
                                    const Int32 Version,
-                                   Serialization::ObjectWalker& Walker)
+                                   Serialization::SerializerWalker& Walker)
         {
             (void)Version;
             static_assert( std::is_pointer_v<SerializeType> , "SerializeType is not a pointer." );
@@ -287,7 +466,7 @@ namespace Serialization {
         /// @brief
         /// @tparam SerializeType
         /// @remarks
-        /// @param Name
+        /// @param Name The name of the member to serialize.
         /// @param ToSerialize
         /// @param Tags
         /// @param Walker
@@ -295,7 +474,7 @@ namespace Serialization {
         void SerializeNonOwnedPointer(const StringView Name,
                                       const SerializeType ToSerialize,
                                       const MemberTags Tags,
-                                      Serialization::ObjectWalker& Walker)
+                                      Serialization::SerializerWalker& Walker)
         {
             static_assert( std::is_pointer_v<SerializeType> , "SerializeType is not a pointer." );
             using DecayedType = std::remove_pointer_t<SerializeType>;
@@ -309,12 +488,20 @@ namespace Serialization {
             }
         }
 
+        /// @brief
+        /// @tparam SerializeType
+        /// @remarks
+        /// @param Name The name of the member to serialize.
+        /// @param ToSerialize
+        /// @param Tags
+        /// @param Version
+        /// @param Walker
         template<class SerializeType>
         void SerializePointer(const StringView Name,
                               const SerializeType ToSerialize,
                               const MemberTags Tags,
                               const Int32 Version,
-                              Serialization::ObjectWalker& Walker)
+                              Serialization::SerializerWalker& Walker)
         {
             static_assert( std::is_pointer_v<SerializeType> , "SerializeType is not a pointer." );
             if( Serialization::IsNotOwned(Tags) ) {
@@ -334,11 +521,12 @@ namespace Serialization {
                    const SerializeType& ToSerialize,
                    const MemberTags Tags,
                    const Int32 Version,
-                   Serialization::ObjectWalker& Walker)
+                   Serialization::SerializerWalker& Walker)
     {
         (void)Version;
         namespace Impl = Mezzanine::Serialization::Impl;
         using DecayedType = std::decay_t<SerializeType>;
+        std::cout << "\nSerializing type: \"" << GetRegisteredName<DecayedType>() << "\".\n";
         if constexpr( std::is_arithmetic_v<DecayedType> ) { // Basic Number Types
             Impl::SerializeSimpleMember(Name,ToSerialize,Tags,Walker);
         }else if constexpr( StringTools::is_string<DecayedType>::value ) { // Strings
@@ -355,7 +543,7 @@ namespace Serialization {
                    const SerializeType ToSerialize,
                    const MemberTags Tags,
                    const Int32 Version,
-                   Serialization::ObjectWalker& Walker)
+                   Serialization::SerializerWalker& Walker)
     {
         static_assert( std::is_pointer_v<SerializeType> , "SerializeType is not a pointer." );
         namespace Impl = Mezzanine::Serialization::Impl;
@@ -382,7 +570,7 @@ namespace Serialization {
                    const std::shared_ptr<SerializeType> ToSerialize,
                    const MemberTags Tags,
                    const Int32 Version,
-                   Serialization::ObjectWalker& Walker)
+                   Serialization::SerializerWalker& Walker)
     {
         (void)Name;
         (void)Tags;
@@ -399,26 +587,26 @@ namespace Serialization {
     void Serialize(const StringView Name,
                    const SerializeType& ToSerialize,
                    const Int32 Version,
-                   Serialization::ObjectWalker& Walker)
+                   Serialization::SerializerWalker& Walker)
     {
-        Mezzanine::Serialize(Name,MemberTags::None,ToSerialize,Version,Walker);
+        Mezzanine::Serialize(Name,ToSerialize,MemberTags::None,Version,Walker);
     }
     template< typename SerializeType,
               typename >
     void Serialize(const StringView Name,
                    const SerializeType ToSerialize,
                    const Int32 Version,
-                   Serialization::ObjectWalker& Walker)
+                   Serialization::SerializerWalker& Walker)
     {
-        Mezzanine::Serialize(Name,MemberTags::None,ToSerialize,Version,Walker);
+        Mezzanine::Serialize(Name,ToSerialize,MemberTags::None,Version,Walker);
     }
     template< typename SerializeType >
     void Serialize(const StringView Name,
                    const std::shared_ptr<SerializeType> ToSerialize,
                    const Int32 Version,
-                   Serialization::ObjectWalker& Walker)
+                   Serialization::SerializerWalker& Walker)
     {
-        Mezzanine::Serialize(Name,MemberTags::None,ToSerialize,Version,Walker);
+        Mezzanine::Serialize(Name,ToSerialize,MemberTags::None,Version,Walker);
     }
 
     ///////////////////////////////////////////////////////////////////////////////

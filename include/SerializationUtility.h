@@ -58,6 +58,8 @@ namespace Mezzanine {
 namespace Serialization {
     class AttributeWalker;
     class ObjectWalker;
+    class SerializerWalker;
+    class DeserializerWalker;
 }
 
     template<typename SerializeType, typename = std::enable_if_t<!std::is_pointer_v<SerializeType>>>
@@ -65,84 +67,70 @@ namespace Serialization {
                    const SerializeType& ToSerialize,
                    const MemberTags Tags,
                    const Int32 Version,
-                   Serialization::ObjectWalker& Walker);
+                   Serialization::SerializerWalker& Walker);
     template<typename SerializeType, typename = std::enable_if_t<std::is_pointer_v<SerializeType>>>
     void Serialize(const StringView Name,
                    const SerializeType ToSerialize,
                    const MemberTags Tags,
                    const Int32 Version,
-                   Serialization::ObjectWalker& Walker);
+                   Serialization::SerializerWalker& Walker);
     template<typename SerializeType>
     void Serialize(const StringView Name,
                    const std::shared_ptr<SerializeType> ToSerialize,
                    const MemberTags Tags,
                    const Int32 Version,
-                   Serialization::ObjectWalker& Walker);
+                   Serialization::SerializerWalker& Walker);
 
     template<typename SerializeType, typename = std::enable_if_t<!std::is_pointer_v<SerializeType>>>
     void Serialize(const StringView Name,
                    const SerializeType& ToSerialize,
                    const Int32 Version,
-                   Serialization::ObjectWalker& Walker);
+                   Serialization::SerializerWalker& Walker);
     template<typename SerializeType, typename = std::enable_if_t<std::is_pointer_v<SerializeType>>>
     void Serialize(const StringView Name,
                    const SerializeType ToSerialize,
                    const Int32 Version,
-                   Serialization::ObjectWalker& Walker);
+                   Serialization::SerializerWalker& Walker);
     template<typename SerializeType>
     void Serialize(const StringView Name,
                    const std::shared_ptr<SerializeType> ToSerialize,
                    const Int32 Version,
-                   Serialization::ObjectWalker& Walker);
+                   Serialization::SerializerWalker& Walker);
 
-    template<typename SerializeType, typename = std::enable_if_t<!std::is_pointer_v<SerializeType>>>
+    template<typename DeserializeType, typename = std::enable_if_t<!std::is_pointer_v<DeserializeType>>>
     void Deserialize(const StringView Name,
-                     SerializeType& ToDeserialize,
+                     DeserializeType& ToDeserialize,
                      const MemberTags Tags,
                      const Int32 Version,
-                     Serialization::ObjectWalker& Walker);
-    template<typename SerializeType, typename = std::enable_if_t<std::is_pointer_v<SerializeType>>>
+                     Serialization::DeserializerWalker& Walker);
+    template<typename DeserializeType, typename = std::enable_if_t<std::is_pointer_v<DeserializeType>>>
     void Deserialize(const StringView Name,
-                     SerializeType ToDeserialize,
+                     DeserializeType ToDeserialize,
                      const MemberTags Tags,
                      const Int32 Version,
-                     Serialization::ObjectWalker& Walker);
-    template<typename SerializeType>
+                     Serialization::DeserializerWalker& Walker);
+    template<typename DeserializeType>
     void Deserialize(const StringView Name,
-                     std::shared_ptr<SerializeType> ToDeserialize,
+                     std::shared_ptr<DeserializeType> ToDeserialize,
                      const MemberTags Tags,
                      const Int32 Version,
-                     Serialization::ObjectWalker& Walker);
+                     Serialization::DeserializerWalker& Walker);
 
-    template<typename SerializeType, typename = std::enable_if_t<!std::is_pointer_v<SerializeType>>>
+    template<typename DeserializeType, typename = std::enable_if_t<!std::is_pointer_v<DeserializeType>>>
     void Deserialize(const StringView Name,
-                     SerializeType& ToDeserialize,
+                     DeserializeType& ToDeserialize,
                      const Int32 Version,
-                     Serialization::ObjectWalker& Walker);
-    template<typename SerializeType, typename = std::enable_if_t<std::is_pointer_v<SerializeType>>>
+                     Serialization::DeserializerWalker& Walker);
+    template<typename DeserializeType, typename = std::enable_if_t<std::is_pointer_v<DeserializeType>>>
     void Deserialize(const StringView Name,
-                     SerializeType ToDeserialize,
+                     DeserializeType ToDeserialize,
                      const Int32 Version,
-                     Serialization::ObjectWalker& Walker);
-    template<typename SerializeType>
+                     Serialization::DeserializerWalker& Walker);
+    template<typename DeserializeType>
     void Deserialize(const StringView Name,
-                     std::shared_ptr<SerializeType> ToDeserialize,
+                     std::shared_ptr<DeserializeType> ToDeserialize,
                      const Int32 Version,
-                     Serialization::ObjectWalker& Walker);
-
-    template<typename SerializeFunctType>
-    void Deserialize(const StringView Name,
-                     const MemberTags Tags,
-                     const Int32 Version,
-                     Serialization::ObjectWalker& Walker,
-                     SerializeFunctType Funct);
-
-    /*
-    template<typename SerializeFunctType>
-    void Deserialize(const StringView Name,
-                     const Int32 Version,
-                     Serialization::ObjectWalker& Walker,
-                     SerializeFunctType Funct);//*/
+                     Serialization::DeserializerWalker& Walker);
 
 namespace Serialization {
     ///////////////////////////////////////////////////////////////////////////////
@@ -281,14 +269,36 @@ RESTORE_WARNING_STATE
     /// @return Returns true if the Ignore tag is present in the provided bitfield, false otherwise.
     constexpr Boole IsIgnorable(const MemberTags Tags)
     {
-        return ( Tags & MemberTags::Ignore ) == MemberTags::None;
+        return ( Tags & MemberTags::Ignore ) != MemberTags::None;
     }
     /// @brief Convenience check for the NotOwned tag in a MemberTags bitfield.
     /// @param Tags The bitfield to check.
     /// @return Returns true if the NotOwned tag is present in the provided bitfield, false otherwise.
     constexpr Boole IsNotOwned(const MemberTags Tags)
     {
-        return ( Tags & MemberTags::NotOwned ) == MemberTags::None;
+        return ( Tags & MemberTags::NotOwned ) != MemberTags::None;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // Identity Functions
+
+    /// @brief Gets a serialization friendly identity of a type.
+    /// @remarks This function operates a lot like @ref GetRegisteredName, except it can handle
+    /// pointer and reference types and will add them to the type name string as necessary.
+    /// @tparam TypeToName The type that will be identified.
+    /// @return Returns a String containing the identity of the specified type.
+    template<typename TypeToName>
+    constexpr String GetSerializableTypeIdentity()
+    {
+        using DecayedType = std::decay_t< TypeToName >;
+        String ReturnName{ GetRegisteredName< std::remove_pointer_t<DecayedType> >() };
+        if constexpr( std::is_pointer_v<DecayedType> ) {
+            ReturnName.push_back('*');
+        }
+        if constexpr( std::is_reference_v<TypeToName> ) {
+            ReturnName.push_back('&');
+        }
+        return ReturnName;
     }
 
     /// @}

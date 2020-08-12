@@ -66,11 +66,12 @@ namespace SerializationTest {
         String Name;
         String Value;
     public:
-        Attribute() = default;
+        Attribute()
+            { std::cout << "\nCreating Internal Attribute at address " << this << ".\n"; }
         Attribute(const StringView AttribName, const StringView AttribValue) :
             Name(AttribName),
             Value(AttribValue)
-            {  }
+            { std::cout << "\nCreating Internal Attribute at address " << this << ".\n"; }
         ~Attribute() = default;
 
         void SetName(const StringView NewName)
@@ -116,9 +117,11 @@ namespace SerializationTest {
     public:
         Node(Node* Creator) :
             Parent(Creator)
-            {  }
+            //{  }
+            { std::cout << "\nCreating Internal Node at address " << this << ".\n"; }
         ~Node()
-            { this->ClearNodes(); }
+            //{ this->ClearNodes(); }
+            { std::cout << "\nDestroying Node (and all child nodes) at address " << this << ".\n";  this->ClearNodes(); }
 
         void SetName(const StringView NewName)
             { this->Name = NewName; }
@@ -130,7 +133,7 @@ namespace SerializationTest {
         Node& GetParent() const
             { return *( this->Parent ); }
         size_t GetDepth() const
-            { return ( this->Parent ? this->Parent->GetDepth() + 1 : 1 ); }
+            { return ( this->Parent ? this->Parent->GetDepth() + 1 : 0 ); }
 
         Node& CreateChildNode()
             { return *( this->Nodes.emplace_back( new Node(this) ) ); }
@@ -162,9 +165,21 @@ namespace SerializationTest {
         size_t GetNumAttributes() const
             { return this->Attributes.size(); }
         Attribute& GetAttribute(const size_t Index)
-            { return this->Attributes[Index]; }
+            //{ return this->Attributes[Index]; }
+            {
+                std::cout << "\nAttribute requested at index " << Index;
+                Attribute& TempAttrib = this->Attributes.at(Index);
+                std::cout << " and address " << &TempAttrib << " from Node " << this << ".\n";
+                return this->Attributes[Index];
+            }
         const Attribute& GetAttribute(const size_t Index) const
-            { return this->Attributes[Index]; }
+            //{ return this->Attributes[Index]; }
+            {
+                std::cout << "\nAttribute requested at index " << Index;
+                const Attribute& TempAttrib = this->Attributes.at(Index);
+                std::cout << " and address " << &TempAttrib << " from Node " << this << ".\n";
+                return this->Attributes[Index];
+            }
         Attribute& GetFirstAttribute()
             { return this->Attributes.front(); }
         const Attribute& GetFirstAttribute() const
@@ -182,6 +197,7 @@ namespace SerializationTest {
     std::ostream& operator<<(std::ostream& Stream, const Node& ToSerialize);
     std::ostream& operator<<(std::ostream& Stream, const Node& ToSerialize)
     {
+        std::cout << "\nSerializing Node: \"" << ToSerialize.GetName() << "\".\n";
         Stream << '\n';
         size_t NodeDepth = ToSerialize.GetDepth();
         for( size_t IndentCount = 0 ; IndentCount < NodeDepth ; ++IndentCount )
@@ -236,21 +252,46 @@ namespace SerializationTest {
         size_t Index = 0;
 
         SerializationTest::Attribute& GetAttrib()
-            { return this->ParentNode.get().GetAttribute(Index); }
+            //{ return this->ParentNode.get().GetAttribute(this->Index); }
+            {
+                std::cout << "\nEntering \"GetAttrib\" from BackendAttrib " << this << ".\n";
+                std::cout << "\nAttribute Index: " << this->Index << ".\n";
+                Node& TempParent = this->ParentNode.get();
+                std::cout << "\nParentNode Address: " << &TempParent << ".\n";
+                Attribute& TempAttrib = TempParent.GetAttribute(this->Index);
+                std::cout << "\nTempAttrib Address: " << &TempAttrib << ".\n";
+                std::cout << "\nExiting \"GetAttrib\".\n";
+                return this->ParentNode.get().GetAttribute(this->Index);
+            }
         const SerializationTest::Attribute& GetAttrib() const
-            { return this->ParentNode.get().GetAttribute(Index); }
+            //{ return this->ParentNode.get().GetAttribute(this->Index); }
+            {
+                std::cout << "\nEntering \"GetAttribConst\" from BackendAttrib " << this << ".\n";
+                std::cout << "\nAttribute Index: " << this->Index << ".\n";
+                Node& TempParent = this->ParentNode.get();
+                std::cout << "\nParentNode Address: " << &TempParent << ".\n";
+                Attribute& TempAttrib = TempParent.GetAttribute(this->Index);
+                std::cout << "\nTempAttrib Address: " << &TempAttrib << ".\n";
+                std::cout << "\nExiting \"GetAttrib\".\n";
+                return this->ParentNode.get().GetAttribute(this->Index);
+            }
     public:
         BackendAttribute(NodeRef Parent, const size_t AttribIndex) :
             ParentNode(Parent),
             Index(AttribIndex)
-            {  }
+            //{  }
+            { std::cout << "\nCreating BackendAttrib " << this << " from ParentNode " << &Parent << ".\n"; }
         virtual ~BackendAttribute() = default;
 
         ///////////////////////////////////////////////////////////////////////////////
         // Name Operations
 
         virtual void SetName(const StringView Name)
-            { this->GetAttrib().SetName(Name); }
+            //{ this->GetAttrib().SetName(Name); }
+            {
+                this->GetAttrib().SetName(Name);
+                std::cout << "\nAttribute \"" << Name << "\" name set.\n";
+            }
         [[nodiscard]]
         virtual StringView GetName() const
             { return this->GetAttrib().GetName(); }
@@ -330,6 +371,12 @@ namespace SerializationTest {
         virtual std::optional<Int8> GetInt8() const
             { return StringTools::ConvertFromString<Int8>( this->GetAttrib().GetValue() ); }
 
+        virtual void SetBool(const Boole Value)
+            { this->GetAttrib().SetValue( StringTools::ConvertToString(Value) ); }
+        [[nodiscard]]
+        virtual std::optional<Boole> GetBool() const
+            { return StringTools::ConvertFromString<Int8>( this->GetAttrib().GetValue() ); }
+
         ///////////////////////////////////////////////////////////////////////////////
         // Navigation
 
@@ -342,17 +389,26 @@ namespace SerializationTest {
 
         virtual Serialization::AttributeWalker& Next()
         {
-            if( !AtEnd() ) {
+            if( !this->AtEnd() ) {
                 ++Index;
             }
             return *this;
         }
         virtual Serialization::AttributeWalker& Previous()
         {
-            if( !AtBegin() ) {
+            if( !this->AtBegin() ) {
                 --Index;
             }
             return *this;
+        }
+
+        void SetIndex(const size_t NewIndex)
+        {
+            this->Index = NewIndex;
+        }
+        void SetParentNode(NodeRef NewParent)
+        {
+            this->ParentNode = NewParent;
         }
     };//BackendAttribute
 
@@ -361,23 +417,26 @@ namespace SerializationTest {
     public:
         using NodeRef = std::reference_wrapper<SerializationTest::Node>;
     protected:
-        NodeRef SerialNode;
+        BackendAttribute CurrentAttribute;
+        NodeRef SelfNode;
         size_t SelfIndex;
 
         Node& GetSelfNode()
-            { return this->SerialNode.get(); }
+            { return this->SelfNode.get(); }
         const Node& GetSelfNode() const
-            { return this->SerialNode.get(); }
+            { return this->SelfNode.get(); }
 
         Node& GetParentNode()
-            { return this->SerialNode.get().GetParent(); }
+            { return this->SelfNode.get().GetParent(); }
         const Node& GetParentNode() const
-            { return this->SerialNode.get().GetParent(); }
+            { return this->SelfNode.get().GetParent(); }
     public:
         BackendNode(NodeRef Internal, const size_t Index) :
-            SerialNode(Internal),
+            CurrentAttribute(Internal,0),
+            SelfNode(Internal),
             SelfIndex(Index)
-            {  }
+            //{  }
+            { std::cout << "\nCreating BackendNode at address " << this << " with Internal Node at " << &Internal.get() << ".\n"; }
         virtual ~BackendNode() = default;
 
         ///////////////////////////////////////////////////////////////////////////////
@@ -430,7 +489,8 @@ namespace SerializationTest {
         {
             if( this->HasNextSibling() ) {
                 this->SelfIndex++;
-                this->SerialNode = this->GetParentNode().GetNode(this->SelfIndex);
+                this->SelfNode = this->GetParentNode().GetNode(this->SelfIndex);
+                this->CurrentAttribute.SetParentNode(this->SelfNode);
             }
             return *this;
         }
@@ -438,7 +498,8 @@ namespace SerializationTest {
         {
             if( this->HasPreviousSibling() ) {
                 this->SelfIndex--;
-                this->SerialNode = this->GetParentNode().GetNode(this->SelfIndex);
+                this->SelfNode = this->GetParentNode().GetNode(this->SelfIndex);
+                this->CurrentAttribute.SetParentNode(this->SelfNode);
             }
             return *this;
         }
@@ -452,13 +513,15 @@ namespace SerializationTest {
                     break;
                 }
             }
-            this->SerialNode = Parent;
+            this->SelfNode = Parent;
+            this->CurrentAttribute.SetParentNode(this->SelfNode);
             return *this;
         }
         virtual Serialization::ObjectWalker& FirstChild()
         {
-            this->SerialNode = this->GetSelfNode().GetNode(0);
+            this->SelfNode = this->GetSelfNode().GetNode(0);
             this->SelfIndex = 0;
+            this->CurrentAttribute.SetParentNode(this->SelfNode);
             return *this;
         }
         [[nodiscard]]
@@ -469,7 +532,8 @@ namespace SerializationTest {
                 Node& CurrNode = this->GetSelfNode().GetNode(Index);
                 if( CurrNode.GetName() == Name ) {
                     this->SelfIndex = Index;
-                    this->SerialNode = CurrNode;
+                    this->SelfNode = CurrNode;
+                    this->CurrentAttribute.SetParentNode(this->SelfNode);
                     return true;
                 }
             }
@@ -479,20 +543,26 @@ namespace SerializationTest {
         [[nodiscard]]
         virtual Boole CreateChild(const StringView Name, const MemberTags Tags, const Boole Move)
         {
+            std::cout << "\nEntering \"CreateChild(Node)\" with name \"" << Name << "\".\n";
             (void)Tags;
             for( size_t Index = 0 ; Index < this->GetSelfNode().GetNumNodes() ; ++Index )
             {
                 if( this->GetSelfNode().GetNode(Index).GetName() == Name ) {
+                    std::cout << "\nExiting \"CreateChild(Node)\" after finding duplicate of new node \"" << Name << "\".\n";
                     return false;
                 }
             }
             if( Move ) {
+                std:: cout << "Moving from parent node " << &this->GetSelfNode() << '/' << this->GetSelfNode().GetName();
                 this->SelfIndex = this->GetSelfNode().GetNumNodes();
-                this->SerialNode = this->GetSelfNode().CreateChildNode();
+                this->SelfNode = this->GetSelfNode().CreateChildNode();
                 this->GetSelfNode().SetName(Name);
+                this->CurrentAttribute.SetParentNode(this->SelfNode);
+                std:: cout << "To child node " << &this->GetSelfNode() << '/' << this->GetSelfNode().GetName() << ".\n";
             }else{
                 this->GetSelfNode().CreateChildNode().SetName(Name);
             }
+            std::cout << "\nExiting \"CreateChild(Node)\" after successfully creating new node \"" << Name << "\".\n";
             return true;
         }
 
@@ -514,26 +584,39 @@ namespace SerializationTest {
             return false;
         }
         [[nodiscard]]
-        virtual Serialization::AttributeWalker& GetAttributes() const
+        virtual Serialization::AttributeWalker& GetAttributes()
         {
-
+            return this->CurrentAttribute;
         }
         [[nodiscard]]
-        virtual Serialization::AttributeWalker& GetAttribute(const StringView Name) const
+        virtual Serialization::AttributeWalker& GetAttribute(const StringView Name)
         {
-
+            std::cout << "\nEntering \"GetAttribute\" with parameter \"" << Name << "\".\n";
+            for( size_t Index = 0 ; Index < this->GetSelfNode().GetNumAttributes() ; ++Index )
+            {
+                if( this->GetSelfNode().GetAttribute(Index).GetName() == Name ) {
+                    std::cout << "\nAttribute Found.\n";
+                    this->CurrentAttribute.SetIndex(Index);
+                    break;
+                }
+            }
+            std::cout << "\nExiting \"GetAttribute\".\n";
+            return this->CurrentAttribute;
         }
         [[nodiscard]]
         virtual Boole CreateAttribute(const StringView Name, const MemberTags Tags)
         {
             (void)Tags;
+            std::cout << "\nEntering \"CreateAttribute\" on node " << &this->GetSelfNode() << " with parameter \"" << Name << "\".\n";
             for( size_t Index = 0 ; Index < this->GetSelfNode().GetNumAttributes() ; ++Index )
             {
                 if( this->GetSelfNode().GetAttribute(Index).GetName() == Name ) {
+                    std::cout << "\nExiting \"CreateAttribute\" after finding duplicate of \"" << Name << "\".\n";
                     return false;
                 }
             }
             this->GetSelfNode().CreateChildAttribute().SetName(Name);
+            std::cout << "\nExiting \"CreateAttribute\" after creating \"" << Name << "\".\n";
             return true;
         }
     };//BackendNode
@@ -541,9 +624,14 @@ namespace SerializationTest {
     class Backend : public Serialization::BackendBase
     {
     protected:
-        BackendNode RootNode = { nullptr };
+        Node RootNode;
+        BackendNode CurrentNode;
     public:
-        Backend() = default;
+        Backend() :
+            RootNode(nullptr),
+            CurrentNode(std::ref(RootNode),0)
+            //{ this->RootNode.SetName("Root"); }
+            { std::cout << "\nCreating Backend at address " << this << ".\n";  this->RootNode.SetName("Root"); }
         virtual ~Backend() = default;
 
         ///////////////////////////////////////////////////////////////////////////////
@@ -555,17 +643,17 @@ namespace SerializationTest {
         ///////////////////////////////////////////////////////////////////////////////
         // Root Object
 
-        virtual Serialization::ObjectWalker& GetWalker() const
-            {  }
+        virtual Serialization::ObjectWalker& GetWalker()
+            { return CurrentNode; }
 
         ///////////////////////////////////////////////////////////////////////////////
         // Input and Output
 
         virtual void Read(std::istream& Input)
-            {  }
+            { Input >> RootNode; }
 
         virtual void Write(std::ostream& Output)
-            {  }
+            { Output << RootNode; }
     };//Backend
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -796,11 +884,13 @@ AUTOMATIC_TEST_GROUP(SerializationTests,Serialization)
     SuperComposed FakeManagerOne;
     SuperComposed FakeManagerTwo;
 
-    Backend Serializer;
+    Backend SerializerBack;
+    Serialization::SerializerWalker Walker(SerializerBack.GetWalker());
 
-    Mezzanine::Serialize("FakeManager",FakeManagerOne,Serialization::LatestVersion,Serializer.GetWalker());
-    StringStream SerializedManager;
-    Serializer.Write(SerializedManager);
+    Mezzanine::Serialize("FakeManager",FakeManagerOne,Serialization::LatestVersion,Walker);
+    //StringStream SerializedManager;
+    std::ofstream SerializedManager("SerializedOutput.txt");
+    SerializerBack.Write(SerializedManager);
 }
 
 #endif
