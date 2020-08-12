@@ -133,13 +133,22 @@ namespace Mezzanine {
         LogLevel ActivelyLogging;
 
     public:
-        /// @brief Buffer Stealing Constructor
-        /// @details When used to create a LogStream this will use the rdbuf of another std::basic_ostream
-        /// @param OutputStream This is the stream to steal the buffer from
+        /// @brief Buffer Stealing Constructor.
+        /// @details When used to create a LogStream this will use the rdbuf of another std::basic_ostream.
+        /// @param OutputStream This is the stream to steal the buffer from.
         /// @param WillLog The starting LogLevel to capture, which Defaults to TraceAndHigher.
         BasicLogStream(std::basic_ostream<CharType, CharTraits>& OutputStream,
                        LogLevel WillLog = LogLevel::TraceAndHigher)
             : std::basic_ostream<CharType, CharTraits>(OutputStream.rdbuf()),
+              ActivelyLogging(WillLog)
+            { }
+        /// @brief Buffer Constructor.
+        /// @details When used to create a LogStream this will use the rdbuf of another std::basic_ostream.
+        /// @param OutputStream This is the stream to steal the buffer from.
+        /// @param WillLog The starting LogLevel to capture, which Defaults to TraceAndHigher.
+        BasicLogStream(std::basic_streambuf<CharType, CharTraits>* OutputBuf,
+                       LogLevel WillLog = LogLevel::TraceAndHigher)
+            : std::basic_ostream<CharType, CharTraits>(OutputBuf),
               ActivelyLogging(WillLog)
             { }
 
