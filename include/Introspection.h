@@ -190,6 +190,8 @@ namespace Mezzanine {
         using ObjectType = Object;
         /// @brief The type returned by the getter method.
         using ReturnType = Return;
+        /// @brief The type returned by the getter method when the object is const.
+        using ConstReturnType = Return;
         /// @brief The decayed type of Return, stripped of reference and const qualifiers.
         using DecayedType = std::decay_t<Return>;
     };//DeduceGetterTypes
@@ -204,6 +206,8 @@ namespace Mezzanine {
         using ObjectType = Object;
         /// @brief The type returned by the getter method.
         using ReturnType = Return&;
+        /// @brief The type returned by the getter method when the object is const.
+        using ConstReturnType = const Return&;
         /// @brief The decayed type of Return, stripped of reference and const qualifiers.
         using DecayedType = std::decay_t<Return>;
     };//DeduceGetterTypes
@@ -218,6 +222,8 @@ namespace Mezzanine {
         using ObjectType = Object;
         /// @brief The member type being pointed to.
         using ReturnType = Member&;
+        /// @brief The type returned by the getter method when the object is const.
+        using ConstReturnType = const Member&;
         /// @brief The decayed type of Member, stripped of reference and const qualifiers.
         using DecayedType = std::decay_t<Member>;
     };//DeduceGetterTypes
@@ -345,12 +351,16 @@ namespace Mezzanine {
         static_assert( !is_member_array<GetterMethod>::value,
                        "Member Array types aren't supported!  Use get/set methods instead." );
 
+        /// @brief The type of the MemberAccessor instantiation in the immediate context.
+        using SelfType = MemberAccessor<SetterMethod,GetterMethod,Tags>;
         /// @brief The class type the member being accessed belongs to.
         using ClassType = typename GetDeducer::ObjectType;
         /// @brief The member type being accessed by this.
         using MemberType = typename GetDeducer::DecayedType;
         /// @brief The type returned by the getter method.
         using ReturnType = typename GetDeducer::ReturnType;
+        /// @brief The type returned by the getter method when the object is const.
+        using ConstReturnType = typename GetDeducer::ConstReturnType;
         /// @brief The member pointer type of the setter method.
         using SetterAccessPtr = SetterMethod;
         /// @brief The member pointer type of the getter method.
@@ -399,16 +409,6 @@ namespace Mezzanine {
         static constexpr Boole CanSetFrom()
         {
             return std::is_convertible_v<SetFrom,MemberType>;
-        }
-        /// @brief Tests whether or not a const getter is available.
-        /// @tparam ClassToGetFrom The type to check the setter of.
-        /// @return Returns true if there is a const getter set for that type.
-        template<typename ClassToGetFrom>
-        [[nodiscard]]
-        static constexpr Boole CanConstGet()
-        {
-            return std::is_same_v<ClassToGetFrom,ClassType> &&
-                   !std::is_same_v<GetterAccessPtr,NonConstRefGetterPtrType<ClassType,MemberType>>;
         }
     private:
         /// @brief A pointer to the function setting the member or to the member itself.
@@ -459,7 +459,7 @@ namespace Mezzanine {
         /// will be thrown.
         /// @param Object The object to assign the member value to.
         /// @param Arg The value to be assigned.
-        template<typename SetFrom, typename = std::enable_if_t< CanSetFrom<SetFrom>() >>
+        template<typename SetFrom, typename = std::enable_if_t< SelfType::CanSetFrom<SetFrom>() >>
         void SetValue(ClassType& Object, SetFrom&& Arg) const
         {
             if( this->HasSetter() ) {
@@ -480,9 +480,9 @@ namespace Mezzanine {
         /// will be thrown.
         /// @param Object The object to retrieve the member value from.
         /// @return Returns the value of the member.
-        template<typename ObjectType, typename = std::enable_if_t< CanConstGet<ObjectType>() >>
+        template<typename ObjectType>
         [[nodiscard]]
-        ReturnType GetValue(const ObjectType& Object) const
+        ConstReturnType GetValue(const ObjectType& Object) const
         {
             if( this->HasGetter() ) {
                 if constexpr( std::is_same_v<GetterAccessPtr,MemberPtrType<ClassType,MemberType>> ) {
@@ -500,7 +500,7 @@ namespace Mezzanine {
         /// will be thrown.
         /// @param Object The object to retrieve the member value from.
         /// @return Returns the value of the member.
-        template<typename ObjectType, typename = std::enable_if_t< !CanConstGet<ObjectType>() >>
+        template<typename ObjectType, typename = void>
         [[nodiscard]]
         ReturnType GetValue(ObjectType& Object) const
         {
@@ -992,6 +992,165 @@ namespace Mezzanine {
         );
     }
 
+    ///////////////////////////////////////////////////////////////////////////////
+    // Fundamental Types Name Registration
+
+    /// @brief Name registration specialization for doubles.
+    /// @return Returns a String containing "Double".
+    template<>
+    StringView GetRegisteredName<double>()
+        { return "Double"; }
+    /// @brief Name registration specialization for floats.
+    /// @return Returns a String containing "Float".
+    template<>
+    StringView GetRegisteredName<float>()
+        { return "Float"; }
+    /// @brief Name registration specialization for UInt64s.
+    /// @return Returns a String containing "UInt64".
+    template<>
+    StringView GetRegisteredName<UInt64>()
+        { return "UInt64"; }
+    /// @brief Name registration specialization for Int64s.
+    /// @return Returns a String containing "Int64".
+    template<>
+    StringView GetRegisteredName<Int64>()
+        { return "Int64"; }
+    /// @brief Name registration specialization for UInt32s.
+    /// @return Returns a String containing "UInt32".
+    template<>
+    StringView GetRegisteredName<UInt32>()
+        { return "UInt32"; }
+    /// @brief Name registration specialization for Int32s.
+    /// @return Returns a String containing "Int32".
+    template<>
+    StringView GetRegisteredName<Int32>()
+        { return "Int32"; }
+    /// @brief Name registration specialization for UInt16s.
+    /// @return Returns a String containing "UInt16".
+    template<>
+    StringView GetRegisteredName<UInt16>()
+        { return "UInt16"; }
+    /// @brief Name registration specialization for Int16s.
+    /// @return Returns a String containing "Int16".
+    template<>
+    StringView GetRegisteredName<Int16>()
+        { return "Int16"; }
+    /// @brief Name registration specialization for UInt8s.
+    /// @return Returns a String containing "UInt8".
+    template<>
+    StringView GetRegisteredName<UInt8>()
+        { return "UInt8"; }
+    /// @brief Name registration specialization for Int8s.
+    /// @return Returns a String containing "Int8".
+    template<>
+    StringView GetRegisteredName<Int8>()
+        { return "Int8"; }
+    /// @brief Name registration specialization for chars.
+    /// @return Returns a String containing "Char".
+    template<>
+    StringView GetRegisteredName<char>()
+        { return "Char"; }
+    /// @brief Name registration specialization for bools.
+    /// @return Returns a String containing "Bool".
+    template<>
+    StringView GetRegisteredName<Boole>()
+        { return "Bool"; }
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // Standard Types Name Registration
+/*
+    template<typename CharType,
+             typename Traits = std::char_traits<CharType> >
+    StringView GetRegisteredName< std::basic_string_view<CharType,Traits> >()
+        { return "StringView"; }
+
+    template<typename CharType,
+             typename Traits = std::char_traits<CharType>,
+             typename Allocator = std::allocator<CharType> >
+    StringView GetRegisteredName< std::basic_string<CharType,Traits,Allocator> >()
+        { return "String"; }
+
+    template<typename ElementType,
+             size_t Count>
+    StringView GetRegisteredName< std::array<ElementType,Count> >()
+        { return "Array"; }
+
+    template<typename ElementType,
+             typename Allocator = std::allocator<ElementType>>
+    StringView GetRegisteredName< std::vector<ElementType,Allocator> >()
+        { return "Vector"; }
+
+    template<typename ElementType,
+             typename Allocator = std::allocator<ElementType>>
+    StringView GetRegisteredName< std::list<ElementType,Allocator> >()
+        { return "List"; }
+
+    template<typename ElementType,
+             typename Allocator = std::allocator<ElementType>>
+    StringView GetRegisteredName< std::forward_list<ElementType,Allocator> >()
+        { return "ForwardList"; }
+
+    template<typename ElementType,
+             typename Allocator = std::allocator<ElementType>>
+    StringView GetRegisteredName< std::deque<ElementType,Allocator> >()
+        { return "Deque"; }
+
+    template<typename KeyType,
+             typename Compare = std::less<KeyType>,
+             typename Allocator = std::allocator<KeyType> >
+    StringView GetRegisteredName< std::set<KeyType,Compare,Allocator> >()
+        { return "Set"; }
+
+    template<typename KeyType,
+             typename Compare = std::less<KeyType>,
+             typename Allocator = std::allocator<KeyType> >
+    StringView GetRegisteredName< std::multiset<KeyType,Compare,Allocator> >()
+        { return "MultiSet"; }
+
+    template<typename KeyType,
+             typename Hash = std::hash<KeyType>,
+             typename KeyEqual = std::equal_to<KeyType>,
+             typename Allocator = std::allocator<KeyType> >
+    StringView GetRegisteredName< std::unordered_set<KeyType,Hash,KeyEqual,Allocator> >()
+        { return "UnorderedSet"; }
+
+    template<typename KeyType,
+             typename Hash = std::hash<KeyType>,
+             typename KeyEqual = std::equal_to<KeyType>,
+             typename Allocator = std::allocator<KeyType> >
+    StringView GetRegisteredName< std::unordered_multiset<KeyType,Hash,KeyEqual,Allocator> >()
+        { return "UnorderedMultiSet"; }
+
+    template<typename KeyType,
+             typename ValueType,
+             typename Compare = std::less<KeyType>,
+             typename Allocator = std::allocator<const KeyType, ValueType> >
+    StringView GetRegisteredName< std::map<KeyType,ValueType,Compare,Allocator> >()
+        { return "Map"; }
+
+    template<typename KeyType,
+             typename ValueType,
+             typename Compare = std::less<KeyType>,
+             typename Allocator = std::allocator<const KeyType, ValueType> >
+    StringView GetRegisteredName< std::multimap<KeyType,ValueType,Compare,Allocator> >()
+        { return "MultiMap"; }
+
+    template<typename KeyType,
+             typename ValueType,
+             typename Hash = std::hash<KeyType>,
+             typename KeyEqual = std::equal_to<KeyType>,
+             typename Allocator = std::allocator<const KeyType, ValueType> >
+    StringView GetRegisteredName< std::unordered_map<KeyType,ValueType,Hash,KeyEqual,Allocator> >()
+        { return "UnorderedMap"; }
+
+    template<typename KeyType,
+             typename ValueType,
+             typename Hash = std::hash<KeyType>,
+             typename KeyEqual = std::equal_to<KeyType>,
+             typename Allocator = std::allocator<const KeyType, ValueType> >
+    StringView GetRegisteredName< std::unordered_multimap<KeyType,ValueType,Hash,KeyEqual,Allocator> >()
+        { return "UnorderedMultiMap"; }
+*/
     /// @page Mezzanine Introspection System
     /// @section IntrospectOverview Overview
     /// The Mezzanine Introspection system is a collection of Classes, Structs, and Functions that heavily
