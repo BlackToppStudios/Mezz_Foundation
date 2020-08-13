@@ -84,7 +84,7 @@ ArgVector TokenizeSingleArg(const String& DirtyArg)
         { return TokenizeShortArg(DirtyArg); }
 
     // If all else fails, leave it.
-    return  { DirtyArg };
+    return { DirtyArg };
 }
 
 ArgVector TokenizeArgVector(const ArgVector& DirtyArgs)
