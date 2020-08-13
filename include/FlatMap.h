@@ -383,7 +383,7 @@ namespace Mezzanine
         {
             iterator FoundIt = find(Key);
             if( FoundIt == end() ) {
-                MEZZ_EXCEPTION(OutOfRangeCode, "Specified key was not found in FlatMap.");
+                MEZZ_EXCEPTION(OutOfRangeCode, "Specified key was not found in FlatMap.")
             }
             return (*FoundIt).second;
         }
@@ -399,7 +399,7 @@ namespace Mezzanine
         {
             const_iterator FoundIt = find(Key);
             if( FoundIt == end() ) {
-                MEZZ_EXCEPTION(OutOfRangeCode, "Specified key was not found in FlatMap (const).");
+                MEZZ_EXCEPTION(OutOfRangeCode, "Specified key was not found in FlatMap (const).")
             }
             return (*FoundIt).second;
         }

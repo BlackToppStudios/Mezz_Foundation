@@ -53,77 +53,77 @@ DEFAULT_TEST_GROUP(StringToolsTests,StringTools)
     using namespace Mezzanine;
 
     {//Character Checks
-        TEST_EQUAL("IsSpace(const_CharType)-Pass",true,StringTools::IsSpace(' '));
-        TEST_EQUAL("IsSpace(const_CharType)-Fail",false,StringTools::IsSpace('\t'));
-        TEST_EQUAL("IsTab(const_CharType)-Pass1",true,StringTools::IsTab('\t'));
-        TEST_EQUAL("IsTab(const_CharType)-Pass2",true,StringTools::IsTab('\v'));
-        TEST_EQUAL("IsTab(const_CharType)-Fail",false,StringTools::IsTab('\r'));
-        TEST_EQUAL("IsNewline(const_CharType)-Pass1",true,StringTools::IsNewline('\r'));
-        TEST_EQUAL("IsNewline(const_CharType)-Pass2",true,StringTools::IsNewline('\n'));
-        TEST_EQUAL("IsNewline(const_CharType)-Fail",false,StringTools::IsNewline('!'));
-        TEST_EQUAL("IsWhitespace(const_CharType)-Pass1",true,StringTools::IsWhitespace(' '));
-        TEST_EQUAL("IsWhitespace(const_CharType)-Pass2",true,StringTools::IsWhitespace('\t'));
-        TEST_EQUAL("IsWhitespace(const_CharType)-Pass3",true,StringTools::IsWhitespace('\n'));
-        TEST_EQUAL("IsWhitespace(const_CharType)-Fail",false,StringTools::IsWhitespace('&'));
-        TEST_EQUAL("IsDigit(const_CharType)-Pass",true,StringTools::IsDigit('5'));
-        TEST_EQUAL("IsDigit(const_CharType)-Fail",false,StringTools::IsDigit('L'));
-        TEST_EQUAL("IsLowerAlphaLetter(const_CharType)-Pass",true,StringTools::IsLowerAlphaLetter('a'));
-        TEST_EQUAL("IsLowerAlphaLetter(const_CharType)-Fail",false,StringTools::IsLowerAlphaLetter('A'));
-        TEST_EQUAL("IsUpperAlphaLetter(const_CharType)-Pass",true,StringTools::IsUpperAlphaLetter('B'));
-        TEST_EQUAL("IsUpperAlphaLetter(const_CharType)-Fail",false,StringTools::IsUpperAlphaLetter('b'));
-        TEST_EQUAL("IsAlphaLetter(const_CharType)-Pass",true,StringTools::IsAlphaLetter('y'));
-        TEST_EQUAL("IsAlphaLetter(const_CharType)-Fail",false,StringTools::IsAlphaLetter('9'));
-        TEST_EQUAL("IsLowerHexLetter(const_CharType)-Pass",true,StringTools::IsLowerHexLetter('e'));
-        TEST_EQUAL("IsLowerHexLetter(const_CharType)-Fail",false,StringTools::IsLowerHexLetter('g'));
-        TEST_EQUAL("IsUpperHexLetter(const_CharType)-Pass",true,StringTools::IsUpperHexLetter('F'));
-        TEST_EQUAL("IsUpperHexLetter(const_CharType)-Fail",false,StringTools::IsUpperHexLetter('1'));
-        TEST_EQUAL("IsHexLetter(const_CharType)-Upper-Pass",true,StringTools::IsHexLetter('B'));
-        TEST_EQUAL("IsHexLetter(const_CharType)-Lower-Pass",true,StringTools::IsHexLetter('b'));
-        TEST_EQUAL("IsHexLetter(const_CharType)-Fail",false,StringTools::IsHexLetter('z'));
-        TEST_EQUAL("IsHexDigit(const_CharType)-Pass",true,StringTools::IsHexDigit('8'));
-        TEST_EQUAL("IsHexDigit(const_CharType)-Fail",false,StringTools::IsHexDigit('t'));
-        TEST_EQUAL("IsAlphanumeric(const_CharType)-Pass",true,StringTools::IsAlphanumeric('R'));
-        TEST_EQUAL("IsAlphanumeric(const_CharType)-Fail",false,StringTools::IsAlphanumeric(' '));
+        TEST_EQUAL("IsSpace(const_CharType)-Pass",true,StringTools::IsSpace(' '))
+        TEST_EQUAL("IsSpace(const_CharType)-Fail",false,StringTools::IsSpace('\t'))
+        TEST_EQUAL("IsTab(const_CharType)-Pass1",true,StringTools::IsTab('\t'))
+        TEST_EQUAL("IsTab(const_CharType)-Pass2",true,StringTools::IsTab('\v'))
+        TEST_EQUAL("IsTab(const_CharType)-Fail",false,StringTools::IsTab('\r'))
+        TEST_EQUAL("IsNewline(const_CharType)-Pass1",true,StringTools::IsNewline('\r'))
+        TEST_EQUAL("IsNewline(const_CharType)-Pass2",true,StringTools::IsNewline('\n'))
+        TEST_EQUAL("IsNewline(const_CharType)-Fail",false,StringTools::IsNewline('!'))
+        TEST_EQUAL("IsWhitespace(const_CharType)-Pass1",true,StringTools::IsWhitespace(' '))
+        TEST_EQUAL("IsWhitespace(const_CharType)-Pass2",true,StringTools::IsWhitespace('\t'))
+        TEST_EQUAL("IsWhitespace(const_CharType)-Pass3",true,StringTools::IsWhitespace('\n'))
+        TEST_EQUAL("IsWhitespace(const_CharType)-Fail",false,StringTools::IsWhitespace('&'))
+        TEST_EQUAL("IsDigit(const_CharType)-Pass",true,StringTools::IsDigit('5'))
+        TEST_EQUAL("IsDigit(const_CharType)-Fail",false,StringTools::IsDigit('L'))
+        TEST_EQUAL("IsLowerAlphaLetter(const_CharType)-Pass",true,StringTools::IsLowerAlphaLetter('a'))
+        TEST_EQUAL("IsLowerAlphaLetter(const_CharType)-Fail",false,StringTools::IsLowerAlphaLetter('A'))
+        TEST_EQUAL("IsUpperAlphaLetter(const_CharType)-Pass",true,StringTools::IsUpperAlphaLetter('B'))
+        TEST_EQUAL("IsUpperAlphaLetter(const_CharType)-Fail",false,StringTools::IsUpperAlphaLetter('b'))
+        TEST_EQUAL("IsAlphaLetter(const_CharType)-Pass",true,StringTools::IsAlphaLetter('y'))
+        TEST_EQUAL("IsAlphaLetter(const_CharType)-Fail",false,StringTools::IsAlphaLetter('9'))
+        TEST_EQUAL("IsLowerHexLetter(const_CharType)-Pass",true,StringTools::IsLowerHexLetter('e'))
+        TEST_EQUAL("IsLowerHexLetter(const_CharType)-Fail",false,StringTools::IsLowerHexLetter('g'))
+        TEST_EQUAL("IsUpperHexLetter(const_CharType)-Pass",true,StringTools::IsUpperHexLetter('F'))
+        TEST_EQUAL("IsUpperHexLetter(const_CharType)-Fail",false,StringTools::IsUpperHexLetter('1'))
+        TEST_EQUAL("IsHexLetter(const_CharType)-Upper-Pass",true,StringTools::IsHexLetter('B'))
+        TEST_EQUAL("IsHexLetter(const_CharType)-Lower-Pass",true,StringTools::IsHexLetter('b'))
+        TEST_EQUAL("IsHexLetter(const_CharType)-Fail",false,StringTools::IsHexLetter('z'))
+        TEST_EQUAL("IsHexDigit(const_CharType)-Pass",true,StringTools::IsHexDigit('8'))
+        TEST_EQUAL("IsHexDigit(const_CharType)-Fail",false,StringTools::IsHexDigit('t'))
+        TEST_EQUAL("IsAlphanumeric(const_CharType)-Pass",true,StringTools::IsAlphanumeric('R'))
+        TEST_EQUAL("IsAlphanumeric(const_CharType)-Fail",false,StringTools::IsAlphanumeric(' '))
 
         unsigned char UCharPass = ' ';
         unsigned char UCharFail = '\t';
-        TEST_EQUAL("IsSpace(const_CharType)-unsigned_char-Pass",true,StringTools::IsSpace(UCharPass));
-        TEST_EQUAL("IsSpace(const_CharType)-unsigned_char-Fail",false,StringTools::IsSpace(UCharFail));
-        TEST_EQUAL("IsSpace(const_CharType)-wchar_t-Pass",true,StringTools::IsSpace(wchar_t(' ')));
-        TEST_EQUAL("IsSpace(const_CharType)-wchar_t-Fail",false,StringTools::IsSpace(wchar_t('\t')));
-        TEST_EQUAL("IsSpace(const_CharType)-char16_t-Pass",true,StringTools::IsSpace(char16_t(' ')));
-        TEST_EQUAL("IsSpace(const_CharType)-char16_t-Fail",false,StringTools::IsSpace(char16_t('\t')));
-        TEST_EQUAL("IsSpace(const_CharType)-char32_t-Pass",true,StringTools::IsSpace(char32_t(' ')));
-        TEST_EQUAL("IsSpace(const_CharType)-char32_t-Fail",false,StringTools::IsSpace(char32_t('\t')));
+        TEST_EQUAL("IsSpace(const_CharType)-unsigned_char-Pass",true,StringTools::IsSpace(UCharPass))
+        TEST_EQUAL("IsSpace(const_CharType)-unsigned_char-Fail",false,StringTools::IsSpace(UCharFail))
+        TEST_EQUAL("IsSpace(const_CharType)-wchar_t-Pass",true,StringTools::IsSpace(wchar_t(' ')))
+        TEST_EQUAL("IsSpace(const_CharType)-wchar_t-Fail",false,StringTools::IsSpace(wchar_t('\t')))
+        TEST_EQUAL("IsSpace(const_CharType)-char16_t-Pass",true,StringTools::IsSpace(char16_t(' ')))
+        TEST_EQUAL("IsSpace(const_CharType)-char16_t-Fail",false,StringTools::IsSpace(char16_t('\t')))
+        TEST_EQUAL("IsSpace(const_CharType)-char32_t-Pass",true,StringTools::IsSpace(char32_t(' ')))
+        TEST_EQUAL("IsSpace(const_CharType)-char32_t-Fail",false,StringTools::IsSpace(char32_t('\t')))
     }//Character Manipulation and Checks
 
     {//String Manipulation
         String ToUpperString("This is typed in a reasonable, soft-spoken tone.");
         const String ToUpperResult("THIS IS TYPED IN A REASONABLE, SOFT-SPOKEN TONE.");
         StringTools::ToUpperCase(ToUpperString.begin(),ToUpperString.end());
-        TEST_EQUAL("ToUpperCase(StrIter,StrIter)",ToUpperResult,ToUpperString);
+        TEST_EQUAL("ToUpperCase(StrIter,StrIter)",ToUpperResult,ToUpperString)
 
         String UpperCopyString("This Is An Odd Sentence Typed In Pascal-Case; With An Unnecessary Semi-Colon.");
         const String UpperCopyResult("THIS IS AN ODD SENTENCE TYPED IN PASCAL-CASE; WITH AN UNNECESSARY SEMI-COLON.");
-        TEST_EQUAL("UpperCaseCopy(String)",UpperCopyResult,StringTools::UpperCaseCopy(UpperCopyString));
+        TEST_EQUAL("UpperCaseCopy(String)",UpperCopyResult,StringTools::UpperCaseCopy(UpperCopyString))
 
         String ToLowerString("CAPS LOCK IS CRUISE CONTROL FOR COOL!");
         const String ToLowerResult("caps lock is cruise control for cool!");
         StringTools::ToLowerCase(ToLowerString.begin(),ToLowerString.end());
-        TEST_EQUAL("ToLowerCase(StrIter,StrIter)",ToLowerResult,ToLowerString);
+        TEST_EQUAL("ToLowerCase(StrIter,StrIter)",ToLowerResult,ToLowerString)
 
         String LowerCopyString("I HAVE A VERY GOOD BRAIN AND HAVE SAID MANY THINGS.");
         const String LowerCopyResult("i have a very good brain and have said many things.");
-        TEST_EQUAL("LowerCaseCopy(String)",LowerCopyResult,StringTools::LowerCaseCopy(LowerCopyString));
+        TEST_EQUAL("LowerCaseCopy(String)",LowerCopyResult,StringTools::LowerCaseCopy(LowerCopyString))
 
         String ToPascalCaseString("Test string, do not reply.");
         const String ToPascalCaseResult("Test String, Do Not Reply.");
         StringTools::ToPascalCase(ToPascalCaseString.begin(),ToPascalCaseString.end());
-        TEST_EQUAL("ToPascalCase(StrIter,StrIter)",ToPascalCaseResult,ToPascalCaseString);
+        TEST_EQUAL("ToPascalCase(StrIter,StrIter)",ToPascalCaseResult,ToPascalCaseString)
 
         String PascalCaseCopyString("I'm so meta, even this acronym.");
         const String PascalCaseCopyResult("I'm So Meta, Even This Acronym.");
-        TEST_EQUAL("PascalCaseCopy(String)",PascalCaseCopyResult,StringTools::PascalCaseCopy(PascalCaseCopyString));
+        TEST_EQUAL("PascalCaseCopy(String)",PascalCaseCopyResult,StringTools::PascalCaseCopy(PascalCaseCopyString))
     }//String Manipulation
 
     {//Size Modifying String Manipulation
@@ -138,35 +138,35 @@ DEFAULT_TEST_GROUP(StringToolsTests,StringTools)
         StringTools::StrIter Pass3Iter = StringTools::TrimLeft(TrimPassString3.begin(),TrimPassString3.end());
         TrimPassString3.erase( size_t(Pass3Iter - TrimPassString3.begin()) );// Manual Cleanup
         TEST_EQUAL("Trim(String&,const_Boole,const_Boole)-StringVal",
-                   String("This is a trim test."),TrimPassString1);
+                   String("This is a trim test."),TrimPassString1)
         TEST_EQUAL("Trim(String&,const_Boole,const_Boole)-EndPos",
-                   size_t(20),size_t(Pass1Iter - TrimPassString1.begin()));
+                   size_t(20),size_t(Pass1Iter - TrimPassString1.begin()))
         TEST_EQUAL("TrimRight(String&,const_Boole,const_Boole)-StringVal",
-                   String("    This is a trim test."),TrimPassString2);
+                   String("    This is a trim test."),TrimPassString2)
         TEST_EQUAL("TrimRight(String&,const_Boole,const_Boole)-EndPos",
-                   size_t(24),size_t(Pass2Iter - TrimPassString2.begin()));
+                   size_t(24),size_t(Pass2Iter - TrimPassString2.begin()))
         TEST_EQUAL("TrimLeft(String&,const_Boole,const_Boole)-StringVal",
-                   String("This is a trim test. \t\t"),TrimPassString3);
+                   String("This is a trim test. \t\t"),TrimPassString3)
         TEST_EQUAL("TrimLeft(String&,const_Boole,const_Boole)-EndPos",
-                   size_t(23),size_t(Pass3Iter - TrimPassString3.begin()));
+                   size_t(23),size_t(Pass3Iter - TrimPassString3.begin()))
 
         const String TrimCopySourceString("\tThis is an indented trim test.  ");
         TEST_EQUAL("TrimCopy(String,const_Boole,const_Boole)-Pass",
                    String("This is an indented trim test."),
-                   StringTools::TrimCopy(TrimCopySourceString.begin(),TrimCopySourceString.end()));
+                   StringTools::TrimCopy(TrimCopySourceString.begin(),TrimCopySourceString.end()))
         TEST_EQUAL("TrimRightCopy(String,const_Boole,const_Boole)-Pass",
                    String("\tThis is an indented trim test."),
-                   StringTools::TrimRightCopy(TrimCopySourceString.begin(),TrimCopySourceString.end()));
+                   StringTools::TrimRightCopy(TrimCopySourceString.begin(),TrimCopySourceString.end()))
         TEST_EQUAL("TrimLeftCopy(String,const_Boole,const_Boole)-Pass",
                    String("This is an indented trim test.  "),
-                   StringTools::TrimLeftCopy(TrimCopySourceString.begin(),TrimCopySourceString.end()));
+                   StringTools::TrimLeftCopy(TrimCopySourceString.begin(),TrimCopySourceString.end()))
 
         String DupWhiteSourceString("This  is  a needlessly  wide sentence.   ");
         String DupWhiteResultString("This is a needlessly wide sentence. ");
         StringTools::StrIter DupWhiteIter = StringTools::RemoveDuplicateWhitespaces(DupWhiteSourceString.begin(),
                                                                                     DupWhiteSourceString.end());
         DupWhiteSourceString.erase( size_t(DupWhiteIter - DupWhiteSourceString.begin()) );// Manual Cleanup
-        TEST_EQUAL("RemoveDuplicateWhitespaces(String&)",DupWhiteResultString,DupWhiteSourceString);
+        TEST_EQUAL("RemoveDuplicateWhitespaces(String&)",DupWhiteResultString,DupWhiteSourceString)
 
         String DupWhiteCopySourceString("\t\tThis indented  sentence   is    stretching     really      far.");
         const String DupWhiteCopyResultString("\tThis indented sentence is stretching really far.");
@@ -182,36 +182,36 @@ DEFAULT_TEST_GROUP(StringToolsTests,StringTools)
         StringView HexStr3("3F");
         StringView HexStr4("06");
         TEST_EQUAL_EPSILON("ConvertHexToColourChannel(const_StringView)-First",
-                           Real(113.0 / 255.0),StringTools::ConvertHexToColourChannel(HexStr1));
+                           Real(113.0 / 255.0),StringTools::ConvertHexToColourChannel(HexStr1))
         TEST_EQUAL_EPSILON("ConvertHexToColourChannel(const_StringView)-Second",
-                           Real(162.0 / 255.0),StringTools::ConvertHexToColourChannel(HexStr2));
+                           Real(162.0 / 255.0),StringTools::ConvertHexToColourChannel(HexStr2))
         TEST_EQUAL_EPSILON("ConvertHexToColourChannel(const_StringView)-Third",
-                           Real(63.0 / 255.0),StringTools::ConvertHexToColourChannel(HexStr3));
+                           Real(63.0 / 255.0),StringTools::ConvertHexToColourChannel(HexStr3))
         TEST_EQUAL_EPSILON("ConvertHexToColourChannel(const_StringView)-Fourth",
-                           Real(6.0 / 255.0),StringTools::ConvertHexToColourChannel(HexStr4));
+                           Real(6.0 / 255.0),StringTools::ConvertHexToColourChannel(HexStr4))
 
         TEST_THROW("ConvertHexToColourChannel(const_StringView)-InvalidLengthLong",
                    Mezzanine::Exception::HexConversion,
-                   [](){ StringTools::ConvertHexToColourChannel("ABC"); });
+                   [](){ StringTools::ConvertHexToColourChannel("ABC"); })
         TEST_THROW("ConvertHexToColourChannel(const_StringView)-InvalidLengthShort",
                    Mezzanine::Exception::HexConversion,
-                   [](){ StringTools::ConvertHexToColourChannel("A"); });
+                   [](){ StringTools::ConvertHexToColourChannel("A"); })
         TEST_THROW("ConvertHexToColourChannel(const_StringView)-InvalidChar",
                    Mezzanine::Exception::HexConversion,
-                   [](){ StringTools::ConvertHexToColourChannel("QQ"); });
+                   [](){ StringTools::ConvertHexToColourChannel("QQ"); })
 
         Real ChannelVal1 = 0.8675f;//221.2125
         Real ChannelVal2 = 0.1234f;//31.467
         Real ChannelVal3 = 0.9274f;//236.487
         Real ChannelVal4 = 0.0475f;//12.1125
         TEST_EQUAL("ConvertColourChannelToHex(const_Real)-First",
-                   String("DD"),StringTools::ConvertColourChannelToHex(ChannelVal1));
+                   String("DD"),StringTools::ConvertColourChannelToHex(ChannelVal1))
         TEST_EQUAL("ConvertColourChannelToHex(const_Real)-Second",
-                   String("1F"),StringTools::ConvertColourChannelToHex(ChannelVal2));
+                   String("1F"),StringTools::ConvertColourChannelToHex(ChannelVal2))
         TEST_EQUAL("ConvertColourChannelToHex(const_Real)-Third",
-                   String("EC"),StringTools::ConvertColourChannelToHex(ChannelVal3));
+                   String("EC"),StringTools::ConvertColourChannelToHex(ChannelVal3))
         TEST_EQUAL("ConvertColourChannelToHex(const_Real)-Fourth",
-                   String("0C"),StringTools::ConvertColourChannelToHex(ChannelVal4));
+                   String("0C"),StringTools::ConvertColourChannelToHex(ChannelVal4))
     }//Colour Channels
 
     {//Tokenizing
@@ -219,76 +219,76 @@ DEFAULT_TEST_GROUP(StringToolsTests,StringTools)
 
         StringVector DefaultSplitResult = StringTools::Split(SplitSourceString);
         TEST_EQUAL("Split(const_String&,const_String&,const_Whole)-DefaultCount",
-                   size_t(11),DefaultSplitResult.size());
+                   size_t(11),DefaultSplitResult.size())
         TEST_EQUAL("Split(const_String&,const_String&,const_Whole)-DefaultElement1",
-                   String("This"),DefaultSplitResult[0]);
+                   String("This"),DefaultSplitResult[0])
         TEST_EQUAL("Split(const_String&,const_String&,const_Whole)-DefaultElement2",
-                   String("is"),DefaultSplitResult[1]);
+                   String("is"),DefaultSplitResult[1])
         TEST_EQUAL("Split(const_String&,const_String&,const_Whole)-DefaultElement3",
-                   String("a"),DefaultSplitResult[2]);
+                   String("a"),DefaultSplitResult[2])
         TEST_EQUAL("Split(const_String&,const_String&,const_Whole)-DefaultElement4",
-                   String("string"),DefaultSplitResult[3]);
+                   String("string"),DefaultSplitResult[3])
         TEST_EQUAL("Split(const_String&,const_String&,const_Whole)-DefaultElement5",
-                   String("that"),DefaultSplitResult[4]);
+                   String("that"),DefaultSplitResult[4])
         TEST_EQUAL("Split(const_String&,const_String&,const_Whole)-DefaultElement6",
-                   String("will"),DefaultSplitResult[5]);
+                   String("will"),DefaultSplitResult[5])
         TEST_EQUAL("Split(const_String&,const_String&,const_Whole)-DefaultElement7",
-                   String("be"),DefaultSplitResult[6]);
+                   String("be"),DefaultSplitResult[6])
         TEST_EQUAL("Split(const_String&,const_String&,const_Whole)-DefaultElement8",
-                   String("split"),DefaultSplitResult[7]);
+                   String("split"),DefaultSplitResult[7])
         TEST_EQUAL("Split(const_String&,const_String&,const_Whole)-DefaultElement9",
-                   String("into"),DefaultSplitResult[8]);
+                   String("into"),DefaultSplitResult[8])
         TEST_EQUAL("Split(const_String&,const_String&,const_Whole)-DefaultElement10",
-                   String("11"),DefaultSplitResult[9]);
+                   String("11"),DefaultSplitResult[9])
         TEST_EQUAL("Split(const_String&,const_String&,const_Whole)-DefaultElement11",
-                   String("parts."),DefaultSplitResult[10]);
+                   String("parts."),DefaultSplitResult[10])
 
         // This should normally split 6 times to produce 7 pieces.
         StringVector ISplitResult = StringTools::Split(SplitSourceString,"i",5);
         TEST_EQUAL("Split(const_String&,const_String&,const_Whole)-ISplitCount",
-                   size_t(6),ISplitResult.size());
+                   size_t(6),ISplitResult.size())
         TEST_EQUAL("Split(const_String&,const_String&,const_Whole)-ISplitElement1",
-                   String("Th"),ISplitResult[0]);
+                   String("Th"),ISplitResult[0])
         TEST_EQUAL("Split(const_String&,const_String&,const_Whole)-ISplitElement2",
-                   String("s "),ISplitResult[1]);
+                   String("s "),ISplitResult[1])
         TEST_EQUAL("Split(const_String&,const_String&,const_Whole)-ISplitElement3",
-                   String("s a str"),ISplitResult[2]);
+                   String("s a str"),ISplitResult[2])
         TEST_EQUAL("Split(const_String&,const_String&,const_Whole)-ISplitElement4",
-                   String("ng that w"),ISplitResult[3]);
+                   String("ng that w"),ISplitResult[3])
         TEST_EQUAL("Split(const_String&,const_String&,const_Whole)-ISplitElement5",
-                   String("ll be spl"),ISplitResult[4]);
+                   String("ll be spl"),ISplitResult[4])
         TEST_EQUAL("Split(const_String&,const_String&,const_Whole)-ISplitElement6",
-                   String("t into 11 parts."),ISplitResult[5]);
+                   String("t into 11 parts."),ISplitResult[5])
 
         std::vector<StringView> DefaultJoinSource(DefaultSplitResult.begin(),DefaultSplitResult.end());
         TEST_EQUAL("Join(const_vector,const_String)-JoinDefault",
-                   SplitSourceString,StringTools::Join(DefaultJoinSource));
+                   SplitSourceString,StringTools::Join(DefaultJoinSource))
 
         std::vector<StringView> IJoinSource(ISplitResult.begin(),ISplitResult.end());
         TEST_EQUAL("Join(const_vector,const_String)-JoinISplit",
-                   SplitSourceString,StringTools::Join(IJoinSource,"i"));
+                   SplitSourceString,StringTools::Join(IJoinSource,"i"))
     }//Tokenizing
 
     {//Pattern Matching
         const String StartsWithSourceString("Autocannibalism");
         TEST_EQUAL("StartsWith(const_StringView,const_StringView,const_Boole)-Pass",
-                   true,StringTools::StartsWith(StartsWithSourceString,"auto",false));
+                   true,StringTools::StartsWith(StartsWithSourceString,"auto",false))
         TEST_EQUAL("StartsWith(const_StringView,const_StringView,const_Boole)-CasePass",
-                   true,StringTools::StartsWith(StartsWithSourceString,"Auto",true));
+                   true,StringTools::StartsWith(StartsWithSourceString,"Auto",true))
         TEST_EQUAL("StartsWith(const_StringView,const_StringView,const_Boole)-Fail",
-                   false,StringTools::StartsWith(StartsWithSourceString,"Self",false));
+                   false,StringTools::StartsWith(StartsWithSourceString,"Self",false))
         TEST_EQUAL("StartsWith(const_StringView,const_StringView,const_Boole)-CaseFail",
-                   false,StringTools::StartsWith(StartsWithSourceString,"AUTO",true));
+                   false,StringTools::StartsWith(StartsWithSourceString,"AUTO",true))
 
         const String EndsWithSourceString("ThatsTheJoke.jpg");
         TEST_EQUAL("EndsWith(const_StringView,const_StringView,const_Boole)-Pass",
-                   true,StringTools::EndsWith(EndsWithSourceString,".JPG",false));
+                   true,StringTools::EndsWith(EndsWithSourceString,".JPG",false))
         TEST_EQUAL("EndsWith(const_StringView,const_StringView,const_Boole)-CasePass",
-                   true,StringTools::EndsWith(EndsWithSourceString,".jpg",true));
+                   true,StringTools::EndsWith(EndsWithSourceString,".jpg",true))
         TEST_EQUAL("EndsWith(const_StringView,const_StringView,const_Boole)-Fail",
-                   false,StringTools::EndsWith(EndsWithSourceString,".png",false));
+                   false,StringTools::EndsWith(EndsWithSourceString,".png",false))
         TEST_EQUAL("EndsWith(const_StringView,const_StringView,const_Boole)-CaseFail",
-                   false,StringTools::EndsWith(EndsWithSourceString,".JPG",true));
+                   false,StringTools::EndsWith(EndsWithSourceString,".JPG",true))
 
         String FirstSource("Test/Data/Results.txt");
         String SecondSource("WS_29_06_18.dat");
@@ -303,80 +303,80 @@ DEFAULT_TEST_GROUP(StringToolsTests,StringTools)
         String StarAnythingStarPattern("\\**\\*");
 
         TEST_EQUAL("PatternMatch(const_StringView,const_StringView,const_Boole)-Pass1",
-                   true,StringTools::PatternMatch(FirstSource,UnixTestDataTextPattern,false));
+                   true,StringTools::PatternMatch(FirstSource,UnixTestDataTextPattern,false))
         TEST_EQUAL("PatternMatch(const_StringView,const_StringView,const_Boole)-Pass2",
-                   true,StringTools::PatternMatch(FirstSource,AnythingWith3CharExtPattern,false));
+                   true,StringTools::PatternMatch(FirstSource,AnythingWith3CharExtPattern,false))
         TEST_EQUAL("PatternMatch(const_StringView,const_StringView,const_Boole)-Pass3",
-                   true,StringTools::PatternMatch(SecondSource,AnythingWith3CharExtPattern,true));
+                   true,StringTools::PatternMatch(SecondSource,AnythingWith3CharExtPattern,true))
         TEST_EQUAL("PatternMatch(const_StringView,const_StringView,const_Boole)-Pass4",
-                   true,StringTools::PatternMatch(SecondSource,GibberishDateDotDatPattern,false));
+                   true,StringTools::PatternMatch(SecondSource,GibberishDateDotDatPattern,false))
         TEST_EQUAL("PatternMatch(const_StringView,const_StringView,const_Boole)-Pass5",
-                   true,StringTools::PatternMatch(ThirdSource,WinTestDataTextPattern,false));
+                   true,StringTools::PatternMatch(ThirdSource,WinTestDataTextPattern,false))
         TEST_EQUAL("PatternMatch(const_StringView,const_StringView,const_Boole)-Pass6",
-                   true,StringTools::PatternMatch(FourthSource,StarAnythingStarPattern,true));
+                   true,StringTools::PatternMatch(FourthSource,StarAnythingStarPattern,true))
 
         TEST_EQUAL("PatternMatch(const_StringView,const_StringView,const_Boole)-Fail1",
-                   false,StringTools::PatternMatch(FirstSource,AnythingDotDatPattern,false));
+                   false,StringTools::PatternMatch(FirstSource,AnythingDotDatPattern,false))
         TEST_EQUAL("PatternMatch(const_StringView,const_StringView,const_Boole)-Fail2",
-                   false,StringTools::PatternMatch(SecondSource,GibberishDateDotDatPattern,true));
+                   false,StringTools::PatternMatch(SecondSource,GibberishDateDotDatPattern,true))
         TEST_EQUAL("PatternMatch(const_StringView,const_StringView,const_Boole)-Fail3",
-                   false,StringTools::PatternMatch(FirstSource,AnythingDotDatPattern,false));
+                   false,StringTools::PatternMatch(FirstSource,AnythingDotDatPattern,false))
         TEST_EQUAL("PatternMatch(const_StringView,const_StringView,const_Boole)-Fail4",
-                   false,StringTools::PatternMatch(ThirdSource,StarAnythingStarPattern,true));
+                   false,StringTools::PatternMatch(ThirdSource,StarAnythingStarPattern,true))
     }//Pattern Matching
 
     {//Convert-From-String Functions
         TEST_EQUAL_EPSILON("ConvertFromString(const_StringView)-Real",
-                   Real(3.1415926),StringTools::ConvertFromString<Real>("3.1415926"));
+                   Real(3.1415926),StringTools::ConvertFromString<Real>("3.1415926"))
         TEST_EQUAL("ConvertFromString(const_StringView)-Integer",
-                   Integer(-7272),StringTools::ConvertFromString<Integer>("-7272"));
+                   Integer(-7272),StringTools::ConvertFromString<Integer>("-7272"))
         TEST_EQUAL("ConvertFromString(const_StringView)-Whole",
-                   Whole(8383),StringTools::ConvertFromString<Whole>("8383"));
+                   Whole(8383),StringTools::ConvertFromString<Whole>("8383"))
         TEST_EQUAL("ConvertFromString(const_StringView)-Int8",
-                   static_cast<Int8>(-45),StringTools::ConvertFromString<Int8>("-45"));
+                   static_cast<Int8>(-45),StringTools::ConvertFromString<Int8>("-45"))
         TEST_EQUAL("ConvertFromString(const_StringView)-UInt8",
-                   static_cast<UInt8>(66),StringTools::ConvertFromString<UInt8>("66"));
+                   static_cast<UInt8>(66),StringTools::ConvertFromString<UInt8>("66"))
         TEST_EQUAL("ConvertFromString(const_StringView)-Int16",
-                   Int16(-30100),StringTools::ConvertFromString<Int16>("-30100"));
+                   Int16(-30100),StringTools::ConvertFromString<Int16>("-30100"))
         TEST_EQUAL("ConvertFromString(const_StringView)-UInt16",
-                   UInt16(27015),StringTools::ConvertFromString<UInt16>("27015"));
+                   UInt16(27015),StringTools::ConvertFromString<UInt16>("27015"))
         TEST_EQUAL("ConvertFromString(const_StringView)-Int32",
-                   Int32(-1256844),StringTools::ConvertFromString<Int32>("-1256844"));
+                   Int32(-1256844),StringTools::ConvertFromString<Int32>("-1256844"))
         TEST_EQUAL("ConvertFromString(const_StringView)-UInt32",
-                   UInt32(3872423),StringTools::ConvertFromString<UInt32>("3872423"));
+                   UInt32(3872423),StringTools::ConvertFromString<UInt32>("3872423"))
 
         TEST_EQUAL("ConvertToBool(const_StringView,const_Boole)-Yes",
-                   true,StringTools::ConvertToBool("Yes",false));
+                   true,StringTools::ConvertToBool("Yes",false))
         TEST_EQUAL("ConvertToBool(const_StringView,const_Boole)-No",
-                   false,StringTools::ConvertToBool("No",true));
+                   false,StringTools::ConvertToBool("No",true))
         TEST_EQUAL("ConvertToBool(const_StringView,const_Boole)-1",
-                   true,StringTools::ConvertToBool("1",false));
+                   true,StringTools::ConvertToBool("1",false))
         TEST_EQUAL("ConvertToBool(const_StringView,const_Boole)-0",
-                   false,StringTools::ConvertToBool("0",true));
+                   false,StringTools::ConvertToBool("0",true))
         TEST_EQUAL("ConvertToBool(const_StringView,const_Boole)-True",
-                   true,StringTools::ConvertToBool("True",false));
+                   true,StringTools::ConvertToBool("True",false))
         TEST_EQUAL("ConvertToBool(const_StringView,const_Boole)-False",
-                   false,StringTools::ConvertToBool("False",true));
+                   false,StringTools::ConvertToBool("False",true))
         TEST_EQUAL("ConvertToBool(const_StringView,const_Boole)-Default",
-                   true,StringTools::ConvertToBool("Yes"));
+                   true,StringTools::ConvertToBool("Yes"))
         TEST_EQUAL("ConvertToBool(const_StringView,const_Boole)-Gibberish-Fail",
-                   false,StringTools::ConvertToBool("Gibberish"));
+                   false,StringTools::ConvertToBool("Gibberish"))
         TEST_EQUAL("ConvertToBool(const_StringView,const_Boole)-Gibberish-PassingDefault",
-                   true,StringTools::ConvertToBool("Gibberish",true));
+                   true,StringTools::ConvertToBool("Gibberish",true))
     }//Convert-From-String Functions
 
     {//Convert-To-String Functions
-        TEST_EQUAL("ConvertToString(const_T&)-BooleTrue",String("true"),StringTools::ConvertToString(Boole(true)));
-        TEST_EQUAL("ConvertToString(const_T&)-BooleFalse",String("false"),StringTools::ConvertToString(Boole(false)));
-        TEST_EQUAL("ConvertToString(const_T&)-Real",String("3.14"),StringTools::ConvertToString(Real(3.14)));
-        TEST_EQUAL("ConvertToString(const_T&)-Integer",String("-7272"),StringTools::ConvertToString(Integer(-7272)));
-        TEST_EQUAL("ConvertToString(const_T&)-Whole",String("8383"),StringTools::ConvertToString(Whole(8383)));
-        TEST_EQUAL("ConvertToString(const_T&)-Int8",String("-45"),StringTools::ConvertToString(Int8(-45)));
-        TEST_EQUAL("ConvertToString(const_T&)-UInt8",String("66"),StringTools::ConvertToString(UInt8(66)));
-        TEST_EQUAL("ConvertToString(const_T&)-Int16",String("-30100"),StringTools::ConvertToString(Int16(-30100)));
-        TEST_EQUAL("ConvertToString(const_T&)-UInt16",String("27015"),StringTools::ConvertToString(UInt16(27015)));
-        TEST_EQUAL("ConvertToString(const_T&)-Int32",String("-1256844"),StringTools::ConvertToString(Int32(-1256844)));
-        TEST_EQUAL("ConvertToString(const_T&)-UInt32",String("3872423"),StringTools::ConvertToString(UInt32(3872423)));
+        TEST_EQUAL("ConvertToString(const_T&)-BooleTrue",String("true"),StringTools::ConvertToString(Boole(true)))
+        TEST_EQUAL("ConvertToString(const_T&)-BooleFalse",String("false"),StringTools::ConvertToString(Boole(false)))
+        TEST_EQUAL("ConvertToString(const_T&)-Real",String("3.14"),StringTools::ConvertToString(Real(3.14)))
+        TEST_EQUAL("ConvertToString(const_T&)-Integer",String("-7272"),StringTools::ConvertToString(Integer(-7272)))
+        TEST_EQUAL("ConvertToString(const_T&)-Whole",String("8383"),StringTools::ConvertToString(Whole(8383)))
+        TEST_EQUAL("ConvertToString(const_T&)-Int8",String("-45"),StringTools::ConvertToString(Int8(-45)))
+        TEST_EQUAL("ConvertToString(const_T&)-UInt8",String("66"),StringTools::ConvertToString(UInt8(66)))
+        TEST_EQUAL("ConvertToString(const_T&)-Int16",String("-30100"),StringTools::ConvertToString(Int16(-30100)))
+        TEST_EQUAL("ConvertToString(const_T&)-UInt16",String("27015"),StringTools::ConvertToString(UInt16(27015)))
+        TEST_EQUAL("ConvertToString(const_T&)-Int32",String("-1256844"),StringTools::ConvertToString(Int32(-1256844)))
+        TEST_EQUAL("ConvertToString(const_T&)-UInt32",String("3872423"),StringTools::ConvertToString(UInt32(3872423)))
     }//Convert-To-String Functions
 }
 

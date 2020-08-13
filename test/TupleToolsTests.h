@@ -57,16 +57,16 @@ AUTOMATIC_TEST_GROUP(TupleToolsTests,TupleTools)
         constexpr Boole IntTest = tuple_has_type<int,TestTuple>::value;
         constexpr Boole FloatTest = tuple_has_type<float,TestTuple>::value;
         constexpr Boole CharTest = tuple_has_type<char,TestTuple>::value;
-        TEST_EQUAL("tuple_has_type-int",true,IntTest);
-        TEST_EQUAL("tuple_has_type-float",true,FloatTest);
-        TEST_EQUAL("tuple_has_type-char",true,CharTest);
+        TEST_EQUAL("tuple_has_type-int",true,IntTest)
+        TEST_EQUAL("tuple_has_type-float",true,FloatTest)
+        TEST_EQUAL("tuple_has_type-char",true,CharTest)
 
         constexpr Boole ShortTest = tuple_has_type<short,TestTuple>::value;
         constexpr Boole DoubleTest = tuple_has_type<double,TestTuple>::value;
         constexpr Boole StringTest = tuple_has_type<std::string,TestTuple>::value;
-        TEST_EQUAL("tuple_has_type-short",false,ShortTest);
-        TEST_EQUAL("tuple_has_type-double",false,DoubleTest);
-        TEST_EQUAL("tuple_has_type-string",false,StringTest);
+        TEST_EQUAL("tuple_has_type-short",false,ShortTest)
+        TEST_EQUAL("tuple_has_type-double",false,DoubleTest)
+        TEST_EQUAL("tuple_has_type-string",false,StringTest)
     }//tuple_has_type
 
     using FirstTupleType = std::tuple<int,float,int>;
@@ -84,13 +84,13 @@ AUTOMATIC_TEST_GROUP(TupleToolsTests,TupleTools)
         constexpr Boole Result2 = std::is_same_v<std::tuple<float>,decltype(Element2)>;
         constexpr Boole Result3 = std::is_same_v<std::tuple<>,decltype(Element3)>;
 
-        TEST_EQUAL("element_as_tuple-Element1-Type",true,Result1);
-        TEST_EQUAL("element_as_tuple-Element2-Type",true,Result2);
-        TEST_EQUAL("element_as_tuple-Element3-Type",true,Result3);
+        TEST_EQUAL("element_as_tuple-Element1-Type",true,Result1)
+        TEST_EQUAL("element_as_tuple-Element2-Type",true,Result2)
+        TEST_EQUAL("element_as_tuple-Element3-Type",true,Result3)
 
-        TEST_EQUAL("element_as_tuple-Value1",10,std::get<0>(Element1));
-        TEST_EQUAL_EPSILON("element_as_tuple-Value2",1.0f,std::get<0>(Element2));
-        TEST_EQUAL("element_as_tuple-Value3",size_t(0),std::tuple_size_v<decltype(Element3)>);
+        TEST_EQUAL("element_as_tuple-Value1",10,std::get<0>(Element1))
+        TEST_EQUAL_EPSILON("element_as_tuple-Value2",1.0f,std::get<0>(Element2))
+        TEST_EQUAL("element_as_tuple-Value3",size_t(0),std::tuple_size_v<decltype(Element3)>)
     }//element_as_tuple
 
     {//rebuild_tuple_unique
@@ -106,21 +106,21 @@ AUTOMATIC_TEST_GROUP(TupleToolsTests,TupleTools)
         constexpr Boole Result2 = std::is_same_v<std::tuple<char,short,int>,decltype(Rebuild2)>;
         constexpr Boole Result3 = std::is_same_v<std::tuple<int,float,char,short>,decltype(Rebuild3)>;
 
-        TEST_EQUAL("rebuild_tuple_unique-Rebuild1-Type",true,Result1);
-        TEST_EQUAL("rebuild_tuple_unique-Rebuild2-Type",true,Result2);
-        TEST_EQUAL("rebuild_tuple_unique-Rebuild3-Type",true,Result3);
+        TEST_EQUAL("rebuild_tuple_unique-Rebuild1-Type",true,Result1)
+        TEST_EQUAL("rebuild_tuple_unique-Rebuild2-Type",true,Result2)
+        TEST_EQUAL("rebuild_tuple_unique-Rebuild3-Type",true,Result3)
 
-        TEST_EQUAL("rebuild_tuple_unique-Rebuild1-Value1",30,std::get<0>(Rebuild1));
-        TEST_EQUAL_EPSILON("rebuild_tuple_unique-Rebuild1-Value2",0.5f,std::get<1>(Rebuild1));
+        TEST_EQUAL("rebuild_tuple_unique-Rebuild1-Value1",30,std::get<0>(Rebuild1))
+        TEST_EQUAL_EPSILON("rebuild_tuple_unique-Rebuild1-Value2",0.5f,std::get<1>(Rebuild1))
 
-        TEST_EQUAL("rebuild_tuple_unique-Rebuild2-Value1",'A',std::get<0>(Rebuild2));
-        TEST_EQUAL("rebuild_tuple_unique-Rebuild2-Value2",short(65),std::get<1>(Rebuild2));
-        TEST_EQUAL("rebuild_tuple_unique-Rebuild2-Value3",155,std::get<2>(Rebuild2));
+        TEST_EQUAL("rebuild_tuple_unique-Rebuild2-Value1",'A',std::get<0>(Rebuild2))
+        TEST_EQUAL("rebuild_tuple_unique-Rebuild2-Value2",short(65),std::get<1>(Rebuild2))
+        TEST_EQUAL("rebuild_tuple_unique-Rebuild2-Value3",155,std::get<2>(Rebuild2))
 
-        TEST_EQUAL("rebuild_tuple_unique-Rebuild3-Value1",30,std::get<0>(Rebuild3));
-        TEST_EQUAL_EPSILON("rebuild_tuple_unique-Rebuild3-Value2",0.5f,std::get<1>(Rebuild3));
-        TEST_EQUAL("rebuild_tuple_unique-Rebuild3-Value3",'A',std::get<2>(Rebuild3));
-        TEST_EQUAL("rebuild_tuple_unique-Rebuild3-Value4",short(65),std::get<3>(Rebuild3));
+        TEST_EQUAL("rebuild_tuple_unique-Rebuild3-Value1",30,std::get<0>(Rebuild3))
+        TEST_EQUAL_EPSILON("rebuild_tuple_unique-Rebuild3-Value2",0.5f,std::get<1>(Rebuild3))
+        TEST_EQUAL("rebuild_tuple_unique-Rebuild3-Value3",'A',std::get<2>(Rebuild3))
+        TEST_EQUAL("rebuild_tuple_unique-Rebuild3-Value4",short(65),std::get<3>(Rebuild3))
     }//rebuild_tuple_unique
 
     {//tuple_cat_unique
@@ -131,13 +131,13 @@ AUTOMATIC_TEST_GROUP(TupleToolsTests,TupleTools)
         auto ResultTuple = tuple_cat_unique(FirstTestTuple,SecondTestTuple,ThirdTestTuple);
         constexpr Boole Result = std::is_same_v<std::tuple<int,float,char,short,std::string>,decltype(ResultTuple)>;
 
-        TEST_EQUAL("tuple_cat_unique-Type",true,Result);
+        TEST_EQUAL("tuple_cat_unique-Type",true,Result)
 
-        TEST_EQUAL("tuple_cat_unique-Value1",50,std::get<0>(ResultTuple));
-        TEST_EQUAL_EPSILON("tuple_cat_unique-Value2",0.25f,std::get<1>(ResultTuple));
-        TEST_EQUAL("tuple_cat_unique-Value3",'Z',std::get<2>(ResultTuple));
-        TEST_EQUAL("tuple_cat_unique-Value4",short(255),std::get<3>(ResultTuple));
-        TEST_EQUAL("tuple_cat_unique-Value5",std::string("Hi"),std::get<4>(ResultTuple));
+        TEST_EQUAL("tuple_cat_unique-Value1",50,std::get<0>(ResultTuple))
+        TEST_EQUAL_EPSILON("tuple_cat_unique-Value2",0.25f,std::get<1>(ResultTuple))
+        TEST_EQUAL("tuple_cat_unique-Value3",'Z',std::get<2>(ResultTuple))
+        TEST_EQUAL("tuple_cat_unique-Value4",short(255),std::get<3>(ResultTuple))
+        TEST_EQUAL("tuple_cat_unique-Value5",std::string("Hi"),std::get<4>(ResultTuple))
     }//tuple_cat_unique
 }
 

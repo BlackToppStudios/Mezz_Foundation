@@ -214,7 +214,7 @@ namespace Mezzanine
         ElementType& at(size_t Index)
         {
             if( Index >= size() ) {
-                MEZZ_EXCEPTION(OutOfRangeCode, "Specified array index is invalid.");
+                MEZZ_EXCEPTION(OutOfRangeCode, "Specified array index is invalid.")
             }
             return InternalStorage[Index];
         }
@@ -226,7 +226,7 @@ namespace Mezzanine
         const ElementType& at(size_t Index) const
         {
             if( Index >= size() ) {
-                MEZZ_EXCEPTION(OutOfRangeCode, "Specified array index is invalid (const).");
+                MEZZ_EXCEPTION(OutOfRangeCode, "Specified array index is invalid (const).")
             }
             return InternalStorage[Index];
         }

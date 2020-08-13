@@ -45,12 +45,17 @@
 
 #include "MezzTest.h"
 #include "TimingTools.h"
+#include "RuntimeStatics.h"
 
 #include "CountedPtr.h"
 #include "CountedPtrTests.h"
 
 BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
 {
+    // The memory model of JS garbage collection does not play nicely with this test.
+    if(Mezzanine::RuntimeStatic::CompilerIsEmscripten())
+        { return; }
+
     using namespace Mezzanine;
     using namespace CountedPtrTesting;
 
@@ -69,7 +74,7 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
                 << "but otherwise trivial constructors. This is useful only for comparing the speeds of the point "
                 << "constructs on this platform, not for providing objective pointer dereferencing costs.\n\n";
         //const Whole TestCount = 10000000;
-        const std::chrono::seconds TestTime(1);
+        const std::chrono::seconds TestTime(2);
 
         /////////////////////////////////////
         // Create tests
@@ -223,56 +228,110 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
         /////////////////////////////////////
         // Comparison of Benchmark Results
 
-        TEST_WARN( "FixMe", true );
+        SAVE_WARNING_STATE
+        SUPPRESS_GCC_WARNING("-Wconversion")
 
-        /*
-        TestLog << "Checking that raw pointers are fastest for sanity.\n";
-        TEST_WARN( "RawPtrCreateVsInternal",
-                   RawPtrCreateResult.Average < InternalRefCreateResult.Average );
-        TEST_WARN( "RawPtrCreateVsExternal",
-                   RawPtrCreateResult.Average < ExternalRefCreateResult.Average );
-        TEST_WARN( "RawPtrCreateVsStdShared",
-                   RawPtrCreateResult.Average < StdPtrCreateResult.Average );
-        TEST_WARN( "RawPtrCreateVsStdMakeShared",
-                   RawPtrCreateResult.Average < MakeSharedCreateResult.Average );
-        TEST_WARN( "RawPtrCopyVsInternalCopy",
-                   RawPtrCopyResult.Average < InternalRefCopyResult.Average );
-        TEST_WARN( "RawPtrCopyVsExternalCopy",
-                   RawPtrCopyResult.Average < ExternalRefCopyResult.Average );
-        TEST_WARN( "RawPtrCopyVsStdSharedCopy",
-                   RawPtrCopyResult.Average < StdPtrCopyResult.Average );
-        TEST_WARN( "RawPtrCopyVsStdMakeSharedCopy",
-                   RawPtrCopyResult.Average < MakeSharedCopyResult.Average );
+        using Count = Mezzanine::Testing::MicroBenchmarkResults::CountType;
 
-        TestLog << "Checking CountedPtr internal is faster than CountedPtr external.\n";
-        TEST_WARN( "InternalVsExternal",
-                   InternalRefCreateResult.Average < ExternalRefCreateResult.Average );
-        TEST_WARN( "InternalVsExternalCopy",
-                   InternalRefCopyResult.Average < ExternalRefCopyResult.Average );
+        // Internal Count Comparisons
+        Count InternalToRawPercentageCopy =
+            InternalRefCopyResult.Iterations * Count{100} / RawPtrCopyResult.Iterations;
+        Count InternalToRawPercentageCreate =
+            InternalRefCreateResult.Iterations * Count{100} / RawPtrCreateResult.Iterations;
 
-        TestLog << "Checking CountedPtr internal is faster than std::shared_ptr.\n";
-        TEST_WARN( "InternalVsShared",
-                   InternalRefCreateResult.Average < StdPtrCreateResult.Average );
-        TEST_WARN( "InternalCopyVsStdSharedCopy",
-                   InternalRefCopyResult.Average < StdPtrCopyResult.Average );
+        Count InternalToExternalPercentageCopy =
+            InternalRefCopyResult.Iterations * Count{100} / ExternalRefCopyResult.Iterations;
+        Count InternalToExternalPercentageCreate =
+            InternalRefCreateResult.Iterations * Count{100} / ExternalRefCreateResult.Iterations;
 
-        TestLog << "Checking CountedPtr internal is faster than std::make_shared.\n";
-        TEST_WARN( "InternalVsStdMakeShared",
-                   InternalRefCreateResult.Average < MakeSharedCreateResult.Average );
-        TEST_WARN( "InternalCopyVsStdMakeSharedCopy",
-                   InternalRefCopyResult.Average < MakeSharedCopyResult.Average );
+        Count InternalToSharedPercentageCopy =
+            InternalRefCopyResult.Iterations * Count{100} / StdPtrCopyResult.Iterations;
+        Count InternalToSharedPercentageCreate =
+            InternalRefCreateResult.Iterations * Count{100} / StdPtrCreateResult.Iterations;
 
-        // Don't care about these tests as much.
-        TestLog << "Checking CountedPtr External is faster than shared_ptr.\n";
-        TEST_WARN( "ExternalVsShared",
-                   ExternalRefCreateResult.Average < StdPtrCreateResult.Average );
-        TEST_WARN( "ExternalVsSharedCopy",
-                   ExternalRefCopyResult.Average < StdPtrCopyResult.Average );
-        TEST_WARN( "ExternalVsMakeShared",
-                   ExternalRefCreateResult.Average < MakeSharedCreateResult.Average );
-        TEST_WARN( "ExternalVsMakeSharedCopy",
-                   ExternalRefCopyResult.Average < MakeSharedCopyResult.Average );
-        */
+        Count InternalToMakeSharedPercentageCopy =
+            InternalRefCopyResult.Iterations * Count{100} / MakeSharedCopyResult.Iterations;
+        Count InternalToMakeSharedPercentageCreate =
+            InternalRefCreateResult.Iterations * Count{100} / MakeSharedCreateResult.Iterations;
+
+        // External Count Comparisons
+        Count ExternalToSharedPercentageCopy =
+            ExternalRefCopyResult.Iterations * Count{100} / StdPtrCopyResult.Iterations;
+        Count ExternalToSharedPercentageCreate =
+            ExternalRefCreateResult.Iterations * Count{100} / StdPtrCreateResult.Iterations;
+
+        Count ExternalToMakeSharedPercentageCopy =
+            ExternalRefCopyResult.Iterations * Count{100} / MakeSharedCopyResult.Iterations;
+        Count ExternalToMakeSharedPercentageCreate =
+            ExternalRefCreateResult.Iterations * Count{100} / MakeSharedCreateResult.Iterations;
+
+        RESTORE_WARNING_STATE
+
+        TestLog << "The Internal Counted pointer gets about "
+                << InternalToRawPercentageCopy << "% as many working iterations as raw pointers.\n"
+                << "The Internal Counted pointer gets about "
+                << InternalToRawPercentageCreate << "% as many creation iterations as raw pointers.\n\n"
+
+                << "The Internal Counted pointer gets about "
+                << InternalToExternalPercentageCopy << "% as many working iterations as External Counted pointers.\n"
+                << "The Internal Counted pointer gets about "
+                << InternalToExternalPercentageCreate
+                << "% as many creation iterations as External Counted pointers.\n\n"
+
+                << "The Internal Counted pointer gets about "
+                << InternalToSharedPercentageCopy << "% as many working iterations as shared pointers.\n"
+                << "The Internal Counted pointer gets about "
+                << InternalToSharedPercentageCreate << "% as many creation iterations as shared pointers.\n\n"
+
+                << "The Internal Counted pointer gets about "
+                << InternalToMakeSharedPercentageCopy << "% as many working iterations as make_shared pointers.\n"
+                << "The Internal Counted pointer gets about "
+                << InternalToMakeSharedPercentageCreate << "% as many creation iterations as make_shared pointers.\n\n"
+
+                << "The External Counted pointer gets about "
+                << ExternalToSharedPercentageCopy << "% as many working iterations as shared pointers.\n"
+                << "The External Counted pointer gets about "
+                << ExternalToSharedPercentageCreate << "% as many creation iterations as shared pointers.\n\n"
+
+                << "The External Counted pointer gets about "
+                << ExternalToMakeSharedPercentageCopy << "% as many working iterations as make_shared pointers.\n"
+                << "The External Counted pointer gets about "
+                << ExternalToMakeSharedPercentageCreate << "% as many creation iterations as make_shared pointers.\n\n"
+                ;
+
+        // Benchmarks don't make sense in Debug and shouldn't warn.
+        if(Mezzanine::RuntimeStatic::Debug())
+            { return; }
+
+        // Internal Percentage based comparisons
+        TEST_WARN( "InternalDoesASimilarAmountOfCreateIterationsToRawPointers",
+                   75 < InternalToRawPercentageCreate )
+        TEST_WARN( "InternalDoesASimilarAmountOfWorkIterationsToRawPointers",
+                   75 < InternalToRawPercentageCopy )
+
+        TEST_WARN( "InternalDoesMoreCreateIterationsThanExternalReferenceCountOrIsClose",
+                   95 < InternalToExternalPercentageCreate )
+        TEST_WARN( "InternalDoesMoreWorkIterationsThanExternalReferenceCountOrIsClose",
+                   95 < InternalToExternalPercentageCopy )
+
+        TEST_WARN( "InternalDoesMoreCreateIterationsThanSharedpointers",
+                   100 < InternalToSharedPercentageCreate )
+        TEST_WARN( "InternalDoesMoreWorkIterationsThanSharedpointers",
+                   100 < InternalToSharedPercentageCopy )
+        TEST_WARN( "InternalDoesMoreOrASimilarAmountOfCreateIterationsThanMakeSharedpointers",
+                   95 < InternalToMakeSharedPercentageCreate )
+        TEST_WARN( "InternalDoesMoreWorkIterationsThanMakeSharedpointers",
+                   100 < InternalToMakeSharedPercentageCopy )
+
+        // External Percentage based comparisons
+        TEST_WARN( "ExternalDoesAboutAsManyOrMoreCreateIterationsThanSharedpointers",
+                   95 < ExternalToSharedPercentageCreate )
+        TEST_WARN( "ExternalDoesMoreOrAboutTheSameWorkIterationsThanSharedpointers",
+                   95 < ExternalToSharedPercentageCopy )
+        TEST_WARN( "InternalDoesntSuckAtCreateIterationsComparedToMakeSharedpointers",
+                   50 < ExternalToMakeSharedPercentageCreate )
+        TEST_WARN( "InternalDoesntSuckAtWorlIterationsComparedToMakeSharedpointers",
+                   50 < ExternalToMakeSharedPercentageCopy )
     }
 }
 

@@ -92,221 +92,221 @@ AUTOMATIC_TEST_GROUP(ContainerToolsTests,ContainerTools)
 
     {//is_range
         TEST_EQUAL("is_range-Array",
-                   true,IsRange<TestArray>());
+                   true,IsRange<TestArray>())
         TEST_EQUAL("is_range-Map",
-                   true,IsRange<TestMap>());
+                   true,IsRange<TestMap>())
         TEST_EQUAL("is_range-String",
-                   true,IsRange<TestString>());
+                   true,IsRange<TestString>())
         TEST_EQUAL("is_range-SharedPtr",
-                   false,IsRange<TestSharedPtr>());
+                   false,IsRange<TestSharedPtr>())
     }//is_range
 
     {//is_resizable_contiguous
         TEST_EQUAL("is_resizable_contiguous-Array",
-                   false,IsResizableContiguous<TestArray>());
+                   false,IsResizableContiguous<TestArray>())
         TEST_EQUAL("is_resizable_contiguous-Vector",
-                   true,IsResizableContiguous<TestVector>());
+                   true,IsResizableContiguous<TestVector>())
         TEST_EQUAL("is_resizable_contiguous-Deque",
-                   false,IsResizableContiguous<TestDeque>());
+                   false,IsResizableContiguous<TestDeque>())
         TEST_EQUAL("is_resizable_contiguous-List",
-                   false,IsResizableContiguous<TestList>());
+                   false,IsResizableContiguous<TestList>())
         TEST_EQUAL("is_resizable_contiguous-Set",
-                   false,IsResizableContiguous<TestSet>());
+                   false,IsResizableContiguous<TestSet>())
         TEST_EQUAL("is_resizable_contiguous-MultiSet",
-                   false,IsResizableContiguous<TestMultiSet>());
+                   false,IsResizableContiguous<TestMultiSet>())
         TEST_EQUAL("is_resizable_contiguous-Map",
-                   false,IsResizableContiguous<TestMap>());
+                   false,IsResizableContiguous<TestMap>())
         TEST_EQUAL("is_resizable_contiguous-MultiMap",
-                   false,IsResizableContiguous<TestMultiMap>());
+                   false,IsResizableContiguous<TestMultiMap>())
         TEST_EQUAL("is_resizable_contiguous-UnorderedSet",
-                   false,IsResizableContiguous<TestUnorderedSet>());
+                   false,IsResizableContiguous<TestUnorderedSet>())
         TEST_EQUAL("is_resizable_contiguous-UnorderedMultiSet",
-                   false,IsResizableContiguous<TestUnorderedMultiSet>());
+                   false,IsResizableContiguous<TestUnorderedMultiSet>())
         TEST_EQUAL("is_resizable_contiguous-UnorderedMap",
-                   false,IsResizableContiguous<TestUnorderedMap>());
+                   false,IsResizableContiguous<TestUnorderedMap>())
         TEST_EQUAL("is_resizable_contiguous-UnorderedMultiMap",
-                   false,IsResizableContiguous<TestUnorderedMultiMap>());
+                   false,IsResizableContiguous<TestUnorderedMultiMap>())
         TEST_EQUAL("is_resizable_contiguous-FlatMap",
-                   false,IsResizableContiguous<TestFlatMap>());
+                   false,IsResizableContiguous<TestFlatMap>())
         TEST_EQUAL("is_resizable_contiguous-ManagedArray",
-                   false,IsResizableContiguous<TestManagedArray>());
+                   false,IsResizableContiguous<TestManagedArray>())
         TEST_EQUAL("is_resizable_contiguous-SortedManagedArray",
-                   false,IsResizableContiguous<TestSortedManagedArray>());
+                   false,IsResizableContiguous<TestSortedManagedArray>())
         TEST_EQUAL("is_resizable_contiguous-SortedVector",
-                   false,IsResizableContiguous<TestSortedVector>());
+                   false,IsResizableContiguous<TestSortedVector>())
         TEST_EQUAL("is_resizable_contiguous-String",
-                   true,IsResizableContiguous<TestString>());
+                   true,IsResizableContiguous<TestString>())
         TEST_EQUAL("is_resizable_contiguous-SharedPtr",
-                   false,IsResizableContiguous<TestSharedPtr>());
+                   false,IsResizableContiguous<TestSharedPtr>())
     }//is_resizable_contiguous
 
     {//is_resizable_noncontiguous
         TEST_EQUAL("is_resizable_noncontiguous-Array",
-                   false,IsResizableNonContiguous<TestArray>());
+                   false,IsResizableNonContiguous<TestArray>())
         TEST_EQUAL("is_resizable_noncontiguous-Vector",
-                   false,IsResizableNonContiguous<TestVector>());
+                   false,IsResizableNonContiguous<TestVector>())
         TEST_EQUAL("is_resizable_noncontiguous-Deque",
-                   true,IsResizableNonContiguous<TestDeque>());
+                   true,IsResizableNonContiguous<TestDeque>())
         TEST_EQUAL("is_resizable_noncontiguous-List",
-                   true,IsResizableNonContiguous<TestList>());
+                   true,IsResizableNonContiguous<TestList>())
         TEST_EQUAL("is_resizable_noncontiguous-Set",
-                   false,IsResizableNonContiguous<TestSet>());
+                   false,IsResizableNonContiguous<TestSet>())
         TEST_EQUAL("is_resizable_noncontiguous-MultiSet",
-                   false,IsResizableNonContiguous<TestMultiSet>());
+                   false,IsResizableNonContiguous<TestMultiSet>())
         TEST_EQUAL("is_resizable_noncontiguous-Map",
-                   false,IsResizableNonContiguous<TestMap>());
+                   false,IsResizableNonContiguous<TestMap>())
         TEST_EQUAL("is_resizable_noncontiguous-MultiMap",
-                   false,IsResizableNonContiguous<TestMultiMap>());
+                   false,IsResizableNonContiguous<TestMultiMap>())
         TEST_EQUAL("is_resizable_noncontiguous-UnorderedSet",
-                   false,IsResizableNonContiguous<TestUnorderedSet>());
+                   false,IsResizableNonContiguous<TestUnorderedSet>())
         TEST_EQUAL("is_resizable_noncontiguous-UnorderedMultiSet",
-                   false,IsResizableNonContiguous<TestUnorderedMultiSet>());
+                   false,IsResizableNonContiguous<TestUnorderedMultiSet>())
         TEST_EQUAL("is_resizable_noncontiguous-UnorderedMap",
-                   false,IsResizableNonContiguous<TestUnorderedMap>());
+                   false,IsResizableNonContiguous<TestUnorderedMap>())
         TEST_EQUAL("is_resizable_noncontiguous-UnorderedMultiMap",
-                   false,IsResizableNonContiguous<TestUnorderedMultiMap>());
+                   false,IsResizableNonContiguous<TestUnorderedMultiMap>())
         TEST_EQUAL("is_resizable_noncontiguous-FlatMap",
-                   false,IsResizableNonContiguous<TestFlatMap>());
+                   false,IsResizableNonContiguous<TestFlatMap>())
         TEST_EQUAL("is_resizable_noncontiguous-ManagedArray",
-                   false,IsResizableNonContiguous<TestManagedArray>());
+                   false,IsResizableNonContiguous<TestManagedArray>())
         TEST_EQUAL("is_resizable_noncontiguous-SortedManagedArray",
-                   false,IsResizableNonContiguous<TestSortedManagedArray>());
+                   false,IsResizableNonContiguous<TestSortedManagedArray>())
         TEST_EQUAL("is_resizable_noncontiguous-SortedVector",
-                   false,IsResizableNonContiguous<TestSortedVector>());
+                   false,IsResizableNonContiguous<TestSortedVector>())
         TEST_EQUAL("is_resizable_noncontiguous-String",
-                   false,IsResizableNonContiguous<TestString>());
+                   false,IsResizableNonContiguous<TestString>())
         TEST_EQUAL("is_resizable_noncontiguous-SharedPtr",
-                   false,IsResizableNonContiguous<TestSharedPtr>());
+                   false,IsResizableNonContiguous<TestSharedPtr>())
     }//is_resizable_noncontiguous
 
     {//is_container
         TEST_EQUAL("is_container-Array",
-                   true,IsContainer<TestArray>());
+                   true,IsContainer<TestArray>())
         TEST_EQUAL("is_container-Vector",
-                   true,IsContainer<TestVector>());
+                   true,IsContainer<TestVector>())
         TEST_EQUAL("is_container-Deque",
-                   true,IsContainer<TestDeque>());
+                   true,IsContainer<TestDeque>())
         TEST_EQUAL("is_container-List",
-                   true,IsContainer<TestList>());
+                   true,IsContainer<TestList>())
         TEST_EQUAL("is_container-Set",
-                   true,IsContainer<TestSet>());
+                   true,IsContainer<TestSet>())
         TEST_EQUAL("is_container-MultiSet",
-                   true,IsContainer<TestMultiSet>());
+                   true,IsContainer<TestMultiSet>())
         TEST_EQUAL("is_container-Map",
-                   true,IsContainer<TestMap>());
+                   true,IsContainer<TestMap>())
         TEST_EQUAL("is_container-MultiMap",
-                   true,IsContainer<TestMultiMap>());
+                   true,IsContainer<TestMultiMap>())
         TEST_EQUAL("is_container-UnorderedSet",
-                   true,IsContainer<TestUnorderedSet>());
+                   true,IsContainer<TestUnorderedSet>())
         TEST_EQUAL("is_container-UnorderedMultiSet",
-                   true,IsContainer<TestUnorderedMultiSet>());
+                   true,IsContainer<TestUnorderedMultiSet>())
         TEST_EQUAL("is_container-UnorderedMap",
-                   true,IsContainer<TestUnorderedMap>());
+                   true,IsContainer<TestUnorderedMap>())
         TEST_EQUAL("is_container-UnorderedMultiMap",
-                   true,IsContainer<TestUnorderedMultiMap>());
+                   true,IsContainer<TestUnorderedMultiMap>())
         TEST_EQUAL("is_container-FlatMap",
-                   true,IsContainer<TestFlatMap>());
+                   true,IsContainer<TestFlatMap>())
         TEST_EQUAL("is_container-ManagedArray",
-                   true,IsContainer<TestManagedArray>());
+                   true,IsContainer<TestManagedArray>())
         TEST_EQUAL("is_container-SortedManagedArray",
-                   true,IsContainer<TestSortedManagedArray>());
+                   true,IsContainer<TestSortedManagedArray>())
         TEST_EQUAL("is_container-SortedVector",
-                   true,IsContainer<TestSortedVector>());
+                   true,IsContainer<TestSortedVector>())
         TEST_EQUAL("is_container-String",
-                   true,IsContainer<TestString>());
+                   true,IsContainer<TestString>())
         TEST_EQUAL("is_container-SharedPtr",
-                   false,IsContainer<TestSharedPtr>());
+                   false,IsContainer<TestSharedPtr>())
     }//is_container
 
     {//is_key_value_pair
         TEST_EQUAL("is_key_value_pair-Vector",
-                   false,IsKeyValuePair<TestVector::value_type>());
+                   false,IsKeyValuePair<TestVector::value_type>())
         TEST_EQUAL("is_key_value_pair-Map",
-                   true,IsKeyValuePair<TestMap::value_type>());
+                   true,IsKeyValuePair<TestMap::value_type>())
         TEST_EQUAL("is_key_value_pair-ManagedArray",
-                   false,IsKeyValuePair<TestManagedArray::value_type>());
+                   false,IsKeyValuePair<TestManagedArray::value_type>())
         TEST_EQUAL("is_key_value_pair-UnorderedMultiMap",
-                   true,IsKeyValuePair<TestUnorderedMultiMap::value_type>());
+                   true,IsKeyValuePair<TestUnorderedMultiMap::value_type>())
         TEST_EQUAL("is_key_value_pair-SharedPtr",
-                   false,IsKeyValuePair<TestSharedPtr>());
+                   false,IsKeyValuePair<TestSharedPtr>())
     }//is_key_value_pair
 
     {//is_associative_container
         TEST_EQUAL("is_associative_container-Array",
-                   false,IsAssociativeContainer<TestArray>());
+                   false,IsAssociativeContainer<TestArray>())
         TEST_EQUAL("is_associative_container-Vector",
-                   false,IsAssociativeContainer<TestVector>());
+                   false,IsAssociativeContainer<TestVector>())
         TEST_EQUAL("is_associative_container-Deque",
-                   false,IsAssociativeContainer<TestDeque>());
+                   false,IsAssociativeContainer<TestDeque>())
         TEST_EQUAL("is_associative_container-List",
-                   false,IsAssociativeContainer<TestList>());
+                   false,IsAssociativeContainer<TestList>())
         TEST_EQUAL("is_associative_container-Set",
-                   false,IsAssociativeContainer<TestSet>());
+                   false,IsAssociativeContainer<TestSet>())
         TEST_EQUAL("is_associative_container-MultiSet",
-                   false,IsAssociativeContainer<TestMultiSet>());
+                   false,IsAssociativeContainer<TestMultiSet>())
         TEST_EQUAL("is_associative_container-Map",
-                   true,IsAssociativeContainer<TestMap>());
+                   true,IsAssociativeContainer<TestMap>())
         TEST_EQUAL("is_associative_container-MultiMap",
-                   true,IsAssociativeContainer<TestMultiMap>());
+                   true,IsAssociativeContainer<TestMultiMap>())
         TEST_EQUAL("is_associative_container-UnorderedSet",
-                   false,IsAssociativeContainer<TestUnorderedSet>());
+                   false,IsAssociativeContainer<TestUnorderedSet>())
         TEST_EQUAL("is_associative_container-UnorderedMultiSet",
-                   false,IsAssociativeContainer<TestUnorderedMultiSet>());
+                   false,IsAssociativeContainer<TestUnorderedMultiSet>())
         TEST_EQUAL("is_associative_container-UnorderedMap",
-                   true,IsAssociativeContainer<TestUnorderedMap>());
+                   true,IsAssociativeContainer<TestUnorderedMap>())
         TEST_EQUAL("is_associative_container-UnorderedMultiMap",
-                   true,IsAssociativeContainer<TestUnorderedMultiMap>());
+                   true,IsAssociativeContainer<TestUnorderedMultiMap>())
         TEST_EQUAL("is_associative_container-FlatMap",
-                   true,IsAssociativeContainer<TestFlatMap>());
+                   true,IsAssociativeContainer<TestFlatMap>())
         TEST_EQUAL("is_associative_container-ManagedArray",
-                   false,IsAssociativeContainer<TestManagedArray>());
+                   false,IsAssociativeContainer<TestManagedArray>())
         TEST_EQUAL("is_associative_container-SortedManagedArray",
-                   false,IsAssociativeContainer<TestSortedManagedArray>());
+                   false,IsAssociativeContainer<TestSortedManagedArray>())
         TEST_EQUAL("is_associative_container-SortedVector",
-                   false,IsAssociativeContainer<TestSortedVector>());
+                   false,IsAssociativeContainer<TestSortedVector>())
         TEST_EQUAL("is_associative_container-String",
-                   false,IsAssociativeContainer<TestString>());
+                   false,IsAssociativeContainer<TestString>())
         TEST_EQUAL("is_associative_container-SharedPtr",
-                   false,IsAssociativeContainer<TestSharedPtr>());
+                   false,IsAssociativeContainer<TestSharedPtr>())
     }//is_associative_container
 
     {//is_non_associative_container
         TEST_EQUAL("is_non_associative_container-Array",
-                   true,IsNonAssociativeContainer<TestArray>());
+                   true,IsNonAssociativeContainer<TestArray>())
         TEST_EQUAL("is_non_associative_container-Vector",
-                   true,IsNonAssociativeContainer<TestVector>());
+                   true,IsNonAssociativeContainer<TestVector>())
         TEST_EQUAL("is_non_associative_container-Deque",
-                   true,IsNonAssociativeContainer<TestDeque>());
+                   true,IsNonAssociativeContainer<TestDeque>())
         TEST_EQUAL("is_non_associative_container-List",
-                   true,IsNonAssociativeContainer<TestList>());
+                   true,IsNonAssociativeContainer<TestList>())
         TEST_EQUAL("is_non_associative_container-Set",
-                   true,IsNonAssociativeContainer<TestSet>());
+                   true,IsNonAssociativeContainer<TestSet>())
         TEST_EQUAL("is_non_associative_container-MultiSet",
-                   true,IsNonAssociativeContainer<TestMultiSet>());
+                   true,IsNonAssociativeContainer<TestMultiSet>())
         TEST_EQUAL("is_non_associative_container-Map",
-                   false,IsNonAssociativeContainer<TestMap>());
+                   false,IsNonAssociativeContainer<TestMap>())
         TEST_EQUAL("is_non_associative_container-MultiMap",
-                   false,IsNonAssociativeContainer<TestMultiMap>());
+                   false,IsNonAssociativeContainer<TestMultiMap>())
         TEST_EQUAL("is_non_associative_container-UnorderedSet",
-                   true,IsNonAssociativeContainer<TestUnorderedSet>());
+                   true,IsNonAssociativeContainer<TestUnorderedSet>())
         TEST_EQUAL("is_non_associative_container-UnorderedMultiSet",
-                   true,IsNonAssociativeContainer<TestUnorderedMultiSet>());
+                   true,IsNonAssociativeContainer<TestUnorderedMultiSet>())
         TEST_EQUAL("is_non_associative_container-UnorderedMap",
-                   false,IsNonAssociativeContainer<TestUnorderedMap>());
+                   false,IsNonAssociativeContainer<TestUnorderedMap>())
         TEST_EQUAL("is_non_associative_container-UnorderedMultiMap",
-                   false,IsNonAssociativeContainer<TestUnorderedMultiMap>());
+                   false,IsNonAssociativeContainer<TestUnorderedMultiMap>())
         TEST_EQUAL("is_non_associative_container-FlatMap",
-                   false,IsNonAssociativeContainer<TestFlatMap>());
+                   false,IsNonAssociativeContainer<TestFlatMap>())
         TEST_EQUAL("is_non_associative_container-ManagedArray",
-                   true,IsNonAssociativeContainer<TestManagedArray>());
+                   true,IsNonAssociativeContainer<TestManagedArray>())
         TEST_EQUAL("is_non_associative_container-SortedManagedArray",
-                   true,IsNonAssociativeContainer<TestSortedManagedArray>());
+                   true,IsNonAssociativeContainer<TestSortedManagedArray>())
         TEST_EQUAL("is_non_associative_container-SortedVector",
-                   true,IsNonAssociativeContainer<TestSortedVector>());
+                   true,IsNonAssociativeContainer<TestSortedVector>())
         TEST_EQUAL("is_non_associative_container-String",
-                   true,IsNonAssociativeContainer<TestString>());
+                   true,IsNonAssociativeContainer<TestString>())
         TEST_EQUAL("is_non_associative_container-SharedPtr",
-                   false,IsNonAssociativeContainer<TestSharedPtr>());
+                   false,IsNonAssociativeContainer<TestSharedPtr>())
     }//is_non_associative_container
 }
 

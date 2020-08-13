@@ -62,14 +62,14 @@ DEFAULT_TEST_GROUP(StaticAnyTests,StaticAny)
         static_assert( is_static_any_decayed_v<const AnyType&>, "Supposed to Pass." );
         static_assert( !is_static_any_decayed_v<float>, "Supposed to Fail." );
 
-        TEST_EQUAL( "is_static_any<ElementType>-Pass", true, is_static_any<AnyType>::value );
-        TEST_EQUAL( "is_static_any<ElementType>-Fail", false, is_static_any<int>::value );
-        TEST_EQUAL( "is_static_any_v<ElementType>-Pass", true, is_static_any_v<AnyType> );
-        TEST_EQUAL( "is_static_any_v<ElementType>-Fail", false, is_static_any_v<const AnyType> );
-        TEST_EQUAL( "is_static_any_decayed<ElementType>-Pass", true, is_static_any_decayed<AnyType&>::value );
-        TEST_EQUAL( "is_static_any_decayed<ElementType>-Fail", false, is_static_any_decayed<int>::value );
-        TEST_EQUAL( "is_static_any_decayed_v<ElementType>-Pass", true, is_static_any_decayed_v<const AnyType&> );
-        TEST_EQUAL( "is_static_any_decayed_v<ElementType>-Fail", false, is_static_any_decayed_v<float> );
+        TEST_EQUAL( "is_static_any<ElementType>-Pass", true, is_static_any<AnyType>::value )
+        TEST_EQUAL( "is_static_any<ElementType>-Fail", false, is_static_any<int>::value )
+        TEST_EQUAL( "is_static_any_v<ElementType>-Pass", true, is_static_any_v<AnyType> )
+        TEST_EQUAL( "is_static_any_v<ElementType>-Fail", false, is_static_any_v<const AnyType> )
+        TEST_EQUAL( "is_static_any_decayed<ElementType>-Pass", true, is_static_any_decayed<AnyType&>::value )
+        TEST_EQUAL( "is_static_any_decayed<ElementType>-Fail", false, is_static_any_decayed<int>::value )
+        TEST_EQUAL( "is_static_any_decayed_v<ElementType>-Pass", true, is_static_any_decayed_v<const AnyType&> )
+        TEST_EQUAL( "is_static_any_decayed_v<ElementType>-Fail", false, is_static_any_decayed_v<float> )
     }// Traits
 
     {// Casting
@@ -80,43 +80,43 @@ DEFAULT_TEST_GROUP(StaticAnyTests,StaticAny)
         AnyType StringAny( String("Test") );
         const AnyType ConstStringAny( String("ConstTest") );
         TEST_EQUAL( "StaticAnyCast<String>(StaticAny<>)-Ref-Pass",
-                    "Test", StaticAnyCast<String>(StringAny) );
+                    "Test", StaticAnyCast<String>(StringAny) )
         TEST_EQUAL( "StaticAnyCast<String>(StaticAny<>)-ConstRef-Pass",
-                    "ConstTest", StaticAnyCast<String>(ConstStringAny) );
+                    "ConstTest", StaticAnyCast<String>(ConstStringAny) )
         TEST_THROW( "StaticAnyCast<String>(StaticAny<>)-Ref-Fail",
                     Mezzanine::Exception::BadCast,
-                    [&StringAny](){ StaticAnyCast< std::vector<char> >(StringAny); } );
+                    [&StringAny](){ StaticAnyCast< std::vector<char> >(StringAny); } )
         TEST_THROW( "StaticAnyCast<String>(StaticAny<>)-ConstRef-Fail",
                     Mezzanine::Exception::BadCast ,
-                    [&ConstStringAny](){ StaticAnyCast< std::vector<char> >(ConstStringAny); } );
+                    [&ConstStringAny](){ StaticAnyCast< std::vector<char> >(ConstStringAny); } )
 
         double Archimedes(3.1415926);
         const double Eulers(2.7182818);
         AnyType DoubleAny( Archimedes );
         const AnyType ConstDoubleAny( Eulers );
         TEST_EQUAL_EPSILON( "StaticAnyCast<double>(StaticAny<>)-Ptr-Pass",
-                            Archimedes, *StaticAnyCast<double>(&DoubleAny) );
+                            Archimedes, *StaticAnyCast<double>(&DoubleAny) )
         TEST_EQUAL_EPSILON( "StaticAnyCast<double>(StaticAny<>)-ConstPtr-Pass",
-                            Eulers, *StaticAnyCast<double>(&ConstDoubleAny) );
+                            Eulers, *StaticAnyCast<double>(&ConstDoubleAny) )
         TEST_THROW( "StaticAnyCast<double>(StaticAny<>)-Ptr-Fail",
                     Mezzanine::Exception::BadCast ,
-                    [&DoubleAny](){ StaticAnyCast<float>(&DoubleAny); } );
+                    [&DoubleAny](){ StaticAnyCast<float>(&DoubleAny); } )
         TEST_THROW( "StaticAnyCast<double>(StaticAny<>)-ConstPtr-Fail",
                     Mezzanine::Exception::BadCast ,
-                    [&ConstDoubleAny](){ StaticAnyCast<float>(&ConstDoubleAny); } );
+                    [&ConstDoubleAny](){ StaticAnyCast<float>(&ConstDoubleAny); } )
 
         AnyType SharedPtrAny( std::make_shared<long>( long(123) ) );
         const AnyType ConstSharedPtrAny( std::make_shared<short>( short(12345) ) );
         TEST_EQUAL( "StaticAnyCast<_std::shared_ptr<long>_>(StaticAny<>)-Ref-Pass",
-                    long(123), *( StaticAnyCast< std::shared_ptr<long> >(SharedPtrAny) ) );
+                    long(123), *( StaticAnyCast< std::shared_ptr<long> >(SharedPtrAny) ) )
         TEST_EQUAL( "StaticAnyCast<_std::shared_ptr<short>_>(StaticAny<>)-ConstRef-Pass",
-                    short(12345), *( StaticAnyCast< std::shared_ptr<short> >(ConstSharedPtrAny) ) );
+                    short(12345), *( StaticAnyCast< std::shared_ptr<short> >(ConstSharedPtrAny) ) )
         TEST_THROW( "StaticAnyCast<_std::shared_ptr<long>_>(StaticAny<>)-Ref-Fail",
                     Mezzanine::Exception::BadCast ,
-                    [&SharedPtrAny](){ StaticAnyCast< std::shared_ptr<char> >(SharedPtrAny); } );
+                    [&SharedPtrAny](){ StaticAnyCast< std::shared_ptr<char> >(SharedPtrAny); } )
         TEST_THROW( "StaticAnyCast<_std::shared_ptr<short>_>(StaticAny<>)-ConstRef-Fail",
                     Mezzanine::Exception::BadCast ,
-                    [&ConstSharedPtrAny](){ StaticAnyCast< std::shared_ptr<char> >(ConstSharedPtrAny); } );
+                    [&ConstSharedPtrAny](){ StaticAnyCast< std::shared_ptr<char> >(ConstSharedPtrAny); } )
     }// Casting
 
     {// Simple Construct / Destruct
@@ -125,10 +125,10 @@ DEFAULT_TEST_GROUP(StaticAnyTests,StaticAny)
         std::shared_ptr<String> StringPtr = std::make_shared<String>("Test");
         AnyType FirstAny( StringPtr );
         TEST_EQUAL( "SimpleConstructElement",
-                    2, StringPtr.use_count() );
+                    2, StringPtr.use_count() )
         FirstAny.clear();
         TEST_EQUAL( "SimpleDestructElement",
-                    1, StringPtr.use_count() );
+                    1, StringPtr.use_count() )
     }// Simple Construct / Destruct
 
     {// Integer
@@ -141,35 +141,35 @@ DEFAULT_TEST_GROUP(StaticAnyTests,StaticAny)
 
         AnyType EmptyAny;
         TEST_EQUAL( "StaticAny()-Unsigned",
-                    true, EmptyAny.empty() );
+                    true, EmptyAny.empty() )
 
         AnyType CopyAnySource( unsigned(321) );
         AnyType CopyAnyDest(CopyAnySource);
         TEST_EQUAL( "StaticAny(const_StaticAny&)-Unsigned",
-                    unsigned(321), StaticAnyCast<unsigned>(CopyAnySource) );
+                    unsigned(321), StaticAnyCast<unsigned>(CopyAnySource) )
 
         AnyType MoveAnySource( unsigned(12345) );
         AnyType MoveAnyDest( std::move(MoveAnySource) );
         TEST_EQUAL( "StaticAny(StaticAny&&)-Dest-Unsigned",
-                    unsigned(12345), StaticAnyCast<unsigned>(MoveAnyDest) );
+                    unsigned(12345), StaticAnyCast<unsigned>(MoveAnyDest) )
         TEST_EQUAL( "StaticAny(StaticAny&&)-Source-Unsigned",
-                    true, MoveAnySource.empty() );
+                    true, MoveAnySource.empty() )
 
         SmallerAnyType SmallerAny( short(4321) );
         AnyType CopySmallerAny(SmallerAny);
         TEST_EQUAL( "StaticAny(const_StaticAny<size_t>&)-Unsigned",
-                    short(4321), StaticAnyCast<short>(CopySmallerAny) );
+                    short(4321), StaticAnyCast<short>(CopySmallerAny) )
 
         SmallerAnyType SmallerMoveSource( short(123) );
         AnyType SmallerMoveDest( std::move(SmallerMoveSource) );
         TEST_EQUAL( "StaticAny(StaticAny<size_t>&&)-Dest-Unsigned",
-                    short(123), StaticAnyCast<short>(SmallerMoveDest) );
+                    short(123), StaticAnyCast<short>(SmallerMoveDest) )
         TEST_EQUAL( "StaticAny(StaticAny<size_t>&&)-Source-Unsigned",
-                    true, SmallerMoveSource.empty() );
+                    true, SmallerMoveSource.empty() )
 
         AnyType AnythingAny( unsigned(1337) );
         TEST_EQUAL( "StaticAny(ElementType&&)-Unsigned",
-                    unsigned(1337), StaticAnyCast<unsigned>(AnythingAny) );
+                    unsigned(1337), StaticAnyCast<unsigned>(AnythingAny) )
 
         //
         // Assignment operators
@@ -177,46 +177,46 @@ DEFAULT_TEST_GROUP(StaticAnyTests,StaticAny)
 
         AnyType CopyAssignDest;
         TEST_EQUAL( "operator=(const_StaticAny&)-Empty-Unsigned",
-                    true, CopyAssignDest.empty() );
+                    true, CopyAssignDest.empty() )
         AnyType CopyAssignSource( unsigned(144) );
         CopyAssignDest = CopyAssignSource;
         TEST_EQUAL( "operator=(const_StaticAny&)-Unsigned",
-                    unsigned(144), StaticAnyCast<unsigned>(CopyAssignDest) );
+                    unsigned(144), StaticAnyCast<unsigned>(CopyAssignDest) )
 
         AnyType MoveAssignDest;
         TEST_EQUAL( "operator=(StaticAny&&)-Empty-Unsigned",
-                    true, MoveAssignDest.empty() );
+                    true, MoveAssignDest.empty() )
         AnyType MoveAssignSource( unsigned(288) );
         MoveAssignDest = std::move( MoveAssignSource );
         TEST_EQUAL( "operator=(StaticAny&&)-Dest-Unsigned",
-                    unsigned(288), StaticAnyCast<unsigned>(MoveAssignDest) );
+                    unsigned(288), StaticAnyCast<unsigned>(MoveAssignDest) )
         TEST_EQUAL( "operator=(StaticAny&&)-Source-Unsigned",
-                    true, MoveAssignSource.empty() );
+                    true, MoveAssignSource.empty() )
 
         AnyType CopyAssignSmallerDest;
         TEST_EQUAL( "operator=(const_StaticAny<size_t>&)-Empty-Unsigned",
-                    true, CopyAssignSmallerDest.empty() );
+                    true, CopyAssignSmallerDest.empty() )
         SmallerAnyType CopyAssignSmallerSource( short(576) );
         CopyAssignSmallerDest = CopyAssignSmallerSource;
         TEST_EQUAL( "operator=(const_StaticAny<size_t>&)-Unsigned",
-                    short(576), StaticAnyCast<short>(CopyAssignSmallerDest) );
+                    short(576), StaticAnyCast<short>(CopyAssignSmallerDest) )
 
         AnyType MoveAssignSmallerDest;
         TEST_EQUAL( "operator=(StaticAny<size_t>&&)-Empty-Unsigned",
-                    true, MoveAssignSmallerDest.empty() );
+                    true, MoveAssignSmallerDest.empty() )
         SmallerAnyType MoveAssignSmallerSource( short(1152) );
         MoveAssignSmallerDest = std::move( MoveAssignSmallerSource );
         TEST_EQUAL( "operator=(StaticAny<size_t>&&)-Dest-Unsigned",
-                    short(1152), StaticAnyCast<short>(MoveAssignSmallerDest) );
+                    short(1152), StaticAnyCast<short>(MoveAssignSmallerDest) )
         TEST_EQUAL( "operator=(StaticAny<size_t>&&)-Source-Unsigned",
-                    true, MoveAssignSmallerSource.empty() );
+                    true, MoveAssignSmallerSource.empty() )
 
         AnyType AnythingAnyAssignDest;
         TEST_EQUAL( "operator=(ElementType&&)-Empty-Unsigned",
-                    true, AnythingAnyAssignDest.empty() );
+                    true, AnythingAnyAssignDest.empty() )
         AnythingAnyAssignDest = unsigned(8675309);
         TEST_EQUAL( "operator=(ElementType&&)-Unsigned",
-                    unsigned(8675309), StaticAnyCast<unsigned>(AnythingAnyAssignDest) );
+                    unsigned(8675309), StaticAnyCast<unsigned>(AnythingAnyAssignDest) )
 
         //
         // Utility
@@ -224,47 +224,47 @@ DEFAULT_TEST_GROUP(StaticAnyTests,StaticAny)
 
         AnyType UtilityAny;
         TEST_EQUAL( "capacity()-Unsigned",
-                    sizeof(unsigned), AnyType::capacity() );
+                    sizeof(unsigned), AnyType::capacity() )
         TEST_EQUAL( "capacity()-Short",
-                    sizeof(short), SmallerAnyType::capacity() );
+                    sizeof(short), SmallerAnyType::capacity() )
 
         TEST_EQUAL( "align()-Unsigned",
-                    alignof(unsigned), AnyType::align() );
+                    alignof(unsigned), AnyType::align() )
         TEST_EQUAL( "align()-Short",
-                    alignof(short), SmallerAnyType::align() );
+                    alignof(short), SmallerAnyType::align() )
 
         TEST_EQUAL( "empty()_const-Unassigned-Unsigned",
-                    true, UtilityAny.empty() );
+                    true, UtilityAny.empty() )
         TEST_EQUAL( "size()_const-Unassigned-Unsigned",
-                    size_t(0), UtilityAny.size() );
+                    size_t(0), UtilityAny.size() )
         TEST_EQUAL( "get_type()_const-Unassigned-Unsigned",
-                    typeid(void).hash_code(), UtilityAny.get_type().hash_code() );
+                    typeid(void).hash_code(), UtilityAny.get_type().hash_code() )
 
         UtilityAny.emplace<unsigned>(unsigned(2304));
         TEST_EQUAL( "emplace(ArgTypes&&...)-Unsigned",
-                    unsigned(2304), StaticAnyCast<unsigned>(UtilityAny) );
+                    unsigned(2304), StaticAnyCast<unsigned>(UtilityAny) )
 
         TEST_EQUAL( "empty()_const-Assigned-Unsigned",
-                    false, UtilityAny.empty() );
+                    false, UtilityAny.empty() )
         TEST_EQUAL( "size()_const-Assigned-Unsigned",
-                    sizeof(unsigned), UtilityAny.size() );
+                    sizeof(unsigned), UtilityAny.size() )
         TEST_EQUAL( "get_type()_const-Assigned-Unsigned",
-                    typeid(unsigned).hash_code(), UtilityAny.get_type().hash_code() );
+                    typeid(unsigned).hash_code(), UtilityAny.get_type().hash_code() )
 
         UtilityAny = char('A');
         TEST_EQUAL( "operator=(ElementType&&)-Unsigned-Char",
-                    char('A'), StaticAnyCast<char>(UtilityAny) );
+                    char('A'), StaticAnyCast<char>(UtilityAny) )
 
         TEST_EQUAL( "empty()_const-Assigned-Unsigned-Char",
-                    false, UtilityAny.empty() );
+                    false, UtilityAny.empty() )
         TEST_EQUAL( "size()_const-Assigned-Unsigned-Char",
-                    sizeof(char), UtilityAny.size() );
+                    sizeof(char), UtilityAny.size() )
         TEST_EQUAL( "get_type()_const-Assigned-Unsigned-Char",
-                    typeid(char).hash_code(), UtilityAny.get_type().hash_code() );
+                    typeid(char).hash_code(), UtilityAny.get_type().hash_code() )
 
         UtilityAny.clear();
         TEST_EQUAL( "clear()-Unsigned",
-                    true, UtilityAny.empty() );
+                    true, UtilityAny.empty() )
     }// Integer
 
     {// String
@@ -277,35 +277,35 @@ DEFAULT_TEST_GROUP(StaticAnyTests,StaticAny)
 
         AnyType EmptyAny;
         TEST_EQUAL( "StaticAny()-String",
-                    true, EmptyAny.empty() );
+                    true, EmptyAny.empty() )
 
         AnyType CopyAnySource( String("321") );
         AnyType CopyAnyDest(CopyAnySource);
         TEST_EQUAL( "StaticAny(const_StaticAny&)-String",
-                    String("321"), StaticAnyCast<String>(CopyAnySource) );
+                    String("321"), StaticAnyCast<String>(CopyAnySource) )
 
         AnyType MoveAnySource( String("1234") );
         AnyType MoveAnyDest( std::move(MoveAnySource) );
         TEST_EQUAL( "StaticAny(StaticAny&&)-Dest-String",
-                    String("1234"), StaticAnyCast<String>(MoveAnyDest) );
+                    String("1234"), StaticAnyCast<String>(MoveAnyDest) )
         TEST_EQUAL( "StaticAny(StaticAny&&)-Source-String",
-                    true, MoveAnySource.empty() );
+                    true, MoveAnySource.empty() )
 
         SmallerAnyType SmallerAny( char('$') );
         AnyType CopySmallerAny(SmallerAny);
         TEST_EQUAL( "StaticAny(const_StaticAny<size_t>&)-String",
-                    char('$'), StaticAnyCast<char>(CopySmallerAny) );
+                    char('$'), StaticAnyCast<char>(CopySmallerAny) )
 
         SmallerAnyType SmallerMoveSource( char('@') );
         AnyType SmallerMoveDest( std::move(SmallerMoveSource) );
         TEST_EQUAL( "StaticAny(StaticAny<size_t>&&)-Dest-String",
-                    char('@'), StaticAnyCast<char>(SmallerMoveDest) );
+                    char('@'), StaticAnyCast<char>(SmallerMoveDest) )
         TEST_EQUAL( "StaticAny(StaticAny<size_t>&&)-Source-String",
-                    true, SmallerMoveSource.empty() );
+                    true, SmallerMoveSource.empty() )
 
         AnyType AnythingAny( String("1337") );
         TEST_EQUAL( "StaticAny(ElementType&&)-String",
-                    String("1337"), StaticAnyCast<String>(AnythingAny) );
+                    String("1337"), StaticAnyCast<String>(AnythingAny) )
 
         //
         // Assignment operators
@@ -313,46 +313,46 @@ DEFAULT_TEST_GROUP(StaticAnyTests,StaticAny)
 
         AnyType CopyAssignDest;
         TEST_EQUAL( "operator=(const_StaticAny&)-Empty-String",
-                    true, CopyAssignDest.empty() );
+                    true, CopyAssignDest.empty() )
         AnyType CopyAssignSource( String("144") );
         CopyAssignDest = CopyAssignSource;
         TEST_EQUAL( "operator=(const_StaticAny&)-String",
-                    String("144"), StaticAnyCast<String>(CopyAssignDest) );
+                    String("144"), StaticAnyCast<String>(CopyAssignDest) )
 
         AnyType MoveAssignDest;
         TEST_EQUAL( "operator=(StaticAny&&)-Empty-String",
-                    true, MoveAssignDest.empty() );
+                    true, MoveAssignDest.empty() )
         AnyType MoveAssignSource( String("288") );
         MoveAssignDest = std::move( MoveAssignSource );
         TEST_EQUAL( "operator=(StaticAny&&)-Dest-String",
-                    String("288"), StaticAnyCast<String>(MoveAssignDest) );
+                    String("288"), StaticAnyCast<String>(MoveAssignDest) )
         TEST_EQUAL( "operator=(StaticAny&&)-Source-String",
-                    true, MoveAssignSource.empty() );
+                    true, MoveAssignSource.empty() )
 
         AnyType CopyAssignSmallerDest;
         TEST_EQUAL( "operator=(const_StaticAny<size_t>&)-Empty-String",
-                    true, CopyAssignSmallerDest.empty() );
+                    true, CopyAssignSmallerDest.empty() )
         SmallerAnyType CopyAssignSmallerSource( char('$') );
         CopyAssignSmallerDest = CopyAssignSmallerSource;
         TEST_EQUAL( "operator=(const_StaticAny<size_t>&)-String",
-                    char('$'), StaticAnyCast<char>(CopyAssignSmallerDest) );
+                    char('$'), StaticAnyCast<char>(CopyAssignSmallerDest) )
 
         AnyType MoveAssignSmallerDest;
         TEST_EQUAL( "operator=(StaticAny<size_t>&&)-Empty-String",
-                    true, MoveAssignSmallerDest.empty() );
+                    true, MoveAssignSmallerDest.empty() )
         SmallerAnyType MoveAssignSmallerSource( char('@') );
         MoveAssignSmallerDest = std::move( MoveAssignSmallerSource );
         TEST_EQUAL( "operator=(StaticAny<size_t>&&)-Dest-String",
-                    char('@'), StaticAnyCast<char>(MoveAssignSmallerDest) );
+                    char('@'), StaticAnyCast<char>(MoveAssignSmallerDest) )
         TEST_EQUAL( "operator=(StaticAny<size_t>&&)-Source-String",
-                    true, MoveAssignSmallerSource.empty() );
+                    true, MoveAssignSmallerSource.empty() )
 
         AnyType AnythingAnyAssignDest;
         TEST_EQUAL( "operator=(ElementType&&)-Empty-String",
-                    true, AnythingAnyAssignDest.empty() );
+                    true, AnythingAnyAssignDest.empty() )
         AnythingAnyAssignDest = String("8675309");
         TEST_EQUAL( "operator=(ElementType&&)-String",
-                    String("8675309"), StaticAnyCast<String>(AnythingAnyAssignDest) );
+                    String("8675309"), StaticAnyCast<String>(AnythingAnyAssignDest) )
 
         //
         // Utility
@@ -360,47 +360,47 @@ DEFAULT_TEST_GROUP(StaticAnyTests,StaticAny)
 
         AnyType UtilityAny;
         TEST_EQUAL( "capacity()-String",
-                    sizeof(String), AnyType::capacity() );
+                    sizeof(String), AnyType::capacity() )
         TEST_EQUAL( "capacity()-CharString",
-                    (sizeof(char) * 3), SmallerAnyType::capacity() );
+                    (sizeof(char) * 3), SmallerAnyType::capacity() )
 
         TEST_EQUAL( "align()-String",
-                    alignof(String), AnyType::align() );
+                    alignof(String), AnyType::align() )
         TEST_EQUAL( "align()-CharString",
-                    size_t(4), SmallerAnyType::align() );
+                    size_t(4), SmallerAnyType::align() )
 
         TEST_EQUAL( "empty()_const-Unassigned-String",
-                    true, UtilityAny.empty() );
+                    true, UtilityAny.empty() )
         TEST_EQUAL( "size()_const-Unassigned-String",
-                    size_t(0), UtilityAny.size() );
+                    size_t(0), UtilityAny.size() )
         TEST_EQUAL( "get_type()_const-Unassigned-String",
-                    typeid(void).hash_code(),UtilityAny.get_type().hash_code() );
+                    typeid(void).hash_code(),UtilityAny.get_type().hash_code() )
 
         UtilityAny.emplace<String>("2304");
         TEST_EQUAL( "emplace(ArgTypes&&...)-String",
-                    String("2304"), StaticAnyCast<String>(UtilityAny) );
+                    String("2304"), StaticAnyCast<String>(UtilityAny) )
 
         TEST_EQUAL( "empty()_const-Assigned-String",
-                    false, UtilityAny.empty() );
+                    false, UtilityAny.empty() )
         TEST_EQUAL( "size()_const-Assigned-String",
-                    sizeof(String), UtilityAny.size() );
+                    sizeof(String), UtilityAny.size() )
         TEST_EQUAL( "get_type()_const-Assigned-String",
-                    typeid(String).hash_code(),UtilityAny.get_type().hash_code() );
+                    typeid(String).hash_code(),UtilityAny.get_type().hash_code() )
 
         UtilityAny = char('a');
         TEST_EQUAL( "operator=(ElementType&&)-String-Char",
-                    char('a'), StaticAnyCast<char>(UtilityAny) );
+                    char('a'), StaticAnyCast<char>(UtilityAny) )
 
         TEST_EQUAL( "empty()_const-Assigned-String-Char",
-                    false, UtilityAny.empty() );
+                    false, UtilityAny.empty() )
         TEST_EQUAL( "size()_const-Assigned-String-Char",
-                    sizeof(char), UtilityAny.size() );
+                    sizeof(char), UtilityAny.size() )
         TEST_EQUAL( "get_type()_const-Assigned-String-Char",
-                    typeid(char).hash_code(),UtilityAny.get_type().hash_code() );
+                    typeid(char).hash_code(),UtilityAny.get_type().hash_code() )
 
         UtilityAny.clear();
         TEST_EQUAL( "clear()-String",
-                    true, UtilityAny.empty());
+                    true, UtilityAny.empty())
     }// String
 }
 

@@ -392,7 +392,7 @@ namespace StringTools {
     {
         if( Hex.size() != 2 ) {
             MEZZ_EXCEPTION(HexConversionCode,
-                           "Hex code requires 2 characters to express a Colour channel.");
+                           "Hex code requires 2 characters to express a Colour channel.")
         }
 
         // <charconv> implementation
@@ -400,7 +400,7 @@ namespace StringTools {
         std::from_chars_result Result = std::from_chars(Hex.data(),Hex.data() + 2,Temp,16);
         if( Result.ec != std::errc() ) {
             MEZZ_EXCEPTION(HexConversionCode,
-                           "Error parsing Hex String. Does the String contain only valid Hex characters?");
+                           "Error parsing Hex String. Does the String contain only valid Hex characters?")
         }
         Real Ret = static_cast<Real>(Temp);
         return std::min(Ret *= HexConversionMultiplier,Real(1.0));//*/
@@ -410,7 +410,7 @@ namespace StringTools {
         Real Ret = static_cast<Real>( std::strtol(Hex.data(),&EndPtr,16) );
         if( EndPtr != std::next(Hex.data(),2) ) {
             MEZZ_EXCEPTION(HexConversionCode,
-                           "Error parsing Hex String. Does the String contain only valid Hex characters?");
+                           "Error parsing Hex String. Does the String contain only valid Hex characters?")
         }
         return std::min(Ret *= HexConversionMultiplier,Real(1.0));
     }
@@ -423,7 +423,7 @@ namespace StringTools {
         std::to_chars_result Result = std::to_chars(Ret.data(),Ret.data() + 2,Temp,16);
         if( Result.ec != std::errc() ) {
             MEZZ_EXCEPTION(HexConversionCode,
-                           "Error converting Real to Hex. Is it within the range 0.0-1.0?");
+                           "Error converting Real to Hex. Is it within the range 0.0-1.0?")
         }
 
         if( Result.ptr == std::next(Ret.data()) ) {

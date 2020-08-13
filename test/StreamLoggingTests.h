@@ -96,8 +96,8 @@ DEFAULT_TEST_GROUP(StreamLoggingTests, StreamLogging)
                   << "You should have seen no 'NOT's and " << Expected << " messages with the word 'displayed'. \n"
                   << std::endl;
 
-        TEST_EQUAL("InternalStreamSingleNotsDropped", 0, FindCount(Output, "NOT"));
-        TEST_EQUAL("InternalStreamSinglePassedThrough", Expected, FindCount(Output, "Should be displayed"));
+        TEST_EQUAL("InternalStreamSingleNotsDropped", 0, FindCount(Output, "NOT"))
+        TEST_EQUAL("InternalStreamSinglePassedThrough", Expected, FindCount(Output, "Should be displayed"))
     }
 
     {
@@ -125,8 +125,8 @@ DEFAULT_TEST_GROUP(StreamLoggingTests, StreamLogging)
                   << "You should have seen no 'NOT's and " << Expected << " messages with the word 'displayed'. \n"
                   << std::endl;
 
-        TEST_EQUAL("InternalStreamORdNotsDropped", 0, FindCount(Output, "NOT"));
-        TEST_EQUAL("InternalStreamORdPassedThrough", Expected, FindCount(Output, "Should be displayed"));
+        TEST_EQUAL("InternalStreamORdNotsDropped", 0, FindCount(Output, "NOT"))
+        TEST_EQUAL("InternalStreamORdPassedThrough", Expected, FindCount(Output, "Should be displayed"))
     }
 
     {
@@ -155,8 +155,8 @@ DEFAULT_TEST_GROUP(StreamLoggingTests, StreamLogging)
                   << "You should have seen no 'NOT's and " << Expected << " messages with the word 'displayed'. \n"
                   << std::endl;
 
-        TEST_EQUAL("InternalStreamANDedNotsDropped", 0, FindCount(Output, "NOT"));
-        TEST_EQUAL("InternalStreamANDedPassedThrough", Expected, FindCount(Output, "Should be displayed"));
+        TEST_EQUAL("InternalStreamANDedNotsDropped", 0, FindCount(Output, "NOT"))
+        TEST_EQUAL("InternalStreamANDedPassedThrough", Expected, FindCount(Output, "Should be displayed"))
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -184,8 +184,8 @@ DEFAULT_TEST_GROUP(StreamLoggingTests, StreamLogging)
                   << "You should have seen no 'NOT's and " << Expected << " messages with the word 'displayed'. \n"
                   << std::endl;
 
-        TEST_EQUAL("StandardlStreamSingleNotsDropped", 0, FindCount(Output, "NOT"));
-        TEST_EQUAL("StandardStreamSinglePassedThrough", Expected, FindCount(Output, "Should be displayed"));
+        TEST_EQUAL("StandardlStreamSingleNotsDropped", 0, FindCount(Output, "NOT"))
+        TEST_EQUAL("StandardStreamSinglePassedThrough", Expected, FindCount(Output, "Should be displayed"))
     }
 
     {
@@ -212,8 +212,8 @@ DEFAULT_TEST_GROUP(StreamLoggingTests, StreamLogging)
                   << "You should have seen no 'NOT's and " << Expected << " messages with the word 'displayed'. \n"
                   << std::endl;
 
-        TEST_EQUAL("StandardStreamORdNotsDropped", 0, FindCount(Output, "NOT"));
-        TEST_EQUAL("StandardStreamORdPassedThrough", Expected, FindCount(Output, "Should be displayed"));
+        TEST_EQUAL("StandardStreamORdNotsDropped", 0, FindCount(Output, "NOT"))
+        TEST_EQUAL("StandardStreamORdPassedThrough", Expected, FindCount(Output, "Should be displayed"))
     }
 
     {
@@ -241,8 +241,8 @@ DEFAULT_TEST_GROUP(StreamLoggingTests, StreamLogging)
                   << "You should have seen no 'NOT's and " << Expected << " messages with the word 'displayed'. \n"
                   << std::endl;
 
-        TEST_EQUAL("StandardStreamANDedNotsDropped", 0, FindCount(Output, "NOT"));
-        TEST_EQUAL("StandardStreamANDedPassedThrough", Expected, FindCount(Output, "Should be displayed"));
+        TEST_EQUAL("StandardStreamANDedNotsDropped", 0, FindCount(Output, "NOT"))
+        TEST_EQUAL("StandardStreamANDedPassedThrough", Expected, FindCount(Output, "Should be displayed"))
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -253,27 +253,27 @@ DEFAULT_TEST_GROUP(StreamLoggingTests, StreamLogging)
         std::stringstream Converter;
 
         Converter << LogLevel::None;
-        TEST("LogLevelNoneStreams", 0 < FindCount(Converter.str(), "None"));
+        TEST("LogLevelNoneStreams", 0 < FindCount(Converter.str(), "None"))
         Converter.str("");
 
         Converter << LogLevel::Trace;
-        TEST("LogLevelTraceStreams", 0 < FindCount(Converter.str(), "Trace"));
+        TEST("LogLevelTraceStreams", 0 < FindCount(Converter.str(), "Trace"))
         Converter.str("");
 
         Converter << LogLevel::Debug;
-        TEST("LogLevelDebugStreams", 0 < FindCount(Converter.str(), "Debug"));
+        TEST("LogLevelDebugStreams", 0 < FindCount(Converter.str(), "Debug"))
         Converter.str("");
 
         Converter << LogLevel::Warn;
-        TEST("LogLevelWarnStreams", 0 < FindCount(Converter.str(), "Warn"));
+        TEST("LogLevelWarnStreams", 0 < FindCount(Converter.str(), "Warn"))
         Converter.str("");
 
         Converter << LogLevel::Error;
-        TEST("LogLevelErrorStreams", 0 < FindCount(Converter.str(), "Error"));
+        TEST("LogLevelErrorStreams", 0 < FindCount(Converter.str(), "Error"))
         Converter.str("");
 
         Converter << LogLevel::Fatal;
-        TEST("LogLevelFatalStreams", 0 < FindCount(Converter.str(), "Fatal"));
+        TEST("LogLevelFatalStreams", 0 < FindCount(Converter.str(), "Fatal"))
         Converter.str("");
     }
 }

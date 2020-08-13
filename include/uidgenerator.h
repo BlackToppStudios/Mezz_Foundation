@@ -44,6 +44,8 @@
 #include "datatypes.h"
 #include "interval.h"
 
+#include "MezzException.h"
+
 #ifndef SWIG
 #include <cassert>
 #endif

@@ -163,7 +163,7 @@ namespace Hashing {
                     TailBlock = ROTL32(TailBlock,15);
                     TailBlock *= x86_32_Constant_Two;
                     OutputHash ^= TailBlock;
-        };
+        }
 
         //----------
         // Finalization
@@ -282,7 +282,7 @@ namespace Hashing {
                      TailBlockPart1  = ROTL32(TailBlockPart1,15);
                      TailBlockPart1 *= x86_128_Constant_Two;
                      HashPart1 ^= TailBlockPart1;
-        };
+        }
 
         //----------
         // Finalization
@@ -395,7 +395,7 @@ namespace Hashing {
                      TailBlockPart1  = ROTL64(TailBlockPart1,31);
                      TailBlockPart1 *= x64_128_Constant_Two;
                      HashPart1 ^= TailBlockPart1;
-        };
+        }
 
         //----------
         // Finalization
