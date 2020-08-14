@@ -170,15 +170,15 @@ DEFAULT_TEST_GROUP(FunctionalToolsTests,FunctionalTools)
     }
 
     {
-        const auto OnlyReturnsOne = Curry(IsEven, 2);
-        const auto OnlyReturnsZero = Curry(IsEven, 1);
-        const auto AlsoOnlyReturnsOne = CurryBack(IsEven, 2);
-        const auto AlsoOnlyReturnsZero = CurryBack(IsEven, 1);
+        const auto OnlyReturnsTrue = Curry(IsEven, 2);
+        const auto OnlyReturnsFalse = Curry(IsEven, 1);
+        const auto AlsoOnlyReturnsTrue = CurryBack(IsEven, 2);
+        const auto AlsoOnlyReturnsFalse = CurryBack(IsEven, 1);
 
-        TEST_EQUAL("CurryReturnsOne", 1, OnlyReturnsOne())
-        TEST_EQUAL("CurryReturnsZero", 0, OnlyReturnsZero())
-        TEST_EQUAL("CurryBackReturnsOne", 1, AlsoOnlyReturnsOne())
-        TEST_EQUAL("CurryBackReturnsZero", 0, AlsoOnlyReturnsZero())
+        TEST_EQUAL("CurryReturnsTrue", true, OnlyReturnsTrue())
+        TEST_EQUAL("CurryReturnsFalse", false, OnlyReturnsFalse())
+        TEST_EQUAL("CurryBackReturnsTrue", true, AlsoOnlyReturnsTrue())
+        TEST_EQUAL("CurryBackReturnsFalse", false, AlsoOnlyReturnsFalse())
 
         const auto SubtractFromTen = Curry(std::minus<int>(), 10);
         TEST_EQUAL("CurryStdFunctions", 3, SubtractFromTen(7))

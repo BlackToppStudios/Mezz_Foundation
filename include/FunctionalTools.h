@@ -79,6 +79,9 @@ namespace Mezzanine
 
     RESTORE_WARNING_STATE
 
+    // The select make a new method by checking if the predicate is true when called for each item in the incoming data.
+    // if it is true, it is included, if not it is excluded.
+
     // This is an implementation detail of Select
 
     template <typename CVReturnContainerType = void, typename MaybePredicateType = std::false_type>
@@ -258,6 +261,9 @@ namespace Mezzanine
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    // Reject is the inverse of select. It makes a new collection by applying a function to each item in the incoming
+    // data and keeping it if false (copying into new collection).
+
     template<typename CVReturnContainerType = void,
              typename CVIncomingContainerType,
              typename PredicateType>
@@ -349,6 +355,9 @@ namespace Mezzanine
     }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // The "map" operation, this creates a new collection by capturing the values returned when apply a function to the
+    // incoming data set.
 
     template<typename CVReturnContainerType = void,
              typename CVIncomingContainerType,
