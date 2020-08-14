@@ -137,53 +137,50 @@ namespace ContainerDetect {
     constexpr Boole HasClear()
         { return HasClear_t<Class>::value; }
 
+    /// @brief Convenience type for push_back function detection.
+    /// @tparam Class The class to test.
+    template<typename Class>
+    using PushBackValueFunct_t = decltype(std::declval<Class&>().push_back(std::declval<typename Class::value_type>()));
+    /// @brief Type for is_detected that tests for the existence of push_back on a class.
+    /// @tparam Class The class that will be checked for the presence of a push_back function.
+    template<typename Class>
+    using PushBackValue_t = std::is_detected<PushBackValueFunct_t,Class>;
+    /// @brief Convenience function for the value of a HasPushBackValue check.
+    /// @tparam Class The class that will be checked for the presence of a "push_back(class::value_type)" function.
+    /// @return Returns true if the provided type has a "push_back()" member function that accepts a value, false otherwise.
+    template<typename Class>
+    constexpr Boole HasPushBackValue()
+        { return PushBackValue_t<Class>::value; }
 
+    /// @brief Convenience type for insert function detection.
+    /// @tparam Class The class to test.
+    template<typename Class>
+    using InsertValueFunct_t = decltype(std::declval<Class&>().insert(std::declval<typename Class::value_type>()));
+    /// @brief Type for is_detected that tests for the existence of insert on a class.
+    /// @tparam Class The class that will be checked for the presence of a insert function.
+    template<typename Class>
+    using InsertValue_t = std::is_detected<InsertValueFunct_t,Class>;
+    /// @brief Convenience function for the value of a HasInsertValue check.
+    /// @tparam Class The class that will be checked for the presence of a "insert(class::value_type)" function.
+    /// @return Returns true if the provided type has a "insert()" member function that accepts a value, false otherwise.
+    template<typename Class>
+    constexpr Boole HasInsertValue()
+        { return InsertValue_t<Class>::value; }
 
-/// @brief Convenience type for push_back function detection.
-/// @tparam Class The class to test.
-template<typename Class>
-using PushBackValueFunct_t = decltype(std::declval<Class&>().push_back(std::declval<typename Class::value_type>()));
-/// @brief Type for is_detected that tests for the existence of push_back on a class.
-/// @tparam Class The class that will be checked for the presence of a push_back function.
-template<typename Class>
-using PushBackValue_t = std::is_detected<PushBackValueFunct_t,Class>;
-/// @brief Convenience function for the value of a HasPushBackValue check.
-/// @tparam Class The class that will be checked for the presence of a "push_back(class::value_type)" function.
-/// @return Returns true if the provided type has a "push_back()" member function that accepts a value, false otherwise.
-template<typename Class>
-constexpr Boole HasPushBackValue()
-    { return PushBackValue_t<Class>::value; }
-
-/// @brief Convenience type for insert function detection.
-/// @tparam Class The class to test.
-template<typename Class>
-using InsertValueFunct_t = decltype(std::declval<Class&>().insert(std::declval<typename Class::value_type>()));
-/// @brief Type for is_detected that tests for the existence of insert on a class.
-/// @tparam Class The class that will be checked for the presence of a insert function.
-template<typename Class>
-using InsertValue_t = std::is_detected<InsertValueFunct_t,Class>;
-/// @brief Convenience function for the value of a HasInsertValue check.
-/// @tparam Class The class that will be checked for the presence of a "insert(class::value_type)" function.
-/// @return Returns true if the provided type has a "insert()" member function that accepts a value, false otherwise.
-template<typename Class>
-constexpr Boole HasInsertValue()
-    { return InsertValue_t<Class>::value; }
-
-/// @brief Convenience type for add(value) function detection.
-/// @tparam Class The class to test.
-template<typename Class>
-using AddValueFunct_t = decltype(std::declval<Class&>().add(std::declval<typename Class::value_type>()));
-/// @brief Type for is_detected that tests for the existence of add on a class.
-/// @tparam Class The class that will be checked for the presence of a insert function.
-template<typename Class>
-using AddValue_t = std::is_detected<AddValueFunct_t,Class>;
-/// @brief Convenience function for the value of a HasAddValue check.
-/// @tparam Class The class that will be checked for the presence of a "add(class::value_type)" function.
-/// @return Returns true if the provided type has a "add()" member function that accepts a value, false otherwise.
-template<typename Class>
-constexpr Boole HasAddValue()
-    { return AddValue_t<Class>::value; }
-
+    /// @brief Convenience type for add(value) function detection.
+    /// @tparam Class The class to test.
+    template<typename Class>
+    using AddValueFunct_t = decltype(std::declval<Class&>().add(std::declval<typename Class::value_type>()));
+    /// @brief Type for is_detected that tests for the existence of add on a class.
+    /// @tparam Class The class that will be checked for the presence of a insert function.
+    template<typename Class>
+    using AddValue_t = std::is_detected<AddValueFunct_t,Class>;
+    /// @brief Convenience function for the value of a HasAddValue check.
+    /// @tparam Class The class that will be checked for the presence of a "add(class::value_type)" function.
+    /// @return Returns true if the provided type has a "add()" member function that accepts a value, false otherwise.
+    template<typename Class>
+    constexpr Boole HasAddValue()
+        { return AddValue_t<Class>::value; }
 
     /// @brief Dummy/failure type for detecting if a class has a "value_type" defined.
     /// @tparam Class The class to be tested.

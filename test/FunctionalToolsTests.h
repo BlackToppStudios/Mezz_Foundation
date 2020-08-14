@@ -54,103 +54,109 @@ DEFAULT_TEST_GROUP(FunctionalToolsTests,FunctionalTools)
 {
     using namespace Mezzanine;
 
+    // This meme is floating around r/ProgrammerHumor so I might as well.
+    const auto IsEven = [](Integer i) noexcept { return i%2 == 0; };
+    const auto IsOdd = [IsEven](Integer i) noexcept { return !IsEven(i); };
+    const auto Increment = [](Integer i) noexcept { return i+1; };
+
+    const std::vector<Integer> OneToTen {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    const std::vector<Integer> OneToTenOnlyEven {2, 4, 6, 8, 10};
+    const std::vector<Integer> OneToTenOnlyOdd {1, 3, 5, 7, 9};
+    const std::vector<Integer> OnlyZeroForSure{0};
+    const std::vector<Integer> ZeroToTenOnlyEven {0, 2, 4, 6, 8, 10};
+    const std::vector<Integer> ZeroAndTwoToEleven {0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
+
+    const std::list<Integer> ListOneToTenOnlyEven {2, 4, 6, 8, 10};
+    const std::set<Integer> SetOneToTenOnlyOdd {1, 3, 5, 7, 9};
+    const std::deque<Integer> DequeOneToTenOnlyEven {2, 4, 6, 8, 10};
+
     {
-        // This meme is floating around r/ProgrammerHumor so I might as well.
-        const auto IsEven = [](Integer i){ return i%2 == 0; };
-        const auto IsOdd = [IsEven](Integer i){ return !IsEven(i); };
-        const auto Increment = [](Integer i){ return i+1; };
+        // Simple tests
+        TEST("Select<Integer>(IsEven)", OneToTenOnlyEven == Select(OneToTen, IsEven))
+        TEST("Reject<Integer>(IsEven)", OneToTenOnlyOdd == Reject(OneToTen, IsEven))
+        TEST("Convert<Integer>(Increment)", OneToTenOnlyEven == Convert(OneToTenOnlyOdd, Increment))
 
-        const std::vector<Integer> OneToTen {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-        const std::vector<Integer> OneToTenOnlyEven {2, 4, 6, 8, 10};
-        const std::vector<Integer> OneToTenOnlyOdd {1, 3, 5, 7, 9};
-        const std::vector<Integer> OnlyZeroForSure{0};
-        const std::vector<Integer> ZeroToTenOnlyEven {0, 2, 4, 6, 8, 10};
-        const std::vector<Integer> ZeroAndTwoToEleven {0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
+        // Specified Return Types
+        TEST("Select<List,Integer>(IsEven)",
+             ListOneToTenOnlyEven == Select<std::list<Integer>>(OneToTen, IsEven))
+        TEST("Reject<Set,Integer>(IsEven)",
+             SetOneToTenOnlyOdd == Reject<std::set<Integer>>(OneToTen, IsEven))
+        TEST("Convert<Deque,Integer>(Increment)",
+             DequeOneToTenOnlyEven == Convert<std::deque<Integer>>(OneToTenOnlyOdd, Increment))
+    }
 
-        const std::list<Integer> ListOneToTenOnlyEven {2, 4, 6, 8, 10};
-        const std::set<Integer> SetOneToTenOnlyOdd {1, 3, 5, 7, 9};
-        const std::deque<Integer> DequeOneToTenOnlyEven {2, 4, 6, 8, 10};
+    { // AutoCurrying Predicates
+        const auto SelectEvenIntoVector = Select<std::vector<Integer>>(IsEven);
+        TEST("SelectAutoCurried<vectorConstruction>(IsEven)", OneToTenOnlyEven == SelectEvenIntoVector(OneToTen))
 
-        {
-            // Simple tests
-            TEST("Select<Integer>(IsEven)", OneToTenOnlyEven == Select(OneToTen, IsEven))
-            TEST("Reject<Integer>(IsEven)", OneToTenOnlyOdd == Reject(OneToTen, IsEven))
-            TEST("Convert<Integer>(Increment)", OneToTenOnlyEven == Convert(OneToTenOnlyOdd, Increment))
+        const auto SelectEven = Select(IsEven);
+        TEST("SelectAutoCurried<Integer>(IsEven)", OneToTenOnlyEven == SelectEven(OneToTen))
 
-            // Specified Return Types
-            TEST("Select<List,Integer>(IsEven)",
-                 ListOneToTenOnlyEven == Select<std::list<Integer>>(OneToTen, IsEven))
-            TEST("Reject<Set,Integer>(IsEven)",
-                 SetOneToTenOnlyOdd == Reject<std::set<Integer>>(OneToTen, IsEven))
-            TEST("Convert<Deque,Integer>(Increment)",
-                 DequeOneToTenOnlyEven == Convert<std::deque<Integer>>(OneToTenOnlyOdd, Increment))
-
-        }
-
-        {
-            // Simple tests
-            TEST("Select3<Integer>(IsEven)", OneToTenOnlyEven == Select3(OneToTen, IsEven))
-            TEST("Reject3<Integer>(IsEven)", OneToTenOnlyOdd == Reject3(OneToTen, IsEven))
-            TEST("Convert3<Integer>(Increment)", OneToTenOnlyEven == Convert3(OneToTenOnlyOdd, Increment))
-
-            // Specified Return Types
-            TEST("Select3<List,Integer>(IsEven)",
-                 ListOneToTenOnlyEven == Select3(OneToTen, IsEven, std::list<Integer>{}))
-            TEST("Select3<Set,Integer>(IsEven)",
-                 SetOneToTenOnlyOdd == Reject3(OneToTen, IsEven, std::set<Integer>{}))
-            TEST("Convert3<Deque,Integer>(Increment)",
-                 DequeOneToTenOnlyEven == Convert3(OneToTenOnlyOdd, Increment, std::deque<Integer>()))
-            {
-                std::vector<Integer> OnlyZeroMutable{0};
-                TEST("Select3<List,Integer,{0}>(IsEven)",
-                     ZeroToTenOnlyEven == Select3(OneToTen, IsEven,std::vector<Integer>{0}))
-                TEST("Select3<List,Integer,{0}>(IsEven)-InputUnchanged", OnlyZeroForSure == OnlyZeroMutable)
-
-                TEST("Select3<List,Integer,const&{0}>(IsEven)",
-                     ZeroToTenOnlyEven == Select3(OneToTen, IsEven, OnlyZeroForSure))
-                TEST("Select3<List,Integer,const&{0}>(IsEven)-InputUnchanged", OnlyZeroForSure == OnlyZeroMutable)
-
-                TEST("Select3<List,Integer,&{0}>(IsEven)",
-                     ZeroToTenOnlyEven == Select3(OneToTen, IsEven, OnlyZeroMutable))
-                TEST("Select3<List,Integer,&{0}>(IsEven)-InputUnchanged", OnlyZeroForSure == OnlyZeroMutable)
-            }
-
-            {
-                std::vector<Integer> OnlyZeroMutable{0};
-                TEST("Reject3<List,Integer,{0}>(IsOdd)",
-                     ZeroToTenOnlyEven == Reject3(OneToTen, IsOdd,std::vector<Integer>{0}))
-                TEST("Reject3<List,Integer,{0}>(IsOdd)-InputUnchanged", OnlyZeroForSure == OnlyZeroMutable)
-
-                TEST("Reject3<List,Integer,const&{0}>(IsOdd)",
-                     ZeroToTenOnlyEven == Reject3(OneToTen, IsOdd, OnlyZeroForSure))
-                TEST("Reject3<List,Integer,const&{0}>(IsOdd)-InputUnchanged", OnlyZeroForSure == OnlyZeroMutable)
-
-                TEST("Reject3<List,Integer,&{0}>(IsOdd)",
-                     ZeroToTenOnlyEven == Reject3(OneToTen, IsOdd, OnlyZeroMutable))
-                TEST("Reject3<List,Integer,&{0}>(IsOdd)-InputUnchanged", OnlyZeroForSure == OnlyZeroMutable)
-            }
-
-            {
-                std::vector<Integer> OnlyZeroMutable{0};
-                TEST("Convert3<List,Integer,{0}>(Increment)",
-                     ZeroAndTwoToEleven == Convert3(OneToTen, Increment, std::vector<Integer>{0}))
-                TEST("Convert3<List,Integer,{0}>(Increment)-InputUnchanged", OnlyZeroForSure == OnlyZeroMutable)
-
-                TEST("Convert3<List,Integer,const&{0}>(Increment)",
-                     ZeroAndTwoToEleven == Convert3(OneToTen, Increment, OnlyZeroForSure))
-                TEST("Convert3<List,Integer,const&{0}>(IsEven)-InputUnchanged", OnlyZeroForSure == OnlyZeroMutable)
-
-                TEST("Convert3<List,Integer,&{0}>(Increment)",
-                     ZeroAndTwoToEleven == Convert3(OneToTen, Increment, OnlyZeroMutable))
-                TEST("Convert3<List,Integer,&{0}>(IsEven)-InputUnchanged", OnlyZeroForSure == OnlyZeroMutable)
-            }
-
-        }
     }
 
     {
+        // Simple tests
+        TEST("Select3<Integer>(IsEven)", OneToTenOnlyEven == Select3(OneToTen, IsEven))
+        TEST("Reject3<Integer>(IsEven)", OneToTenOnlyOdd == Reject3(OneToTen, IsEven))
+        TEST("Convert3<Integer>(Increment)", OneToTenOnlyEven == Convert3(OneToTenOnlyOdd, Increment))
 
-        const auto UpCase = [](String::value_type c)
+        // Specified Return Types
+        TEST("Select3<List,Integer>(IsEven)",
+             ListOneToTenOnlyEven == Select3(OneToTen, IsEven, std::list<Integer>{}))
+        TEST("Select3<Set,Integer>(IsEven)",
+             SetOneToTenOnlyOdd == Reject3(OneToTen, IsEven, std::set<Integer>{}))
+        TEST("Convert3<Deque,Integer>(Increment)",
+             DequeOneToTenOnlyEven == Convert3(OneToTenOnlyOdd, Increment, std::deque<Integer>()))
+
+        {
+            std::vector<Integer> OnlyZeroMutable{0};
+            TEST("Select3<List,Integer,{0}>(IsEven)",
+                 ZeroToTenOnlyEven == Select3(OneToTen, IsEven,std::vector<Integer>{0}))
+            TEST("Select3<List,Integer,{0}>(IsEven)-InputUnchanged", OnlyZeroForSure == OnlyZeroMutable)
+
+            TEST("Select3<List,Integer,const&{0}>(IsEven)",
+                 ZeroToTenOnlyEven == Select3(OneToTen, IsEven, OnlyZeroForSure))
+            TEST("Select3<List,Integer,const&{0}>(IsEven)-InputUnchanged", OnlyZeroForSure == OnlyZeroMutable)
+
+            TEST("Select3<List,Integer,&{0}>(IsEven)",
+                 ZeroToTenOnlyEven == Select3(OneToTen, IsEven, OnlyZeroMutable))
+            TEST("Select3<List,Integer,&{0}>(IsEven)-InputUnchanged", OnlyZeroForSure == OnlyZeroMutable)
+        }
+
+        {
+            std::vector<Integer> OnlyZeroMutable{0};
+            TEST("Reject3<List,Integer,{0}>(IsOdd)",
+                 ZeroToTenOnlyEven == Reject3(OneToTen, IsOdd,std::vector<Integer>{0}))
+            TEST("Reject3<List,Integer,{0}>(IsOdd)-InputUnchanged", OnlyZeroForSure == OnlyZeroMutable)
+
+            TEST("Reject3<List,Integer,const&{0}>(IsOdd)",
+                 ZeroToTenOnlyEven == Reject3(OneToTen, IsOdd, OnlyZeroForSure))
+            TEST("Reject3<List,Integer,const&{0}>(IsOdd)-InputUnchanged", OnlyZeroForSure == OnlyZeroMutable)
+
+            TEST("Reject3<List,Integer,&{0}>(IsOdd)",
+                 ZeroToTenOnlyEven == Reject3(OneToTen, IsOdd, OnlyZeroMutable))
+            TEST("Reject3<List,Integer,&{0}>(IsOdd)-InputUnchanged", OnlyZeroForSure == OnlyZeroMutable)
+        }
+
+        {
+            std::vector<Integer> OnlyZeroMutable{0};
+            TEST("Convert3<List,Integer,{0}>(Increment)",
+                 ZeroAndTwoToEleven == Convert3(OneToTen, Increment, std::vector<Integer>{0}))
+            TEST("Convert3<List,Integer,{0}>(Increment)-InputUnchanged", OnlyZeroForSure == OnlyZeroMutable)
+
+            TEST("Convert3<List,Integer,const&{0}>(Increment)",
+                 ZeroAndTwoToEleven == Convert3(OneToTen, Increment, OnlyZeroForSure))
+            TEST("Convert3<List,Integer,const&{0}>(IsEven)-InputUnchanged", OnlyZeroForSure == OnlyZeroMutable)
+
+            TEST("Convert3<List,Integer,&{0}>(Increment)",
+                 ZeroAndTwoToEleven == Convert3(OneToTen, Increment, OnlyZeroMutable))
+            TEST("Convert3<List,Integer,&{0}>(IsEven)-InputUnchanged", OnlyZeroForSure == OnlyZeroMutable)
+        }
+
+    }
+
+    {
+        const auto UpCase = [](String::value_type c) noexcept
         {
             if('a'<=c && c<='z')
                 { return static_cast<String::value_type>(c-32); }
@@ -163,6 +169,41 @@ DEFAULT_TEST_GROUP(FunctionalToolsTests,FunctionalTools)
 
     }
 
+    {
+        const auto OnlyReturnsOne = Curry(IsEven, 2);
+        const auto OnlyReturnsZero = Curry(IsEven, 1);
+        const auto AlsoOnlyReturnsOne = CurryBack(IsEven, 2);
+        const auto AlsoOnlyReturnsZero = CurryBack(IsEven, 1);
+
+        TEST_EQUAL("CurryReturnsOne", 1, OnlyReturnsOne())
+        TEST_EQUAL("CurryReturnsZero", 0, OnlyReturnsZero())
+        TEST_EQUAL("CurryBackReturnsOne", 1, AlsoOnlyReturnsOne())
+        TEST_EQUAL("CurryBackReturnsZero", 0, AlsoOnlyReturnsZero())
+
+        const auto SubtractFromTen = Curry(std::minus<int>(), 10);
+        TEST_EQUAL("CurryStdFunctions", 3, SubtractFromTen(7))
+
+        const auto SubtractFive = CurryBack(std::minus<int>(), 5);
+        TEST_EQUAL("CurryBackStdFunctions", 2, SubtractFive(7))
+    }
+
+    // Garbage that is still in progress
+
+    SAVE_WARNING_STATE
+    SUPPRESS_CLANG_WARNING("-Wctad-maybe-unsupported")
+    {
+        Pipe Working{OneToTen};
+
+        TEST("PipeSimpleGetValue", OneToTen == Working.Value())
+        TEST("PipeInlineGetValue", OneToTen == Pipe{OneToTen}.Value())
+
+        Pipe{OneToTen}.f();
+        Pipe<std::vector<int>>::f();
+        Pipe{OneToTen}.next(IsEven);
+        Pipe{OneToTen}.next(SelectStruct<>());
+        //Pipe{OneToTen}.next(Select<>());
+    }
+    RESTORE_WARNING_STATE
 }
 
 #endif

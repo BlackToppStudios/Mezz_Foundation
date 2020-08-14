@@ -54,6 +54,115 @@ namespace Mezzanine
 {
 
 
+    SAVE_WARNING_STATE
+    SUPPRESS_CLANG_WARNING("-Wpadded")
+    SUPPRESS_GCC_WARNING("-Wpadded")
+
+    // Currying is "partially applying arguments to a function". These are ways make new functions by bundling old
+    // functions and values in to a lambda so that we get new semantics. The tests have a super simple example.
+
+    // Derived from https://stackoverflow.com/questions/152005/how-can-currying-be-done-in-c
+    // With written permission via cc by-sa
+    template<typename FunctionType, typename... ArgumentsType>
+    auto Curry(FunctionType Function, ArgumentsType... Arguments) {
+        return [=](auto... AppendedArguments) {
+            return Function(Arguments..., AppendedArguments...);
+        };
+    }
+
+    template<typename FunctionType, typename... ArgumentsType>
+    auto CurryBack(FunctionType Function, ArgumentsType... Arguments) {
+        return [=](auto... AppendedArguments) {
+            return Function(AppendedArguments..., Arguments...);
+        };
+    }
+
+    RESTORE_WARNING_STATE
+
+    // This is an implementation detail of Select
+
+    template <typename CVReturnContainerType = void, typename MaybePredicateType = std::false_type>
+    struct SelectStruct
+    {
+        MaybePredicateType MaybePredicate;
+
+        template<typename CVIncomingContainerType, typename PredicateType>
+        [[nodiscard]] constexpr
+        decltype(auto) operator() (const CVIncomingContainerType& IncomingContainer, PredicateType Predicate) const
+        {
+            using IncomingContainerType = std::decay_t<CVIncomingContainerType>;
+            using ActualCVReturnType = std::conditional_t<
+                std::is_void_v<CVReturnContainerType>, IncomingContainerType, CVReturnContainerType
+            >;
+            using ReturnContainerType = std::decay_t<ActualCVReturnType>;
+            using namespace ContainerDetect;
+
+            static_assert(IsRange<IncomingContainerType>(),
+                    "Mezzanine::Select only selects from containers or ranges.");
+            static_assert(IsContainer<ReturnContainerType>(),
+                    "Mezzanine::Select only selects into containers.");
+            static_assert(HasPushBackValue<ReturnContainerType>() ||
+                          HasInsertValue<ReturnContainerType>() ||
+                          HasAddValue<ReturnContainerType>(),
+                    "Mezzanine::Select only selects into containers with push_back(value_type), add(value_type) or "
+                    "insert(value_type).");
+            static_assert(std::is_default_constructible<ReturnContainerType>(),
+                    "Mezzanine::Select only selects into containers that can be default constructed.");
+
+            ReturnContainerType Results;
+
+            if constexpr( HasReserve<ReturnContainerType>())
+                { Results.reserve(IncomingContainer.size()); }
+
+            for(const auto& item : IncomingContainer)
+            {
+                if(std::invoke(Predicate,item))
+                {
+                    if constexpr(HasPushBackValue<ReturnContainerType>())
+                        { Results.push_back(item); }
+                    else if constexpr(HasInsertValue<ReturnContainerType>())
+                        { Results.insert(item); }
+                    else if constexpr(HasAddValue<ReturnContainerType>())
+                        { Results.add(item); }
+                }
+            }
+
+            return Results;
+        }
+
+        template<typename CVIncomingContainerType>
+        [[nodiscard]] constexpr
+        decltype(auto) operator() (const CVIncomingContainerType& IncomingContainer) const
+        {
+            return operator()(IncomingContainer, MaybePredicate);
+        }
+    };
+
+
+    // This is the normal functional select entry point.
+    template<typename CVReturnContainerType = void,
+             typename CVIncomingContainerType,
+             typename PredicateType>
+    [[nodiscard]] constexpr
+    decltype(auto) Select(const CVIncomingContainerType& IncomingContainer, PredicateType Predicate)
+    {
+        return SelectStruct<CVReturnContainerType,std::false_type>()
+                (std::forward<const CVIncomingContainerType&>(IncomingContainer),
+                 std::forward<PredicateType>(Predicate));
+    }
+
+    // This is the auto-curried (I made this term up), version of select that lets us create new select functions by
+    // getting a select function bound to a predicate.
+    template<typename CVReturnContainerType = void,
+             typename PredicateType>
+    [[nodiscard]] constexpr
+    decltype(auto) Select(PredicateType Predicate)
+    {
+        return SelectStruct<CVReturnContainerType,PredicateType>{Predicate};
+    }
+
+
+/*
     template<typename CVReturnContainerType = void,
              typename CVIncomingContainerType,
              typename PredicateType>
@@ -98,9 +207,12 @@ namespace Mezzanine
         }
 
         return Results;
-    }
+    } // */
 
 
+    // */
+
+    // 3
     template<typename CVIncomingContainerType,
              typename PredicateType,
              typename CVReturnContainerType = CVIncomingContainerType>
@@ -321,6 +433,47 @@ namespace Mezzanine
 
         return Results;
     }
+
+
+    // This is garbage I am experimenting with.
+    template<typename CVIncomingContainerType>
+    class Pipe {
+    private:
+        CVIncomingContainerType PipeData;
+    public:
+        Pipe(CVIncomingContainerType DataToPipe) : PipeData{DataToPipe}
+            {}
+
+        ~Pipe() = default;
+        Pipe(const Pipe&) = default;
+
+        [[nodiscard]] constexpr
+        CVIncomingContainerType Value() const noexcept
+            { return PipeData; }
+
+        static void f()
+        {}
+
+        template <typename FunctionType>
+        auto static next(FunctionType Function)
+        {
+            (void)Function;
+        }
+
+
+/*
+        template <typename FunctionType, typename... FunctionArgumentTypes>
+        [[nodiscard]] constexpr
+        //Pipe<decltype(std::invoke(FunctionType, declval(FunctionArgumentTypes)))>
+        decltype(auto)
+            operator>> (FunctionType Function, FunctionArgumentTypes&&... FunctionArguments)
+        {
+            return Pipe{std::invoke, PipeData, std::forward<FunctionArgumentTypes>(FunctionArguments)};
+        }
+*/
+
+
+    };
 
 } //Mezzanine
 
