@@ -60,6 +60,7 @@
 #include <unordered_map>
 // Incomplete List of Mezzanine Containers
 #include "FlatMap.h"
+#include "FunctionalTools.h"
 #include "ManagedArray.h"
 #include "SortedManagedArray.h"
 #include "SortedVector.h"
@@ -100,6 +101,39 @@ AUTOMATIC_TEST_GROUP(ContainerToolsTests,ContainerTools)
         TEST_EQUAL("is_range-SharedPtr",
                    false,IsRange<TestSharedPtr>())
     }//is_range
+
+    {//is_reverse_range
+        TEST_EQUAL("is_reverse_range-Array",
+                   true,IsReverseRange<TestArray>())
+        TEST_EQUAL("is_reverse_range-Map",
+                   true,IsReverseRange<TestMap>())
+        TEST_EQUAL("is_reverse_range-String",
+                   true,IsReverseRange<TestString>())
+        TEST_EQUAL("is_reverse_range-SharedPtr",
+                   false,IsReverseRange<TestSharedPtr>())
+    }//is_reverse_range
+
+    {//is_const_range
+        TEST_EQUAL("is_const_range-Array",
+                   true,IsConstRange<TestArray>())
+        TEST_EQUAL("is_const_range-Map",
+                   true,IsConstRange<TestMap>())
+        TEST_EQUAL("is_const_range-String",
+                   true,IsConstRange<TestString>())
+        TEST_EQUAL("is_const_range-SharedPtr",
+                   false,IsConstRange<TestSharedPtr>())
+    }//is_const_range
+
+    {//is_const_reverse_range
+        TEST_EQUAL("is_const_reverse_range-Array",
+                   true,IsConstReverseRange<TestArray>())
+        TEST_EQUAL("is_const_reverse_range-Map",
+                   true,IsConstReverseRange<TestMap>())
+        TEST_EQUAL("is_const_reverse_range-String",
+                   true,IsConstReverseRange<TestString>())
+        TEST_EQUAL("is_const_reverse_range-SharedPtr",
+                   false,IsConstReverseRange<TestSharedPtr>())
+    }//is_const_reverse_range
 
     {//is_resizable_contiguous
         TEST_EQUAL("is_resizable_contiguous-Array",

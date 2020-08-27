@@ -77,6 +77,96 @@ namespace ContainerDetect {
     constexpr Boole HasEnd()
         { return HasEnd_t<Class>::value; }
 
+    /// @brief Convenience type for rbegin function detection.
+    /// @tparam Class The class to test.
+    template<typename Class>
+    using RBeginFunct_t = decltype(std::declval<Class&>().rbegin());
+    /// @brief Type for is_detected that tests for the existence of rbegin on a class.
+    /// @tparam Class The class that will be checked for the presence of a rbegin function.
+    template<typename Class>
+    using HasRBegin_t = std::is_detected<RBeginFunct_t,Class>;
+    /// @brief Convenience function for the value of a HasRBegin check.
+    /// @tparam Class The class that will be checked for the presence of a "rbegin()" function.
+    /// @return Returns true if the provided type has a "rbegin()" member function, false otherwise.
+    template<typename Class>
+    constexpr Boole HasRBegin()
+        { return HasRBegin_t<Class>::value; }
+
+    /// @brief Convenience type for rend function detection.
+    /// @tparam Class The class to test.
+    template<typename Class>
+    using REndFunct_t = decltype(std::declval<Class&>().rend());
+    /// @brief Type for is_detected that tests for the existence of rend on a class.
+    /// @tparam Class The class that will be checked for the presence of a rend function.
+    template<typename Class>
+    using HasREnd_t = std::is_detected<REndFunct_t,Class>;
+    /// @brief Convenience function for the value of a HasREnd check.
+    /// @tparam Class The class that will be checked for the presence of a "rend()" function.
+    /// @return Returns true if the provided type has a "rend()" member function, false otherwise.
+    template<typename Class>
+    constexpr Boole HasREnd()
+        { return HasREnd_t<Class>::value; }
+
+    /// @brief Convenience type for cbegin function detection.
+    /// @tparam Class The class to test.
+    template<typename Class>
+    using CBeginFunct_t = decltype(std::declval<Class&>().cbegin());
+    /// @brief Type for is_detected that tests for the existence of cbegin on a class.
+    /// @tparam Class The class that will be checked for the presence of a cbegin function.
+    template<typename Class>
+    using HasCBegin_t = std::is_detected<CBeginFunct_t,Class>;
+    /// @brief Convenience function for the value of a HasCBegin check.
+    /// @tparam Class The class that will be checked for the presence of a "cbegin()" function.
+    /// @return Returns true if the provided type has a "cbegin()" member function, false otherwise.
+    template<typename Class>
+    constexpr Boole HasCBegin()
+        { return HasCBegin_t<Class>::value; }
+
+    /// @brief Convenience type for cend function detection.
+    /// @tparam Class The class to test.
+    template<typename Class>
+    using CEndFunct_t = decltype(std::declval<Class&>().cend());
+    /// @brief Type for is_detected that tests for the existence of cend on a class.
+    /// @tparam Class The class that will be checked for the presence of a cend function.
+    template<typename Class>
+    using HasCEnd_t = std::is_detected<CEndFunct_t,Class>;
+    /// @brief Convenience function for the value of a HasCEnd check.
+    /// @tparam Class The class that will be checked for the presence of a "cend()" function.
+    /// @return Returns true if the provided type has a "cend()" member function, false otherwise.
+    template<typename Class>
+    constexpr Boole HasCEnd()
+        { return HasCEnd_t<Class>::value; }
+
+    /// @brief Convenience type for crbegin function detection.
+    /// @tparam Class The class to test.
+    template<typename Class>
+    using CRBeginFunct_t = decltype(std::declval<Class&>().crbegin());
+    /// @brief Type for is_detected that tests for the existence of rbegin on a class.
+    /// @tparam Class The class that will be checked for the presence of a rbegin function.
+    template<typename Class>
+    using HasCRBegin_t = std::is_detected<CRBeginFunct_t,Class>;
+    /// @brief Convenience function for the value of a HasCRBegin check.
+    /// @tparam Class The class that will be checked for the presence of a "crbegin()" function.
+    /// @return Returns true if the provided type has a "crbegin()" member function, false otherwise.
+    template<typename Class>
+    constexpr Boole HasCRBegin()
+        { return HasCRBegin_t<Class>::value; }
+
+    /// @brief Convenience type for crend function detection.
+    /// @tparam Class The class to test.
+    template<typename Class>
+    using CREndFunct_t = decltype(std::declval<Class&>().crend());
+    /// @brief Type for is_detected that tests for the existence of crend on a class.
+    /// @tparam Class The class that will be checked for the presence of a crend function.
+    template<typename Class>
+    using HasCREnd_t = std::is_detected<CREndFunct_t,Class>;
+    /// @brief Convenience function for the value of a HasCREnd check.
+    /// @tparam Class The class that will be checked for the presence of a "crend()" function.
+    /// @return Returns true if the provided type has a "crend()" member function, false otherwise.
+    template<typename Class>
+    constexpr Boole HasCREnd()
+        { return HasCREnd_t<Class>::value; }
+
     /// @brief Convenience type for size function detection.
     /// @tparam Class The class to test.
     template<typename Class>
@@ -203,6 +293,54 @@ namespace ContainerDetect {
     constexpr Boole HasValueType()
         { return HasValueType_t<Class>::value; }
 
+/// @brief Dummy/failure type for detecting if a class has a "size_type" defined.
+/// @tparam Class The class to be tested.
+template<typename Class, typename = void>
+struct DetectSizeType : std::false_type
+    {  };
+/// @brief Success type for detecting if a class has a "size_type" defined.
+/// @tparam Class The class to be tested.
+template<typename Class>
+struct DetectSizeType<Class,std::void_t<typename Class::size_type>> : std::true_type
+    {  };
+/// @brief Type for detecting the existance of a "size_type" member on a class.
+/// @tparam Class The class to be tested.
+template<typename Class>
+using HasSizeType_t = DetectSizeType<Class>;
+/// @brief Convenience function for the value of a HasSizeType check.
+/// @tparam Class The class that will be checked for the presence of a "size_type" member.
+/// @return Returns true if the provided type has a "size_type" member, false otherwise.
+template<typename Class>
+constexpr Boole HasSizeType()
+    { return HasSizeType_t<Class>::value; }
+
+
+/// @brief Dummy/failure type for detecting if a class has a "difference_type" defined.
+/// @tparam Class The class to be tested.
+template<typename Class, typename = void>
+struct DetectDifferenceType : std::false_type
+    {  };
+/// @brief Success type for detecting if a class has a "difference_type" defined.
+/// @tparam Class The class to be tested.
+template<typename Class>
+struct DetectDifferenceType<Class,std::void_t<typename Class::difference_type>> : std::true_type
+    {  };
+/// @brief Type for detecting the existance of a "difference_type" member on a class.
+/// @tparam Class The class to be tested.
+template<typename Class>
+using HasDifferenceType_t = DetectDifferenceType<Class>;
+/// @brief Convenience function for the value of a HasDifferenceType check.
+/// @tparam Class The class that will be checked for the presence of a "difference_type" member.
+/// @return Returns true if the provided type has a "difference_type" member, false otherwise.
+template<typename Class>
+constexpr Boole HasDifferenceType()
+    { return HasDifferenceType_t<Class>::value; }
+
+    // has size_type
+    // has difference_type
+
+
+
     /// @brief Dummy/failure type for detecting if a class has a "key_type" defined.
     /// @tparam Class The class to be tested.
     template<typename Class, typename = void>
@@ -261,6 +399,51 @@ namespace ContainerDetect {
     constexpr Boole IsRange()
         { return is_range<CheckType>::value; }
 
+    /// @brief A type trait that checks to see if a type is/has a reverse range of elements.
+    /// @tparam CheckType The type that will be checked.
+    /// @remarks This tests for the presence of rbegin() and rend() member functions on the type.
+    template<typename CheckType>
+    struct is_reverse_range :
+        std::bool_constant< ContainerDetect::HasRBegin<CheckType>() &&
+                            ContainerDetect::HasREnd<CheckType>() >
+        {  };
+    /// @brief Convenience function for getting just the bool of a is_reverse_range check.
+    /// @tparam CheckType The type that will be checked.
+    /// @return Returns true if CheckType has "rbegin()" and "rend()" member functions, false otherwise.
+    template<typename CheckType>
+    constexpr Boole IsReverseRange()
+        { return is_reverse_range<CheckType>::value; }
+
+    /// @brief A type trait that checks to see if a type is/has a const range of elements.
+    /// @tparam CheckType The type that will be checked.
+    /// @remarks This tests for the presence of cbegin() and cend() member functions on the type.
+    template<typename CheckType>
+    struct is_const_range :
+        std::bool_constant< ContainerDetect::HasCBegin<CheckType>() &&
+                            ContainerDetect::HasCEnd<CheckType>() >
+        {  };
+    /// @brief Convenience function for getting just the bool of a is_const_range check.
+    /// @tparam CheckType The type that will be checked.
+    /// @return Returns true if CheckType has "cbegin()" and "cend()" member functions, false otherwise.
+    template<typename CheckType>
+    constexpr Boole IsConstRange()
+        { return is_const_range<CheckType>::value; }
+
+    /// @brief A type trait that checks to see if a type is/has a const reverse range of elements.
+    /// @tparam CheckType The type that will be checked.
+    /// @remarks This tests for the presence of crbegin() and crend() member functions on the type.
+    template<typename CheckType>
+    struct is_const_reverse_range :
+        std::bool_constant< ContainerDetect::HasCRBegin<CheckType>() &&
+                            ContainerDetect::HasCREnd<CheckType>() >
+        {  };
+    /// @brief Convenience function for getting just the bool of a is_const_reverse_range check.
+    /// @tparam CheckType The type that will be checked.
+    /// @return Returns true if CheckType has "crbegin()" and "crend()" member functions, false otherwise.
+    template<typename CheckType>
+    constexpr Boole IsConstReverseRange()
+        { return is_const_reverse_range<CheckType>::value; }
+
     /// @brief A type trait that checks to see if a type has contiguous internal storage that can be resized.
     /// @tparam CheckType The type that will be checked.
     /// @remarks This tests for the presence of resize() and reserve() member functions on the type.
@@ -306,6 +489,12 @@ namespace ContainerDetect {
     template<typename CheckType>
     constexpr Boole IsContainer()
         { return is_container<CheckType>::value; }
+
+
+
+
+
+
 
     /// @brief Dummy/failure type for detecting if a class is a key/value pair for associative containers.
     /// @tparam ValueType The value_type stored by the container being tested.
@@ -406,8 +595,6 @@ namespace ContainerDetect {
     template<typename Comp, typename KeyType>
     struct comp_is_transparent<Comp,KeyType,std::void_t<typename Comp::is_transparent>> : std::true_type
         {  };
-
-
 
 }//Mezzanine
 

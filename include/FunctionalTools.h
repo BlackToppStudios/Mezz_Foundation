@@ -41,448 +41,168 @@
 #define Mezz_Foundation_FunctionalTools_h
 
 /// @file
-/// @brief
+/// @brief This is the main Header for the FuntionalTools library Component.
 
 #ifndef SWIG
     #include "DataTypes.h"
     #include "ContainerTools.h"
-
-    #include <iostream>
+    #include "MezzException.h"
 #endif
+
+
+#include "FunctionalExtras.h"
+#include "FunctionalFunctorsContainerToContainer.h"
+#include "FunctionalFunctorsContainerToData.h"
+#include "FunctionalPipe.h"
 
 namespace Mezzanine
 {
 
-
-    SAVE_WARNING_STATE
-    SUPPRESS_CLANG_WARNING("-Wpadded")
-    SUPPRESS_GCC_WARNING("-Wpadded")
-
-    // Currying is "partially applying arguments to a function". These are ways make new functions by bundling old
-    // functions and values in to a lambda so that we get new semantics. The tests have a super simple example.
-
-    // Derived from https://stackoverflow.com/questions/152005/how-can-currying-be-done-in-c
-    // With written permission via cc by-sa
-    template<typename FunctionType, typename... ArgumentsType>
-    auto Curry(FunctionType Function, ArgumentsType... Arguments) {
-        return [=](auto... AppendedArguments) {
-            return Function(Arguments..., AppendedArguments...);
-        };
-    }
-
-    template<typename FunctionType, typename... ArgumentsType>
-    auto CurryBack(FunctionType Function, ArgumentsType... Arguments) {
-        return [=](auto... AppendedArguments) {
-            return Function(AppendedArguments..., Arguments...);
-        };
-    }
-
-    RESTORE_WARNING_STATE
-
-    // The select make a new method by checking if the predicate is true when called for each item in the incoming data.
-    // if it is true, it is included, if not it is excluded.
-
-    // This is an implementation detail of Select
-
-    template <typename CVReturnContainerType = void, typename MaybePredicateType = std::false_type>
-    struct SelectStruct
-    {
-        MaybePredicateType MaybePredicate;
-
-        template<typename CVIncomingContainerType, typename PredicateType>
-        [[nodiscard]] constexpr
-        decltype(auto) operator() (const CVIncomingContainerType& IncomingContainer, PredicateType Predicate) const
-        {
-            using IncomingContainerType = std::decay_t<CVIncomingContainerType>;
-            using ActualCVReturnType = std::conditional_t<
-                std::is_void_v<CVReturnContainerType>, IncomingContainerType, CVReturnContainerType
-            >;
-            using ReturnContainerType = std::decay_t<ActualCVReturnType>;
-            using namespace ContainerDetect;
-
-            static_assert(IsRange<IncomingContainerType>(),
-                    "Mezzanine::Select only selects from containers or ranges.");
-            static_assert(IsContainer<ReturnContainerType>(),
-                    "Mezzanine::Select only selects into containers.");
-            static_assert(HasPushBackValue<ReturnContainerType>() ||
-                          HasInsertValue<ReturnContainerType>() ||
-                          HasAddValue<ReturnContainerType>(),
-                    "Mezzanine::Select only selects into containers with push_back(value_type), add(value_type) or "
-                    "insert(value_type).");
-            static_assert(std::is_default_constructible<ReturnContainerType>(),
-                    "Mezzanine::Select only selects into containers that can be default constructed.");
-
-            ReturnContainerType Results;
-
-            if constexpr( HasReserve<ReturnContainerType>())
-                { Results.reserve(IncomingContainer.size()); }
-
-            for(const auto& item : IncomingContainer)
-            {
-                if(std::invoke(Predicate,item))
-                {
-                    if constexpr(HasPushBackValue<ReturnContainerType>())
-                        { Results.push_back(item); }
-                    else if constexpr(HasInsertValue<ReturnContainerType>())
-                        { Results.insert(item); }
-                    else if constexpr(HasAddValue<ReturnContainerType>())
-                        { Results.add(item); }
-                }
-            }
-
-            return Results;
-        }
-
-        template<typename CVIncomingContainerType>
-        [[nodiscard]] constexpr
-        decltype(auto) operator() (const CVIncomingContainerType& IncomingContainer) const
-        {
-            return operator()(IncomingContainer, MaybePredicate);
-        }
-    };
-
-
-    // This is the normal functional select entry point.
-    template<typename CVReturnContainerType = void,
-             typename CVIncomingContainerType,
-             typename PredicateType>
-    [[nodiscard]] constexpr
-    decltype(auto) Select(const CVIncomingContainerType& IncomingContainer, PredicateType Predicate)
-    {
-        return SelectStruct<CVReturnContainerType,std::false_type>()
-                (std::forward<const CVIncomingContainerType&>(IncomingContainer),
-                 std::forward<PredicateType>(Predicate));
-    }
-
-    // This is the auto-curried (I made this term up), version of select that lets us create new select functions by
-    // getting a select function bound to a predicate.
-    template<typename CVReturnContainerType = void,
-             typename PredicateType>
-    [[nodiscard]] constexpr
-    decltype(auto) Select(PredicateType Predicate)
-    {
-        return SelectStruct<CVReturnContainerType,PredicateType>{Predicate};
-    }
-
-
-/*
-    template<typename CVReturnContainerType = void,
-             typename CVIncomingContainerType,
-             typename PredicateType>
-    [[nodiscard]] constexpr
-    decltype(auto) Select(const CVIncomingContainerType& IncomingContainer, PredicateType Predicate)
-    {
-        using IncomingContainerType = std::decay_t<CVIncomingContainerType>;
-        using ActualCVReturnType = std::conditional_t<
-            std::is_void_v<CVReturnContainerType>, IncomingContainerType, CVReturnContainerType
-        >;
-        using ReturnContainerType = std::decay_t<ActualCVReturnType>;
-        using namespace ContainerDetect;
-
-        static_assert(IsRange<IncomingContainerType>(),
-                "Mezzanine::Select only selects from containers or ranges.");
-        static_assert(IsContainer<ReturnContainerType>(),
-                "Mezzanine::Select only selects into containers.");
-        static_assert(HasPushBackValue<ReturnContainerType>() ||
-                      HasInsertValue<ReturnContainerType>() ||
-                      HasAddValue<ReturnContainerType>(),
-                "Mezzanine::Select only selects into containers with push_back(value_type), add(value_type) or "
-                "insert(value_type).");
-        static_assert(std::is_default_constructible<ReturnContainerType>(),
-                "Mezzanine::Select only selects into containers that can be default constructed.");
-
-        ReturnContainerType Results;
-
-        if constexpr( HasReserve<ReturnContainerType>())
-            { Results.reserve(IncomingContainer.size()); }
-
-        for(const auto& item : IncomingContainer)
-        {
-            if(std::invoke(Predicate,item))
-            {
-                if constexpr(HasPushBackValue<ReturnContainerType>())
-                    { Results.push_back(item); }
-                else if constexpr(HasInsertValue<ReturnContainerType>())
-                    { Results.insert(item); }
-                else if constexpr(HasAddValue<ReturnContainerType>())
-                    { Results.add(item); }
-            }
-        }
-
-        return Results;
-    } // */
+/// @page FuncionalTools Funcional Tools
+/// Functional programming is all the craze in many circles. There are places where it can be useful, even in game
+/// development, but it isn't a magical panacea that some treat it like. Specifically, it is great for data
+/// transformations that aren't performance sensitive and if built using imperative, procedural, or Object Oriented(OOP)
+/// methods would be much larger and complex. There are places it is poorly suited, such as the hot path on hetergenous
+/// data needing complex manipulation and having side effects.
+/// @n @n
+/// @section FunctionToolsIntroToFP Intro to Functional Programming
+/// For those not familar Functional Programming is a software developement paradign which focuses on manipulating
+/// functions and parts of functions to create a different kind of abstraction from imperative or OOP. Rather than
+/// creating new data structures or new algorithms a functional style focuses on manipulating re-usable components of
+/// control flow. It can be used to create data structures or algorithm but when doing this it is often implied in the
+/// construction of containers and arrangement of functions.
+/// @n @n
+/// There are common things you might see in various programming paradigms, or at least this how Sqeaky views
+/// comparisons of the paradigms:
+/// @n
+///   - Imperative/Procedural
+///     - Functions used for code reuse by calling with different parameters,
+///     - Plenty of Explicit control flow: Loops, Counters, Ifs, Switches,
+///     - Few mechanisms for Older code to invoke newer code,
+///     - Structured data held in structs and managed with pointers/references to make trees/lists/graphs,
+///     - Data is generally mutable and controlling what can change it might be challenging,
+///     - Data layout can (must?) be precisely controlled and is often optimized for size of speed,
+///     - Function side effect, like global state mutations are common,
+///     - Control flow at the low and high level is usually obvious and usually conceptually linear,
+///     - Systems are often older and not Multithreaded, threading mechanism when present are often simple.
+/// @n
+///   - Object Oriented Programming (OOP)
+///     - Functions and objects used for code reuse by changing parameters,
+///     - Plenty of Explicit control flow: Loops, Counters, Ifs,
+///     - Some switches replaced by inheritance and code snippets can be smaller and more maintainable,
+///     - Attaching functions on objects as parameters allows old code to call new code using runtime polymorphism,
+///     - Data is often mutable and access is usually controlled by scope and encapsulation,
+///     - Data layout can be explicit or implicit in objects,
+///     - Functions often have side effects scoped to one object, class, or module,
+///     - Control flow is obvious at low level in each object or function,
+///     - Control flow can be masked at higher conceptual levels by polymorphism or dependency injection,
+///     - System might be old or modern and may have a variety of threading models.
+/// @n
+///   - Functional Programming (FP)
+///     - Functions can be reused by composing them into new functions,
+///     - Little explicit control flow, recursion a little more common and lazy evaluation masks control flow,
+///     - Functions commonly used as parameters heavily encourages direct code reuse,
+///     - The specific structure of data is often an afterthought and some effort required to manage layout,
+///     - Data is generally immutable and mutability simulated by copying data,
+///     - Functions rarely have side effects and can generally be used in new context without prior research,
+///     - Control flow might be heavily masked, Lazy Evaluation, Currying, partial function application...,
+///     - Systems likely to be newer and very thread friendly because of immutability and lack of preconditions.
+/// @n @n
+/// These are just some heuristics, not every system matches all or any of these. Each paradign has pros and cons,
+/// and C++ can do all three, but needs some tooling to do FP comfortably.
+/// @n @n
+/// @section FunctionToolsInTheMezzanine FP in the Mezzanine
+/// The Mezzanine has some solid solutions to some of the problems discussed here already, and game development has
+/// tight constraints on performance and data. Because of these constraints it is unlikely that FP will be used on
+/// performance critical paths directly in games. It does have plenty of uses in tooling, non-optimized paths or places
+/// where it performs well.
+/// @n @n
+/// These tools generally operate on const references and make no attempt to perform lazy evaluation. There are also no
+/// specific attempts to integrate threading (This is likely to change with Mezz_Threading). These design decisions were
+/// made to maximize simplicity and attempt to fit the problem space poorly addressed elsewhere.
+/// @n @n
+/// Mezzanine::Functional provides 4 categories of components:
+/// @n
+///   - @ref FuncionalToolsThePipe, a tool for connecting Functors,
+///   - An assortment of @ref FuncionalToolsFunctors that operate on containers,
+///   - A few special purpose functions for getting data by @ref FuncionalToolsDrains,
+///   - A few @ref FuncionalToolsExtras that smooth out functional interaction.
+/// @n @n
+/// Some of these component are useful on their own, but the primary design pattern introduced is Pipe/Functor/Drain.
+/// The Functors can all be used on their own and encapsulate one little piece of control flow. Individually, they can
+/// copy data into new containers and apply different changes or select only specific portion of the data. Just one at
+/// a time the can seem simplistic, but chaining several together can allow incredibly nuanced and sophisted data
+/// manipulation with minimal complexity. The functors can be nested in code just like normal function calls, but
+/// starting with a pipe the chaining can be streamlined and counting parentheses and tracking large amounts of
+/// parameters should be reduced.
+/// @n @n
+///
+///
+/// Pipe >> Functor >> Drain pattern.
+///
+/// @subsection FuncionalToolsThePipe The Pipe
+/// @subsection FuncionalToolsFunctors Included Functors
+///
+/// Select/Filter - ✓
+/// Reject - ✓
+/// Convert/Map - ✓
+/// TakeN - ✓
+/// TakeBackN - ✓
+/// TakeWhile - ✓
+/// TakeBackWhile - ✓
+/// DropN - ✓
+/// DropBackN - ✓
+/// DropWhile - ✓
+/// DropBackWhile - ✓
+///
+/// Reverse
+/// Sort
+/// Zip
+/// Unzip
+/// Compact - Drops nulls
+/// Slice (int Start, int End)
+/// Reverse
+/// Unique
+/// Shuffle
+/// ForEach
+/// Sample
+/// Flatten - Will be difficult with type system.
+/// Rotate
+/// Partition
+///
+/// @subsection FuncionalToolsDrains Draining the Pipe
+///
+/// Max - ✓
+/// Min - ✓
+/// MinMax - ✓
+/// Size/Length - ✓
+/// Find - ✓
+/// Includes/Contains - ✓
+/// AllOf  - ✓
+/// AnyOf - ✓
+/// NoneOf - ✓
+/// IsSorted - ✓
+/// IsPartitioned - ✓
+/// Reduce/Collect/Accumulate
+///
+/// @subsection FuncionalToolsExtras Functional Extras
+/// Currying - ✓
+/// CreateRange - ✓
 
 
-    // */
 
-    // 3
-    template<typename CVIncomingContainerType,
-             typename PredicateType,
-             typename CVReturnContainerType = CVIncomingContainerType>
-    constexpr
-    decltype(auto) Select3(const CVIncomingContainerType& IncomingContainer,
-                          PredicateType Predicate,
-                          CVReturnContainerType&& ResultsContainer = CVIncomingContainerType())
-    {
-        using IncomingContainerType = std::decay_t<CVIncomingContainerType>;
-        using ReturnContainerType = std::decay_t<CVReturnContainerType>;
-        using namespace ContainerDetect;
 
-        static_assert(IsRange<IncomingContainerType>(),
-                "Mezzanine::Select only selects from containers or ranges.");
-        static_assert(IsContainer<ReturnContainerType>(),
-                "Mezzanine::Select only selects into containers.");
-        static_assert(HasPushBackValue<ReturnContainerType>() ||
-                      HasInsertValue<ReturnContainerType>() ||
-                      HasAddValue<ReturnContainerType>(),
-                "Mezzanine::Select only selects into containers with push_back(value_type), add(value_type) or "
-                "insert(value_type).");
-
-        ReturnContainerType Results{ResultsContainer};
-
-        if constexpr( HasReserve<ReturnContainerType>())
-            { Results.reserve(IncomingContainer.size()); }
-
-        for(const auto& item : IncomingContainer)
-        {
-            if(std::invoke(Predicate,item))
-            {
-                if constexpr(HasPushBackValue<ReturnContainerType>())
-                    { Results.push_back(item); }
-                else if constexpr(HasInsertValue<ReturnContainerType>())
-                    { Results.insert(item); }
-                else if constexpr(HasAddValue<ReturnContainerType>())
-                    { Results.add(item); }
-            }
-        }
-
-        return Results;
-    }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // Reject is the inverse of select. It makes a new collection by applying a function to each item in the incoming
-    // data and keeping it if false (copying into new collection).
 
-    template<typename CVReturnContainerType = void,
-             typename CVIncomingContainerType,
-             typename PredicateType>
-    [[nodiscard]] constexpr
-    decltype(auto) Reject(const CVIncomingContainerType& IncomingContainer, PredicateType Predicate)
-    {
-        using IncomingContainerType = std::decay_t<CVIncomingContainerType>;
-        using ActualCVReturnType = std::conditional_t<
-            std::is_void_v<CVReturnContainerType>, IncomingContainerType, CVReturnContainerType
-        >;
-        using ReturnContainerType = std::decay_t<ActualCVReturnType>;
-        using namespace ContainerDetect;
-
-        static_assert(IsRange<IncomingContainerType>(),
-                "Mezzanine::Reject only rejects from containers or ranges.");
-        static_assert(IsContainer<ReturnContainerType>(),
-                "Mezzanine::Reject only rejects into containers.");
-        static_assert(HasPushBackValue<ReturnContainerType>() ||
-                      HasInsertValue<ReturnContainerType>() ||
-                      HasAddValue<ReturnContainerType>(),
-                "Mezzanine::Reject only rejects into containers with push_back(value_type), add(value_type) or "
-                "insert(value_type).");
-        static_assert(std::is_default_constructible<ReturnContainerType>(),
-                "Mezzanine::Reject only rejects into containers that can be default constructed.");
-
-        ReturnContainerType Results;
-
-        if constexpr( HasReserve<ReturnContainerType>())
-            { Results.reserve(IncomingContainer.size()); }
-
-        for(const auto& item : IncomingContainer)
-        {
-            if(!std::invoke(Predicate,item))
-            {
-                if constexpr(HasPushBackValue<ReturnContainerType>())
-                    { Results.push_back(item); }
-                else if constexpr(HasInsertValue<ReturnContainerType>())
-                    { Results.insert(item); }
-                else if constexpr(HasAddValue<ReturnContainerType>())
-                    { Results.add(item); }
-            }
-        }
-
-        return Results;
-    }
-
-
-    template<typename CVIncomingContainerType,
-             typename PredicateType,
-             typename CVReturnContainerType = CVIncomingContainerType>
-    [[nodiscard]] constexpr
-    decltype(auto) Reject3(const CVIncomingContainerType& IncomingContainer,
-                          PredicateType Predicate,
-                          CVReturnContainerType&& ResultsContainer = CVIncomingContainerType())
-    {
-        using IncomingContainerType = std::decay_t<CVIncomingContainerType>;
-        using ReturnContainerType = std::decay_t<CVReturnContainerType>;
-        using namespace ContainerDetect;
-
-        static_assert(IsRange<IncomingContainerType>(),
-                "Mezzanine::Reject only rejects from containers or ranges.");
-        static_assert(IsContainer<ReturnContainerType>(),
-                "Mezzanine::Reject only rejects into containers.");
-        static_assert(HasPushBackValue<ReturnContainerType>() ||
-                      HasInsertValue<ReturnContainerType>() ||
-                      HasAddValue<ReturnContainerType>(),
-                "Mezzanine::Reject only rejects into containers with push_back(value_type), add(value_type) or "
-                "insert(value_type).");
-
-        ReturnContainerType Results{ResultsContainer};
-
-        if constexpr( HasReserve<ReturnContainerType>())
-            { Results.reserve(IncomingContainer.size()); }
-
-        for(const auto& item : IncomingContainer)
-        {
-            if(!std::invoke(Predicate,item))
-            {
-                if constexpr(HasPushBackValue<ReturnContainerType>())
-                    { Results.push_back(item); }
-                else if constexpr(HasInsertValue<ReturnContainerType>())
-                    { Results.insert(item); }
-                else if constexpr(HasAddValue<ReturnContainerType>())
-                    { Results.add(item); }
-            }
-        }
-
-        return Results;
-    }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // The "map" operation, this creates a new collection by capturing the values returned when apply a function to the
-    // incoming data set.
-
-    template<typename CVReturnContainerType = void,
-             typename CVIncomingContainerType,
-             typename PredicateType>
-    [[nodiscard]] constexpr
-    decltype(auto) Convert(const CVIncomingContainerType& IncomingContainer, PredicateType Predicate)
-    {
-        using IncomingContainerType = std::decay_t<CVIncomingContainerType>;
-        using ActualCVReturnType = std::conditional_t<
-            std::is_void_v<CVReturnContainerType>, IncomingContainerType, CVReturnContainerType
-        >;
-        using ReturnContainerType = std::decay_t<ActualCVReturnType>;
-        using namespace ContainerDetect;
-
-        static_assert(IsRange<IncomingContainerType>(),
-                "Mezzanine::Convert only coonverts from containers or ranges.");
-        static_assert(IsContainer<ReturnContainerType>(),
-                "Mezzanine::Convert only coonverts into containers.");
-        static_assert(HasPushBackValue<ReturnContainerType>() ||
-                      HasInsertValue<ReturnContainerType>() ||
-                      HasAddValue<ReturnContainerType>(),
-                "Mezzanine::Convert only coonverts into containers with push_back(value_type), add(value_type) or "
-                "insert(value_type).");
-        static_assert(std::is_default_constructible<ReturnContainerType>(),
-                "Mezzanine::Convert only coonverts into containers that can be default constructed.");
-
-        ReturnContainerType Results;
-
-        if constexpr( HasReserve<ReturnContainerType>())
-            { Results.reserve(IncomingContainer.size()); }
-
-        for(const auto& item : IncomingContainer)
-        {
-            if constexpr(HasPushBackValue<ReturnContainerType>())
-                { Results.push_back(std::invoke(Predicate,item)); }
-            else if constexpr(HasInsertValue<ReturnContainerType>())
-                { Results.insert(std::invoke(Predicate,item)); }
-            else if constexpr(HasAddValue<ReturnContainerType>())
-                { Results.add(std::invoke(Predicate,item)); }
-        }
-
-        return Results;
-    }
+    // Pipe drains are functions that get the value out of the pipe. The must implemented a "Drain" member function
+    // which returns a functor. That functor accepts the final value of the pipe and returns some answer.
 
 
-    template<typename CVIncomingContainerType,
-             typename PredicateType,
-             typename CVReturnContainerType = CVIncomingContainerType>
-    [[nodiscard]] constexpr
-    decltype(auto) Convert3(const CVIncomingContainerType& IncomingContainer,
-                           PredicateType Predicate,
-                           CVReturnContainerType&& ResultsContainer = CVIncomingContainerType())
-    {
-        using IncomingContainerType = std::decay_t<CVIncomingContainerType>;
-        using ReturnContainerType = std::decay_t<CVReturnContainerType>;
-        using namespace ContainerDetect;
-
-        static_assert(IsRange<IncomingContainerType>(),
-                "Mezzanine::Convert only converts from containers or ranges.");
-        static_assert(IsContainer<ReturnContainerType>(),
-                "Mezzanine::Convert only converts into containers.");
-        static_assert(HasPushBackValue<ReturnContainerType>() ||
-                      HasInsertValue<ReturnContainerType>() ||
-                      HasAddValue<ReturnContainerType>(),
-                "Mezzanine::Convert only converts into containers with push_back(value_type), add(value_type) or "
-                "insert(value_type).");
-
-        ReturnContainerType Results{ResultsContainer};
-
-        if constexpr( HasReserve<ReturnContainerType>())
-            { Results.reserve(IncomingContainer.size()); }
-
-        for(const auto& item : IncomingContainer)
-        {
-            if constexpr(HasPushBackValue<ReturnContainerType>())
-                { Results.push_back(std::invoke(Predicate,item)); }
-            else if constexpr(HasInsertValue<ReturnContainerType>())
-                { Results.insert(std::invoke(Predicate,item)); }
-            else if constexpr(HasAddValue<ReturnContainerType>())
-                { Results.add(std::invoke(Predicate,item)); }
-        }
-
-        return Results;
-    }
-
-
-    // This is garbage I am experimenting with.
-    template<typename CVIncomingContainerType>
-    class Pipe {
-    private:
-        CVIncomingContainerType PipeData;
-    public:
-        Pipe(CVIncomingContainerType DataToPipe) : PipeData{DataToPipe}
-            {}
-
-        ~Pipe() = default;
-        Pipe(const Pipe&) = default;
-
-        [[nodiscard]] constexpr
-        CVIncomingContainerType Value() const noexcept
-            { return PipeData; }
-
-        static void f()
-        {}
-
-        template <typename FunctionType>
-        auto static next(FunctionType Function)
-        {
-            (void)Function;
-        }
-
-
-/*
-        template <typename FunctionType, typename... FunctionArgumentTypes>
-        [[nodiscard]] constexpr
-        //Pipe<decltype(std::invoke(FunctionType, declval(FunctionArgumentTypes)))>
-        decltype(auto)
-            operator>> (FunctionType Function, FunctionArgumentTypes&&... FunctionArguments)
-        {
-            return Pipe{std::invoke, PipeData, std::forward<FunctionArgumentTypes>(FunctionArguments)};
-        }
-*/
-
-
-    };
 
 } //Mezzanine
 
