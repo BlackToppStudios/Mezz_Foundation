@@ -72,6 +72,8 @@ namespace Mezzanine
         using reverse_iterator = typename StorageArray::reverse_iterator;
         /// @brief Type of const reverse iterator for random access. Invalidated on all insertions.
         using const_reverse_iterator = typename StorageArray::const_reverse_iterator;
+        /// @brief The type of the distance between two iterators.
+        using difference_type = decltype(iterator{}-iterator{});
     private:
         /// @brief The internal array that does most of the interesting work.
         StorageArray InternalStorage;

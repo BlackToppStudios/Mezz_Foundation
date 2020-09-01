@@ -459,6 +459,45 @@ AUTOMATIC_TEST_GROUP(ContainerToolsTests,ContainerTools)
         TEST_EQUAL("has_add_value-SharedPtr",
                    false,ContainerDetect::HasAddValue<TestSharedPtr>())
     }//has_add_value
+
+    {//is_stdlib_like_container
+        TEST_EQUAL("is_stdlib_like_container-Array",
+                   true,IsStdLibLikeContainer<TestArray>())
+        TEST_EQUAL("is_stdlib_like_container-Vector",
+                   true,IsStdLibLikeContainer<TestVector>())
+        TEST_EQUAL("is_stdlib_like_container-Deque",
+                   true,IsStdLibLikeContainer<TestDeque>())
+        TEST_EQUAL("is_stdlib_like_container-List",
+                   true,IsStdLibLikeContainer<TestList>())
+        TEST_EQUAL("is_stdlib_like_container-Set",
+                   true,IsStdLibLikeContainer<TestSet>())
+        TEST_EQUAL("is_stdlib_like_container-MultiSet",
+                   true,IsStdLibLikeContainer<TestMultiSet>())
+        TEST_EQUAL("is_stdlib_like_container-Map",
+                   true,IsStdLibLikeContainer<TestMap>())
+        TEST_EQUAL("is_stdlib_like_container-MultiMap",
+                   true,IsStdLibLikeContainer<TestMultiMap>())
+        TEST_EQUAL("is_stdlib_like_container-UnorderedSet",
+                   true,IsStdLibLikeContainer<TestUnorderedSet>())
+        TEST_EQUAL("is_stdlib_like_container-UnorderedMultiSet",
+                   true,IsStdLibLikeContainer<TestUnorderedMultiSet>())
+        TEST_EQUAL("is_stdlib_like_container-UnorderedMap",
+                   true,IsStdLibLikeContainer<TestUnorderedMap>())
+        TEST_EQUAL("is_stdlib_like_container-UnorderedMultiMap",
+                   true,IsStdLibLikeContainer<TestUnorderedMultiMap>())
+        TEST_EQUAL("is_stdlib_like_container-FlatMap",
+                   true,IsStdLibLikeContainer<TestFlatMap>())
+        TEST_EQUAL("is_stdlib_like_container-ManagedArray",
+                   true,IsStdLibLikeContainer<TestManagedArray>())
+        TEST_EQUAL("is_stdlib_like_container-SortedManagedArray",
+                   true,IsStdLibLikeContainer<TestSortedManagedArray>())
+        TEST_EQUAL("is_stdlib_like_container-SortedVector",
+                   true,IsStdLibLikeContainer<TestSortedVector>())
+        TEST_EQUAL("is_stdlib_like_container-String",
+                   true,IsStdLibLikeContainer<TestString>())
+        TEST_EQUAL("is_stdlib_like_container-SharedPtr",
+                   false,IsStdLibLikeContainer<TestSharedPtr>())
+    }//is_stdlib_like_container
 }
 
 #endif

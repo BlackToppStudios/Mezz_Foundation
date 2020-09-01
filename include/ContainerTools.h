@@ -293,53 +293,47 @@ namespace ContainerDetect {
     constexpr Boole HasValueType()
         { return HasValueType_t<Class>::value; }
 
-/// @brief Dummy/failure type for detecting if a class has a "size_type" defined.
-/// @tparam Class The class to be tested.
-template<typename Class, typename = void>
-struct DetectSizeType : std::false_type
-    {  };
-/// @brief Success type for detecting if a class has a "size_type" defined.
-/// @tparam Class The class to be tested.
-template<typename Class>
-struct DetectSizeType<Class,std::void_t<typename Class::size_type>> : std::true_type
-    {  };
-/// @brief Type for detecting the existance of a "size_type" member on a class.
-/// @tparam Class The class to be tested.
-template<typename Class>
-using HasSizeType_t = DetectSizeType<Class>;
-/// @brief Convenience function for the value of a HasSizeType check.
-/// @tparam Class The class that will be checked for the presence of a "size_type" member.
-/// @return Returns true if the provided type has a "size_type" member, false otherwise.
-template<typename Class>
-constexpr Boole HasSizeType()
-    { return HasSizeType_t<Class>::value; }
+    /// @brief Dummy/failure type for detecting if a class has a "size_type" defined.
+    /// @tparam Class The class to be tested.
+    template<typename Class, typename = void>
+    struct DetectSizeType : std::false_type
+        {  };
+    /// @brief Success type for detecting if a class has a "size_type" defined.
+    /// @tparam Class The class to be tested.
+    template<typename Class>
+    struct DetectSizeType<Class,std::void_t<typename Class::size_type>> : std::true_type
+        {  };
+    /// @brief Type for detecting the existance of a "size_type" member on a class.
+    /// @tparam Class The class to be tested.
+    template<typename Class>
+    using HasSizeType_t = DetectSizeType<Class>;
+    /// @brief Convenience function for the value of a HasSizeType check.
+    /// @tparam Class The class that will be checked for the presence of a "size_type" member.
+    /// @return Returns true if the provided type has a "size_type" member, false otherwise.
+    template<typename Class>
+    constexpr Boole HasSizeType()
+        { return HasSizeType_t<Class>::value; }
 
-
-/// @brief Dummy/failure type for detecting if a class has a "difference_type" defined.
-/// @tparam Class The class to be tested.
-template<typename Class, typename = void>
-struct DetectDifferenceType : std::false_type
-    {  };
-/// @brief Success type for detecting if a class has a "difference_type" defined.
-/// @tparam Class The class to be tested.
-template<typename Class>
-struct DetectDifferenceType<Class,std::void_t<typename Class::difference_type>> : std::true_type
-    {  };
-/// @brief Type for detecting the existance of a "difference_type" member on a class.
-/// @tparam Class The class to be tested.
-template<typename Class>
-using HasDifferenceType_t = DetectDifferenceType<Class>;
-/// @brief Convenience function for the value of a HasDifferenceType check.
-/// @tparam Class The class that will be checked for the presence of a "difference_type" member.
-/// @return Returns true if the provided type has a "difference_type" member, false otherwise.
-template<typename Class>
-constexpr Boole HasDifferenceType()
-    { return HasDifferenceType_t<Class>::value; }
-
-    // has size_type
-    // has difference_type
-
-
+    /// @brief Dummy/failure type for detecting if a class has a "difference_type" defined.
+    /// @tparam Class The class to be tested.
+    template<typename Class, typename = void>
+    struct DetectDifferenceType : std::false_type
+        {  };
+    /// @brief Success type for detecting if a class has a "difference_type" defined.
+    /// @tparam Class The class to be tested.
+    template<typename Class>
+    struct DetectDifferenceType<Class,std::void_t<typename Class::difference_type>> : std::true_type
+        {  };
+    /// @brief Type for detecting the existance of a "difference_type" member on a class.
+    /// @tparam Class The class to be tested.
+    template<typename Class>
+    using HasDifferenceType_t = DetectDifferenceType<Class>;
+    /// @brief Convenience function for the value of a HasDifferenceType check.
+    /// @tparam Class The class that will be checked for the presence of a "difference_type" member.
+    /// @return Returns true if the provided type has a "difference_type" member, false otherwise.
+    template<typename Class>
+    constexpr Boole HasDifferenceType()
+        { return HasDifferenceType_t<Class>::value; }
 
     /// @brief Dummy/failure type for detecting if a class has a "key_type" defined.
     /// @tparam Class The class to be tested.
@@ -490,11 +484,24 @@ constexpr Boole HasDifferenceType()
     constexpr Boole IsContainer()
         { return is_container<CheckType>::value; }
 
-
-
-
-
-
+    /// @brief A type trait that checks to see if it meets stricter requirements like most StdLib containers.
+    /// @tparam CheckType The type that will be checked.
+    /// @remarks This tests for the presence of begin(), end(), cbegin(), cend(), size(), size_type, difference_type,
+    /// and a value_type member on the type.
+    template<typename CheckType>
+    struct is_stdlib_like_container :
+        std::bool_constant< IsRange<CheckType>() &&
+                            IsConstRange<CheckType>() &&
+                            ContainerDetect::HasSize<CheckType>() &&
+                            ContainerDetect::HasValueType<CheckType>() &&
+                            ContainerDetect::HasDifferenceType<CheckType>() >
+        {  };
+    /// @brief Convenience function for getting just the bool of a is_container check.
+    /// @tparam CheckType The type that will be checked.
+    /// @return Returns true if CheckType is very similar to most std library containers., false otherwise.
+    template<typename CheckType>
+    constexpr Boole IsStdLibLikeContainer()
+        { return is_stdlib_like_container<CheckType>::value; }
 
     /// @brief Dummy/failure type for detecting if a class is a key/value pair for associative containers.
     /// @tparam ValueType The value_type stored by the container being tested.

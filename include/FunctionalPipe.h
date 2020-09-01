@@ -51,7 +51,8 @@
 
 namespace Mezzanine
 {
-namespace Functional {
+namespace Functional
+{
 
     // This is garbage I am experimenting with.
     template<typename CVContainerType>
@@ -118,43 +119,7 @@ namespace Functional {
             { return PipeData; }
 
     };
-/*
-    template <typename T, typename PipedDataType>
-    [[nodiscard]]
-    Boole operator==(const T& t, const Pipe<PipedDataType>& MyPipeIsReady)
-    {
-        static_assert(std::is_convertible_v<T,PipedDataType>,
-            "The data contained in the Pipe is not implicitly convertible to T for operator==(T,Pipe).");
-        return t == MyPipeIsReady.Value();
-    }
 
-    template <typename T, typename PipedDataType>
-    [[nodiscard]]
-    Boole operator==(const Pipe<PipedDataType>& MyPipeIsReady, const T& t)
-    {
-        static_assert(std::is_convertible_v<T,PipedDataType>,
-            "The data contained in the Pipe is not implicitly convertible to T for operator==(Pipe,T).");
-        return t == MyPipeIsReady.Value();
-    }
-
-    template <typename T, typename PipedDataType>
-    [[nodiscard]]
-    Boole operator!=(const T& t, const Pipe<PipedDataType>& MyPipeIsReady)
-    {
-        static_assert(std::is_convertible_v<T,PipedDataType>,
-            "The data contained in the Pipe is not implicitly convertible to T for operator!=(T,Pipe).");
-        return t != MyPipeIsReady.Value();
-    }
-
-    template <typename T, typename PipedDataType>
-    [[nodiscard]]
-    Boole operator!=(const Pipe<PipedDataType>& MyPipeIsReady, const T& t)
-    {
-        static_assert(std::is_convertible_v<T,PipedDataType>,
-            "The data contained in the Pipe is not implicitly convertible to T for operator!=(Pipe,T).");
-        return t != MyPipeIsReady.Value();
-    }
-*/
 
 } // Functional
 } // Mezzanine

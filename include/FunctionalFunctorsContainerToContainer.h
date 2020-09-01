@@ -60,6 +60,9 @@ namespace Functional
 
 #ifndef START_FUNCTOR_END_CONTAINER_TO_CONTAINER_AUTOCURRY
 
+    /// @def START_FUNCTOR_END_CONTAINER_TO_CONTAINER_AUTOCURRY
+    /// @brief Start a default container to container functor that autocurries if given a predicate.
+    /// @param StructName What is the struct called, this is an internal implementation detail.
 
     #define START_FUNCTOR_END_CONTAINER_TO_CONTAINER_AUTOCURRY(StructName)                                             \
         template <typename CVReturnContainerType = std::false_type, typename MaybePredicateType = std::false_type>     \
@@ -73,16 +76,14 @@ namespace Functional
 
     /// @def END_FUNCTOR_END_CONTAINER_TO_CONTAINER_AUTOCURRY
     /// @brief Terminate a default functor that accepts and returns a container and autocurries if given a predicate.
-    /// @param StructName
-    /// @param Name
+    /// @param StructName This must match the above StructName, it is an implementation detail.
+    /// @param Name These are the names of the API functions.
 
-    #define END_FUNCTOR_END_CONTAINER_TO_CONTAINER_AUTOCURRY(StructName,Name)                                          \
+#define END_FUNCTOR_END_CONTAINER_TO_CONTAINER_AUTOCURRY(StructName,Name)                                          \
             template<typename CVIncomingContainerType>                                                                 \
             [[nodiscard]] constexpr                                                                                    \
             decltype(auto) operator() (const CVIncomingContainerType& IncomingContainer) const                         \
-            {                                                                                                          \
-                return operator()(IncomingContainer, MaybePredicate);                                                  \
-            }                                                                                                          \
+                {  return operator()(IncomingContainer, MaybePredicate); }                                             \
         };                                                                                                             \
                                                                                                                        \
         /* Immediately invoking entry point */                                                                         \
@@ -92,18 +93,15 @@ namespace Functional
         [[nodiscard]] constexpr                                                                                        \
         decltype(auto) Name(const CVIncomingContainerType& IncomingContainer, PredicateType&& Predicate)               \
         {                                                                                                              \
-        return StructName<CVReturnContainerType,std::false_type>()                                                     \
-                (std::forward<const CVIncomingContainerType&>(IncomingContainer),                                      \
-                 std::forward<PredicateType>(Predicate));                                                              \
+            return StructName<CVReturnContainerType,std::false_type>()                                                 \
+                (IncomingContainer, std::forward<PredicateType>(Predicate));                                           \
         }                                                                                                              \
                                                                                                                        \
         /* Auto-Currying Entry Point */                                                                                \
-        template<typename CVReturnContainerType = std::false_type,                                                     \
-             typename PredicateType>                                                                                   \
+        template<typename CVReturnContainerType = std::false_type, typename PredicateType>                             \
         [[nodiscard]] constexpr                                                                                        \
         decltype(auto) Name(PredicateType&& Predicate)                                                                 \
             { return StructName<CVReturnContainerType,PredicateType>{std::forward<PredicateType>(Predicate)}; }
-
 #endif
 
     // The select make a new method by checking if the predicate is true when called for each item in the incoming data.
@@ -113,19 +111,22 @@ namespace Functional
     /// @details This is an implementation detail for @ref Select
 
     /// @fn Select
-    /// @details todo
-    /// @return todo
+    /// @details This accepts a container of data and a predicate. The predicate accepts one value from the container
+    /// and returns true or false. This is applied to every item in the container and each item that results in true is
+    /// copied into the resulting container. If data is supplied this returns a function which accepts data and uses the
+    /// previously passed predicate.
+    /// @return This returns a container that is a subset of the previous container.
 
     /// @struct FilterStruct
     /// @details This is an implementation detail for @ref Filter
 
     /// @fn Filter
-    /// @copydoc Select alias of Select
+    /// @copydoc Select
 
     START_FUNCTOR_END_CONTAINER_TO_CONTAINER_AUTOCURRY(SelectStruct)
         template<typename CVIncomingContainerType, typename PredicateType>
         [[nodiscard]] constexpr
-        decltype(auto) operator() (const CVIncomingContainerType& IncomingContainer, PredicateType Predicate) const
+        auto operator() (const CVIncomingContainerType& IncomingContainer, PredicateType&& Predicate) const
         {
             using IncomingContainerType = std::decay_t<CVIncomingContainerType>;
             using ActualCVReturnType = std::conditional_t<
@@ -153,7 +154,7 @@ namespace Functional
 
             for(const auto& item : IncomingContainer)
             {
-                if(std::invoke(Predicate,item))
+                if(std::invoke(std::forward<PredicateType>(Predicate),item))
                 {
                     if constexpr(HasPushBackValue<ReturnContainerType>())
                         { Results.push_back(item); }
@@ -171,7 +172,7 @@ namespace Functional
     START_FUNCTOR_END_CONTAINER_TO_CONTAINER_AUTOCURRY(FilterStruct)
         template<typename CVIncomingContainerType, typename PredicateType>
         [[nodiscard]] constexpr
-        decltype(auto) operator() (const CVIncomingContainerType& IncomingContainer, PredicateType Predicate) const
+        auto operator() (const CVIncomingContainerType& IncomingContainer, PredicateType&& Predicate) const
         {
             using IncomingContainerType = std::decay_t<CVIncomingContainerType>;
             using ActualCVReturnType = std::conditional_t<
@@ -199,7 +200,7 @@ namespace Functional
 
             for(const auto& item : IncomingContainer)
             {
-                if(std::invoke(Predicate,item))
+                if(std::invoke(std::forward<PredicateType>(Predicate),item))
                 {
                     if constexpr(HasPushBackValue<ReturnContainerType>())
                         { Results.push_back(item); }
@@ -223,13 +224,16 @@ namespace Functional
     /// @details This is an implementation detail for @ref Reject
 
     /// @fn Reject
-    /// @details todo
-    /// @return todo
+    /// @details This accepts a container of data and a predicate. The predicate accepts one value from the container
+    /// and returns true or false. This is applied to every item in the container and each item that results in false is
+    /// copied into the resulting container. If data is not supplied this returns a function which accepts data and uses
+    /// the previously passed predicate.
+    /// @return This returns a container that is a subset of the previous container.
 
     START_FUNCTOR_END_CONTAINER_TO_CONTAINER_AUTOCURRY(RejectStruct)
         template<typename CVIncomingContainerType, typename PredicateType>
         [[nodiscard]] constexpr
-        decltype(auto) operator() (const CVIncomingContainerType& IncomingContainer, PredicateType Predicate) const
+        auto operator() (const CVIncomingContainerType& IncomingContainer, PredicateType&& Predicate) const
         {
             using IncomingContainerType = std::decay_t<CVIncomingContainerType>;
             using ActualCVReturnType = std::conditional_t<
@@ -257,7 +261,7 @@ namespace Functional
 
             for(const auto& item : IncomingContainer)
             {
-                if(!std::invoke(Predicate,item))
+                if(!std::invoke(std::forward<PredicateType>(Predicate),item))
                 {
                     if constexpr(HasPushBackValue<ReturnContainerType>())
                         { Results.push_back(item); }
@@ -281,19 +285,22 @@ namespace Functional
     /// @details This is an implementation detail for @ref Convert
 
     /// @fn Convert
-    /// @details todo
-    /// @return todo
+    /// @details This accepts a container of data and a predicate. The predicate accepts one value from the container
+    /// and returns any value. The values that result from applying the predicate to every value in the container are
+    /// used to produce a new container. If data is not supplied this returns a function which accepts data and uses
+    /// the previously passed predicate.
+    /// @return A fresh container construct by applying a predicate or a functor that can convert data in this way.
 
     /// @struct MapStruct
     /// @details This is an implementation detail for @ref Map
 
     /// @fn Map
-    /// @copydoc Convert alias of Convert
+    /// @copydoc Convert
 
     START_FUNCTOR_END_CONTAINER_TO_CONTAINER_AUTOCURRY(ConvertStruct)
         template<typename CVIncomingContainerType, typename PredicateType>
         [[nodiscard]] constexpr
-        decltype(auto) operator() (const CVIncomingContainerType& IncomingContainer, PredicateType Predicate) const
+        auto operator() (const CVIncomingContainerType& IncomingContainer, PredicateType&& Predicate) const
         {
             using IncomingContainerType = std::decay_t<CVIncomingContainerType>;
             using ActualCVReturnType = std::conditional_t<
@@ -322,11 +329,11 @@ namespace Functional
             for(const auto& item : IncomingContainer)
             {
                 if constexpr(HasPushBackValue<ReturnContainerType>())
-                    { Results.push_back(std::invoke(Predicate,item)); }
+                    { Results.push_back(std::invoke(std::forward<PredicateType>(Predicate),item)); }
                 else if constexpr(HasInsertValue<ReturnContainerType>())
-                    { Results.insert(std::invoke(Predicate,item)); }
+                    { Results.insert(std::invoke(std::forward<PredicateType>(Predicate),item)); }
                 else if constexpr(HasAddValue<ReturnContainerType>())
-                    { Results.add(std::invoke(Predicate,item)); }
+                    { Results.add(std::invoke(std::forward<PredicateType>(Predicate),item)); }
             }
 
             return Results;
@@ -336,7 +343,7 @@ namespace Functional
     START_FUNCTOR_END_CONTAINER_TO_CONTAINER_AUTOCURRY(MapStruct)
         template<typename CVIncomingContainerType, typename PredicateType>
         [[nodiscard]] constexpr
-        decltype(auto) operator() (const CVIncomingContainerType& IncomingContainer, PredicateType Predicate) const
+        auto operator() (const CVIncomingContainerType& IncomingContainer, PredicateType&& Predicate) const
         {
             using IncomingContainerType = std::decay_t<CVIncomingContainerType>;
             using ActualCVReturnType = std::conditional_t<
@@ -365,11 +372,11 @@ namespace Functional
             for(const auto& item : IncomingContainer)
             {
                 if constexpr(HasPushBackValue<ReturnContainerType>())
-                    { Results.push_back(std::invoke(Predicate,item)); }
+                    { Results.push_back(std::invoke(std::forward<PredicateType>(Predicate),item)); }
                 else if constexpr(HasInsertValue<ReturnContainerType>())
-                    { Results.insert(std::invoke(Predicate,item)); }
+                    { Results.insert(std::invoke(std::forward<PredicateType>(Predicate),item)); }
                 else if constexpr(HasAddValue<ReturnContainerType>())
-                    { Results.add(std::invoke(Predicate,item)); }
+                    { Results.add(std::invoke(std::forward<PredicateType>(Predicate),item)); }
             }
 
             return Results;
@@ -382,13 +389,15 @@ namespace Functional
     /// @details This is an implementation detail for @ref TakeN
 
     /// @fn TakeN
-    /// @details todo
-    /// @return todo
+    /// @details This contructs a smaller container by copying the first N items from the data container. If an amount
+    /// is passed but not data is a functor is returned that will return copies of the passed amount of data that
+    /// functor is passed.
+    /// @return A subset of the data or a functor that returns a subset of the data.
 
     START_FUNCTOR_END_CONTAINER_TO_CONTAINER_AUTOCURRY(TakeNStruct)
         template<typename CVIncomingContainerType, typename CountType>
         [[nodiscard]] constexpr
-        decltype(auto) operator() (const CVIncomingContainerType& IncomingContainer, CountType CountToTake) const
+        auto operator() (const CVIncomingContainerType& IncomingContainer, CountType CountToTake) const
         {
             using IncomingContainerType = std::decay_t<CVIncomingContainerType>;
             using SizeType = typename IncomingContainerType::size_type;
@@ -437,13 +446,15 @@ namespace Functional
     /// @details This is an implementation detail for @ref TakeBackN
 
     /// @fn TakeBackN
-    /// @details todo returns reversed end of container
-    /// @return todo
+    /// @details This contructs a smaller container by copying the last N items in reverse order from the data
+    /// container. If an amount is passed but not data is a functor is returned that will return copies of the passed
+    /// amount of data that functor is passed.
+    /// @return A subset of the data or a functor that returns a subset of the data.
 
     START_FUNCTOR_END_CONTAINER_TO_CONTAINER_AUTOCURRY(TakeBackNStruct)
         template<typename CVIncomingContainerType, typename CountType>
         [[nodiscard]] constexpr
-        decltype(auto) operator() (const CVIncomingContainerType& IncomingContainer, CountType CountToTake) const
+        auto operator() (const CVIncomingContainerType& IncomingContainer, CountType CountToTake) const
         {
             using IncomingContainerType = std::decay_t<CVIncomingContainerType>;
             using SizeType = typename IncomingContainerType::size_type;
@@ -491,13 +502,16 @@ namespace Functional
     /// @details This is an implementation detail for @ref TakeWhile
 
     /// @fn TakeWhile
-    /// @details todo
-    /// @return todo
+    /// @details This contructs a smaller container by copying items from the beginning of the container as long as the
+    /// predicate returns true when passed that item. When the predicate returns false this returns what has been copied
+    /// so far. If a predicate is passed but nt data is passed, then a functor is returned that will return copies of
+    /// the data it recieves based on the predicate.
+    /// @return A subset of the data or a functor that returns a subset of the data.
 
     START_FUNCTOR_END_CONTAINER_TO_CONTAINER_AUTOCURRY(TakeWhileStruct)
         template<typename CVIncomingContainerType, typename PredicateType>
         [[nodiscard]] constexpr
-        decltype(auto) operator() (const CVIncomingContainerType& IncomingContainer, PredicateType Predicate) const
+        auto operator() (const CVIncomingContainerType& IncomingContainer, PredicateType&& Predicate) const
         {
             using IncomingContainerType = std::decay_t<CVIncomingContainerType>;
             using ActualCVReturnType = std::conditional_t<
@@ -524,7 +538,7 @@ namespace Functional
                 { Results.reserve(IncomingContainer.size()); }
 
             auto Copying = IncomingContainer.cbegin();
-            while(IncomingContainer.cend() != Copying && std::invoke(Predicate, *Copying))
+            while(IncomingContainer.cend() != Copying && std::invoke(std::forward<PredicateType>(Predicate), *Copying))
             {
                 if constexpr(HasPushBackValue<ReturnContainerType>())
                     { Results.push_back(*Copying); }
@@ -544,13 +558,16 @@ namespace Functional
     /// @details This is an implementation detail for @ref TakeBackWhile
 
     /// @fn TakeBackWhile
-    /// @details todo
-    /// @return todo
+    /// @details This contructs a smaller container by copying items from the end of the container in reverse order as
+    /// long as the predicate returns true when passed that item. When the predicate returns false this returns what has
+    /// been copied so far. If a predicate is passed but no data is, then a functor is returned that will return copies
+    /// using the predicate as described above.
+    /// @return A subset of the data or a functor that returns a subset of the data.
 
     START_FUNCTOR_END_CONTAINER_TO_CONTAINER_AUTOCURRY(TakeBackWhileStruct)
         template<typename CVIncomingContainerType, typename PredicateType>
         [[nodiscard]] constexpr
-        decltype(auto) operator() (const CVIncomingContainerType& IncomingContainer, PredicateType Predicate) const
+        auto operator() (const CVIncomingContainerType& IncomingContainer, PredicateType&& Predicate) const
         {
             using IncomingContainerType = std::decay_t<CVIncomingContainerType>;
             using ActualCVReturnType = std::conditional_t<
@@ -577,7 +594,7 @@ namespace Functional
                 { Results.reserve(IncomingContainer.size()); }
 
             auto Copying = IncomingContainer.crbegin();
-            while(IncomingContainer.crend() != Copying && std::invoke(Predicate, *Copying))
+            while(IncomingContainer.crend() != Copying && std::invoke(std::forward<PredicateType>(Predicate), *Copying))
             {
                 if constexpr(HasPushBackValue<ReturnContainerType>())
                     { Results.push_back(*Copying); }
@@ -599,13 +616,14 @@ namespace Functional
     /// @details This is an implementation detail for @ref DropN
 
     /// @fn DropN
-    /// @details todo
-    /// @return todo
+    /// @details This skips the first N items them copies items to the start of the container. If not given data this
+    /// returns a functor that does the described copying.
+    /// @return A subset of the data with some of the data omitted.
 
     START_FUNCTOR_END_CONTAINER_TO_CONTAINER_AUTOCURRY(DropNStruct)
         template<typename CVIncomingContainerType, typename CountType>
         [[nodiscard]] constexpr
-        decltype(auto) operator() (const CVIncomingContainerType& IncomingContainer, CountType CountToDrop) const
+        auto operator() (const CVIncomingContainerType& IncomingContainer, CountType CountToDrop) const
         {
             using IncomingContainerType = std::decay_t<CVIncomingContainerType>;
             using SizeType = typename IncomingContainerType::size_type;
@@ -660,13 +678,14 @@ namespace Functional
     /// @details This is an implementation detail for @ref DropBackN
 
     /// @fn DropBackN
-    /// @details todo returns reversed end of container
-    /// @return todo
+    /// @details This skips the last N items then copies items to the end of the container. If not given data this
+    /// returns a functor that does the described copying.
+    /// @return A subset of the data with some of the data omitted.
 
     START_FUNCTOR_END_CONTAINER_TO_CONTAINER_AUTOCURRY(DropBackNStruct)
         template<typename CVIncomingContainerType, typename CountType>
         [[nodiscard]] constexpr
-        decltype(auto) operator() (const CVIncomingContainerType& IncomingContainer, CountType CountToDrop) const
+        auto operator() (const CVIncomingContainerType& IncomingContainer, CountType CountToDrop) const
         {
             using IncomingContainerType = std::decay_t<CVIncomingContainerType>;
             using SizeType = typename IncomingContainerType::size_type;
@@ -720,13 +739,15 @@ namespace Functional
     /// @details This is an implementation detail for @ref DropWhile
 
     /// @fn DropWhile
-    /// @details todo
-    /// @return todo
+    /// @details Skips items from the beginning as long as a predicate returns true then copies the rest of the data
+    /// from the incoming container. If not given data this returns a functor that uses the predicate to skip and copy
+    /// data.
+    /// @return A subset of the data with some of the data omitted.
 
     START_FUNCTOR_END_CONTAINER_TO_CONTAINER_AUTOCURRY(DropWhileStruct)
         template<typename CVIncomingContainerType, typename PredicateType>
         [[nodiscard]] constexpr
-        decltype(auto) operator() (const CVIncomingContainerType& IncomingContainer, PredicateType Predicate) const
+        auto operator() (const CVIncomingContainerType& IncomingContainer, PredicateType&& Predicate) const
         {
             using IncomingContainerType = std::decay_t<CVIncomingContainerType>;
             using ActualCVReturnType = std::conditional_t<
@@ -753,7 +774,7 @@ namespace Functional
                 { Results.reserve(IncomingContainer.size()); }
 
             auto Copying = IncomingContainer.cbegin();
-            while(IncomingContainer.cend() != Copying && std::invoke(Predicate, *Copying))
+            while(IncomingContainer.cend() != Copying && std::invoke(std::forward<PredicateType>(Predicate), *Copying))
                 { Copying++; }
 
             while(IncomingContainer.cend() != Copying)
@@ -776,13 +797,15 @@ namespace Functional
     /// @details This is an implementation detail for @ref DropBackWhile
 
     /// @fn DropBackWhile
-    /// @details todo
-    /// @return todo
+    /// @details Skips items from the end as long as a predicate returns true then copies the rest of the data
+    /// from the incoming container. If not given data this returns a functor that uses the predicate to skip and copy
+    /// data.
+    /// @return A subset of the data with some of the data omitted.
 
     START_FUNCTOR_END_CONTAINER_TO_CONTAINER_AUTOCURRY(DropBackWhileStruct)
         template<typename CVIncomingContainerType, typename PredicateType>
         [[nodiscard]] constexpr
-        decltype(auto) operator() (const CVIncomingContainerType& IncomingContainer, PredicateType Predicate) const
+        auto operator() (const CVIncomingContainerType& IncomingContainer, PredicateType&& Predicate) const
         {
             using IncomingContainerType = std::decay_t<CVIncomingContainerType>;
             using ActualCVReturnType = std::conditional_t<
@@ -809,7 +832,7 @@ namespace Functional
                 { Results.reserve(IncomingContainer.size()); }
 
             auto Copying = IncomingContainer.crbegin();
-            while(IncomingContainer.crend() != Copying && std::invoke(Predicate, *Copying))
+            while(IncomingContainer.crend() != Copying && std::invoke(std::forward<PredicateType>(Predicate), *Copying))
                 { Copying++; }
 
             while(IncomingContainer.crend() != Copying)
@@ -828,6 +851,68 @@ namespace Functional
         }
     END_FUNCTOR_END_CONTAINER_TO_CONTAINER_AUTOCURRY(DropBackWhileStruct, DropBackWhile)
 
+    /// @details This is an implementation detail for @ref Reverse
+    template <typename CVReturnContainerType = std::false_type>
+    struct ReverseStruct
+    {
+        template<typename CVIncomingContainerType>
+        [[nodiscard]] constexpr
+        decltype(auto) operator() (const CVIncomingContainerType& IncomingContainer) const
+        {
+            using IncomingContainerType = std::decay_t<CVIncomingContainerType>;
+            using ActualCVReturnType = std::conditional_t<
+                std::is_same_v<CVReturnContainerType, std::false_type>, IncomingContainerType, CVReturnContainerType
+            >;
+            using ReturnContainerType = std::decay_t<ActualCVReturnType>;
+            using namespace ContainerDetect;
+
+            static_assert(IsConstReverseRange<IncomingContainerType>(),
+                    "Mezzanine::Reverse only reverses from reversible const containers or ranges.");
+            static_assert(IsContainer<ReturnContainerType>(),
+                    "Mezzanine::Reverse only reverses into containers.");
+            static_assert(HasPushBackValue<ReturnContainerType>() ||
+                          HasInsertValue<ReturnContainerType>() ||
+                          HasAddValue<ReturnContainerType>(),
+                    "Mezzanine::Reverse only reverses into containers with push_back(value_type), add(value_type) "
+                    "or insert(value_type).");
+            static_assert(std::is_default_constructible<ReturnContainerType>(),
+                    "Mezzanine::Reverse only drops into containers that can be default constructed.");
+
+            ReturnContainerType Results;
+
+            if constexpr( HasReserve<ReturnContainerType>())
+                { Results.reserve(IncomingContainer.size()); }
+
+            for(auto Copying = IncomingContainer.crbegin();
+                Copying != IncomingContainer.crend();
+                Copying++)
+            {
+                if constexpr(HasPushBackValue<ReturnContainerType>())
+                    { Results.push_back(*Copying); }
+                else if constexpr(HasInsertValue<ReturnContainerType>())
+                    { Results.insert(*Copying); }
+                else if constexpr(HasAddValue<ReturnContainerType>())
+                    { Results.add(*Copying); }
+            }
+
+            return Results;
+        }
+    };
+
+    /// @copydoc Reverse
+    template<typename CVReturnContainerType = std::false_type,
+             typename CVIncomingContainerType>
+    [[nodiscard]] constexpr
+    decltype(auto) Reverse(const CVIncomingContainerType& IncomingContainer)
+        { return ReverseStruct<CVReturnContainerType>{}(IncomingContainer); }
+
+    /// @details Copies items in reverse order to create a new container. If not given data returns a functor that
+    /// reverses its input.
+    /// @return A copy of the data in reverse order.
+    template<typename CVReturnContainerType = std::false_type>
+    [[nodiscard]] constexpr
+    decltype(auto) Reverse()
+        { return ReverseStruct<CVReturnContainerType>{}; }
 
 
 

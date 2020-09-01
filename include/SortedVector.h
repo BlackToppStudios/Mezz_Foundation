@@ -73,6 +73,8 @@ namespace Mezzanine
         using reverse_iterator = typename StorageVector::reverse_iterator;
         /// @brief Type of const reverse iterator for random access. Invalidated on all insertions.
         using const_reverse_iterator = typename StorageVector::const_reverse_iterator;
+        /// @brief The type of the distance between two iterators.
+        using difference_type = typename StorageVector::difference_type;
     private:
         /// @brief The actual vector that does most of the interesting work.
         StorageVector InternalStorage;

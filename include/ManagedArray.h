@@ -80,6 +80,8 @@ namespace Mezzanine
         using iterator = value_type*;
         /// @brief Type of const random access iterator. Invalidated on all insertions.
         using const_iterator = const value_type*;
+        /// @brief The type of the distance between two iterators.
+        using difference_type = decltype(iterator{}-iterator{});
         /// @brief Type of mutable reverse iterator for random access. Invalidated on all insertions.
         using reverse_iterator = std::reverse_iterator<iterator>;
         /// @brief Type of const reverse iterator for random access. Invalidated on all insertions.

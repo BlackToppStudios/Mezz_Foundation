@@ -78,6 +78,7 @@ DEFAULT_TEST_GROUP(FunctionalToolsTests,FunctionalTools)
 
     const std::vector<Integer> OneToTen {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
     const std::vector<Integer> OneToThree {1, 2, 3};
+    const std::vector<Integer> ThreeToOne {3, 2, 1};
     const std::vector<Integer> TenToSeven {10, 9, 8, 7};
     const std::vector<Integer> EightToTen {8, 9, 10};
     const std::vector<Integer> OneToTenOnlyEven {2, 4, 6, 8, 10};
@@ -111,6 +112,7 @@ DEFAULT_TEST_GROUP(FunctionalToolsTests,FunctionalTools)
         TEST("DropBackNSimple", FourToOne == DropBackN(OneToTen,6))
         TEST("DropWhile", EightToTen == DropWhile(OneToTen,[](Integer x){ return x < 8; }))
         TEST("DropBackWhile", FourToOne == DropBackWhile(OneToTen,[](Integer x){ return x > 4; }))
+        TEST("Reverse", OneToThree == Reverse(ThreeToOne))
 
         // Specified Return Types
         TEST("Select<List,Integer>(IsEven)",
@@ -134,14 +136,20 @@ DEFAULT_TEST_GROUP(FunctionalToolsTests,FunctionalTools)
         const String UpperCaseWord{"WORD"};
 
         TEST("Convert<String>(UpCase)", UpperCaseWord == Convert(Word, UpCase))
+
     }
 
     {
         // AutoCurrying with Predicates on collection to collection functors
         const auto SelectEvenIntoVector = Select<std::vector<Integer>>(IsEven);
         TEST("SelectAutoCurried<vectorConstruction>(IsEven)", OneToTenOnlyEven == SelectEvenIntoVector(OneToTen))
+
         const auto SelectEven = Select(IsEven);
-        TEST("SelectAutoCurried<Integer>(IsEven)", OneToTenOnlyEven == SelectEven(OneToTen))
+        TEST("SelectAutoCurriedOnFunction<Implicit>(IsEven)", OneToTenOnlyEven == SelectEven(OneToTen))
+
+        // It should be possible to support auto-currying on data or predicate. Checout Issue #75 & #76
+        //const auto SelectFromOneToTen = Select(OneToTen);
+        //TEST("SelectAutoCurriedOnData<Implicit>(OneToTen)", OneToTenOnlyEven == SelectFromOneToTen(IsEven))
 
         const auto RejectEvenIntoVector = Reject<std::vector<Integer>>(IsOdd);
         TEST("RejectAutoCurried<vectorConstruction>(IsOdd)", OneToTenOnlyEven == RejectEvenIntoVector(OneToTen))
@@ -170,6 +178,9 @@ DEFAULT_TEST_GROUP(FunctionalToolsTests,FunctionalTools)
         TEST("DropWhileAutoCurried<Integer>", EightToTen == DropWhileLessThanEight(OneToTen))
         const auto DropBackWhileGreaterThanFour = DropBackWhile([](Integer x){ return x > 4; });
         TEST("DropBackWhileAutoCurried<Integer>", FourToOne == DropBackWhileGreaterThanFour(OneToTen))
+
+        const auto ReverseFunctor = Reverse<std::vector<Integer>>();
+        TEST("ReverseAutoCurry", OneToThree == ReverseFunctor(ThreeToOne))
     }
 
     {
@@ -209,6 +220,23 @@ DEFAULT_TEST_GROUP(FunctionalToolsTests,FunctionalTools)
         TEST_EQUAL("IsPartitioned", true, IsPartitioned(OneToTenEvenThenOdd,IsEven))
         TEST_EQUAL("IsPartitioned-Miss", false, IsPartitioned(OneToTenEvenThenOdd,IsOdd))
 
+        TEST_EQUAL("Accumulate", 6, Accumulate(OneToThree,std::plus<Integer>{},0))
+        TEST_EQUAL("Accumulate<MaxInt>", MaxInt{6}, Accumulate<MaxInt>(OneToThree,std::plus<Integer>{},0))
+        TEST_EQUAL("Collect", 6, Collect(OneToThree,std::plus<Integer>{},0))
+        TEST_EQUAL("LeftFold", 6, LeftFold(OneToThree,std::plus<Integer>{},0))
+        TEST_EQUAL("Reduce", 6, Reduce(OneToThree,std::plus<Integer>{},0))
+
+        TEST_EQUAL("AccumulateBack", 6, AccumulateBack(OneToThree,std::plus<Integer>{},0))
+        TEST_EQUAL("AccumulateBack<MaxInt>", MaxInt{6}, AccumulateBack<MaxInt>(OneToThree,std::plus<Integer>{},0))
+        TEST_EQUAL("RightFold", 6, RightFold(OneToThree,std::plus<Integer>{},0))
+
+        auto AsStringAppender = [](String l, Integer r) { return l + std::to_string(r); };
+        TEST_EQUAL("AccumulateNonCommutative",
+                   String("123"),
+                   Accumulate(OneToThree, AsStringAppender, String("")))
+        TEST_EQUAL("AccumulateBackNonCommutative",
+                   String("321"),
+                   AccumulateBack(OneToThree, AsStringAppender, String("")))
     }
 
     {
@@ -239,6 +267,17 @@ DEFAULT_TEST_GROUP(FunctionalToolsTests,FunctionalTools)
 
         auto IsOddPartitioned = IsPartitioned(IsOdd);
         TEST_EQUAL("IsPartitionedAutoCurry", false, IsOddPartitioned(OneToTenEvenThenOdd))
+
+
+        auto Sum = Accumulate(std::plus<Integer>{},0);
+        TEST_EQUAL("AccumulateAutoCurry", 6, Sum(OneToThree))
+        auto SumMaxInt = Accumulate(std::plus<Integer>{},0);
+        TEST_EQUAL("AccumulateAutoCurry<MaxInt>", MaxInt{6}, SumMaxInt(OneToThree))
+
+        auto SumBack = AccumulateBack(std::plus<Integer>{},0);
+        TEST_EQUAL("AccumulateBackAutoCurry", 6, SumBack(OneToThree))
+        auto SumBackMaxInt = AccumulateBack(std::plus<Integer>{},0);
+        TEST_EQUAL("AccumulateBackAutoCurry<MaxInt>", MaxInt{6}, SumBackMaxInt(OneToThree))
 
     }
 
@@ -301,6 +340,8 @@ DEFAULT_TEST_GROUP(FunctionalToolsTests,FunctionalTools)
             >> Convert(Increment)
             > Max();
         TEST_EQUAL("BigPipeExample", 11, answer)
+
+
     }
 
     {
