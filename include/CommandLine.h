@@ -64,7 +64,7 @@ const char ArgToken = '-';
 /// @param ArgCount The count of arguments as given to main.
 /// @param Arguments The "Argument Vector" as given to main.
 /// @return An ArgVector with a 1 to 1 conversion of the inputs without opinions in parsing or tokenizing.
-ArgVector MEZZ_LIB VectorizeArgs(int ArgCount,  char** Arguments);
+ArgVector MEZZ_LIB VectorizeArgs(int ArgCount, char** Arguments);
 
 /// @brief An opinionated way to split grouped single letter args into multiple short arguments
 /// @param DirtyArg A single arg prepended with '-' that should be split.
@@ -88,34 +88,50 @@ ArgMap MEZZ_LIB MapArgumentParameters(const ArgVector& DirtyArgs);
 
 /// @brief A collection of arguments and possible associated flags.
 /// @details This is a simple container for storing command line arguments after parsing them in an opinionated but
-/// common way.
+/// common way. The opinions lean towards the common features that GNU style arguments but do not conform exactly.
+/// Single character options are prefixed by a single '-' and have a corresponding long option prefixed with '--'.
+/// Either the short or long form can accept any amount of arguments with no '-'s at the beginning. All of this will
+/// be stored in a one const data structure that can be referred to easily later.
 /// @n @n
-/// This accepts the Argument Count (commonly argc) and Argument Vector/Values(argv) in the constructor as they are
-/// passed into main.
+///
+/// This accepts the Argument Count (commonly argc) and Argument Vector/Values (often argv) in the constructor as they
+/// are passed into main. Here is one idealized example:
 /// @code{.cpp}
 /// int main(int ArgC, char** ArgV)
 /// {
 ///      const CommandLineArguments Parsed(ArgC, ArgV);
 /// @endcode
+///
+/// And Another that is actually an example from our Mezzy Tool:
+/// @code{.cpp}
+/// Mezzanine::ExitCode main(int ArgCount, char** Arguments)
+/// {
+///     // Parse command line arguments
+///     Mezzanine::CommandLineArguments ParsedArgs(ArgCount, Arguments);
+/// @endcode
+///
 /// After this the instannce of CommandLineArguments has only readable members, every member is const and nothing is
 /// mutable. This is to insure that accidents cause compilation errors and allows confidence that use of this that
 /// compile are likely to be correct (or at least only wrong because of runtime logic errors like indexing errors).
 /// @n @n
+///
 /// This tries to look a little like typical GNU command line arguments. This handles "long"
 /// arguments that start with "--" like "--all" and this handles "short" arguments that start with "-" like "-a and
 /// combined short forms like "-rf".
 /// @n @n
+///
 /// This also handles arguments without a "-" prefix by presuming they are parameters for previous arguments. Many
 /// arguments need additional information to specify some behavior. Consider a potential zip command, it might accept a
 /// "--file" flag to indicate the name of the zip file to work with. This could parse this syntax like this
 /// "myZipCommand --file fileToWork.zip".
 /// @n @n
+///
 /// This makes no further guarantees about preserving the order arguments are passed in. For example "-wtf" is the same
 /// as "-tfw" are treated the same as long as there are no trailing parameters for those arguments.
 /// @n @n
 /// This converts all arguments to keys in a map with a value of a vector of their parameters. Consider this command:
 /// @code
-///     foo.exe -s
+///     $ foo.exe -s
 /// @endcode
 ///
 /// This would store "foo.exe" in the data member ExecutableCommand and turns the arg into a dictionary with one key,
@@ -123,10 +139,6 @@ ArgMap MEZZ_LIB MapArgumentParameters(const ArgVector& DirtyArgs);
 /// @code
 ///     { {"-s", {} }
 /// @endcode
-///
-/// The following examples have the same executable command and but would make slightly different data structures and
-/// are illustrated as possible initializer lists:
-/// @n @n
 ///
 /// Short arguments are broken up, and long arguments are not. Short arguments have one ArgToken ("-"), long have two
 /// ArgTokens. Consider this example:
