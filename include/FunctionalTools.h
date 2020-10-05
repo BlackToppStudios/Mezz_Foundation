@@ -257,18 +257,16 @@ namespace Mezzanine
 ///     - @ref Reject - Copy All items that don't match a predicate.
 ///     - @ref Reverse - Return the continer in reverse order.
 ///     - @ref Select - Copy all items matching a predicate.
+///     - @ref Sort - Copies and sorts into a fresh container
 ///     - @ref TakeBackN - Copy the last N items in reverse order.
 ///     - @ref TakeN - Copy the first N items.
 ///     - @ref TakeBackWhile - Copy from the back until the predicate returns false.
 ///     - @ref TakeWhile - Copy from the beginning until the predicate returns false in reverse order.
-///     - @ref
-///
-/// Sort
+///     -
 /// Zip
 /// Unzip
 /// Compact - Drops nulls
 /// Slice (int Start, int End)
-/// Reverse
 /// Unique
 /// Shuffle
 /// ForEach

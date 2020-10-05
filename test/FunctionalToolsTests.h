@@ -113,6 +113,9 @@ DEFAULT_TEST_GROUP(FunctionalToolsTests,FunctionalTools)
         TEST("DropWhile", EightToTen == DropWhile(OneToTen,[](Integer x){ return x < 8; }))
         TEST("DropBackWhile", FourToOne == DropBackWhile(OneToTen,[](Integer x){ return x > 4; }))
         TEST("Reverse", OneToThree == Reverse(ThreeToOne))
+        TEST("Sort", OneToThree == Sort(ThreeToOne, std::less<Integer>{}))
+        //TEST("SortDataOnly", OneToThree == Sort(ThreeToOne)) // TODO: Support immediate invocation with default pred.
+
 
         // Specified Return Types
         TEST("Select<List,Integer>(IsEven)",
@@ -181,6 +184,9 @@ DEFAULT_TEST_GROUP(FunctionalToolsTests,FunctionalTools)
 
         const auto ReverseFunctor = Reverse<std::vector<Integer>>();
         TEST("ReverseAutoCurry", OneToThree == ReverseFunctor(ThreeToOne))
+
+        const auto SortGreatFunctor = Sort(std::greater<Integer>{});
+        TEST("SortAutoCurry", ThreeToOne == SortGreatFunctor(ThreeToOne))
     }
 
     {

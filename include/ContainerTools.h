@@ -166,6 +166,28 @@ namespace ContainerDetect {
     template<typename Class>
     constexpr Boole HasCREnd()
         { return HasCREnd_t<Class>::value; }
+/*
+/// @brief Convenience type for resize function detection.
+/// @tparam Class The class to test.
+template<typename Class>
+//using RangeConstructible_t = decltype(std::is_constructible<Class, typename Class::iterator, typename Class::iterator>);
+using RangeConstructible_t = decltype(std::is_constructible<Class,
+                                      decltype(std::declval<Class&>().end()),
+                                      decltype(std::declval<Class&>().end())>);
+
+/// @brief Type for is_detected that tests for the existence of resize on a class.
+/// @tparam Class The class that will be checked for the presence of a resize function.
+template<typename Class>
+using IsRangeConstructible_t = std::is_detected<RangeConstructible_t, Class>;
+// using IsRangeConstructible_t = std::is_constructible<Class, typename Class::iterator, typename Class::iterator>;
+/// @brief Convenience function for the value of a HasResize check.
+/// @tparam Class The class that will be checked for the presence of a "resize()" function.
+/// @return Returns true if the provided type has a "resize()" member function, false otherwise.
+template<typename Class>
+constexpr Boole IsRangeConstructible()
+    { return IsRangeConstructible_t<Class>::value; }
+*/
+
 
     /// @brief Convenience type for size function detection.
     /// @tparam Class The class to test.

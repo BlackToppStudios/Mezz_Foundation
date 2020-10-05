@@ -79,7 +79,7 @@ namespace Functional
     /// @param StructName This must match the above StructName, it is an implementation detail.
     /// @param Name These are the names of the API functions.
 
-#define END_FUNCTOR_END_CONTAINER_TO_CONTAINER_AUTOCURRY(StructName,Name)                                          \
+    #define END_FUNCTOR_END_CONTAINER_TO_CONTAINER_AUTOCURRY(StructName,Name)                                          \
             template<typename CVIncomingContainerType>                                                                 \
             [[nodiscard]] constexpr                                                                                    \
             decltype(auto) operator() (const CVIncomingContainerType& IncomingContainer) const                         \
@@ -828,7 +828,7 @@ namespace Functional
 
             ReturnContainerType Results;
 
-            if constexpr( HasReserve<ReturnContainerType>())
+            if constexpr(HasReserve<ReturnContainerType>())
                 { Results.reserve(IncomingContainer.size()); }
 
             auto Copying = IncomingContainer.crbegin();
@@ -878,7 +878,7 @@ namespace Functional
             static_assert(std::is_default_constructible<ReturnContainerType>(),
                     "Mezzanine::Reverse only drops into containers that can be default constructed.");
 
-            ReturnContainerType Results;
+            ReturnContainerType Results;        // Can this be optimized by using iter
 
             if constexpr( HasReserve<ReturnContainerType>())
                 { Results.reserve(IncomingContainer.size()); }
@@ -915,7 +915,126 @@ namespace Functional
         { return ReverseStruct<CVReturnContainerType>{}; }
 
 
+    /// @struct SortStruct
+    /// @details This is an implementation detail for @ref Sort
 
+    /// @fn SortWith
+    /// @details Copies and sorts passed data. Accepts a predicate to sort by. If only a prediciate is supplied this
+    /// returns a function that sorts using the passed predicate.
+    /// @return A sorted container of data, presuming the container supports sorting. Or a function that sorts if no
+    /// data was passed.
+
+    START_FUNCTOR_END_CONTAINER_TO_CONTAINER_AUTOCURRY(SortStruct)
+        template<typename CVIncomingContainerType, typename PredicateType>
+        [[nodiscard]] constexpr
+        auto operator() (const CVIncomingContainerType& IncomingContainer, PredicateType&& Predicate) const
+        {
+            using IncomingContainerType = std::decay_t<CVIncomingContainerType>;
+            using ActualCVReturnType = std::conditional_t<
+                std::is_same_v<CVReturnContainerType, std::false_type>, IncomingContainerType, CVReturnContainerType
+            >;
+            using ReturnContainerType = std::decay_t<ActualCVReturnType>;
+            using namespace ContainerDetect;
+
+            static_assert(IsRange<IncomingContainerType>(),
+                    "Mezzanine::Sort only sorts from containers or ranges.");
+            static_assert(IsContainer<ReturnContainerType>(),
+                    "Mezzanine::Sort only sorts into containers.");
+            static_assert(HasPushBackValue<ReturnContainerType>() ||
+                          HasInsertValue<ReturnContainerType>() ||
+                          HasAddValue<ReturnContainerType>(),
+                    "Mezzanine::Sort only sorts into containers with push_back(value_type), add(value_type) "
+                    "or insert(value_type).");
+            static_assert(std::is_default_constructible<ReturnContainerType>(),
+                    "Mezzanine::Sort only sorts into containers that can be default constructed.");
+
+            ReturnContainerType Results;
+            if constexpr(HasReserve<ReturnContainerType>())
+                { Results.reserve(IncomingContainer.size()); }
+
+            // TODO: Check to see if the container supports fast insertion and just copy
+            // TODO: Bench and test std::partial_sort_copy it might be more complex for subtle reasons
+            for(const auto& item : IncomingContainer)
+            {
+                if constexpr(HasPushBackValue<ReturnContainerType>())
+                    { Results.push_back(item); }
+                else if constexpr(HasInsertValue<ReturnContainerType>())
+                    { Results.insert(item); }
+                else if constexpr(HasAddValue<ReturnContainerType>())
+                    { Results.add(item); }
+            }
+
+            // TODO add checks to see if output contianer is sorted
+            if constexpr(std::is_same_v<std::false_type, PredicateType>)
+                { std::sort(std::begin(Results), std::end(Results)); }
+            else
+                { std::sort(std::begin(Results), std::end(Results), std::forward<PredicateType>(Predicate)); }
+
+            return Results;
+        }
+    END_FUNCTOR_END_CONTAINER_TO_CONTAINER_AUTOCURRY(SortStruct, Sort)
+
+
+
+
+    /// @struct ShuffleStruct
+    /// @details This is an implementation detail for @ref Sort
+
+    /// @fn Shuffle
+    /// @details Accepts a container and a random device then randomizes the order of the data returning a
+    /// copy in a random order using the passed random device.
+    /// @return A randomly ordered container
+
+
+    START_FUNCTOR_END_CONTAINER_TO_CONTAINER_AUTOCURRY(ShuffleStruct)
+        template<typename CVIncomingContainerType, typename PredicateType>
+        [[nodiscard]] constexpr
+        auto operator() (const CVIncomingContainerType& IncomingContainer, PredicateType&& Predicate) const
+        {
+            using IncomingContainerType = std::decay_t<CVIncomingContainerType>;
+            using ActualCVReturnType = std::conditional_t<
+                std::is_same_v<CVReturnContainerType, std::false_type>, IncomingContainerType, CVReturnContainerType
+            >;
+            using ReturnContainerType = std::decay_t<ActualCVReturnType>;
+            using namespace ContainerDetect;
+
+            static_assert(IsRange<IncomingContainerType>(),
+                    "Mezzanine::Shuffle only shuffles from containers or ranges.");
+            static_assert(IsContainer<ReturnContainerType>(),
+                    "Mezzanine::Shuffle only shuffles into containers.");
+            static_assert(HasPushBackValue<ReturnContainerType>() ||
+                          HasInsertValue<ReturnContainerType>() ||
+                          HasAddValue<ReturnContainerType>(),
+                    "Mezzanine::Shuffle only shuffles into containers with push_back(value_type), add(value_type) "
+                    "or insert(value_type).");
+            static_assert(std::is_default_constructible<ReturnContainerType>(),
+                    "Mezzanine::Shuffle only shuffles into containers that can be default constructed.");
+
+            ReturnContainerType Results;
+            if constexpr(HasReserve<ReturnContainerType>())
+                { Results.reserve(IncomingContainer.size()); }
+
+            // TODO: Check to see if the container supports fast insertion and just copy
+            // TODO: Bench and test std::partial_sort_copy it might be more complex for subtle reasons
+            for(const auto& item : IncomingContainer)
+            {
+                if constexpr(HasPushBackValue<ReturnContainerType>())
+                    { Results.push_back(item); }
+                else if constexpr(HasInsertValue<ReturnContainerType>())
+                    { Results.insert(item); }
+                else if constexpr(HasAddValue<ReturnContainerType>())
+                    { Results.add(item); }
+            }
+
+            // TODO add checks to see if output contianer is sorted
+            if constexpr(std::is_same_v<std::false_type, PredicateType>)
+                { std::sort(std::begin(Results), std::end(Results)); }
+            else
+                { std::sort(std::begin(Results), std::end(Results), std::forward<PredicateType>(Predicate)); }
+
+            return Results;
+        }
+    END_FUNCTOR_END_CONTAINER_TO_CONTAINER_AUTOCURRY(ShuffleStruct, Shuffle)
 } // Functional
 } // Mezzanine
 

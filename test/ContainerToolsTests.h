@@ -134,7 +134,46 @@ AUTOMATIC_TEST_GROUP(ContainerToolsTests,ContainerTools)
         TEST_EQUAL("is_const_reverse_range-SharedPtr",
                    false,IsConstReverseRange<TestSharedPtr>())
     }//is_const_reverse_range
-
+/*
+    {//is_range_constructible
+        TEST_EQUAL("is_range_constructible-Array",
+                   false,ContainerDetect::IsRangeConstructible<TestArray>())
+        TEST_EQUAL("is_range_constructible-Vector",
+                   true,ContainerDetect::IsRangeConstructible<TestVector>())
+        TEST_EQUAL("is_range_constructible-Deque",
+                   false,ContainerDetect::IsRangeConstructible<TestDeque>())
+        TEST_EQUAL("is_range_constructible-List",
+                   false,ContainerDetect::IsRangeConstructible<TestList>())
+        TEST_EQUAL("is_range_constructible-Set",
+                   false,ContainerDetect::IsRangeConstructible<TestSet>())
+        TEST_EQUAL("is_range_constructible-MultiSet",
+                   false,ContainerDetect::IsRangeConstructible<TestMultiSet>())
+        TEST_EQUAL("is_range_constructible-Map",
+                   false,ContainerDetect::IsRangeConstructible<TestMap>())
+        TEST_EQUAL("is_range_constructible-MultiMap",
+                   false,ContainerDetect::IsRangeConstructible<TestMultiMap>())
+        TEST_EQUAL("is_range_constructible-UnorderedSet",
+                   false,ContainerDetect::IsRangeConstructible<TestUnorderedSet>())
+        TEST_EQUAL("is_range_constructible-UnorderedMultiSet",
+                   false,ContainerDetect::IsRangeConstructible<TestUnorderedMultiSet>())
+        TEST_EQUAL("is_range_constructible-UnorderedMap",
+                   false,ContainerDetect::IsRangeConstructible<TestUnorderedMap>())
+        TEST_EQUAL("is_range_constructible-UnorderedMultiMap",
+                   false,ContainerDetect::IsRangeConstructible<TestUnorderedMultiMap>())
+        TEST_EQUAL("is_range_constructible-FlatMap",
+                   false,ContainerDetect::IsRangeConstructible<TestFlatMap>())
+        TEST_EQUAL("is_range_constructible-ManagedArray",
+                   false,ContainerDetect::IsRangeConstructible<TestManagedArray>())
+        TEST_EQUAL("is_range_constructible-SortedManagedArray",
+                   false,ContainerDetect::IsRangeConstructible<TestSortedManagedArray>())
+        TEST_EQUAL("is_range_constructible-SortedVector",
+                   false,ContainerDetect::IsRangeConstructible<TestSortedVector>())
+        TEST_EQUAL("is_range_constructible-String",
+                   true,ContainerDetect::IsRangeConstructible<TestString>())
+        TEST_EQUAL("is_range_constructible-SharedPtr",
+                   false,ContainerDetect::IsRangeConstructible<TestSharedPtr>())
+    }//is_range_constructible
+*/
     {//is_resizable_contiguous
         TEST_EQUAL("is_resizable_contiguous-Array",
                    false,IsResizableContiguous<TestArray>())
