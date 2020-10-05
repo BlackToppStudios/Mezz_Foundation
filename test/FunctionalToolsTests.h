@@ -106,12 +106,12 @@ DEFAULT_TEST_GROUP(FunctionalToolsTests,FunctionalTools)
         TEST("MapIsAliasOfConvert<Integer>(Increment)", OneToTenOnlyEven == Map(OneToTenOnlyOdd, Increment))
         TEST("TakeNSimple", OneToThree == TakeN(OneToTen,3))
         TEST("TakeBackNSimple", TenToSeven == TakeBackN(OneToTen,4))
-        TEST("TakeWhileSimple", OneToThree == TakeWhile(OneToTen,[](Integer x){ return x <= 3; }) )
-        TEST("TakeBackWhileSimple", TenToSeven == TakeBackWhile(OneToTen,[](Integer x){ return x > 6; }) )
+        TEST("TakeWhileSimple", OneToThree == TakeWhile(OneToTen,[](Integer x) noexcept { return x <= 3; }) )
+        TEST("TakeBackWhileSimple", TenToSeven == TakeBackWhile(OneToTen,[](Integer x) noexcept { return x > 6; }) )
         TEST("DropNSimple", EightToTen == DropN(OneToTen,7))
         TEST("DropBackNSimple", FourToOne == DropBackN(OneToTen,6))
-        TEST("DropWhile", EightToTen == DropWhile(OneToTen,[](Integer x){ return x < 8; }))
-        TEST("DropBackWhile", FourToOne == DropBackWhile(OneToTen,[](Integer x){ return x > 4; }))
+        TEST("DropWhile", EightToTen == DropWhile(OneToTen,[](Integer x) noexcept { return x < 8; }))
+        TEST("DropBackWhile", FourToOne == DropBackWhile(OneToTen,[](Integer x) noexcept { return x > 4; }))
         TEST("Reverse", OneToThree == Reverse(ThreeToOne))
         TEST("Sort", OneToThree == Sort(ThreeToOne, std::less<Integer>{}))
         //TEST("SortDataOnly", OneToThree == Sort(ThreeToOne)) // TODO: Support immediate invocation with default pred.
@@ -168,18 +168,18 @@ DEFAULT_TEST_GROUP(FunctionalToolsTests,FunctionalTools)
         TEST("TakeNAutoCurried<Integer>(3)", OneToThree == Take3(OneToTen))
         const auto TakeBack4 = TakeBackN(4);
         TEST("TakeBackNAutoCurried<Integer>(4)", TenToSeven == TakeBack4(OneToTen))
-        const auto TakeWhileLessThan3 = TakeWhile([](Integer x){ return x <= 3; });
+        const auto TakeWhileLessThan3 = TakeWhile([](Integer x) noexcept { return x <= 3; });
         TEST("TakeWhileAutoCurried<Integer>", OneToThree == TakeWhileLessThan3(OneToTen))
-        const auto TakeBackWhileGreaterThan6 = TakeBackWhile([](Integer x){ return x > 6; });
+        const auto TakeBackWhileGreaterThan6 = TakeBackWhile([](Integer x) noexcept { return x > 6; });
         TEST("TakeBackWhileAutoCurried<Integer>", TenToSeven == TakeBackWhileGreaterThan6(OneToTen))
 
         const auto Drop7 = DropN(7);
         TEST("DropNAutoCurried<Integer>(7)", EightToTen == Drop7(OneToTen))
         const auto DropBack6 = DropBackN(6);
         TEST("DropBackNAutoCurried<Integer>(6)", FourToOne == DropBack6(OneToTen))
-        const auto DropWhileLessThanEight = DropWhile([](Integer x){ return x < 8; });
+        const auto DropWhileLessThanEight = DropWhile([](Integer x) noexcept { return x < 8; });
         TEST("DropWhileAutoCurried<Integer>", EightToTen == DropWhileLessThanEight(OneToTen))
-        const auto DropBackWhileGreaterThanFour = DropBackWhile([](Integer x){ return x > 4; });
+        const auto DropBackWhileGreaterThanFour = DropBackWhile([](Integer x) noexcept { return x > 4; });
         TEST("DropBackWhileAutoCurried<Integer>", FourToOne == DropBackWhileGreaterThanFour(OneToTen))
 
         const auto ReverseFunctor = Reverse<std::vector<Integer>>();
@@ -333,12 +333,15 @@ DEFAULT_TEST_GROUP(FunctionalToolsTests,FunctionalTools)
         TEST("PipeOperator>>SelectIsEven", OneToTenOnlyEven == StreamedResults.Value())
         //TEST("PipeOperator>>SelectIsEven>>Value", OneToTenOnlyEven == Pipe{OneToTen} >> Select(IsEven) >> Results() )
         TEST("PipeOperator>>SelectIsEven>>Value", OneToTenOnlyEven == Pipe{OneToTen} > Select(IsEven) )
+        /*
+        // Not supported by MSVC at all.
         std::vector<Integer> StreamedResultsStronglyTyped = Pipe{OneToTen} >> Select(IsEven);
         TEST("PipeOperator>>SelectIsEven(StronglyTypedImplicitConversion)",
              OneToTenOnlyEven == StreamedResultsStronglyTyped)
+
         const std::vector<Integer> ImplicitlyConverted = Pipe{OneToTen} >> Select(IsEven);
         TEST("PipeOperator>>SelectIsEven(AutoImplicitConversion)", OneToTenOnlyEven == ImplicitlyConverted)
-
+        */
 
 
         Integer answer = Pipe{OneToTen}
@@ -353,7 +356,7 @@ DEFAULT_TEST_GROUP(FunctionalToolsTests,FunctionalTools)
     {
         TestLog << "ASDFASDFASDFASDF" << std::endl;
         for(auto i :
-            DropWhile(OneToTen,[](Integer x){ return x < 8; })
+            DropWhile(OneToTen,[](Integer x) noexcept { return x < 8; })
             )
         {
             TestLog << i << ' ';

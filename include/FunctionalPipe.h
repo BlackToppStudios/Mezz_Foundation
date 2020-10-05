@@ -112,12 +112,13 @@ namespace Functional
         {
             return std::invoke(std::forward<FunctorType>(Functor), PipeData);
         }
-
+/*
+        // Not supported by MSVC at all.
         // Convert this when assiging to strongly typed storage.
         [[nodiscard]] constexpr
         operator auto() const
             { return PipeData; }
-
+*/
     };
 
 
