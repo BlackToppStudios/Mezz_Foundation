@@ -75,11 +75,10 @@ namespace Serialization {
                                const MemberTags Tags,
                                const Integer Version,
                                Serialization::SerializerWalker& Walker) = 0;
-        /*virtual void Deserialize(const StringView Name,
+        virtual void Deserialize(const StringView Name,
                                  void*& ToDeserialize,
                                  const MemberTags Tags,
-                                 const Integer Version,
-                                 Serialization::DeserializerWalker& Walker) = 0;//*/
+                                 Serialization::DeserializerWalker& Walker) = 0;
     };//PolymorphicCaster
 
     struct MEZZ_LIB PolymorphicCasterHolder
@@ -167,10 +166,10 @@ RESTORE_WARNING_STATE
     {
     public:
         static_assert( std::is_base_of_v<Base,Derived>, "\"Base\" is not a base class of Derived" );
-        static_assert( std::is_constructible_v<Derived,const Int32,ObjectWalker&> ||
+        static_assert( std::is_constructible_v<Derived,const Int32,DeserializerWalker&> ||
                        std::is_default_constructible_v<Derived>,
                        "Derived type must be default constructable or have a constructor that accepts "
-                       "an Int and ObjectWalker." );
+                       "an Int and DeserializerWalker." );
 
         ~PolymorphicCasterImpl() = default;
         StringView GetBaseTypeName() const
@@ -198,16 +197,15 @@ RESTORE_WARNING_STATE
             Derived* Casted = static_cast<Derived*>( static_cast<Base*>(ToSerialize) );
             Mezzanine::Serialize(Name,std::forward<Derived*>(Casted),Tags,Version,Walker);
         }
-        /*void Deserialize(const StringView Name,
+        void Deserialize(const StringView Name,
                          void*& ToDeserialize,
                          const MemberTags Tags,
-                         const Int32 Version,
                          Serialization::DeserializerWalker& Walker)
         {
             Derived* UpCasted = nullptr;
             if( ToDeserialize == nullptr ) {
-                if constexpr( std::is_constructible_v<Derived,decltype(Version),decltype(Walker)> ) {
-                    UpCasted = new Derived(Version,Walker);
+                if constexpr( std::is_constructible_v<Derived,decltype(Walker)> ) {
+                    UpCasted = new Derived(Walker);
                 }else if constexpr( std::is_default_constructible_v<Derived> ) {
                     UpCasted = new Derived();
                 }
@@ -215,8 +213,8 @@ RESTORE_WARNING_STATE
             }else{
                 UpCasted = static_cast<Derived*>( static_cast<Base*>(ToDeserialize) );
             }
-            Mezzanine::Deserialize(Name,std::forward<Derived*>(UpCasted),Tags,Version,Walker);
-        }//*/
+            Mezzanine::Deserialize(Name,std::forward<Derived*>(UpCasted),Tags,Walker);
+        }
     };//PolymorphicCasterImpl
 #else
     template<class Derived>

@@ -56,25 +56,26 @@ namespace Serialization {
     /// @addtogroup Serialization
     /// @{
 
+    /// @brief A utility class for moving about the serialization tree when deserializing.
     class MEZZ_LIB DeserializerWalker
     {
     public:
-        using WalkerRef = std::reference_wrapper<Serialization::ObjectWalker>;
+        using WalkerRef = std::reference_wrapper<Serialization::TreeWalker>;
     protected:
         DeserializerPointerTracker Tracker;
         LogStream Logger;
         WalkerRef Walker;
 
-        Serialization::ObjectWalker& GetWalker()
+        Serialization::TreeWalker& GetWalker()
             { return this->Walker; }
-        const Serialization::ObjectWalker& GetWalker() const
+        const Serialization::TreeWalker& GetWalker() const
             { return this->Walker; }
     public:
-        DeserializerWalker(Serialization::ObjectWalker& ToWrap) :
+        DeserializerWalker(Serialization::TreeWalker& ToWrap) :
             Logger(nullptr),
             Walker(ToWrap)
             {  }
-        DeserializerWalker(std::ostream& Log, Serialization::ObjectWalker& ToWrap) :
+        DeserializerWalker(std::ostream& Log, Serialization::TreeWalker& ToWrap) :
             Logger(Log.rdbuf()),
             Walker(ToWrap)
             {  }
@@ -115,12 +116,6 @@ namespace Serialization {
         Boole AtRoot() const
             { return this->GetWalker().AtRoot(); }
         [[nodiscard]]
-        Boole IsFirstChild() const
-            { return this->GetWalker().IsFirstChild(); }
-        [[nodiscard]]
-        Boole IsLastChild() const
-            { return this->GetWalker().IsLastChild(); }
-        [[nodiscard]]
         Boole HasChildren() const
             { return this->GetWalker().HasChildren(); }
         [[nodiscard]]
@@ -133,21 +128,40 @@ namespace Serialization {
         Boole HasPreviousSibling() const
             { return this->GetWalker().HasPreviousSibling(); }
 
-        ObjectWalker& Next()
+        TreeWalker& Next()
             { return this->GetWalker().Next(); }
-        ObjectWalker& Previous()
+        TreeWalker& Previous()
             { return this->GetWalker().Previous(); }
-        ObjectWalker& Parent()
+        TreeWalker& Parent()
             { return this->GetWalker().Parent(); }
-        ObjectWalker& FirstChild()
+        TreeWalker& FirstChild()
             { return this->GetWalker().FirstChild(); }
         [[nodiscard]]
         Boole Child(const StringView Name)
             { return this->GetWalker().Child(Name); }
 
-        [[nodiscard]]
-        Boole CreateChild(const StringView Name, const MemberTags Tags, const Boole Move)
-            { return this->GetWalker().CreateChild(Name,Tags,Move); }
+        ///////////////////////////////////////////////////////////////////////////////
+        // Deserializer Specific Navigation
+
+        template<typename FunctType>
+        void ForEachChild(FunctType&& Funct)
+        {
+            if( !this->HasChildren() ) {
+                return;
+            }
+
+            Boole GoToNext = false;
+            this->FirstChild();
+            do{
+                Funct( *this );
+
+                GoToNext = this->HasNextSibling();
+                if( GoToNext ) {
+                    this->Next();
+                }
+            }while( GoToNext );
+            this->Parent();
+        }
 
         ///////////////////////////////////////////////////////////////////////////////
         // Attributes
@@ -158,32 +172,25 @@ namespace Serialization {
         [[nodiscard]]
         Boole HasAttribute(const StringView Name) const
             { return this->GetWalker().HasAttribute(Name); }
-        [[nodiscard]]
-        AttributeWalker& GetAttributes()
-            { return this->GetWalker().GetAttributes(); }
-        [[nodiscard]]
-        AttributeWalker& GetAttribute(const StringView Name)
-            { return this->GetWalker().GetAttribute(Name); }
-        [[nodiscard]]
-        Boole CreateAttribute(const StringView Name, const MemberTags Tags)
-            { return this->GetWalker().CreateAttribute(Name,Tags); }
 
-        template<typename AttributeType,
-                 typename = std::enable_if_t< !std::is_same_v<std::decay_t<AttributeType>,String> > >
-        void Attribute(const StringView Name, const MemberTags Tags, AttributeType&& Attrib)
-            { this->GetWalker().Attribute(Name,Tags,std::forward<AttributeType>(Attrib)); }
-        void Attribute(const StringView Name, const MemberTags Tags, const String& Attrib)
-            { this->GetWalker().Attribute(Name,Tags,Attrib); }
-        template<typename AttributeType,
-                 typename = std::enable_if_t< !std::is_same_v<std::decay_t<AttributeType>,String> > >
-        void Attribute(const StringView Name, AttributeType&& Attrib)
-            { this->GetWalker().Attribute(Name,std::forward<AttributeType>(Attrib)); }
-        void Attribute(const StringView Name, const String& Attrib)
-            { this->GetWalker().Attribute(Name,Attrib); }
         template<typename AttributeType>
         [[nodiscard]]
-        std::optional<AttributeType> Attribute(const StringView Name)
+        std::optional<AttributeType> Attribute(const StringView Name) const
             { return this->GetWalker().Attribute<AttributeType>(Name); }
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Deserializer Specific Attributes
+
+        [[nodiscard]]
+        Int32 GetVersion() const
+        {
+            Int32 Version = Serialization::LatestVersion;
+            std::optional<Int32> VersionOpt = this->Attribute<Int32>("Version");
+            if( VersionOpt ) {
+                Version = VersionOpt.value();
+            }
+            return Version;
+        }
     };//DeserializerWalker
 
     /// @brief Helper class scope-based navigation of a serialization tree during deserialization.
@@ -232,11 +239,10 @@ namespace Serialization {
         explicit operator bool() const
             { return ( this->Node != nullptr ); }
     };//ScopedDeserializationNode
-/*
+
     namespace Impl {
         template<class DeserializeType>
         void DeserializeClassValidation(const DeserializeType& ToDeserialize,
-                                        const Int32 Version,
                                         Serialization::DeserializerWalker& Walker)
         {
             (void)ToDeserialize;
@@ -245,12 +251,8 @@ namespace Serialization {
                 //ScopedSerializationNode Node("Validation",Walker);
                 //if( Node ) {
                     std::optional<String> TypeNameAttrib = Walker.Attribute<String>("TypeName");
-                    if( !( TypeNameAttrib && TypeNameAttrib.value() == GetRegisteredName<DecayedType>() ) ) {
+                    if( !TypeNameAttrib || TypeNameAttrib.value() != GetRegisteredName<DecayedType>() ) {
                         throw std::runtime_error("Invalid TypeName when Deserializing.");
-                    }
-                    std::optional<int> VersionAttrib = Walker.Attribute<int>("Version");
-                    if( !( VersionAttrib && VersionAttrib.value() == Version ) ) {
-                        throw std::runtime_error("Invalid Version when Deserializing.");
                     }
                 //}
             }
@@ -268,63 +270,43 @@ namespace Serialization {
             }
         }
 
-        template<class DeserializeType, class Setter, class Getter>
-        void DeserializeSimpleMember(const StringView Name,
-                                     DeserializeType& ToDeserialize,
-                                     MemberAccessor<Setter,Getter>& Accessor,
-                                     Serialization::DeserializerWalker& Walker)
-        {
-            using MemberType = decltype(Accessor)::MemberType;
-            std::optional<MemberType> SimpleAttrib = Walker.Attribute<MemberType>(Name);
-            if( SimpleAttrib ) {
-                Accessor.SetValue(ToDeserialize,SimpleAttrib.value());
-            }
-        }
-
         template<class DeserializeType>
-        void DeserializeAllMembers(const DeserializeType& ToDeserialize,
+        void DeserializeAllMembers(DeserializeType& ToDeserialize,
                                    Serialization::DeserializerWalker& Walker)
         {
             using DecayedType = std::decay_t<DeserializeType>;
             if constexpr( IsRegistered<DecayedType>() ) {
                 DoForAllMembers<DecayedType>([&](const auto& Member) {
-                    constexpr MemberTags Tags = std::remove_reference_t<decltype(Member)>::GetTags();
+                    using MemberAccessType = std::remove_reference_t<decltype(Member)>;
+                    using MemberType = typename MemberAccessType::SetDeducer::DecayedType;
+                    constexpr MemberTags Tags = MemberAccessType::GetTags();
+
                     if constexpr( !IsIgnorable( Tags ) ) {
-                        // The normal deserialization interface is only friendly to types passed by reference.
-                        if constexpr( std::is_reference_v< decltype(Member)::ReturnType ) > ) {
-                            Mezzanine::Deserialize(Member.GetName(),Member.GetValue(ToSerialize),Version,Walker);
-                        }else if constexpr( std::is_arithmetic_v<DecayedType> ) {
-                            Serialization::Impl::DeserializeSimpleMember(Name,ToDeserialize,Member,Walker);
-                        }else if constexpr( StringTools::is_string<DecayedType>::value ) {
-                            Serialization::Impl::DeserializeSimpleMember(Name,ToDeserialize,Member,Walker);
-                        }else if constexpr( Mezzanine::is_container<DecayedType>::value ) {
-
+                        MemberType ChildToDeserialize{};
+                        Mezzanine::Deserialize(Member.GetName(),ChildToDeserialize,Tags,Walker.GetVersion(),Walker);
+                        if constexpr( std::is_move_assignable_v<MemberType> ) {
+                            Member.SetValue(ToDeserialize,std::move(ChildToDeserialize));
+                        }else if constexpr( std::is_copy_assignable_v<MemberType> ) {
+                            Member.SetValue(ToDeserialize,ChildToDeserialize);
                         }else{
-
+                            throw std::runtime_error("Cannot assign to member type.");
                         }
                     }
                 });
             }
         }
 
-        template<class DeserializeType>
-        void DeserializeAllMembers(const StringView Name,
-                                   const DeserializeType& ToDeserialize,
-                                   Serialization::DeserializerWalker& Walker)
-        {
-            (void)Name;
-            (void)ToDeserialize;
-            (void)Walker;
-        }
-
         template<class DeserializeType,
                  typename = std::enable_if_t< IsAssociativeContainer<DeserializeType>() >,
                  typename = void>
         void DeserializeContainer(const StringView Name,
-                                  const DeserializeType& ToDeserialize,
+                                  DeserializeType& ToDeserialize,
                                   Serialization::DeserializerWalker& Walker)
         {
             using DecayedType = std::decay_t<DeserializeType>;
+            using KeyType = typename DecayedType::key_type;
+            using MappedType = typename DecayedType::mapped_type;
+
             ScopedDeserializationNode Node(Name);
             if( Node && Walker.HasChildren() ) {
                 if constexpr( ContainerDetect::HasReserve<DecayedType>() ) {
@@ -334,46 +316,34 @@ namespace Serialization {
                     }
                 }
                 std::optional<String> KeyAttrib = Walker.Attribute<String>("KeyType");
-                if( KeyAttrib && KeyAttrib.value() != GetRegisteredName<DecayedType::key_type>() ) {
+                if( KeyAttrib && KeyAttrib.value() != GetRegisteredName<KeyType>() ) {
                     throw std::runtime_error("TypeName mismatch when deserializing container keys.");
                 }
-                std::optional<String> ValueAttrib = Walker.Attribute<String>("ValueType");
-                if( ValueAttrib && ValueAttrib.value() != GetRegisteredName<DecayedType::mapped_type>() ) {
+                std::optional<String> ValueAttrib = Walker.Attribute<String>("MappedType");
+                if( ValueAttrib && ValueAttrib.value() != GetRegisteredName<MappedType>() ) {
                     throw std::runtime_error("TypeName mismatch when deserializing container values.");
                 }
 
-                Walker.FirstChild();
-                do{
+                Walker.ForEachChild( [&](Serialization::DeserializerWalker& ChildWalker) {
+                    KeyType NewKey{};
+                    Deserialize(ChildWalker.GetName(),NewKey,ChildWalker);
+                    MappedType NewMapped{};
+                    Deserialize(ChildWalker.GetName(),NewMapped,ChildWalker);
 
-
-                    Boole GoToNext = !Walker.IsLastChild();
-                    if( GoToNext ) {
-                        Walker.Next();
-                    }
-                }while( GoToNext )
-                Walker.Parent();
-            }
-
-            for( auto& CurrElement : ToSerialize )
-            {
-                StringStream Namer;
-                Namer << "Element" << Count;
-                ScopedSerializationNode ElementNode(Namer.str(),Walker);
-                if( ElementNode ) {
-                    Mezzanine::Serialize("Key",CurrElement.first,LatestVersion,Walker);
-                    Mezzanine::Serialize("Value",CurrElement.second,LatestVersion,Walker);
-                    ++Count;
-                }
+                    ToDeserialize.insert( { NewKey, NewMapped } );
+                } );
             }
         }
 
         template<class DeserializeType,
                  typename = std::enable_if_t< IsNonAssociativeContainer<DeserializeType>() > >
         void DeserializeContainer(const StringView Name,
-                                  const DeserializeType& ToDeserialize,
+                                  DeserializeType& ToDeserialize,
                                   Serialization::DeserializerWalker& Walker)
         {
             using DecayedType = std::decay_t<DeserializeType>;
+            using ValueType = typename DecayedType::value_type;
+
             if constexpr( ContainerDetect::HasReserve<DecayedType>() ) {
                 std::optional<size_t> CountAttrib = Walker.Attribute<size_t>("ElementCount");
                 if( CountAttrib ) {
@@ -385,46 +355,36 @@ namespace Serialization {
                 throw std::runtime_error("TypeName mismatch when deserializing container elements.");
             }
 
-            (void)Name;
+            ScopedDeserializationNode Node(Name);
+            if( Node && Walker.HasChildren() ) {
+                Walker.ForEachChild( [&](Serialization::DeserializerWalker& ChildWalker) {
+                    ValueType NewValue{};
+                    Deserialize(ChildWalker.GetName(),NewValue,ChildWalker);
 
-            for( auto& CurrElement : ToSerialize )
-            {
-                StringStream Namer;
-                Namer << "Element" << Count;
-                Mezzanine::Serialize(Namer.str(),CurrElement,LatestVersion,Walker);
-                ++Count;
+                    ToDeserialize.push_back( NewValue );
+                } );
             }
         }
 
         template<class DeserializeType>
         void DeserializeGenericClass(const StringView Name,
-                                     const DeserializeType& ToDeserialize,
-                                     const Int32 Version,
+                                     DeserializeType& ToDeserialize,
                                      Serialization::DeserializerWalker& Walker)
         {
-            using DecayedType = std::decay_t<DeserializeType>;
             (void)Name;
-            (void)ToDeserialize;
-            (void)Version;
-            (void)Walker;
-
-
             using DecayedType = std::decay_t<DeserializeType>;
             if constexpr( IsRegistered<DecayedType>() ) {
-                Serialization::Impl::SerializeClassValidation(ToSerialize,Version,Walker);
-                Serialization::Impl::SerializeAllMembers(ToSerialize,Walker);
+                Serialization::Impl::DeserializeAllMembers(ToDeserialize,Walker);
             }
         }
 
         template<class DeserializeType>
         void DeserializeOwnedPointer(const StringView Name,
                                      const DeserializeType ToDeserialize,
-                                     const Int32 Version,
                                      Serialization::DeserializerWalker& Walker)
         {
             (void)Name;
             (void)ToDeserialize;
-            (void)Version;
             (void)Walker;
         }
 
@@ -442,14 +402,13 @@ namespace Serialization {
         void DeserializePointer(const StringView Name,
                                 const DeserializeType ToDeserialize,
                                 const MemberTags Tags,
-                                const Int32 Version,
                                 Serialization::DeserializerWalker& Walker)
         {
             static_assert( std::is_pointer_v<DeserializeType> , "DeserializeType is not a pointer." );
             if( Serialization::IsNotOwned(Tags) ) {
                 Serialization::Impl::DeserializeNonOwnedPointer(Name,ToDeserialize,Walker);
             }else{
-                Serialization::Impl::DeserializeOwnedPointer(Name,ToDeserialize,Version,Walker);
+                Serialization::Impl::DeserializeOwnedPointer(Name,ToDeserialize,Walker);
             }
         }
     }//Impl
@@ -457,16 +416,20 @@ namespace Serialization {
     ///////////////////////////////////////////////////////////////////////////////
     // Deserialize
 
+    /// @brief Deserializes a non-pointer class, struct, or primitive type.
+    /// @tparam DeserializeType The deduced type to be deserialized.
+    /// @param Name The name associated with the ToDeserialize parameter/instance.
+    /// @param ToDeserialize The non-pointer class, struct, or primitive to be deserialized.
+    /// @param Tags Descriptors associated with the data being deserialized that may alter deserialization behavior.
+    /// @param Walker The walker/visitor navigating the deserialization tree.
     template< typename DeserializeType,
               typename >
     void Deserialize(const StringView Name,
                      DeserializeType& ToDeserialize,
                      const MemberTags Tags,
-                     const Int32 Version,
                      Serialization::DeserializerWalker& Walker)
     {
         (void)Tags;
-        (void)Version;
         namespace Impl = Mezzanine::Serialization::Impl;
         using DecayedType = std::decay_t<DeserializeType>;
         if constexpr( std::is_arithmetic_v<DecayedType> ) { // Basic Number Types
@@ -476,15 +439,20 @@ namespace Serialization {
         }else if constexpr( Mezzanine::is_container<DecayedType>::value ) { // Generic Containers
             Impl::DeserializeContainer(Name,ToDeserialize,Walker);
         }else{ // Generic Class
-            Impl::DeserializeGenericClass(Name,ToDeserialize,1,Walker);
+            Impl::DeserializeGenericClass(Name,ToDeserialize,Walker);
         }
     }
+    /// @brief Deserializes a class, struct, or primitive type behind a pointer.
+    /// @tparam DeserializeType The deduced type to be deserialized.
+    /// @param Name The name associated with the ToDeserialize parameter/instance.
+    /// @param ToDeserialize The pointer to be deserialized.
+    /// @param Tags Descriptors associated with the data being deserialized that may alter deserialization behavior.
+    /// @param Walker The walker/visitor navigating the deserialization tree.
     template< typename DeserializeType,
               typename >
     void Deserialize(const StringView Name,
                      DeserializeType ToDeserialize,
                      const MemberTags Tags,
-                     const Int32 Version,
                      Serialization::DeserializerWalker& Walker)
     {
         static_assert( std::is_pointer_v<DeserializeType> , "DeDeserializeType is not a pointer." );
@@ -496,64 +464,78 @@ namespace Serialization {
                 Serialization::PolymorphicCasterHolder& Holder = Serialization::GetPolymorphicCasterHolder();
                 Serialization::PolymorphicCaster* Caster = Holder.GetCaster(BaseInfo,DerivedInfo);
                 if( Caster != nullptr ) {
-                    Caster->Deserialize(Name,ToDeserialize,Tags,Version,Walker);
+                    Caster->Deserialize(Name,ToDeserialize,Tags,Walker);
                 }else{
                     throw std::runtime_error("No caster found for polymorphic object.");
                 }
             }else{
-                Impl::DeserializePointer(Name,ToDeserialize,Tags,Version,Walker);
+                Impl::DeserializePointer(Name,ToDeserialize,Tags,Walker);
             }
         }else{
-            Impl::DeserializePointer(Name,ToDeserialize,Tags,Version,Walker);
+            Impl::DeserializePointer(Name,ToDeserialize,Tags,Walker);
         }
     }
+    /// @brief Deserializes a class, struct, or primitive type behind a shared_ptr.
+    /// @tparam DeserializeType The deduced type to be deserialized.
+    /// @param Name The name associated with the ToDeserialize parameter/instance.
+    /// @param ToDeserialize The shared_ptr to be deserialized.
+    /// @param Tags Descriptors associated with the data being deserialized that may alter deserialization behavior.
+    /// @param Walker The walker/visitor navigating the deserialization tree.
     template< typename DeserializeType >
     void Deserialize(const StringView Name,
                      std::shared_ptr<DeserializeType> ToDeserialize,
                      const MemberTags Tags,
-                     const Int32 Version,
                      Serialization::DeserializerWalker& Walker)
     {
         (void)Name;
         (void)ToDeserialize;
         (void)Tags;
-        (void)Version;
         (void)Walker;
     }
 
     ///////////////////////////////////////////////////////////////////////////////
     // Deserialize - No Tags
 
-
+    /// @brief Deserializes a non-pointer class, struct, or primitive type.
+    /// @tparam DeserializeType The deduced type to be deserialized.
+    /// @param Name The name associated with the ToDeserialize parameter/instance.
+    /// @param ToDeserialize The non-pointer class, struct, or primitive to be deserialized.
+    /// @param Walker The walker/visitor navigating the deserialization tree.
     template< typename DeserializeType,
               typename >
     void Deserialize(const StringView Name,
                      DeserializeType& ToDeserialize,
-                     const Int32 Version,
                      Serialization::DeserializerWalker& Walker)
     {
-        Deserialize(Name,ToDeserialize,MemberTags::None,Version,Walker);
+        Deserialize(Name,ToDeserialize,MemberTags::None,Walker);
     }
+    /// @brief Deserializes a class, struct, or primitive type behind a pointer.
+    /// @tparam DeserializeType The deduced type to be deserialized.
+    /// @param Name The name associated with the ToDeserialize parameter/instance.
+    /// @param ToDeserialize The pointer to be deserialized.
+    /// @param Walker The walker/visitor navigating the deserialization tree.
     template< typename DeserializeType,
               typename >
     void Deserialize(const StringView Name,
                      DeserializeType ToDeserialize,
-                     const Int32 Version,
                      Serialization::DeserializerWalker& Walker)
     {
-        Deserialize(Name,ToDeserialize,MemberTags::None,Version,Walker);
+        Deserialize(Name,ToDeserialize,MemberTags::None,Walker);
     }
+    /// @brief Deserializes a class, struct, or primitive type behind a shared_ptr.
+    /// @tparam DeserializeType The deduced type to be deserialized.
+    /// @param Name The name associated with the ToDeserialize parameter/instance.
+    /// @param ToDeserialize The shared_ptr to be deserialized.
+    /// @param Walker The walker/visitor navigating the deserialization tree.
     template< typename DeserializeType >
     void Deserialize(const StringView Name,
                      std::shared_ptr<DeserializeType> ToDeserialize,
-                     const Int32 Version,
                      Serialization::DeserializerWalker& Walker)
     {
-        Deserialize(Name,ToDeserialize,MemberTags::None,Version,Walker);
-    }//*/
+        Deserialize(Name,ToDeserialize,MemberTags::None,Walker);
+    }
 
     /// @}
-}//Serialization
 }//Mezzanine
 
 #endif // Mezz_Foundation_SerializationDeserializer_h

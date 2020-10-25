@@ -57,6 +57,16 @@ namespace Serialization {
     /// @{
 
     ///////////////////////////////////////////////////////////////////////////////
+    // Forward Declares
+
+    namespace AttributeHelpers {
+        template<typename Datum>
+        void SetValue(const StringView, const Datum, TreeWalker&);
+        template<typename Datum>
+        std::optional<Datum> GetValue(const StringView, const TreeWalker&);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////
     // Backend Interface
 
     // Needs ObjectNode forward declare
@@ -75,7 +85,7 @@ namespace Serialization {
         ///////////////////////////////////////////////////////////////////////////////
         // Root Object
 
-        virtual ObjectWalker& GetWalker() = 0;
+        virtual TreeWalker& GetWalker() = 0;
 
         ///////////////////////////////////////////////////////////////////////////////
         // Input and Output
@@ -135,237 +145,80 @@ namespace Serialization {
     }
 
     ///////////////////////////////////////////////////////////////////////////////
-    // Tree Walkers
+    // TreeWalker
 
-    ///////////////////////////////////////////////////////////////////////////////
-    // AttributeWalker
-
-    class MEZZ_LIB AttributeWalker
+    class MEZZ_LIB TreeWalker
     {
-    public:
-        /// @brief Class destructor.
-        virtual ~AttributeWalker() = default;
+    protected:
+        template<typename Datum>
+        friend void AttributeHelpers::SetValue(const StringView, const Datum, TreeWalker&);
+        template<typename Datum>
+        friend std::optional<Datum> AttributeHelpers::GetValue(const StringView, const TreeWalker&);
 
         ///////////////////////////////////////////////////////////////////////////////
-        // Name Operations
+        // Attribute Access
 
-        virtual void SetName(const StringView Name) = 0;
+        virtual void SetString(const StringView Name, const StringView Value) = 0;
         [[nodiscard]]
-        virtual StringView GetName() const = 0;
+        virtual std::optional<StringView> GetString(const StringView Name) const = 0;
 
-        ///////////////////////////////////////////////////////////////////////////////
-        // Value Operations
-
-        virtual void SetString(const StringView Value) = 0;
+        virtual void SetLongDouble(const StringView Name, const long double Value) = 0;
         [[nodiscard]]
-        virtual std::optional<StringView> GetString() const = 0;
+        virtual std::optional<long double> GetLongDouble(const StringView Name) const = 0;
 
-        virtual void SetLongDouble(const long double Value) = 0;
+        virtual void SetDouble(const StringView Name, const double Value) = 0;
         [[nodiscard]]
-        virtual std::optional<long double> GetLongDouble() const = 0;
+        virtual std::optional<double> GetDouble(const StringView Name) const = 0;
 
-        virtual void SetDouble(const double Value) = 0;
+        virtual void SetFloat(const StringView Name, const float Value) = 0;
         [[nodiscard]]
-        virtual std::optional<double> GetDouble() const = 0;
+        virtual std::optional<float> GetFloat(const StringView Name) const = 0;
 
-        virtual void SetFloat(const float Value) = 0;
+        virtual void SetUInt64(const StringView Name, const UInt64 Value) = 0;
         [[nodiscard]]
-        virtual std::optional<float> GetFloat() const = 0;
+        virtual std::optional<UInt64> GetUInt64(const StringView Name) const = 0;
 
-        virtual void SetUInt64(const UInt64 Value) = 0;
+        virtual void SetInt64(const StringView Name, const Int64 Value) = 0;
         [[nodiscard]]
-        virtual std::optional<UInt64> GetUInt64() const = 0;
+        virtual std::optional<Int64> GetInt64(const StringView Name) const = 0;
 
-        virtual void SetInt64(const Int64 Value) = 0;
+        virtual void SetUInt32(const StringView Name, const UInt32 Value) = 0;
         [[nodiscard]]
-        virtual std::optional<Int64> GetInt64() const = 0;
+        virtual std::optional<UInt32> GetUInt32(const StringView Name) const = 0;
 
-        virtual void SetUInt32(const UInt32 Value) = 0;
+        virtual void SetInt32(const StringView Name, const Int32 Value) = 0;
         [[nodiscard]]
-        virtual std::optional<UInt32> GetUInt32() const = 0;
+        virtual std::optional<Int32> GetInt32(const StringView Name) const = 0;
 
-        virtual void SetInt32(const Int32 Value) = 0;
+        virtual void SetUInt16(const StringView Name, const UInt16 Value) = 0;
         [[nodiscard]]
-        virtual std::optional<Int32> GetInt32() const = 0;
+        virtual std::optional<UInt16> GetUInt16(const StringView Name) const = 0;
 
-        virtual void SetUInt16(const UInt16 Value) = 0;
+        virtual void SetInt16(const StringView Name, const Int16 Value) = 0;
         [[nodiscard]]
-        virtual std::optional<UInt16> GetUInt16() const = 0;
+        virtual std::optional<Int16> GetInt16(const StringView Name) const = 0;
 
-        virtual void SetInt16(const Int16 Value) = 0;
+        virtual void SetUInt8(const StringView Name, const UInt8 Value) = 0;
         [[nodiscard]]
-        virtual std::optional<Int16> GetInt16() const = 0;
+        virtual std::optional<UInt8> GetUInt8(const StringView Name) const = 0;
 
-        virtual void SetUInt8(const UInt8 Value) = 0;
+        virtual void SetInt8(const StringView Name, const Int8 Value) = 0;
         [[nodiscard]]
-        virtual std::optional<UInt8> GetUInt8() const = 0;
+        virtual std::optional<Int8> GetInt8(const StringView Name) const = 0;
 
-        virtual void SetInt8(const Int8 Value) = 0;
+        virtual void SetBool(const StringView Name, const Boole Value) = 0;
         [[nodiscard]]
-        virtual std::optional<Int8> GetInt8() const = 0;
-
-        virtual void SetBool(const Boole Value) = 0;
-        [[nodiscard]]
-        virtual std::optional<Boole> GetBool() const = 0;
+        virtual std::optional<Boole> GetBool(const StringView Name) const = 0;
 
         template<typename SetType>
-        void SetValue(SetType&& ToSet);
+        void SetValue(const StringView Name, SetType&& ToSet);
 
         template<typename ReturnType>
         [[nodiscard]]
-        ReturnType GetValue() const;
-
-        ///////////////////////////////////////////////////////////////////////////////
-        // Navigation
-
-        [[nodiscard]]
-        virtual Boole AtBegin() const = 0;
-        [[nodiscard]]
-        virtual Boole AtEnd() const = 0;
-
-        virtual AttributeWalker& Next() = 0;
-        virtual AttributeWalker& Previous() = 0;
-    };//AttributeWalker
-
-    namespace AttributeHelpers {
-        template<typename Datum>
-        void SetValue(AttributeWalker& Walker, const Datum Value)
-            { (void)Walker;  (void)Value; }
-        template<typename Datum>
-        [[nodiscard]]
-        std::optional<Datum> GetValue(const AttributeWalker& Walker)
-            { (void)Walker; return std::optional<Datum>(); }
-
-        template<>
-        void SetValue<StringView>(AttributeWalker& Walker, const StringView Value)
-            { Walker.SetString(Value); }
-        template<>
-        [[nodiscard]]
-        std::optional<StringView> GetValue<StringView>(const AttributeWalker& Walker)
-            { return Walker.GetString(); }
-
-        template<>
-        void SetValue<long double>(AttributeWalker& Walker, const long double Value)
-            { Walker.SetLongDouble(Value); }
-        template<>
-        [[nodiscard]]
-        std::optional<long double> GetValue<long double>(const AttributeWalker& Walker)
-            { return Walker.GetLongDouble(); }
-
-        template<>
-        void SetValue<double>(AttributeWalker& Walker, const double Value)
-            { Walker.SetDouble(Value); }
-        template<>
-        [[nodiscard]]
-        std::optional<double> GetValue<double>(const AttributeWalker& Walker)
-            { return Walker.GetDouble(); }
-
-        template<>
-        void SetValue<float>(AttributeWalker& Walker, const float Value)
-            { Walker.SetFloat(Value); }
-        template<>
-        [[nodiscard]]
-        std::optional<float> GetValue<float>(const AttributeWalker& Walker)
-            { return Walker.GetFloat(); }
-
-        template<>
-        void SetValue<UInt64>(AttributeWalker& Walker, const UInt64 Value)
-            { Walker.SetUInt64(Value); }
-        template<>
-        [[nodiscard]]
-        std::optional<UInt64> GetValue<UInt64>(const AttributeWalker& Walker)
-            { return Walker.GetUInt64(); }
-
-        template<>
-        void SetValue<Int64>(AttributeWalker& Walker, const Int64 Value)
-            { Walker.SetInt64(Value); }
-        template<>
-        [[nodiscard]]
-        std::optional<Int64> GetValue<Int64>(const AttributeWalker& Walker)
-            { return Walker.GetInt64(); }
-
-        template<>
-        void SetValue<UInt32>(AttributeWalker& Walker, const UInt32 Value)
-            { Walker.SetUInt32(Value); }
-        template<>
-        [[nodiscard]]
-        std::optional<UInt32> GetValue<UInt32>(const AttributeWalker& Walker)
-            { return Walker.GetUInt32(); }
-
-        template<>
-        void SetValue<Int32>(AttributeWalker& Walker, const Int32 Value)
-            { Walker.SetInt32(Value); }
-        template<>
-        [[nodiscard]]
-        std::optional<Int32> GetValue<Int32>(const AttributeWalker& Walker)
-            { return Walker.GetInt32(); }
-
-        template<>
-        void SetValue<UInt16>(AttributeWalker& Walker, const UInt16 Value)
-            { Walker.SetUInt16(Value); }
-        template<>
-        [[nodiscard]]
-        std::optional<UInt16> GetValue<UInt16>(const AttributeWalker& Walker)
-            { return Walker.GetUInt16(); }
-
-        template<>
-        void SetValue<Int16>(AttributeWalker& Walker, const Int16 Value)
-            { Walker.SetInt16(Value); }
-        template<>
-        [[nodiscard]]
-        std::optional<Int16> GetValue<Int16>(const AttributeWalker& Walker)
-            { return Walker.GetInt16(); }
-
-        template<>
-        void SetValue<UInt8>(AttributeWalker& Walker, const UInt8 Value)
-            { Walker.SetUInt8(Value); }
-        template<>
-        [[nodiscard]]
-        std::optional<UInt8> GetValue<UInt8>(const AttributeWalker& Walker)
-            { return Walker.GetUInt8(); }
-
-        template<>
-        void SetValue<Int8>(AttributeWalker& Walker, const Int8 Value)
-            { Walker.SetInt8(Value); }
-        template<>
-        [[nodiscard]]
-        std::optional<Int8> GetValue<Int8>(const AttributeWalker& Walker)
-            { return Walker.GetInt8(); }
-
-        template<>
-        void SetValue<Boole>(AttributeWalker& Walker, const Boole Value)
-            { Walker.SetBool(Value); }
-        template<>
-        [[nodiscard]]
-        std::optional<Boole> GetValue<Boole>(const AttributeWalker& Walker)
-            { return Walker.GetBool(); }
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////
-    // AttributeWalker Implementations
-
-    template<typename SetType>
-    void AttributeWalker::SetValue(SetType&& ToSet)
-    {
-        using DecayedType = std::decay_t<SetType>;
-        AttributeHelpers::SetValue<DecayedType>(*this,std::forward<SetType>(ToSet));
-    }
-
-    template<typename ReturnType>
-    [[nodiscard]]
-    ReturnType AttributeWalker::GetValue() const
-    {
-        return AttributeHelpers::GetValue<ReturnType>(*this);
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////
-    // ObjectWalker
-
-    class MEZZ_LIB ObjectWalker
-    {
+        std::optional<ReturnType> GetValue(const StringView Name) const;
     public:
         /// @brief Class destructor.
-        virtual ~ObjectWalker() = default;
+        virtual ~TreeWalker() = default;
 
         ///////////////////////////////////////////////////////////////////////////////
         // Name Operations
@@ -380,10 +233,6 @@ namespace Serialization {
         [[nodiscard]]
         virtual Boole AtRoot() const = 0;
         [[nodiscard]]
-        virtual Boole IsFirstChild() const = 0;
-        [[nodiscard]]
-        virtual Boole IsLastChild() const = 0;
-        [[nodiscard]]
         virtual Boole HasChildren() const = 0;
         [[nodiscard]]
         virtual Boole HasChild(const StringView Name) const = 0;
@@ -392,10 +241,10 @@ namespace Serialization {
         [[nodiscard]]
         virtual Boole HasPreviousSibling() const = 0;
 
-        virtual ObjectWalker& Next() = 0;
-        virtual ObjectWalker& Previous() = 0;
-        virtual ObjectWalker& Parent() = 0;
-        virtual ObjectWalker& FirstChild() = 0;
+        virtual TreeWalker& Next() = 0;
+        virtual TreeWalker& Previous() = 0;
+        virtual TreeWalker& Parent() = 0;
+        virtual TreeWalker& FirstChild() = 0;
         [[nodiscard]]
         virtual Boole Child(const StringView Name) = 0;
 
@@ -410,10 +259,6 @@ namespace Serialization {
         [[nodiscard]]
         virtual Boole HasAttribute(const StringView Name) const = 0;
         [[nodiscard]]
-        virtual AttributeWalker& GetAttributes() = 0;
-        [[nodiscard]]
-        virtual AttributeWalker& GetAttribute(const StringView Name) = 0;
-        [[nodiscard]]
         virtual Boole CreateAttribute(const StringView Name, const MemberTags Tags) = 0;
 
         template<typename AttributeType,
@@ -421,8 +266,7 @@ namespace Serialization {
         void Attribute(const StringView Name, const MemberTags Tags, AttributeType&& Attrib)
         {
             if( this->CreateAttribute(Name,Tags) ) {
-                AttributeWalker& Walker = this->GetAttribute(Name);
-                Walker.SetValue(std::forward<AttributeType>(Attrib));
+                this->SetValue(Name,std::forward<AttributeType>(Attrib));
             }
         }
         void Attribute(const StringView Name, const MemberTags Tags, const String& Attrib)
@@ -442,15 +286,145 @@ namespace Serialization {
         }
         template<typename AttributeType>
         [[nodiscard]]
-        std::optional<AttributeType> Attribute(const StringView Name)
+        std::optional<AttributeType> Attribute(const StringView Name) const
         {
             if( this->HasAttribute(Name) ) {
-                AttributeWalker& Walker = this->GetAttribute(Name);
-                return Walker.GetValue< std::decay<AttributeType> >();
+                return this->GetValue<AttributeType>(Name);
             }
             return std::optional<AttributeType>();
         }
-    };//ObjectWalker
+    };//TreeWalker
+
+    namespace AttributeHelpers {
+        template<typename Datum>
+        void SetValue(const StringView Name, const Datum Value, TreeWalker& Walker)
+            { (void)Walker;  (void)Value; }
+        template<typename Datum>
+        [[nodiscard]]
+        std::optional<Datum> GetValue(const StringView Name, const TreeWalker& Walker)
+            { (void)Walker;  return std::optional<Datum>(); }
+
+        template<>
+        void SetValue<StringView>(const StringView Name, const StringView Value, TreeWalker& Walker)
+            { Walker.SetString(Name,Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<StringView> GetValue<StringView>(const StringView Name, const TreeWalker& Walker)
+            { return Walker.GetString(Name); }
+
+        template<>
+        void SetValue<long double>(const StringView Name, const long double Value, TreeWalker& Walker)
+            { Walker.SetLongDouble(Name,Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<long double> GetValue<long double>(const StringView Name, const TreeWalker& Walker)
+            { return Walker.GetLongDouble(Name); }
+
+        template<>
+        void SetValue<double>(const StringView Name, const double Value, TreeWalker& Walker)
+            { Walker.SetDouble(Name,Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<double> GetValue<double>(const StringView Name, const TreeWalker& Walker)
+            { return Walker.GetDouble(Name); }
+
+        template<>
+        void SetValue<float>(const StringView Name, const float Value, TreeWalker& Walker)
+            { Walker.SetFloat(Name,Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<float> GetValue<float>(const StringView Name, const TreeWalker& Walker)
+            { return Walker.GetFloat(Name); }
+
+        template<>
+        void SetValue<UInt64>(const StringView Name, const UInt64 Value, TreeWalker& Walker)
+            { Walker.SetUInt64(Name,Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<UInt64> GetValue<UInt64>(const StringView Name, const TreeWalker& Walker)
+            { return Walker.GetUInt64(Name); }
+
+        template<>
+        void SetValue<Int64>(const StringView Name, const Int64 Value, TreeWalker& Walker)
+            { Walker.SetInt64(Name,Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<Int64> GetValue<Int64>(const StringView Name, const TreeWalker& Walker)
+            { return Walker.GetInt64(Name); }
+
+        template<>
+        void SetValue<UInt32>(const StringView Name, const UInt32 Value, TreeWalker& Walker)
+            { Walker.SetUInt32(Name,Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<UInt32> GetValue<UInt32>(const StringView Name, const TreeWalker& Walker)
+            { return Walker.GetUInt32(Name); }
+
+        template<>
+        void SetValue<Int32>(const StringView Name, const Int32 Value, TreeWalker& Walker)
+            { Walker.SetInt32(Name,Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<Int32> GetValue<Int32>(const StringView Name, const TreeWalker& Walker)
+            { return Walker.GetInt32(Name); }
+
+        template<>
+        void SetValue<UInt16>(const StringView Name, const UInt16 Value, TreeWalker& Walker)
+            { Walker.SetUInt16(Name,Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<UInt16> GetValue<UInt16>(const StringView Name, const TreeWalker& Walker)
+            { return Walker.GetUInt16(Name); }
+
+        template<>
+        void SetValue<Int16>(const StringView Name, const Int16 Value, TreeWalker& Walker)
+            { Walker.SetInt16(Name,Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<Int16> GetValue<Int16>(const StringView Name, const TreeWalker& Walker)
+            { return Walker.GetInt16(Name); }
+
+        template<>
+        void SetValue<UInt8>(const StringView Name, const UInt8 Value, TreeWalker& Walker)
+            { Walker.SetUInt8(Name,Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<UInt8> GetValue<UInt8>(const StringView Name, const TreeWalker& Walker)
+            { return Walker.GetUInt8(Name); }
+
+        template<>
+        void SetValue<Int8>(const StringView Name, const Int8 Value, TreeWalker& Walker)
+            { Walker.SetInt8(Name,Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<Int8> GetValue<Int8>(const StringView Name, const TreeWalker& Walker)
+            { return Walker.GetInt8(Name); }
+
+        template<>
+        void SetValue<Boole>(const StringView Name, const Boole Value, TreeWalker& Walker)
+            { Walker.SetBool(Name,Value); }
+        template<>
+        [[nodiscard]]
+        std::optional<Boole> GetValue<Boole>(const StringView Name, const TreeWalker& Walker)
+            { return Walker.GetBool(Name); }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // TreeWalker Implementations
+
+    template<typename SetType>
+    void TreeWalker::SetValue(const StringView Name, SetType&& ToSet)
+    {
+        using DecayedType = std::decay_t<SetType>;
+        AttributeHelpers::SetValue<DecayedType>(Name,std::forward<SetType>(ToSet),*this);
+    }
+
+    template<typename ReturnType>
+    [[nodiscard]]
+    std::optional<ReturnType> TreeWalker::GetValue(const StringView Name) const
+    {
+        return AttributeHelpers::GetValue<ReturnType>(Name,*this);
+    }
 
     /// @}
 }//Serialization

@@ -57,13 +57,23 @@ namespace Serialization {
     /// @{
 
     ///////////////////////////////////////////////////////////////////////////////
+    // ObjectCounter (for counting the number of references to a given object)
+
+    struct MEZZ_LIB ObjectCounter
+    {
+        uintptr_t InstanceID = 0;
+        UInt32 LinkCount = 0;
+        UInt32 OwnerOrJoinCount = 0;
+    };
+
+    ///////////////////////////////////////////////////////////////////////////////
     // ObjectLink (for handling non-owned pointers between objects)
 
     struct MEZZ_LIB ObjectLink
     {
         std::vector< std::reference_wrapper<void*> > UnresolvedLinks;
         StringView TypeName;
-        uintptr_t InstanceID;
+        uintptr_t InstanceID = 0;
         void* Instance = nullptr;
     };
 
@@ -74,7 +84,7 @@ namespace Serialization {
     {
         std::vector< std::reference_wrapper< std::shared_ptr<void> > > UnresolvedJoins;
         StringView TypeName;
-        uintptr_t InstanceID;
+        uintptr_t InstanceID = 0;
         std::shared_ptr<void> Instance = nullptr;
     };
 
@@ -100,7 +110,7 @@ namespace Serialization {
             { return Link.InstanceID < ID; }
         Boole operator()(const uintptr_t ID, const TrackerMeta& Link)
             { return ID < Link.InstanceID; }
-    };
+    };//TrackerPredicate
 
     ///////////////////////////////////////////////////////////////////////////////
     // PointerTracker
@@ -108,13 +118,11 @@ namespace Serialization {
     class MEZZ_LIB SerializerPointerTracker
     {
     public:
-        using RawPtrContainer = SortedVector<void*>;
-        using RawPtrIterator = RawPtrContainer::const_iterator;
-        using SharedPtrContainer = SortedVector<std::shared_ptr<void>>;
-        using SharedPtrIterator = SharedPtrContainer::const_iterator;
+        using CountContainer = SortedVector<ObjectCounter,TrackerPredicate<ObjectCounter>>;
+        using CountIterator = CountContainer::iterator;
+        using ConstCountIterator = CountContainer::const_iterator;
     protected:
-        RawPtrContainer RawPtrs;
-        SharedPtrContainer SharedPtrs;
+        CountContainer PtrCounts;
     public:
         SerializerPointerTracker() = default;
         SerializerPointerTracker(const SerializerPointerTracker& Other) = delete;
@@ -132,29 +140,74 @@ namespace Serialization {
         //  Error when a second owner is detected.
         //  Signal for the system to create a link to the original otherwise.
 
-        void TrackPointer(void* ToTrack, const Boole IsOwner)
+        const ObjectCounter& TrackObject(void* ToTrack)
         {
-            if( IsOwner ) {
-                RawPtrIterator FoundIt = this->RawPtrs.find(ToTrack);
-                if( FoundIt == this->RawPtrs.end() ) {
-                    this->RawPtrs.add(ToTrack);
+            uintptr_t PtrID = GetIDOfPtr(&ToTrack);
+            CountIterator FoundIt = this->PtrCounts.find(PtrID);
+            if( FoundIt != this->PtrCounts.end() ) {
+                if( (*FoundIt).OwnerOrJoinCount != 0 ) {
+                    throw std::runtime_error("Multiple owners for object found.");
                 }else{
-                    throw std::runtime_error("Detected multiple owners to pointer.");
+                    (*FoundIt).OwnerOrJoinCount = 1;
+                    return (*FoundIt);
                 }
-            }
-        }
-        void TrackPointer(std::shared_ptr<void> ToTrack, const Boole IsOwner)
-        {
-            if( IsOwner ) {
-                SharedPtrIterator FoundIt = this->SharedPtrs.find(ToTrack);
-                if( FoundIt == this->SharedPtrs.end() ) {
-                    this->SharedPtrs.add(ToTrack);
-                }else{
-                    throw std::runtime_error("Detected multiple owners to pointer.");
-                }
+            }else{
+                ObjectCounter NewCounter;
+                NewCounter.InstanceID = PtrID;
+                NewCounter.OwnerOrJoinCount = 1;
+                return *( this->PtrCounts.add(NewCounter) );
             }
         }
 
+        template<typename ObjType>
+        const ObjectCounter& TrackObject(ObjType& ToTrack)
+            { return TrackObject( &ToTrack ); }
+
+        const ObjectCounter& TrackPointer(void* ToTrack, const Boole IsOwner)
+        {
+            uintptr_t PtrID = GetIDOfPtr(ToTrack);
+            CountIterator FoundIt = this->PtrCounts.find(PtrID);
+            if( FoundIt != this->PtrCounts.end() ) {
+                (*FoundIt).LinkCount++;
+                if( IsOwner ) {
+                    if( (*FoundIt).OwnerOrJoinCount != 0 ) {
+                        throw std::runtime_error("Multiple owners for object found.");
+                    }else{
+                        (*FoundIt).OwnerOrJoinCount = 1;
+                    }
+                }
+                return (*FoundIt);
+            }else{
+                ObjectCounter NewCounter;
+                NewCounter.InstanceID = PtrID;
+                NewCounter.LinkCount = 1;
+                NewCounter.OwnerOrJoinCount = IsOwner;
+                return *( this->PtrCounts.add(NewCounter) );
+            }
+        }
+        const ObjectCounter& TrackSharedPointer(std::shared_ptr<void> ToTrack)
+        {
+            uintptr_t PtrID = GetIDOfPtr(ToTrack.get());
+            CountIterator FoundIt = this->PtrCounts.find(PtrID);
+            if( FoundIt != this->PtrCounts.end() ) {
+                (*FoundIt).OwnerOrJoinCount++;
+                return (*FoundIt);
+            }else{
+                ObjectCounter NewCounter;
+                NewCounter.InstanceID = PtrID;
+                NewCounter.OwnerOrJoinCount = 1;
+                return *( this->PtrCounts.add(NewCounter) );
+            }
+        }
+
+        //CountIterator GetCountBegin()
+        //    { return this->PtrCounts.begin(); }
+        ConstCountIterator GetCountBegin() const
+            { return this->PtrCounts.cbegin(); }
+        //CountIterator GetCountEnd()
+        //    { return this->PtrCounts.end(); }
+        ConstCountIterator GetCountEnd() const
+            { return this->PtrCounts.cend(); }
     };//SerializerPointerTracker
 
     class MEZZ_LIB DeserializerPointerTracker

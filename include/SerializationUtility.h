@@ -57,7 +57,7 @@ namespace Mezzanine {
 
 namespace Serialization {
     class AttributeWalker;
-    class ObjectWalker;
+    class TreeWalker;
     class SerializerWalker;
     class DeserializerWalker;
 }
@@ -101,35 +101,29 @@ namespace Serialization {
     void Deserialize(const StringView Name,
                      DeserializeType& ToDeserialize,
                      const MemberTags Tags,
-                     const Int32 Version,
                      Serialization::DeserializerWalker& Walker);
     template<typename DeserializeType, typename = std::enable_if_t<std::is_pointer_v<DeserializeType>>>
     void Deserialize(const StringView Name,
                      DeserializeType ToDeserialize,
                      const MemberTags Tags,
-                     const Int32 Version,
                      Serialization::DeserializerWalker& Walker);
     template<typename DeserializeType>
     void Deserialize(const StringView Name,
                      std::shared_ptr<DeserializeType> ToDeserialize,
                      const MemberTags Tags,
-                     const Int32 Version,
                      Serialization::DeserializerWalker& Walker);
 
     template<typename DeserializeType, typename = std::enable_if_t<!std::is_pointer_v<DeserializeType>>>
     void Deserialize(const StringView Name,
                      DeserializeType& ToDeserialize,
-                     const Int32 Version,
                      Serialization::DeserializerWalker& Walker);
     template<typename DeserializeType, typename = std::enable_if_t<std::is_pointer_v<DeserializeType>>>
     void Deserialize(const StringView Name,
                      DeserializeType ToDeserialize,
-                     const Int32 Version,
                      Serialization::DeserializerWalker& Walker);
     template<typename DeserializeType>
     void Deserialize(const StringView Name,
                      std::shared_ptr<DeserializeType> ToDeserialize,
-                     const Int32 Version,
                      Serialization::DeserializerWalker& Walker);
 
 namespace Serialization {
@@ -140,10 +134,8 @@ namespace Serialization {
     /// @tparam Class The class to test.
     template<typename Class>
     using SerializeFunct_t = decltype(
-        std::declval<Class&>().Serialize(std::declval<const StringView>(),
-                                         std::declval<const MemberTags>(),
-                                         std::declval<Int32>(),
-                                         std::declval<Serialization::ObjectWalker&>())
+        std::declval<Class&>().Serialize(std::declval<Int32>(),
+                                         std::declval<Serialization::SerializerWalker&>())
     );
     /// @brief Type for is_detected that tests for the existence of Serialize on a class.
     /// @tparam Class The class that will be checked for the presence of a Serialize function.
@@ -161,7 +153,7 @@ namespace Serialization {
     template<typename Class>
     using DeserializeFunct_t = decltype(
         std::declval<Class&>().Deserialize(std::declval<Int32>(),
-                                           std::declval<Serialization::ObjectWalker&>())
+                                           std::declval<Serialization::DeserializerWalker&>())
     );
     /// @brief Type for is_detected that tests for the existence of Deserialize on a class.
     /// @tparam Class The class that will be checked for the presence of a Deserialize function.

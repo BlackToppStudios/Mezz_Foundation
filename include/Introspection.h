@@ -1058,81 +1058,87 @@ namespace Mezzanine {
 
     ///////////////////////////////////////////////////////////////////////////////
     // Standard Types Name Registration
+
 /*
+    template< template<typename...> class MaybeSV,
+              typename = std::enable_if_t< std::is_same_v< MaybeSV,std::basic_string_view > > >
+    constexpr StringView GetRegisteredName<MaybeSV>()
+        { return "StringView"; }
+
     template<typename CharType,
              typename Traits = std::char_traits<CharType> >
-    StringView GetRegisteredName< std::basic_string_view<CharType,Traits> >()
+    constexpr StringView GetRegisteredName< std::basic_string_view<CharType,Traits> >()
         { return "StringView"; }
 
     template<typename CharType,
              typename Traits = std::char_traits<CharType>,
              typename Allocator = std::allocator<CharType> >
-    StringView GetRegisteredName< std::basic_string<CharType,Traits,Allocator> >()
+    constexpr StringView GetRegisteredName< std::basic_string<CharType,Traits,Allocator> >()
         { return "String"; }
 
     template<typename ElementType,
              size_t Count>
-    StringView GetRegisteredName< std::array<ElementType,Count> >()
+    constexpr StringView GetRegisteredName< std::array<ElementType,Count> >()
         { return "Array"; }
 
     template<typename ElementType,
              typename Allocator = std::allocator<ElementType>>
-    StringView GetRegisteredName< std::vector<ElementType,Allocator> >()
+    constexpr StringView GetRegisteredName< std::vector<ElementType,Allocator> >()
         { return "Vector"; }
 
     template<typename ElementType,
              typename Allocator = std::allocator<ElementType>>
-    StringView GetRegisteredName< std::list<ElementType,Allocator> >()
+    constexpr StringView GetRegisteredName< std::list<ElementType,Allocator> >()
         { return "List"; }
 
     template<typename ElementType,
              typename Allocator = std::allocator<ElementType>>
-    StringView GetRegisteredName< std::forward_list<ElementType,Allocator> >()
+    constexpr StringView GetRegisteredName< std::forward_list<ElementType,Allocator> >()
         { return "ForwardList"; }
 
     template<typename ElementType,
              typename Allocator = std::allocator<ElementType>>
-    StringView GetRegisteredName< std::deque<ElementType,Allocator> >()
+    constexpr StringView GetRegisteredName< std::deque<ElementType,Allocator> >()
         { return "Deque"; }
 
     template<typename KeyType,
              typename Compare = std::less<KeyType>,
              typename Allocator = std::allocator<KeyType> >
-    StringView GetRegisteredName< std::set<KeyType,Compare,Allocator> >()
+    constexpr StringView GetRegisteredName< std::set<KeyType,Compare,Allocator> >()
         { return "Set"; }
 
     template<typename KeyType,
              typename Compare = std::less<KeyType>,
              typename Allocator = std::allocator<KeyType> >
-    StringView GetRegisteredName< std::multiset<KeyType,Compare,Allocator> >()
+    constexpr StringView GetRegisteredName< std::multiset<KeyType,Compare,Allocator> >()
         { return "MultiSet"; }
 
     template<typename KeyType,
              typename Hash = std::hash<KeyType>,
              typename KeyEqual = std::equal_to<KeyType>,
              typename Allocator = std::allocator<KeyType> >
-    StringView GetRegisteredName< std::unordered_set<KeyType,Hash,KeyEqual,Allocator> >()
+    constexpr StringView GetRegisteredName< std::unordered_set<KeyType,Hash,KeyEqual,Allocator> >()
         { return "UnorderedSet"; }
 
     template<typename KeyType,
              typename Hash = std::hash<KeyType>,
              typename KeyEqual = std::equal_to<KeyType>,
              typename Allocator = std::allocator<KeyType> >
-    StringView GetRegisteredName< std::unordered_multiset<KeyType,Hash,KeyEqual,Allocator> >()
+    constexpr StringView GetRegisteredName< std::unordered_multiset<KeyType,Hash,KeyEqual,Allocator> >()
         { return "UnorderedMultiSet"; }
 
     template<typename KeyType,
              typename ValueType,
              typename Compare = std::less<KeyType>,
              typename Allocator = std::allocator<const KeyType, ValueType> >
-    StringView GetRegisteredName< std::map<KeyType,ValueType,Compare,Allocator> >()
+    constexpr StringView GetRegisteredName< std::map<KeyType,ValueType,Compare,Allocator> >()
         { return "Map"; }
 
     template<typename KeyType,
              typename ValueType,
              typename Compare = std::less<KeyType>,
              typename Allocator = std::allocator<const KeyType, ValueType> >
-    StringView GetRegisteredName< std::multimap<KeyType,ValueType,Compare,Allocator> >()
+    constexpr StringView GetRegisteredName< std::multimap<KeyType,ValueType,Compare,Allocator> >()
         { return "MultiMap"; }
 
     template<typename KeyType,
@@ -1140,7 +1146,7 @@ namespace Mezzanine {
              typename Hash = std::hash<KeyType>,
              typename KeyEqual = std::equal_to<KeyType>,
              typename Allocator = std::allocator<const KeyType, ValueType> >
-    StringView GetRegisteredName< std::unordered_map<KeyType,ValueType,Hash,KeyEqual,Allocator> >()
+    constexpr StringView GetRegisteredName< std::unordered_map<KeyType,ValueType,Hash,KeyEqual,Allocator> >()
         { return "UnorderedMap"; }
 
     template<typename KeyType,
@@ -1148,7 +1154,7 @@ namespace Mezzanine {
              typename Hash = std::hash<KeyType>,
              typename KeyEqual = std::equal_to<KeyType>,
              typename Allocator = std::allocator<const KeyType, ValueType> >
-    StringView GetRegisteredName< std::unordered_multimap<KeyType,ValueType,Hash,KeyEqual,Allocator> >()
+    constexpr StringView GetRegisteredName< std::unordered_multimap<KeyType,ValueType,Hash,KeyEqual,Allocator> >()
         { return "UnorderedMultiMap"; }
 */
     /// @page Mezzanine Introspection System
@@ -1476,6 +1482,16 @@ namespace Mezzanine {
     /// classes, which is then called upon by the class forming the diamond to assemble the accessors needed by the
     /// diamond. The Introspection system doesn't provide any utilities to make this easier, so it's on you to make
     /// it work smoothly. But doing this, diamonds can be supported.
+    /// @n @n
+    /// There is an important limitation to registration that should be kept in mind. As of the time of this writing
+    /// in C++17 (and even C++20), partial template specialization in function declarations is expicitly not allowed.
+    /// Partial template specialization is exactly how the non-intrusive registration functions operate. This means
+    /// that template classes can be tricky in some cases. If you have a complete type from a template, such as a
+    /// vector<int> and specialize the registration function for that type, it's fine. It works like any given
+    /// non-template type. But if you want to not have to care about the template parameter, and just have common
+    /// functionality for just vector while discarding the parameter you'll run into a brick wall. For other template
+    /// types that you have more control over you can make the registration functions static members and that will
+    /// work ok.
     /// @subsection IntrospectGuts TupleForEach
     /// So we've covered how a custom class interacts with the MemberAccessor. But, how does the MemberAccessor
     /// interact with the rest of the Introspection system? Or with custom logic given to the Introspection system?
