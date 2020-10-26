@@ -308,6 +308,98 @@ AUTOMATIC_TEST_GROUP(ContainerToolsTests,ContainerTools)
         TEST_EQUAL("is_non_associative_container-SharedPtr",
                    false,IsNonAssociativeContainer<TestSharedPtr>())
     }//is_non_associative_container
+
+    {//AddToContainer
+        TestVector ResultVector;
+        AddToContainer(ResultVector,10);
+        TEST_EQUAL("AddToContainer(ContainerType&,ValueType&)-Vector",
+                   10,ResultVector.front())
+
+        TestDeque ResultDeque;
+        AddToContainer(ResultDeque,10);
+        TEST_EQUAL("AddToContainer(ContainerType&,ValueType&)-Deque",
+                   10,ResultDeque.front())
+
+        TestList ResultList;
+        AddToContainer(ResultList,10);
+        TEST_EQUAL("AddToContainer(ContainerType&,ValueType&)-List",
+                   10,ResultList.front())
+
+        TestSet ResultSet;
+        AddToContainer(ResultSet,10);
+        TEST_EQUAL("AddToContainer(ContainerType&,ValueType&)-Set",
+                   10,*ResultSet.begin())
+
+        TestMultiSet ResultMultiSet;
+        AddToContainer(ResultMultiSet,10);
+        TEST_EQUAL("AddToContainer(ContainerType&,ValueType&)-MultiSet",
+                   10,*ResultMultiSet.begin())
+
+        TestMap ResultMap;
+        AddToContainer(ResultMap,String("Ten"),10);
+        TEST_EQUAL("AddToContainer(ContainerType&,ValueType&)-Map-Key",
+                   String("Ten"),(*ResultMap.begin()).first)
+        TEST_EQUAL("AddToContainer(ContainerType&,ValueType&)-Map-Mapped",
+                   10,(*ResultMap.begin()).second)
+
+        TestMultiMap ResultMultiMap;
+        AddToContainer(ResultMultiMap,String("Ten"),10);
+        TEST_EQUAL("AddToContainer(ContainerType&,ValueType&)-MultiMap-Key",
+                   String("Ten"),(*ResultMultiMap.begin()).first)
+        TEST_EQUAL("AddToContainer(ContainerType&,ValueType&)-MultiMap-Mapped",
+                   10,(*ResultMultiMap.begin()).second)
+
+        TestUnorderedSet ResultUnorderedSet;
+        AddToContainer(ResultUnorderedSet,10);
+        TEST_EQUAL("AddToContainer(ContainerType&,ValueType&)-UnorderedSet",
+                   10,*ResultUnorderedSet.begin())
+
+        TestUnorderedMultiSet ResultUnorderedMultiSet;
+        AddToContainer(ResultUnorderedMultiSet,10);
+        TEST_EQUAL("AddToContainer(ContainerType&,ValueType&)-UnorderedMultiSet",
+                   10,*ResultUnorderedMultiSet.begin())
+
+        TestUnorderedMap ResultUnorderedMap;
+        AddToContainer(ResultUnorderedMap,String("Ten"),10);
+        TEST_EQUAL("AddToContainer(ContainerType&,ValueType&)-UnorderedMap-Key",
+                   String("Ten"),(*ResultUnorderedMap.begin()).first)
+        TEST_EQUAL("AddToContainer(ContainerType&,ValueType&)-UnorderedMap-Mapped",
+                   10,(*ResultUnorderedMap.begin()).second)
+
+        TestUnorderedMultiMap ResultUnorderedMultiMap;
+        AddToContainer(ResultUnorderedMultiMap,String("Ten"),10);
+        TEST_EQUAL("AddToContainer(ContainerType&,ValueType&)-UnorderedMultiMap-Key",
+                   String("Ten"),(*ResultUnorderedMultiMap.begin()).first)
+        TEST_EQUAL("AddToContainer(ContainerType&,ValueType&)-UnorderedMultiMap-Mapped",
+                   10,(*ResultUnorderedMultiMap.begin()).second)
+
+        TestFlatMap ResultFlatMap;
+        AddToContainer(ResultFlatMap,String("Ten"),10);
+        TEST_EQUAL("AddToContainer(ContainerType&,ValueType&)-FlatMap-Key",
+                   String("Ten"),(*ResultFlatMap.begin()).first)
+        TEST_EQUAL("AddToContainer(ContainerType&,ValueType&)-FlatMap-Mapped",
+                   10,(*ResultFlatMap.begin()).second)
+
+        TestManagedArray ResultManagedArray;
+        AddToContainer(ResultManagedArray,10);
+        TEST_EQUAL("AddToContainer(ContainerType&,ValueType&)-ManagedArray",
+                   10,*ResultManagedArray.begin())
+
+        TestSortedManagedArray ResultSortedManagedArray;
+        AddToContainer(ResultSortedManagedArray,10);
+        TEST_EQUAL("AddToContainer(ContainerType&,ValueType&)-SortedManagedArray",
+                   10,*ResultSortedManagedArray.begin())
+
+        TestSortedVector ResultSortedVector;
+        AddToContainer(ResultSortedVector,10);
+        TEST_EQUAL("AddToContainer(ContainerType&,ValueType&)-SortedVector",
+                   10,*ResultSortedVector.begin())
+
+        TestString ResultString;
+        AddToContainer(ResultString,'A');
+        TEST_EQUAL("AddToContainer(ContainerType&,ValueType&)-String",
+                   'A',ResultString.back())
+    }//AddToContainer
 }
 
 #endif
