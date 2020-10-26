@@ -56,6 +56,10 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
     if(Mezzanine::RuntimeStatic::CompilerIsEmscripten())
         { return; }
 
+    // Benchmarks don't make sense in Debug and shouldn't warn.
+    if(Mezzanine::RuntimeStatic::Debug())
+        { return; }
+
     using namespace Mezzanine;
     using namespace CountedPtrTesting;
 
@@ -299,38 +303,34 @@ BENCHMARK_TEST_GROUP(CountedPtrBenchmarks,CountedPtrBenchmarks)
                 << ExternalToMakeSharedPercentageCreate << "% as many creation iterations as make_shared pointers.\n\n"
                 ;
 
-        // Benchmarks don't make sense in Debug and shouldn't warn.
-        if(Mezzanine::RuntimeStatic::Debug())
-            { return; }
-
         // Internal Percentage based comparisons
-        TEST_WARN( "InternalDoesASimilarAmountOfCreateIterationsToRawPointers",
+        TEST_PERF( "InternalDoesASimilarAmountOfCreateIterationsToRawPointers",
                    75 < InternalToRawPercentageCreate )
-        TEST_WARN( "InternalDoesASimilarAmountOfWorkIterationsToRawPointers",
+        TEST_PERF( "InternalDoesASimilarAmountOfWorkIterationsToRawPointers",
                    75 < InternalToRawPercentageCopy )
 
-        TEST_WARN( "InternalDoesMoreCreateIterationsThanExternalReferenceCountOrIsClose",
+        TEST_PERF( "InternalDoesMoreCreateIterationsThanExternalReferenceCountOrIsClose",
                    95 < InternalToExternalPercentageCreate )
-        TEST_WARN( "InternalDoesMoreWorkIterationsThanExternalReferenceCountOrIsClose",
+        TEST_PERF( "InternalDoesMoreWorkIterationsThanExternalReferenceCountOrIsClose",
                    95 < InternalToExternalPercentageCopy )
 
-        TEST_WARN( "InternalDoesMoreCreateIterationsThanSharedpointers",
+        TEST_PERF( "InternalDoesMoreCreateIterationsThanSharedpointers",
                    100 < InternalToSharedPercentageCreate )
-        TEST_WARN( "InternalDoesMoreWorkIterationsThanSharedpointers",
+        TEST_PERF( "InternalDoesMoreWorkIterationsThanSharedpointers",
                    100 < InternalToSharedPercentageCopy )
-        TEST_WARN( "InternalDoesMoreOrASimilarAmountOfCreateIterationsThanMakeSharedpointers",
+        TEST_PERF( "InternalDoesMoreOrASimilarAmountOfCreateIterationsThanMakeSharedpointers",
                    95 < InternalToMakeSharedPercentageCreate )
-        TEST_WARN( "InternalDoesMoreWorkIterationsThanMakeSharedpointers",
+        TEST_PERF( "InternalDoesMoreWorkIterationsThanMakeSharedpointers",
                    100 < InternalToMakeSharedPercentageCopy )
 
         // External Percentage based comparisons
-        TEST_WARN( "ExternalDoesAboutAsManyOrMoreCreateIterationsThanSharedpointers",
+        TEST_PERF( "ExternalDoesAboutAsManyOrMoreCreateIterationsThanSharedpointers",
                    95 < ExternalToSharedPercentageCreate )
-        TEST_WARN( "ExternalDoesMoreOrAboutTheSameWorkIterationsThanSharedpointers",
+        TEST_PERF( "ExternalDoesMoreOrAboutTheSameWorkIterationsThanSharedpointers",
                    95 < ExternalToSharedPercentageCopy )
-        TEST_WARN( "InternalDoesntSuckAtCreateIterationsComparedToMakeSharedpointers",
+        TEST_PERF( "InternalDoesntSuckAtCreateIterationsComparedToMakeSharedpointers",
                    50 < ExternalToMakeSharedPercentageCreate )
-        TEST_WARN( "InternalDoesntSuckAtWorlIterationsComparedToMakeSharedpointers",
+        TEST_PERF( "InternalDoesntSuckAtWorlIterationsComparedToMakeSharedpointers",
                    50 < ExternalToMakeSharedPercentageCopy )
     }
 }

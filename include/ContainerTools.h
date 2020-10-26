@@ -137,6 +137,66 @@ namespace ContainerDetect {
     constexpr Boole HasClear()
         { return HasClear_t<Class>::value; }
 
+    /// @brief Convenience type for insert function detection.
+    /// @tparam Class The class to test.
+    template<typename Class, typename... ArgTypes>
+    using InsertFunct_t = decltype(std::declval<Class&>().insert(std::declval<ArgTypes&&>()...));
+    /// @brief Type for is_detected that tests for the existence of insert on a class.
+    /// @tparam Class The class that will be checked for the presence of a insert function.
+    template<typename Class, typename... ArgTypes>
+    using HasInsert_t = std::is_detected<InsertFunct_t,Class,ArgTypes...>;
+    /// @brief Convenience function for the value of a HasClear check.
+    /// @tparam Class The class that will be checked for the presence of a "insert(ArgTypes&&...)" function.
+    /// @return Returns true if the provided type has a "insert(ArgTypes&&...)" member function, false otherwise.
+    template<typename Class, typename... ArgTypes>
+    constexpr Boole HasInsert()
+        { return HasInsert_t<Class,ArgTypes...>::value; }
+
+    /// @brief Convenience type for push_back function detection.
+    /// @tparam Class The class to test.
+    template<typename Class, typename ValueType>
+    using PushBackFunct_t = decltype(std::declval<Class&>().push_back(std::declval<ValueType&&>()));
+    /// @brief Type for is_detected that tests for the existence of push_back on a class.
+    /// @tparam Class The class that will be checked for the presence of a push_back function.
+    template<typename Class, typename ValueType>
+    using HasPushBack_t = std::is_detected<PushBackFunct_t,Class,ValueType>;
+    /// @brief Convenience function for the value of a HasClear check.
+    /// @tparam Class The class that will be checked for the presence of a "push_back(ValueType&&)" function.
+    /// @return Returns true if the provided type has a "push_back(ValueType&&)" member function, false otherwise.
+    template<typename Class, typename ValueType>
+    constexpr Boole HasPushBack()
+        { return HasPushBack_t<Class,ValueType>::value; }
+
+    /// @brief Convenience type for push_front function detection.
+    /// @tparam Class The class to test.
+    template<typename Class, typename ValueType>
+    using PushFrontFunct_t = decltype(std::declval<Class&>().push_front(std::declval<ValueType&&>()));
+    /// @brief Type for is_detected that tests for the existence of push_front on a class.
+    /// @tparam Class The class that will be checked for the presence of a push_front function.
+    template<typename Class, typename ValueType>
+    using HasPushFront_t = std::is_detected<PushFrontFunct_t,Class,ValueType>;
+    /// @brief Convenience function for the value of a HasClear check.
+    /// @tparam Class The class that will be checked for the presence of a "push_front(ValueType&&)" function.
+    /// @return Returns true if the provided type has a "push_front(ValueType&&)" member function, false otherwise.
+    template<typename Class, typename ValueType>
+    constexpr Boole HasPushFront()
+        { return HasPushFront_t<Class,ValueType>::value; }
+
+    /// @brief Convenience type for add function detection.
+    /// @tparam Class The class to test.
+    template<typename Class, typename ValueType>
+    using AddFunct_t = decltype(std::declval<Class&>().add(std::declval<ValueType&&>()));
+    /// @brief Type for is_detected that tests for the existence of add on a class.
+    /// @tparam Class The class that will be checked for the presence of a add function.
+    template<typename Class, typename ValueType>
+    using HasAdd_t = std::is_detected<AddFunct_t,Class,ValueType>;
+    /// @brief Convenience function for the value of a HasClear check.
+    /// @tparam Class The class that will be checked for the presence of a "add(ValueType&&)" function.
+    /// @return Returns true if the provided type has a "add(ValueType&&)" member function, false otherwise.
+    template<typename Class, typename ValueType>
+    constexpr Boole HasAdd()
+        { return HasAdd_t<Class,ValueType>::value; }
+
     /// @brief Dummy/failure type for detecting if a class has a "value_type" defined.
     /// @tparam Class The class to be tested.
     template<typename Class, typename = void>
@@ -203,7 +263,9 @@ namespace ContainerDetect {
 
     /// @brief A type trait that checks to see if a type is/has a range of elements.
     /// @tparam CheckType The type that will be checked.
-    /// @remarks This tests for the presence of begin() and end() member functions on the type.
+    /// @remarks This tests for the presence of begin() and end() member functions on the type. It is worth noting
+    /// that standard container adaptors will fail this check, as well as any check that depends on this check,
+    /// because they lack begin and end member functions.
     template<typename CheckType>
     struct is_range :
         std::bool_constant< ContainerDetect::HasBegin<CheckType>() &&
@@ -211,6 +273,9 @@ namespace ContainerDetect {
         {  };
     /// @brief Convenience function for getting just the bool of a is_range check.
     /// @tparam CheckType The type that will be checked.
+    /// @remarks This tests for the presence of begin() and end() member functions on the type. It is worth noting
+    /// that standard container adaptors will fail this check, as well as any check that depends on this check,
+    /// because they lack begin and end member functions.
     /// @return Returns true if CheckType has "begin()" and "end()" member functions, false otherwise.
     template<typename CheckType>
     constexpr Boole IsRange()
@@ -361,6 +426,82 @@ namespace ContainerDetect {
     template<typename Comp, typename KeyType>
     struct comp_is_transparent<Comp,KeyType,std::void_t<typename Comp::is_transparent>> : std::true_type
         {  };
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // Common/Generic Container Operations
+
+    /// @brief Adds a value to a non-associative container.
+    /// @tparam ValueType The type being stored in the non-associative container.
+    /// @tparam ContainerType The type of the non-associative container.
+    /// @remarks This function attempts to be a generic means of adding values/elements to containers you may
+    /// not want to need to know the exact type of. It will check for the presence of a function it can use to
+    /// add a value to the container and use it if found. It will use the first function found (if multiple
+    /// exist). The order in which it will detect/use functions are as follows:
+    /// @code
+    /// Container.insert( Value );
+    /// Container.add( Value );
+    /// Container.push_back( Value );
+    /// Container.push_front( Value );
+    /// @endcode
+    /// @param Value The Value to be added to the container.
+    /// @param AddingTo The non-associative container being added to.
+    template< typename ContainerType, typename ValueType,
+              typename = std::enable_if_t< IsNonAssociativeContainer<ContainerType>() > >
+    auto AddToContainer(ContainerType& AddingTo, ValueType&& Value)
+    {
+        static_assert( std::is_same_v<ValueType,typename ContainerType::value_type>,
+                       "ValueType provided does not match the ValueType expected by the container." );
+        static_assert( ContainerDetect::HasInsert<ContainerType,ValueType>() ||
+                       ContainerDetect::HasAdd<ContainerType,ValueType>() ||
+                       ContainerDetect::HasPushBack<ContainerType,ValueType>() ||
+                       ContainerDetect::HasPushFront<ContainerType,ValueType>(),
+                       "Container type does not have a detectable function for adding elements to it." );
+
+        if constexpr( ContainerDetect::HasInsert<ContainerType,ValueType>() ) {
+            return AddingTo.insert( std::forward<ValueType>(Value) );
+        }else if constexpr( ContainerDetect::HasAdd<ContainerType,ValueType>() ) {
+            return AddingTo.add( std::forward<ValueType>(Value) );
+        }else if constexpr( ContainerDetect::HasPushBack<ContainerType,ValueType>() ) {
+            return AddingTo.push_back( std::forward<ValueType>(Value) );
+        }else if constexpr( ContainerDetect::HasPushFront<ContainerType,ValueType>() ) {
+            return AddingTo.push_front( std::forward<ValueType>(Value) );
+        }
+    }
+
+    /// @brief Adds a value to an associative container.
+    /// @tparam KeyType The type used as the key in the associative container.
+    /// @tparam MappedType The type mapped to the key in the associative container.
+    /// @tparam ContainerType The type of the associative container.
+    /// @remarks This function attempts to be a generic means of adding values/elements to containers you may
+    /// not want to need to know the exact type of. It will check for the presence of a function it can use to
+    /// add a value to the container and use it if found. It will use the first function found (if multiple
+    /// exist). The order in which it will detect/use functions are as follows:
+    /// @code
+    /// Container.insert( ValueType(Key,Mapped) );
+    /// Container.add( ValueType(Key,Mapped) );
+    /// @endcode
+    /// @param Key The Key value to be added to the container.
+    /// @param Mapped The data being mapped to the key value and added to the container.
+    /// @param AddingTo The associative container being added to.
+    template< typename ContainerType, typename KeyType, typename MappedType,
+              typename = std::enable_if_t< IsAssociativeContainer<ContainerType>() > >
+    auto AddToContainer(ContainerType& AddingTo, KeyType&& Key, MappedType&& Mapped)
+    {
+        using ValueType = std::pair<const KeyType,MappedType>;
+        static_assert( std::is_same_v<ValueType,typename ContainerType::value_type>,
+                       "Key and Mapped types provided does not match the ValueType expected by the container." );
+        static_assert( ContainerDetect::HasInsert<ContainerType,ValueType>() ||
+                       ContainerDetect::HasAdd<ContainerType,ValueType>() ||
+                       ContainerDetect::HasPushBack<ContainerType,ValueType>() ||
+                       ContainerDetect::HasPushFront<ContainerType,ValueType>(),
+                       "Container type does not have a detectable function for adding elements to it." );
+
+        if constexpr( ContainerDetect::HasInsert<ContainerType,ValueType>() ) {
+            return AddingTo.insert( ValueType( std::forward<KeyType>(Key), std::forward<MappedType>(Mapped) ) );
+        }else if constexpr( ContainerDetect::HasAdd<ContainerType,ValueType>() ) {
+            return AddingTo.add( ValueType( std::forward<KeyType>(Key), std::forward<MappedType>(Mapped) ) );
+        }
+    }
 }//Mezzanine
 
 #endif // Mezz_Foundation_ContainerTools_h
