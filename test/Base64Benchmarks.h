@@ -274,7 +274,7 @@ BENCHMARK_TEST_GROUP(Base64Benchmarks,Base64Benchmarks)
     TestLog << "The new decoding algorithm takes about "
             << Percentage << "% as long as the original.\n\n";
 
-    TEST_WARN( "DecodeTimeIsBetterOrWithin5%", Mezzanine::RuntimeStatic::Debug() ? true : Percentage < 105.0)
+    TEST_PERF( "DecodeTimeIsBetterOrWithin5%", Mezzanine::RuntimeStatic::Debug() ? true : Percentage < 105.0)
 
     //Debug on tachyon Intel 6970hq
     /*  Decoding With Rene's algorithm took 745425 microseconds for 10000 iterations and results like: Four score and seven...rish from the earth.
