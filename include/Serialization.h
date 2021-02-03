@@ -53,9 +53,9 @@
 #endif
 
 // - Investigate the need to support c-string serialization.
-// + Track serialized pointers to prevent loops/infinite recurrsion during serialization.
-// + Investigate way to register pointer types to better check if pointers to different types in the inheritance heirarchy is pointing to the same object. (Pointer math with the RTTI pointer?)
-// + Track and store objects with shared ownership.
+// - Track serialized pointers to prevent loops/infinite recurrsion during serialization.
+// - Investigate way to register pointer types to better check if pointers to different types in the inheritance heirarchy is pointing to the same object. (Pointer math with the RTTI pointer?)
+// - Track and store objects with shared ownership.
 // + Implement a way to generate/construct child objects for deserialization. ("Create" MemberTag value?)(Require default constructors for serialized types?)
 // + Consider better methods of storing unique IDs of linked objects and methods of getting at them. (Maybe encourage more designs that only store the ID and fetch pointers per invocation)
 // + Investigate templatizing the backend for a full template solution (instead of polymorphic backends).

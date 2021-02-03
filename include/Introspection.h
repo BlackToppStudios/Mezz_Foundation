@@ -44,7 +44,7 @@
     #include <tuple>
     #include "DataTypes.h"
     #include "DetectionTraits.h"
-    #include "BitFieldTools.h"
+    #include "MemberTags.h"
     #include "MezzException.h"
 #endif
 
@@ -245,58 +245,6 @@ namespace Mezzanine {
     template<class Member, class Object, size_t Num>
     struct is_member_array<Member(Object::*)[Num]> : std::true_type
         {  };
-
-    ///////////////////////////////////////////////////////////////////////////////
-    // Member Tags
-
-    /*
-    // These tags are left over from a short-lived attempt at using tags as types for the metadata of individual
-    // class members.  The idea being that there would be a third variadic template parameter for each created
-    // member that contains all the tags appropriate for that member (most being empty) which would then get
-    // stored in a tuple and (using) aliased on that member type.  That type could then be queried using the
-    // type traits below (tuple_has_type) to generate custom behavior for specific types of data.
-    // This system is unworkable because of the run-time polymorphic requirements of the serialization backends
-    // that are planned for the system.  There is no way to pass around arbitrary and concrete types in a sane
-    // manner through a virtual interface.  Furthermore, the likelihood that arbitrary tag types will be needed
-    // is very low as it would require the user to write (or modify) their own serialization backends to leverage
-    // the flexibility.  This is a significant coding burden that we shouldn't plan on as library maintainers.
-    // For these reasons we've shelved explicit types as member tags in favor of an enum (MemberTags), despite
-    // it's limitations, as we don't expect to be all that hindered by them in all but the most extreme use cases.
-    // Should the run-time polymorphic requirement of the serialization system be lifted then it is possible that
-    // some performance benefits could be gained by reverting to this approach to member tags.  That is why
-    // this code is left commented and this documentation was written.
-
-    struct Local_Tag
-        {  };
-
-    struct Generated_Tag
-        {  };
-    */
-
-    /// @brief A collection of tags describing how member data should be treated in some cases.
-    /// @remarks This enum is meant to be used to determine when special steps need to be taken when looking at
-    /// member data.  For example a networked serialization backend might skip any member with the Local tag.
-    enum class MemberTags
-    {
-        None       = EnumBit(0), ///< Nothing special about the member.
-        Ignore     = EnumBit(1), ///< Member has been explicitly requested to be ignored.
-        Local      = EnumBit(2), ///< Member is only of use on the local host and should not be shared.
-        Generated  = EnumBit(3), ///< Member is a cache generated from other members and can be regenerated.
-        Deprecated = EnumBit(4), ///< Member is deprecated and it's use should be avoided.
-        NotOwned   = EnumBit(5)  ///< Member is a Pointer or Reference to an object not owned by the parent object.
-    };
-    ENABLE_BITMASK_OPERATORS_INSIDE_MEZZANINE(MemberTags)
-
-    /// @brief Stream to standard output stream operator.
-    /// @param Stream The standard output to stream to.
-    /// @param TagToStream The MemberTag value that will be converted and streamed.
-    /// @return Returns a reference to the standard output stream.
-    std::ostream& operator<<(std::ostream& Stream, const MemberTags TagToStream);//[-Werror=missing-declarations]
-    std::ostream& operator<<(std::ostream& Stream, const MemberTags TagToStream)
-    {
-        Stream << static_cast< std::underlying_type_t<MemberTags> >(TagToStream);
-        return Stream;
-    }
 
     SAVE_WARNING_STATE
     SUPPRESS_VC_WARNING(4371)

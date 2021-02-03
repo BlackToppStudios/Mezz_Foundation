@@ -62,68 +62,98 @@ namespace Serialization {
     class DeserializerWalker;
 }
 
-    template<typename SerializeType, typename = std::enable_if_t<!std::is_pointer_v<SerializeType>>>
+    template< typename SerializeType,
+              typename = std::enable_if_t< !std::is_pointer_v<SerializeType> > >
     void Serialize(const StringView Name,
                    const SerializeType& ToSerialize,
                    const MemberTags Tags,
                    const Int32 Version,
                    Serialization::SerializerWalker& Walker);
-    template<typename SerializeType, typename = std::enable_if_t<std::is_pointer_v<SerializeType>>>
+    template< typename SerializeType,
+              typename = std::enable_if_t< std::is_pointer_v<SerializeType> > >
     void Serialize(const StringView Name,
                    const SerializeType ToSerialize,
                    const MemberTags Tags,
                    const Int32 Version,
                    Serialization::SerializerWalker& Walker);
-    template<typename SerializeType>
+    template< typename SerializeType >
+    void Serialize(const StringView Name,
+                   const std::unique_ptr<SerializeType>& ToSerialize,
+                   const MemberTags Tags,
+                   const Int32 Version,
+                   Serialization::SerializerWalker& Walker);
+    template< typename SerializeType >
     void Serialize(const StringView Name,
                    const std::shared_ptr<SerializeType> ToSerialize,
                    const MemberTags Tags,
                    const Int32 Version,
                    Serialization::SerializerWalker& Walker);
+    template< typename SerializeType >
+    void Serialize(const StringView Name,
+                   const std::optional<SerializeType> ToSerialize,
+                   const MemberTags Tags,
+                   const Int32 Version,
+                   Serialization::SerializerWalker& Walker);
 
-    template<typename SerializeType, typename = std::enable_if_t<!std::is_pointer_v<SerializeType>>>
+    template< typename SerializeType,
+              typename = std::enable_if_t< !std::is_pointer_v<SerializeType> > >
     void Serialize(const StringView Name,
                    const SerializeType& ToSerialize,
                    const Int32 Version,
                    Serialization::SerializerWalker& Walker);
-    template<typename SerializeType, typename = std::enable_if_t<std::is_pointer_v<SerializeType>>>
+    template< typename SerializeType,
+              typename = std::enable_if_t< std::is_pointer_v<SerializeType> > >
     void Serialize(const StringView Name,
                    const SerializeType ToSerialize,
                    const Int32 Version,
                    Serialization::SerializerWalker& Walker);
-    template<typename SerializeType>
+    template< typename SerializeType >
+    void Serialize(const StringView Name,
+                   const std::unique_ptr<SerializeType>& ToSerialize,
+                   const Int32 Version,
+                   Serialization::SerializerWalker& Walker);
+    template< typename SerializeType >
     void Serialize(const StringView Name,
                    const std::shared_ptr<SerializeType> ToSerialize,
                    const Int32 Version,
                    Serialization::SerializerWalker& Walker);
+    template< typename SerializeType >
+    void Serialize(const StringView Name,
+                   const std::optional<SerializeType> ToSerialize,
+                   const Int32 Version,
+                   Serialization::SerializerWalker& Walker);
 
-    template<typename DeserializeType, typename = std::enable_if_t<!std::is_pointer_v<DeserializeType>>>
+    template< typename DeserializeType,
+              typename = std::enable_if_t< !std::is_pointer_v<DeserializeType> > >
     void Deserialize(const StringView Name,
                      DeserializeType& ToDeserialize,
                      const MemberTags Tags,
                      Serialization::DeserializerWalker& Walker);
-    template<typename DeserializeType, typename = std::enable_if_t<std::is_pointer_v<DeserializeType>>>
+    template< typename DeserializeType,
+              typename = std::enable_if_t< std::is_pointer_v<DeserializeType> > >
     void Deserialize(const StringView Name,
-                     DeserializeType ToDeserialize,
+                     DeserializeType& ToDeserialize,
                      const MemberTags Tags,
                      Serialization::DeserializerWalker& Walker);
-    template<typename DeserializeType>
+    template< typename DeserializeType >
     void Deserialize(const StringView Name,
-                     std::shared_ptr<DeserializeType> ToDeserialize,
+                     std::shared_ptr<DeserializeType>& ToDeserialize,
                      const MemberTags Tags,
                      Serialization::DeserializerWalker& Walker);
 
-    template<typename DeserializeType, typename = std::enable_if_t<!std::is_pointer_v<DeserializeType>>>
+    template< typename DeserializeType,
+              typename = std::enable_if_t< !std::is_pointer_v<DeserializeType> > >
     void Deserialize(const StringView Name,
                      DeserializeType& ToDeserialize,
                      Serialization::DeserializerWalker& Walker);
-    template<typename DeserializeType, typename = std::enable_if_t<std::is_pointer_v<DeserializeType>>>
+    template< typename DeserializeType,
+              typename = std::enable_if_t< std::is_pointer_v<DeserializeType> > >
     void Deserialize(const StringView Name,
-                     DeserializeType ToDeserialize,
+                     DeserializeType& ToDeserialize,
                      Serialization::DeserializerWalker& Walker);
-    template<typename DeserializeType>
+    template< typename DeserializeType >
     void Deserialize(const StringView Name,
-                     std::shared_ptr<DeserializeType> ToDeserialize,
+                     std::shared_ptr<DeserializeType>& ToDeserialize,
                      Serialization::DeserializerWalker& Walker);
 
 namespace Serialization {

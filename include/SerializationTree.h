@@ -223,7 +223,11 @@ namespace Serialization {
         ///////////////////////////////////////////////////////////////////////////////
         // Name Operations
 
+        /// @brief Sets the name of the Node being visited.
+        /// @param Name The new name to be given to the internal Node.
         virtual void SetName(const StringView Name) = 0;
+        /// @brief Gets the name of the Node being visited.
+        /// @return Returns a StringVeiw containing the name of the internal Node being visited.
         [[nodiscard]]
         virtual StringView GetName() const = 0;
 
