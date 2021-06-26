@@ -150,7 +150,7 @@ namespace Mezzanine
 
             /// @brief Get a pointer to the most derived type of this class.
             /// @return A pointer for use with CountedPtrCast.
-            virtual FooInternal* GetMostDerived()
+            virtual FooInternal* GetMostDerived() override
                 { return this; }
         };
 
@@ -162,7 +162,7 @@ namespace Mezzanine
 
             /// @brief Get a pointer to the most derived type of this class.
             /// @return A pointer for use with CountedPtrCast.
-            virtual FooInternal* GetMostDerived()
+            virtual FooInternal* GetMostDerived() override
                 { return this; }
         };
 
@@ -174,7 +174,7 @@ namespace Mezzanine
 
             /// @brief Get a pointer to the most derived type of this class.
             /// @return A pointer for use with CountedPtrCast.
-            virtual FooInternal* GetMostDerived()
+            virtual FooInternal* GetMostDerived() override
                 { return this; }
         };
         #ifdef _MSC_VER
@@ -230,11 +230,10 @@ namespace Mezzanine
 
             /// @brief Get a pointer to the most derived type of this class.
             /// @return A pointer for use with CountedPtrCast.
-            virtual CarTest* GetMostDerived()
+            virtual CarTest* GetMostDerived() override
                 { return this; }
 
-            virtual ~CarTest()
-                {}
+            virtual ~CarTest() override = default;
         };
 
         RESTORE_WARNING_STATE
