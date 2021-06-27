@@ -51,6 +51,11 @@
 
 namespace Mezzanine
 {
+
+    /// @todo Attempt to remove this later with versions of GCC that don't trigger this needlessly.
+    SAVE_WARNING_STATE
+    SUPPRESS_GCC_WARNING("-Warray-bounds")
+
     /// @addtogroup Containers
     /// @{
 
@@ -511,6 +516,8 @@ namespace Mezzanine
             UsedSpace = 0;
         }
     };//ManagedArray
+
+    RESTORE_WARNING_STATE
 
     /// @}
 } // Mezzanine

@@ -48,6 +48,8 @@
 #include "Base64.h"
 #include "MezzException.h"
 
+#include <iostream>
+
 AUTOMATIC_TEST_GROUP(Base64Tests,Base64)
 {
     using namespace Mezzanine;
