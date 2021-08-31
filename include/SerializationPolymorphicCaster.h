@@ -100,30 +100,42 @@ namespace Serialization {
             if constexpr( std::is_polymorphic_v<NoPtr> ) {
                 const std::type_info& Base = typeid(NoPtr);
                 const std::type_info& MaybeDerived = typeid(*ToCast);
-                return this->CanCast(Base,MaybeDerived);
+                return this->CanUpcast(Base,MaybeDerived);
             }else{
                 return false;
             }
         }
 
         /// @brief Performs a cast to the derived type and then invokes Serialize.
-        /// @param Name The name of the instance being serialized.
         /// @param ToSerialize The instance being serialized.
         /// @param Tags Descriptors associated with the data being serialized that may alter serialization behavior.
         /// @param Version The version of the class instance to serialize as.
         /// @param Walker The walker/visitor navigating the serialization tree.
-        virtual void Serialize(const StringView Name,
-                               void* ToSerialize,
+        virtual void Serialize(void* ToSerialize,
+                               const MemberTags Tags,
+                               const Integer Version,
+                               Serialization::SerializerWalker& Walker) = 0;
+        /// @brief Performs a cast to the derived type and then invokes Serialize.
+        /// @param ToSerialize The instance being serialized.
+        /// @param Tags Descriptors associated with the data being serialized that may alter serialization behavior.
+        /// @param Version The version of the class instance to serialize as.
+        /// @param Walker The walker/visitor navigating the serialization tree.
+        virtual void Serialize(std::shared_ptr<void> ToSerialize,
                                const MemberTags Tags,
                                const Integer Version,
                                Serialization::SerializerWalker& Walker) = 0;
         /// @brief Performs a cast to the derived type and then invokes Deserialize.
-        /// @param Name The name of the instance being deserialized.
         /// @param ToDeserialize The instance being deserialized.
         /// @param Tags Descriptors associated with the data being deserialized that may alter deserialization behavior.
         /// @param Walker The walker/visitor navigating the deserialization tree.
-        virtual void Deserialize(const StringView Name,
-                                 void*& ToDeserialize,
+        virtual void Deserialize(void*& ToDeserialize,
+                                 const MemberTags Tags,
+                                 Serialization::DeserializerWalker& Walker) = 0;
+        /// @brief Performs a cast to the derived type in a shared_ptr and then invokes Deserialize.
+        /// @param ToDeserialize The instance being deserialized.
+        /// @param Tags Descriptors associated with the data being deserialized that may alter deserialization behavior.
+        /// @param Walker The walker/visitor navigating the deserialization tree.
+        virtual void Deserialize(std::shared_ptr<void>& ToDeserialize,
                                  const MemberTags Tags,
                                  Serialization::DeserializerWalker& Walker) = 0;
     };//PolymorphicCaster
@@ -135,6 +147,8 @@ namespace Serialization {
         using CasterBaseType = PolymorphicCaster;
         /// @brief Convenience type for the caster as it is stored in the holder.
         using StoredCasterType = std::shared_ptr<CasterBaseType>;
+        /// @brief Conveneicne type for the type returned when retrieving a caster.
+        using CasterReturnType = CasterBaseType*;
         /// @brief Convenience type for the container of stored casters.
         using DerivedContainer = std::vector<StoredCasterType>;
         /// @brief Convenience type for storing casters sorted by typeinfo/typeindex.
@@ -174,7 +188,8 @@ namespace Serialization {
         template<class Base, class Derived>
         void RegisterCaster()
         {
-            std::shared_ptr<PolymorphicCasterImpl<Base,Derived>> NewCaster = std::make_shared<Base,Derived>();
+            using CasterType = PolymorphicCasterImpl<Base,Derived>;
+            std::shared_ptr<CasterType> NewCaster = std::make_shared<CasterType>();
             this->CastersByTypeInfo[ std::type_index( typeid(Base) ) ].push_back(NewCaster);
             this->CastersByTypeName[ GetRegisteredName<Base>() ].push_back(NewCaster);
         }
@@ -183,7 +198,7 @@ namespace Serialization {
         /// @param BaseInfo The type_info of the base type to be casted from.
         /// @param DerivedInfo The type_info of the derived type to be casted to
         /// @return Returns the caster capable of upcasting from Base to Derived, or nullptr if none is found.
-        StoredCasterType GetCaster(const std::type_info& BaseInfo, const std::type_info& DerivedInfo) const
+        CasterReturnType GetCaster(const std::type_info& BaseInfo, const std::type_info& DerivedInfo) const
         {
             ByTypeInfoContainer::const_iterator FoundBaseIt = this->CastersByTypeInfo.find(std::type_index(BaseInfo));
             if( FoundBaseIt != this->CastersByTypeInfo.end() ) {
@@ -194,7 +209,7 @@ namespace Serialization {
                     }
                 );
                 if( FoundDerivedIt != FoundBase.end() ) {
-                    return (*FoundDerivedIt);
+                    return (*FoundDerivedIt).get();
                 }
             }
             return nullptr;
@@ -204,7 +219,7 @@ namespace Serialization {
         /// @param BaseName The typename of the base type to be casted from.
         /// @param DerivedName The typename of the derived type to be casted to.
         /// @return Returns the caster capable of upcasting from Base to Derived, or nullptr if none is found.
-        StoredCasterType GetCaster(const StringView BaseName, const StringView DerivedName) const
+        CasterReturnType GetCaster(const StringView BaseName, const StringView DerivedName) const
         {
             ByTypeNameContainer::const_iterator FoundBaseIt = this->CastersByTypeName.find(BaseName);
             if( FoundBaseIt != this->CastersByTypeName.end() ) {
@@ -215,7 +230,7 @@ namespace Serialization {
                     }
                 );
                 if( FoundDerivedIt != FoundBase.end() ) {
-                    return (*FoundDerivedIt);
+                    return (*FoundDerivedIt).get();
                 }
             }
             return nullptr;
@@ -226,7 +241,7 @@ namespace Serialization {
         /// @tparam Derived The type the caster will cast to.
         /// @return Returns the caster capable of upcasting from Base to Derived, or nullptr if none is found.
         template<class Base, class Derived>
-        StoredCasterType GetCaster() const
+        CasterReturnType GetCaster() const
         {
             return this->GetCaster( typeid(Base), typeid(Derived) );
         }
@@ -245,6 +260,18 @@ SUPPRESS_CLANG_WARNING("-Wexit-time-destructors")
     {
         static PolymorphicCasterHolder Store;
         return Store;
+    }
+
+    /// @brief Gets the caster registered for casting between Base and Derived.
+    /// @param Base The base type to be casting from.
+    /// @param Derived The derived type to be casting to.
+    /// @return Returns a pointer to the caster registered for the provided types, or nullptr if no such
+    /// caster is registered.
+    PolymorphicCaster* GetPolymorphicCaster(const std::type_info& Base, const std::type_info& Derived);
+    PolymorphicCaster* GetPolymorphicCaster(const std::type_info& Base, const std::type_info& Derived)
+    {
+        PolymorphicCasterHolder& Holder = GetPolymorphicCasterHolder();
+        return Holder.GetCaster(Base,Derived);
     }
 
 RESTORE_WARNING_STATE
@@ -277,43 +304,41 @@ RESTORE_WARNING_STATE
         Boole CanUpcast(const StringView BaseType, const StringView DerivedType) const
             { return ( BaseType == GetBaseTypeName() && DerivedType == GetDerivedTypeName() ); }
 
-        /// @brief
-        /// @param ToUpcast
-        /// @param Funct
-        void Upcast(void* ToUpcast, std::function<void(void*)> Funct)
-        {
-
-        }
-
         /// @copydoc PolymorphicCaster::Serialize
-        void Serialize(const StringView Name,
-                       void* ToSerialize,
+        void Serialize(void* ToSerialize,
                        const MemberTags Tags,
                        const Int32 Version,
                        Serialization::SerializerWalker& Walker)
         {
-            Derived* Casted = static_cast<Derived*>( static_cast<Base*>(ToSerialize) );
-            Mezzanine::Serialize(Name,std::forward<Derived*>(Casted),Tags,Version,Walker);
+            Derived* Casted = static_cast<Derived*>( static_cast<Base*>( ToSerialize ) );
+            Mezzanine::ProtoSerialize(std::forward<Derived*>(Casted),Tags,Version,Walker);
+        }
+        /// @copydoc PolymorphicCaster::Serialize
+        void Serialize(std::shared_ptr<void> ToSerialize,
+                       const MemberTags Tags,
+                       const Int32 Version,
+                       Serialization::SerializerWalker& Walker)
+        {
+            std::shared_ptr<Derived> TempPtr = std::static_pointer_cast<Derived>( ToSerialize );
+            Mezzanine::ProtoSerialize(TempPtr,Tags,Version,Walker);
         }
         /// @copydoc PolymorphicCaster::Deserialize
-        void Deserialize(const StringView Name,
-                         void*& ToDeserialize,
+        void Deserialize(void*& ToDeserialize,
                          const MemberTags Tags,
                          Serialization::DeserializerWalker& Walker)
         {
-            Derived* UpCasted = nullptr;
-            if( ToDeserialize == nullptr ) {
-                if constexpr( std::is_constructible_v<Derived,decltype(Walker)> ) {
-                    UpCasted = new Derived(Walker);
-                    return;
-                }else if constexpr( std::is_default_constructible_v<Derived> ) {
-                    UpCasted = new Derived();
-                }
-                ToDeserialize = UpCasted;
-            }else{
-                UpCasted = static_cast<Derived*>( static_cast<Base*>(ToDeserialize) );
-            }
-            Mezzanine::Deserialize(Name,std::forward<Derived*>(UpCasted),Tags,Walker);
+            Derived* TempPtr = static_cast<Derived*>( ToDeserialize );
+            Mezzanine::ProtoDeserialize<Derived*>(TempPtr,Tags,Walker);
+            //ToDeserialize = TempPtr;
+        }
+        /// @copydoc PolymorphicCaster::Deserialize
+        void Deserialize(std::shared_ptr<void>& ToDeserialize,
+                         const MemberTags Tags,
+                         Serialization::DeserializerWalker& Walker)
+        {
+            std::shared_ptr<Derived> TempPtr = std::static_pointer_cast<Derived>( ToDeserialize );
+            Mezzanine::ProtoDeserialize(TempPtr,Tags,Walker);
+            //ToDeserialize = TempPtr;
         }
     };//PolymorphicCasterImpl
 }//Serialization

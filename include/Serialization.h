@@ -46,6 +46,7 @@
 #ifndef SWIG
     #include "SerializationUtility.h"
     #include "SerializationTree.h"
+    #include "SerializationSimpleBackend.h"
     #include "SerializationPolymorphicCaster.h"
     #include "SerializationPointerTracker.h"
     #include "SerializationSerializer.h"

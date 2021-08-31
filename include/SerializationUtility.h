@@ -53,6 +53,16 @@ namespace Mezzanine {
     /// @{
 
     ///////////////////////////////////////////////////////////////////////////////
+    // Result Enums
+
+    /// @brief An enum used by Deseriailze functions to communicate non-critical results of the operation.
+    enum class DeserializeResult
+    {
+        Success,       ///< The object was deserialized.
+        NeedsDeferred  ///< The object is not ready to be deserialized and needs to be cached.
+    };//DeserializeResult
+
+    ///////////////////////////////////////////////////////////////////////////////
     // Forward Declares
 
 namespace Serialization {
@@ -61,6 +71,33 @@ namespace Serialization {
     class SerializerWalker;
     class DeserializerWalker;
 }
+    template< typename SerializeType,
+              typename = std::enable_if_t< !std::is_pointer_v<SerializeType> > >
+    void ProtoSerialize(const SerializeType& ToSerialize,
+                        const MemberTags Tags,
+                        const Int32 Version,
+                        Serialization::SerializerWalker& Walker);
+    template< typename SerializeType,
+              typename = std::enable_if_t< std::is_pointer_v<SerializeType> > >
+    void ProtoSerialize(const SerializeType ToSerialize,
+                        const MemberTags Tags,
+                        const Int32 Version,
+                        Serialization::SerializerWalker& Walker);
+    template< typename SerializeType >
+    void ProtoSerialize(const std::unique_ptr<SerializeType>& ToSerialize,
+                        const MemberTags Tags,
+                        const Int32 Version,
+                        Serialization::SerializerWalker& Walker);
+    template< typename SerializeType >
+    void ProtoSerialize(const std::shared_ptr<SerializeType> ToSerialize,
+                        const MemberTags Tags,
+                        const Int32 Version,
+                        Serialization::SerializerWalker& Walker);
+    template< typename SerializeType >
+    void ProtoSerialize(const std::optional<SerializeType>& ToSerialize,
+                        const MemberTags Tags,
+                        const Int32 Version,
+                        Serialization::SerializerWalker& Walker);
 
     template< typename SerializeType,
               typename = std::enable_if_t< !std::is_pointer_v<SerializeType> > >
@@ -88,12 +125,6 @@ namespace Serialization {
                    const MemberTags Tags,
                    const Int32 Version,
                    Serialization::SerializerWalker& Walker);
-    template< typename SerializeType >
-    void Serialize(const StringView Name,
-                   const std::optional<SerializeType> ToSerialize,
-                   const MemberTags Tags,
-                   const Int32 Version,
-                   Serialization::SerializerWalker& Walker);
 
     template< typename SerializeType,
               typename = std::enable_if_t< !std::is_pointer_v<SerializeType> > >
@@ -117,14 +148,34 @@ namespace Serialization {
                    const std::shared_ptr<SerializeType> ToSerialize,
                    const Int32 Version,
                    Serialization::SerializerWalker& Walker);
+
+    template< typename DeserializeType,
+              typename = std::enable_if_t< !std::is_pointer_v<DeserializeType> >,
+              typename = void >
+    void ProtoDeserialize(DeserializeType& ToDeserialize,
+                          const MemberTags Tags,
+                          Serialization::DeserializerWalker& Walker);
+    template< typename DeserializeType,
+              typename = std::enable_if_t< std::is_pointer_v<DeserializeType> > >
+    void ProtoDeserialize(DeserializeType& ToDeserialize,
+                          const MemberTags Tags,
+                          Serialization::DeserializerWalker& Walker);
+    template< typename DeserializeType >
+    void ProtoDeserialize(std::unique_ptr<DeserializeType>& ToDeserialize,
+                          const MemberTags Tags,
+                          Serialization::DeserializerWalker& Walker);
+    template< typename DeserializeType >
+    void ProtoDeserialize(std::shared_ptr<DeserializeType>& ToDeserialize,
+                          const MemberTags Tags,
+                          Serialization::DeserializerWalker& Walker);
     template< typename SerializeType >
-    void Serialize(const StringView Name,
-                   const std::optional<SerializeType> ToSerialize,
-                   const Int32 Version,
-                   Serialization::SerializerWalker& Walker);
+    void ProtoDeserialize(const std::optional<SerializeType>& ToSerialize,
+                          const MemberTags Tags,
+                          Serialization::SerializerWalker& Walker);
 
     template< typename DeserializeType,
-              typename = std::enable_if_t< !std::is_pointer_v<DeserializeType> > >
+              typename = std::enable_if_t< !std::is_pointer_v<DeserializeType> >,
+              typename = void >
     void Deserialize(const StringView Name,
                      DeserializeType& ToDeserialize,
                      const MemberTags Tags,
@@ -140,9 +191,15 @@ namespace Serialization {
                      std::shared_ptr<DeserializeType>& ToDeserialize,
                      const MemberTags Tags,
                      Serialization::DeserializerWalker& Walker);
+    template< typename DeserializeType >
+    void Deserialize(const StringView Name,
+                     std::unique_ptr<DeserializeType>& ToDeserialize,
+                     const MemberTags Tags,
+                     Serialization::DeserializerWalker& Walker);
 
     template< typename DeserializeType,
-              typename = std::enable_if_t< !std::is_pointer_v<DeserializeType> > >
+              typename = std::enable_if_t< !std::is_pointer_v<DeserializeType> >,
+              typename = void >
     void Deserialize(const StringView Name,
                      DeserializeType& ToDeserialize,
                      Serialization::DeserializerWalker& Walker);
@@ -154,6 +211,10 @@ namespace Serialization {
     template< typename DeserializeType >
     void Deserialize(const StringView Name,
                      std::shared_ptr<DeserializeType>& ToDeserialize,
+                     Serialization::DeserializerWalker& Walker);
+    template< typename DeserializeType >
+    void Deserialize(const StringView Name,
+                     std::unique_ptr<DeserializeType>& ToDeserialize,
                      Serialization::DeserializerWalker& Walker);
 
 namespace Serialization {
@@ -267,12 +328,6 @@ namespace Serialization {
     }
 
     ///////////////////////////////////////////////////////////////////////////////
-    // Base Class Detection
-
-    template<typename Return, typename Object>
-    Object BaseReturner(Return(Object::*));
-
-    ///////////////////////////////////////////////////////////////////////////////
     // Convenience Constants
 
 SAVE_WARNING_STATE
@@ -291,14 +346,171 @@ RESTORE_WARNING_STATE
     /// @return Returns true if the Ignore tag is present in the provided bitfield, false otherwise.
     constexpr Boole IsIgnorable(const MemberTags Tags)
     {
-        return ( Tags & MemberTags::Ignore ) != MemberTags::None;
+        return ( Tags & MemberTags::Ignore ) == MemberTags::Ignore;
     }
-    /// @brief Convenience check for the NotOwned tag in a MemberTags bitfield.
+
+    /// @brief Convenience check for the Own tags in a MemberTags bitfield.
     /// @param Tags The bitfield to check.
-    /// @return Returns true if the NotOwned tag is present in the provided bitfield, false otherwise.
+    /// @return Returns true if a Own or SharedOwn tag is present in the provided bitfield, false otherwise.
+    constexpr Boole IsOwned(const MemberTags Tags)
+    {
+        return ( Tags & MemberTags::Own ) == MemberTags::Own;
+    }
+    /// @brief Convenience check for the Own tags in a MemberTags bitfield.
+    /// @param Tags The bitfield to check.
+    /// @return Returns true if a Own or SharedOwn tag is present in the provided bitfield, false otherwise.
     constexpr Boole IsNotOwned(const MemberTags Tags)
     {
-        return ( Tags & MemberTags::NotOwned ) != MemberTags::None;
+        return !IsOwned(Tags);
+    }
+
+    /// @brief Adds the Own tag to a MemberTag bitmask.
+    /// @remarks If the provided bitmask alread contains the Own value, this function has no effect.
+    /// @param Tags The MemberTags bitmask to (maybe) modify.
+    /// @return Returns the modified MemberTags bitmask.
+    constexpr MemberTags MakeOwned(const MemberTags Tags)
+    {
+        return ( Tags | MemberTags::Own );
+    }
+    /// @brief Removes all ownership tags from a MemberTag bitmask.
+    /// @remarks If the provided bitmask does not contain an Own or SharedOwn value, this function has no effect.
+    /// @param Tags The MemberTags bitmask to (maybe) modify.
+    /// @return Returns the modified MemberTags bitmask.
+    constexpr MemberTags MakeNotOwned(const MemberTags Tags)
+    {
+        return ( Tags & ~MemberTags::Own );
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // Smart Pointer Detection
+
+    /// @brief Type trait for the detection of a shared_ptr type.
+    /// @tparam Type The type to be checked.
+    /// @details This is the dummy trait for failure cases.
+    template<typename Type>
+    struct is_shared_ptr : std::false_type
+        {  };
+    /// @brief Type trait for the detection of a shared_ptr type.
+    /// @tparam Type The type to be checked.
+    /// @details This is a specialization type for the positive detection of a shared_ptr.
+    template<typename Type>
+    struct is_shared_ptr<std::shared_ptr<Type>> : std::true_type
+        {  };
+
+    /// @brief Type trait for the detection of a weak_ptr type.
+    /// @tparam Type The type to be checked.
+    /// @details This is the dummy trait for failure cases.
+    template<typename Type>
+    struct is_weak_ptr : std::false_type
+        {  };
+    /// @brief Type trait for the detection of a weak_ptr type.
+    /// @tparam Type The type to be checked.
+    /// @details This is a specialization type for the positive detection of a weak_ptr.
+    template<typename Type>
+    struct is_weak_ptr<std::weak_ptr<Type>> : std::true_type
+        {  };
+
+    /// @brief Type trait for the detection of a unique_ptr type.
+    /// @tparam Type The type to be checked.
+    /// @details This is the dummy trait for failure cases.
+    template<typename Type>
+    struct is_unique_ptr : std::false_type
+        {  };
+    /// @brief Type trait for the detection of a unique_ptr type.
+    /// @tparam Type The type to be checked.
+    /// @details This is a specialization type for the positive detection of a unique_ptr.
+    template<typename Type>
+    struct is_unique_ptr<std::unique_ptr<Type>> : std::true_type
+        {  };
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // Convenience Type Checks
+
+    /// @brief Checks to see if a type is a standard array.
+    /// @tparam ToCheck The type to be checked.
+    /// @return Returns true if the type checked is some flavor of std::array, false otherwise.
+    template<typename ToCheck>
+    constexpr Boole IsArray()
+        { return std::is_same_v<ToCheck,std::array>; }
+    /// @brief Checks to see if a type is a raw pointer.
+    /// @tparam ToCheck The type to be checked.
+    /// @return Returns true if the type checked is a raw pointer, false otherwise.
+    template<typename ToCheck>
+    constexpr Boole IsRawPointer()
+    {
+        return std::is_pointer_v<ToCheck>;
+    }
+    /// @brief Checks to see if a type is a smart pointer with shared ownership.
+    /// @tparam ToCheck The type to be checked.
+    /// @return Returns true if the type checked is a shared pointer, false otherwise.
+    template<typename ToCheck>
+    constexpr Boole IsSharedPointer()
+    {
+        return is_shared_ptr<ToCheck>::value;
+    }
+    /// @brief Checks to see if a type is a smart pointer.
+    /// @tparam ToCheck The type to be checked.
+    /// @return Returns true if the type checked is a smart pointer, false otherwise.
+    template<typename ToCheck>
+    constexpr Boole IsSmartPointer()
+    {
+        return is_shared_ptr<ToCheck>::value ||
+               is_weak_ptr<ToCheck>::value ||
+               is_unique_ptr<ToCheck>::value;
+    }
+    /// @brief Checks to see if a type is a pointer.
+    /// @remarks This includes raw pointers and smart pointers alike.
+    /// @tparam ToCheck The type to be checked.
+    /// @return Returns true if the type checked is a raw or smart pointer, false otherwise.
+    template<typename ToCheck>
+    constexpr Boole IsPointer()
+    {
+        return IsRawPointer<ToCheck>() || IsSmartPointer<ToCheck>();
+    }
+    /// @brief Checks to see if a type is an owned raw pointer.
+    /// @remarks Keep in mind that a false return doesn't mean the pointer is not owned, as it may not
+    /// even be a pointer.
+    /// @tparam ToCheck The type to be checked.
+    /// @return Returns true if the type checked is an owned raw or std pointer, false otherwise.
+    template<typename ToCheck, MemberTags Tags>
+    constexpr Boole IsOwnedRawPointer()
+    {
+        return ( IsRawPointer<ToCheck>() && IsOwned(Tags) );
+    }
+    /// @brief Checks to see if a type is a non-owned raw pointer.
+    /// @remarks Keep in mind that a false return doesn't mean the pointer is owned, as it may not
+    /// even be a pointer.
+    /// @tparam ToCheck The type to be checked.
+    /// @return Returns true if the type checked is a non-owned raw or std pointer, false otherwise.
+    template<typename ToCheck, MemberTags Tags>
+    constexpr Boole IsNonOwnedRawPointer()
+    {
+        return ( IsRawPointer<ToCheck>() && IsNotOwned(Tags) );
+    }
+    /// @brief Checks to see if a type is an owned pointer.
+    /// @remarks This includes raw pointers and std pointers alike. @n@n
+    /// Keep in mind that a false return doesn't mean the pointer is not owned, as it may not
+    /// even be a pointer.
+    /// @tparam ToCheck The type to be checked.
+    /// @return Returns true if the type checked is an owned raw or std pointer, false otherwise.
+    template<typename ToCheck, MemberTags Tags>
+    constexpr Boole IsOwnedPointer()
+    {
+        return IsOwnedRawPointer<ToCheck,Tags>() ||
+               is_shared_ptr<ToCheck>::value ||
+               is_unique_ptr<ToCheck>::value;
+    }
+    /// @brief Checks to see if a type is a non-owned pointer.
+    /// @remarks This includes raw pointers and std pointers alike. @n@n
+    /// Keep in mind that a false return doesn't mean the pointer is owned, as it may not
+    /// even be a pointer.
+    /// @tparam ToCheck The type to be checked.
+    /// @return Returns true if the type checked is a non-owned raw or std pointer, false otherwise.
+    template<typename ToCheck, MemberTags Tags>
+    constexpr Boole IsNonOwnedPointer()
+    {
+        return IsNonOwnedRawPointer<ToCheck,Tags>() ||
+               is_weak_ptr<ToCheck>::value;
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -321,6 +533,24 @@ RESTORE_WARNING_STATE
             ReturnName.push_back('&');
         }
         return ReturnName;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // Allocation
+
+    /// @brief Heap allocates a new object of an arbitrary type.
+    /// @pre Type must have a default constructor.
+    /// @tparam Type Any type with a default constructor that may need to be created during deserialization.
+    /// @remarks This function does not have a deallocate equivalent because it does not presume ownership.
+    /// Anything allocated by this function will immedately be assigned to the appropriate member and deallocation
+    /// is presumed to be handled by the type/instance it was placed into. @n@n
+    /// This function is deliberately basic. Overrides are possible and encouraged if a more advanced allocation
+    /// strategy is required.
+    /// @return Returns a pointer to the created instance.
+    template<typename Type>
+    Type* Allocate()
+    {
+        return new Type();
     }
 
     /// @}

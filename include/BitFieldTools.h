@@ -102,6 +102,20 @@ namespace Mezzanine
         );
     }
 
+    /// @brief Implements the bitwise Ones Compliment operator for enum classes that are bitfields.
+    /// @tparam Enum A class enum of the type that this the operator~.
+    /// @param Unary The operand to flip.
+    /// @return Another instance of the class enum with the bits flipped/inverted.
+    template<typename Enum>
+    constexpr std::enable_if_t<BitMaskOperatorTraits<Enum>::Supported,Enum>
+        operator~(const Enum Unary)
+    {
+        using InternalType = typename std::underlying_type<Enum>::type;
+        return static_cast<Enum> (
+            ~static_cast<InternalType>(Unary)
+        );
+    }
+
     /// @def ENABLE_BITMASK_OPERATORS
     /// @brief Use this to tag class enums OUTSIDE the Mezzanine namespace/code so to enable | and & operators.
     #define ENABLE_BITMASK_OPERATORS(x)         \

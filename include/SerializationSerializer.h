@@ -109,6 +109,22 @@ namespace Serialization {
         ///////////////////////////////////////////////////////////////////////////////
         // Pointer Tracking
 
+        /// @brief Tracks a non-shared pointer (owned or not).
+        /// @remarks The purpose of this function is to keep track of the pointers that exist in the serialization
+        /// tree and how many copies exist of each throughout the serialization tree.
+        /// @param ToTrack The pointer to be tracked.
+        /// @param IsOwner Whether or not the pointer instance being tracked is an owning pointer.
+        /// @return Returns an ObjectCounter reference that gives basic information about the tracked pointer.
+        const ObjectCounter& TrackNonSharedPointer(void* ToTrack, const Boole IsOwner)
+            { return this->Tracker.TrackNonSharedPointer(ToTrack,IsOwner); }
+        /// @brief Tracks a shared_ptr.
+        /// @remarks The purpose of this function is to keep track of the pointers that exist in the serialization
+        /// tree and how many copies exist of each throughout the serialization tree.
+        /// @param ToTrack The shared pointer to be tracked.
+        /// @return Returns an ObjectCounter reference that gives basic information about the tracked pointer.
+        const ObjectCounter& TrackSharedPointer(std::shared_ptr<void> ToTrack)
+            { return this->Tracker.TrackSharedPointer(ToTrack); }
+
         /*
         /// @brief Tracks an object as if it were a pointer.
         /// @tparam ObjType The deduced type to track.
@@ -121,17 +137,6 @@ namespace Serialization {
         template<typename ObjType>
         const ObjectCounter& TrackObject(ObjType& ToTrack)
             { return this->Tracker.TrackObject(ToTrack); }//*/
-        /// @brief Tracks a regular pointer (owned or not).
-        /// @param ToTrack The pointer to be tracked.
-        /// @param IsOwner Whether or not the pointer instance being tracked is an owning pointer.
-        /// @return Returns an ObjectCounter reference that gives basic information about the tracked pointer.
-        const ObjectCounter& TrackPointer(void* ToTrack, const Boole IsOwner)
-            { return this->Tracker.TrackPointer(ToTrack,IsOwner); }
-        /// @brief Tracks a shared_ptr.
-        /// @param ToTrack The shared_ptr to be tracked.
-        /// @return Returns an ObjectCounter reference that gives basic information about the tracked pointer.
-        const ObjectCounter& TrackSharedPointer(std::shared_ptr<void> ToTrack)
-            { return this->Tracker.TrackSharedPointer(ToTrack); }
 
         ///////////////////////////////////////////////////////////////////////////////
         // Name Operations
@@ -327,11 +332,13 @@ namespace Serialization {
         /// be appended to it's own node, it is expected that such a node will be created in the calling
         /// function before calling this.
         /// @param ToSerialize The container to be serialized.
+        /// @param Tags Descriptors associated with the data being serialized that may alter serialization behavior.
         /// @param Walker The walker/visitor navigating the serialization tree.
         template<class SerializeType,
                  typename = std::enable_if_t< IsAssociativeContainer<SerializeType>() >,
                  typename = void>
         void SerializeContainer(const SerializeType& ToSerialize,
+                                const MemberTags Tags,
                                 Serialization::SerializerWalker& Walker)
         {
             using DecayedType = std::decay_t<SerializeType>;
@@ -345,8 +352,8 @@ namespace Serialization {
                 Namer << "Element" << Count;
                 ScopedSerializationNode ElementNode(Namer.str(),Walker);
                 if( ElementNode ) {
-                    Mezzanine::Serialize("Key",CurrElement.first,LatestVersion,Walker);
-                    Mezzanine::Serialize("Value",CurrElement.second,LatestVersion,Walker);
+                    Mezzanine::Serialize("Key",CurrElement.first,Tags,LatestVersion,Walker);
+                    Mezzanine::Serialize("Value",CurrElement.second,Tags,LatestVersion,Walker);
                     ++Count;
                 }
             }
@@ -358,10 +365,12 @@ namespace Serialization {
         /// be appended to it's own node, it is expected that such a node will be created in the calling
         /// function before calling this.
         /// @param ToSerialize The container to be serialized.
+        /// @param Tags Descriptors associated with the data being serialized that may alter serialization behavior.
         /// @param Walker The walker/visitor navigating the serialization tree.
         template<class SerializeType,
                  typename = std::enable_if_t< IsNonAssociativeContainer<SerializeType>() > >
         void SerializeContainer(const SerializeType& ToSerialize,
+                                const MemberTags Tags,
                                 Serialization::SerializerWalker& Walker)
         {
             using DecayedType = std::decay_t<SerializeType>;
@@ -372,45 +381,8 @@ namespace Serialization {
             {
                 StringStream Namer;
                 Namer << "Element" << Count;
-                Mezzanine::Serialize(Namer.str(),CurrElement,LatestVersion,Walker);
+                Mezzanine::Serialize(Namer.str(),CurrElement,Tags,LatestVersion,Walker);
                 ++Count;
-            }
-        }
-        /// @brief Creates a new node and serializes an associative container to it.
-        /// @tparam SerializeType The deduced type to be serialized.
-        /// @param Name The name associated with the ToSerialize parameter/instance.
-        /// @param ToSerialize The container to be serialized.
-        /// @param Tags Descriptors associated with the data being serialized that may alter serialization behavior.
-        /// @param Walker The walker/visitor navigating the serialization tree.
-        template<class SerializeType,
-                 typename = std::enable_if_t< IsAssociativeContainer<SerializeType>() >,
-                 typename = void>
-        void SerializeContainerWithNode(const StringView Name,
-                                        const SerializeType& ToSerialize,
-                                        const MemberTags Tags,
-                                        Serialization::SerializerWalker& Walker)
-        {
-            ScopedSerializationNode ContainerNode(Name,Tags,Walker);
-            if( ContainerNode ) {
-                Serialization::Impl::SerializeContainer(ToSerialize,Walker);
-            }
-        }
-        /// @brief Creates a new node and serializes a non-associative container to it.
-        /// @tparam SerializeType The deduced type to be serialized.
-        /// @param Name The name associated with the ToSerialize parameter/instance.
-        /// @param ToSerialize The container to be serialized.
-        /// @param Tags Descriptors associated with the data being serialized that may alter serialization behavior.
-        /// @param Walker The walker/visitor navigating the serialization tree.
-        template<class SerializeType,
-                 typename = std::enable_if_t< IsNonAssociativeContainer<SerializeType>() > >
-        void SerializeContainerWithNode(const StringView Name,
-                                        const SerializeType& ToSerialize,
-                                        const MemberTags Tags,
-                                        Serialization::SerializerWalker& Walker)
-        {
-            ScopedSerializationNode Node(Name,Tags,Walker);
-            if( Node ) {
-                Serialization::Impl::SerializeContainer(ToSerialize,Walker);
             }
         }
         /// @brief Serializes a class or struct to the current node.
@@ -437,39 +409,15 @@ namespace Serialization {
             }
             std::cout << "\nExiting \"SerializeGenericClass\".\n";
         }
-        /// @brief Creates a new node and serializes a class or struct to it.
-        /// @tparam SerializeType The deduced type to be serialized.
-        /// @param Name The name associated with the ToSerialize parameter/instance.
-        /// @param ToSerialize The class or struct to be serialized.
-        /// @param Tags Descriptors associated with the data being serialized that may alter serialization behavior.
-        /// @param Version The version the object should be serialized as. Not all types have multiple versions.
-        /// @param Walker The walker/visitor navigating the serialization tree.
-        template<class SerializeType>
-        void SerializeGenericClassWithNode(const StringView Name,
-                                           const SerializeType& ToSerialize,
-                                           const MemberTags Tags,
-                                           const Int32 Version,
-                                           Serialization::SerializerWalker& Walker)
-        {
-            using DecayedType = std::decay_t<SerializeType>;
-            if constexpr( IsRegistered<DecayedType>() ) {
-                ScopedSerializationNode Node(Name,Tags,Walker);
-                if( Node ) {
-                    Serialization::Impl::SerializeGenericClass(ToSerialize,Version,Walker);
-                }
-            }
-        }
         /// @brief Serializes a struct, class, or primitive behind a owned pointer.
         /// @tparam SerializeType The deduced type to be serialized.
-        /// @param Name The name associated with the ToSerialize parameter/instance.
         /// @param InstanceID A unique serializable ID for the object being pointed to.
         /// @param ToSerialize The owned pointer to be serialized.
         /// @param Tags Descriptors associated with the data being serialized that may alter serialization behavior.
         /// @param Version The version the object should be serialized as. Not all types have multiple versions.
         /// @param Walker The walker/visitor navigating the serialization tree.
         template<class SerializeType>
-        void SerializeOwnedPointer(const StringView Name,
-                                   const uintptr_t InstanceID,
+        void SerializeOwnedPointer(const uintptr_t InstanceID,
                                    const SerializeType ToSerialize,
                                    const MemberTags Tags,
                                    const Int32 Version,
@@ -478,100 +426,237 @@ namespace Serialization {
             static_assert( std::is_pointer_v<SerializeType> , "SerializeType is not a pointer." );
             using DecayedType = std::remove_pointer_t<SerializeType>;
             if constexpr( IsRegistered<DecayedType>() ) {
-                ScopedSerializationNode Node(Name,Tags,Walker);
-                if( Node ) {
-                    Walker.Attribute("IsOwned",true);
-                    Walker.Attribute("InstanceID",InstanceID);
-
-                    // Invoke serialize implementations directly because we need add the attributes above
-                    // without having more needless sub-nodes being created, which would happen if we invoked
-                    // Serialize.
-
-                    if constexpr( std::is_arithmetic_v<DecayedType> ) { // Basic Number Types
-                        Serialization::Impl::SerializeSimpleMember(Name,*ToSerialize,Tags,Walker);
-                    }else if constexpr( StringTools::is_string<DecayedType>::value ) { // Strings
-                        Serialization::Impl::SerializeSimpleMember(Name,*ToSerialize,Tags,Walker);
-                    }else if constexpr( Mezzanine::is_container<DecayedType>::value ) { // Generic Containers
-                        Serialization::Impl::SerializeContainer(*ToSerialize,Walker);
-                    }else{ // Generic Class
-                        Serialization::Impl::SerializeGenericClass(*ToSerialize,Version,Walker);
-                    }
-                }
+                Walker.Attribute("CanDeserialize",true);
+                Walker.Attribute("InstanceID",InstanceID);
+                ProtoSerialize(*ToSerialize,Tags,Version,Walker);
             }
         }
         /// @brief Serializes a struct, class, or primitive behind a non-owned pointer.
         /// @tparam SerializeType The deduced type to be serialized.
-        /// @param Name The name associated with the ToSerialize parameter/instance.
         /// @param InstanceID A unique serializable ID for the object being pointed to.
         /// @param ToSerialize The non-owned pointer to be serialized.
-        /// @param Tags Descriptors associated with the data being serialized that may alter serialization behavior.
         /// @param Walker The walker/visitor navigating the serialization tree.
         template<class SerializeType>
-        void SerializeNonOwnedPointer(const StringView Name,
-                                      const uintptr_t InstanceID,
+        void SerializeNonOwnedPointer(const uintptr_t InstanceID,
                                       const SerializeType ToSerialize,
-                                      const MemberTags Tags,
                                       Serialization::SerializerWalker& Walker)
         {
             (void)ToSerialize;
             static_assert( std::is_pointer_v<SerializeType> , "SerializeType is not a pointer." );
             using DecayedType = std::remove_pointer_t<SerializeType>;
             if constexpr( IsRegistered<DecayedType>() ) {
-                ScopedSerializationNode Node(Name,Tags,Walker);
-                if( Node ) {
-                    Walker.Attribute("IsOwned",false);
-                    Walker.Attribute("TypeName",GetRegisteredName<DecayedType>());
-                    Walker.Attribute("InstanceID",InstanceID);
-                }
+                Walker.Attribute("CanDeserialize",false);
+                Walker.Attribute("TypeName",GetRegisteredName<DecayedType>());
+                Walker.Attribute("InstanceID",InstanceID);
             }
         }
 
-        /// @brief Serializes a struct, class, or primitive behind a pointer.
+        /// @brief Serializes a struct, class, or primitive behind a pointer without casting.
+        /// @remarks This function should be called only when the pointer type matches the type behind the
+        /// pointer exactly.
         /// @tparam SerializeType The deduced type to be serialized.
-        /// @param Name The name associated with the ToSerialize parameter/instance.
         /// @param ToSerialize The pointer to be serialized.
         /// @param Tags Descriptors associated with the data being serialized that may alter serialization behavior.
         /// @param Version The version the object should be serialized as. Not all types have multiple versions.
         /// @param Walker The walker/visitor navigating the serialization tree.
         template<class SerializeType>
-        void SerializePointer(const StringView Name,
-                              const SerializeType ToSerialize,
+        void SerializePointer(const SerializeType ToSerialize,
                               const MemberTags Tags,
                               const Int32 Version,
                               Serialization::SerializerWalker& Walker)
         {
             static_assert( std::is_pointer_v<SerializeType> , "SerializeType is not a pointer." );
+            const ObjectCounter Counter = Walker.TrackNonSharedPointer(ToSerialize,IsOwned(Tags));
             if( Serialization::IsNotOwned(Tags) ) {
-                const ObjectCounter& CountInfo = Walker.TrackPointer(ToSerialize,false);
-                Serialization::Impl::SerializeNonOwnedPointer(Name,CountInfo.InstanceID,ToSerialize,Tags,Walker);
+                Serialization::Impl::SerializeNonOwnedPointer(Counter.InstanceID,ToSerialize,Walker);
             }else{
-                const ObjectCounter& CountInfo = Walker.TrackPointer(ToSerialize,true);
-                Serialization::Impl::SerializeOwnedPointer(Name,CountInfo.InstanceID,ToSerialize,Tags,Version,Walker);
+                Serialization::Impl::SerializeOwnedPointer(Counter.InstanceID,ToSerialize,Tags,Version,Walker);
             }
         }
         /// @brief Serializes a class, struct, or primitive type behind a shared_ptr.
         /// @tparam SerializeType The deduced type to be serialized.
-        /// @param Name The name associated with the ToSerialize parameter/instance.
         /// @param ToSerialize The shared_ptr to be serialized.
         /// @param Tags Descriptors associated with the data being serialized that may alter serialization behavior.
         /// @param Version The version the object should be serialized as. Not all types have multiple versions.
         /// @param Walker The walker/visitor navigating the serialization tree.
         template<class SerializeType>
-        void SerializeSharedPointer(const StringView Name,
-                                    const std::shared_ptr<SerializeType> ToSerialize,
+        void SerializeSharedPointer(const std::shared_ptr<SerializeType> ToSerialize,
                                     const MemberTags Tags,
                                     const Int32 Version,
                                     Serialization::SerializerWalker& Walker)
         {
             const ObjectCounter& CountInfo = Walker.TrackSharedPointer(ToSerialize);
             if( CountInfo.OwnerOrJoinCount > 1 ) {
-                Impl::SerializeNonOwnedPointer(Name,CountInfo.InstanceID,ToSerialize.get(),Tags,Walker);
+                Impl::SerializeNonOwnedPointer(CountInfo.InstanceID,ToSerialize.get(),Walker);
             }else{
-                Impl::SerializeOwnedPointer(Name,CountInfo.InstanceID,ToSerialize.get(),Tags,Version,Walker);
+                Impl::SerializeOwnedPointer(CountInfo.InstanceID,ToSerialize.get(),Tags,Version,Walker);
+            }
+        }
+        /// @brief Serializes type behind a polymorphic pointer.
+        /// @tparam SerializeType The deduced type to be serialized.
+        /// @param ToSerialize The pointer to be serialized.
+        /// @param Tags Descriptors associated with the data being serialized that may alter serialization behavior.
+        /// @param Version The version the object should be serialized as. Not all types have multiple versions.
+        /// @param Walker The walker/visitor navigating the serialization tree.
+        template<class SerializeType>
+        void SerializePolymorphicPointer(const SerializeType ToSerialize,
+                                         const MemberTags Tags,
+                                         const Int32 Version,
+                                         Serialization::SerializerWalker& Walker)
+        {
+            static_assert( std::is_pointer_v<SerializeType> , "SerializeType is not a pointer." );
+            const std::type_info& BaseInfo = typeid(ToSerialize);
+            const std::type_info& DerivedInfo = typeid(*ToSerialize);
+            if( std::type_index(BaseInfo) != std::type_index(DerivedInfo) ) {
+                Serialization::PolymorphicCaster* Caster = Serialization::GetPolymorphicCaster(BaseInfo,DerivedInfo);
+                if( Caster != nullptr ) {
+                    Caster->Serialize(ToSerialize,Tags,Version,Walker);
+                }else{
+                    throw std::runtime_error("No caster found for polymorphic object.");
+                }
+            }else{
+                Impl::SerializePointer(ToSerialize,Tags,Version,Walker);
+            }
+        }
+        /// @brief Serializes type behind a polymorphic pointer.
+        /// @tparam SerializeType The deduced type to be serialized.
+        /// @param ToSerialize The shared pointer to be serialized.
+        /// @param Tags Descriptors associated with the data being serialized that may alter serialization behavior.
+        /// @param Version The version the object should be serialized as. Not all types have multiple versions.
+        /// @param Walker The walker/visitor navigating the serialization tree.
+        template<class SerializeType>
+        void SerializePolymorphicPointer(const std::shared_ptr<SerializeType> ToSerialize,
+                                         const MemberTags Tags,
+                                         const Int32 Version,
+                                         Serialization::SerializerWalker& Walker)
+        {
+            static_assert( std::is_pointer_v<SerializeType> , "SerializeType is not a pointer." );
+            const std::type_info& BaseInfo = typeid(ToSerialize.get());
+            const std::type_info& DerivedInfo = typeid(*ToSerialize.get());
+            if( std::type_index(BaseInfo) != std::type_index(DerivedInfo) ) {
+                Serialization::PolymorphicCaster* Caster = Serialization::GetPolymorphicCaster(BaseInfo,DerivedInfo);
+                if( Caster != nullptr ) {
+                    Caster->Serialize(ToSerialize,Tags,Version,Walker);
+                }else{
+                    throw std::runtime_error("No caster found for polymorphic object.");
+                }
+            }else{
+                Impl::SerializeSharedPointer(ToSerialize,Tags,Version,Walker);
             }
         }
     }//Impl
 }//Serialization
+    ///////////////////////////////////////////////////////////////////////////////
+    // ProtoSerialize
+
+    /// @brief Serializes a non-pointer class, struct, or primitive type.
+    /// @tparam SerializeType The deduced type to be serialized.
+    /// @param ToSerialize The non-pointer class, struct, or primitive to be serialized.
+    /// @param Tags Descriptors associated with the data being serialized that may alter serialization behavior.
+    /// @param Version The version the object should be serialized as. Not all types have multiple versions.
+    /// @param Walker The walker/visitor navigating the serialization tree.
+    template< typename SerializeType,
+              typename >
+    void ProtoSerialize(const SerializeType& ToSerialize,
+                        const MemberTags Tags,
+                        const Int32 Version,
+                        Serialization::SerializerWalker& Walker)
+    {
+        namespace Impl = Mezzanine::Serialization::Impl;
+        using DecayedType = std::decay_t<SerializeType>;
+        if constexpr( IsContainer<DecayedType>() ) {
+            (void)Version;
+            Impl::SerializeContainer(ToSerialize,Tags,Walker);
+        }else if constexpr( IsRegistered<DecayedType>() ) {
+            (void)Tags;
+            Impl::SerializeGenericClass(ToSerialize,Version,Walker);
+        }
+    }
+    /// @brief Serializes a class, struct, or primitive type behind a pointer.
+    /// @tparam SerializeType The deduced type to be serialized.
+    /// @param ToSerialize The pointer to be serialized.
+    /// @param Tags Descriptors associated with the data being serialized that may alter serialization behavior.
+    /// @param Version The version the object should be serialized as. Not all types have multiple versions.
+    /// @param Walker The walker/visitor navigating the serialization tree.
+    template< typename SerializeType,
+              typename >
+    void ProtoSerialize(const SerializeType ToSerialize,
+                        const MemberTags Tags,
+                        const Int32 Version,
+                        Serialization::SerializerWalker& Walker)
+    {
+        using DecayedType = std::remove_pointer_t< std::decay_t<SerializeType> >;
+        namespace Impl = Mezzanine::Serialization::Impl;
+        if constexpr( IsRegistered<DecayedType>() || IsContainer<DecayedType>() ) {
+            if constexpr( std::is_polymorphic_v<DecayedType> ) {
+                Impl::SerializePolymorphicPointer(ToSerialize,Tags,Version,Walker);
+            }else{
+                Impl::SerializePointer(ToSerialize,Tags,Version,Walker);
+            }
+        }
+    }
+    /// @brief Serializes a class, struct, or primitive type behind a unique_ptr.
+    /// @tparam SerializeType The deduced type to be serialized.
+    /// @param ToSerialize The pointer to be serialized.
+    /// @param Tags Descriptors associated with the data being serialized that may alter serialization behavior.
+    /// @param Version The version the object should be serialized as. Not all types have multiple versions.
+    /// @param Walker The walker/visitor navigating the serialization tree.
+    template< typename SerializeType >
+    void ProtoSerialize(const std::unique_ptr<SerializeType>& ToSerialize,
+                        const MemberTags Tags,
+                        const Int32 Version,
+                        Serialization::SerializerWalker& Walker)
+    {
+        using DecayedType = std::decay_t<SerializeType>;
+        if constexpr( IsRegistered<DecayedType>() || IsContainer<DecayedType>() ) {
+            // This is presuming all unique_ptrs are owned.
+            const MemberTags PtrTags = Serialization::MakeOwned(Tags);
+            ProtoSerialize(ToSerialize.get(),PtrTags,Version,Walker);
+        }
+    }
+    /// @brief Serializes a class, struct, or primitive type behind a shared_ptr.
+    /// @tparam SerializeType The deduced type to be serialized.
+    /// @param ToSerialize The shared_ptr to be serialized.
+    /// @param Tags Descriptors associated with the data being serialized that may alter serialization behavior.
+    /// @param Version The version the object should be serialized as. Not all types have multiple versions.
+    /// @param Walker The walker/visitor navigating the serialization tree.
+    template< typename SerializeType >
+    void ProtoSerialize(const std::shared_ptr<SerializeType> ToSerialize,
+                        const MemberTags Tags,
+                        const Int32 Version,
+                        Serialization::SerializerWalker& Walker)
+    {
+        using DecayedType = std::decay_t<SerializeType>;
+        namespace Impl = Mezzanine::Serialization::Impl;
+        if constexpr( IsRegistered<DecayedType>() || IsContainer<DecayedType>() ) {
+            const MemberTags PtrTags = Serialization::MakeOwned(Tags);
+            if constexpr( std::is_polymorphic_v<DecayedType> ) {
+                Impl::SerializePolymorphicPointer(ToSerialize,PtrTags,Version,Walker);
+            }else{
+                Impl::SerializeSharedPointer(ToSerialize,PtrTags,Version,Walker);
+            }
+        }
+    }
+    /// @brief Serializes a type inside an optional, if it is valid/exists.
+    /// @tparam SerializeType The deduced type to maybe be serialized.
+    /// @param ToSerialize The optional to be serialized.
+    /// @param Tags Descriptors associated with the data being serialized that may alter serialization behavior.
+    /// @param Version The version the object should be serialized as. Not all types have multiple versions.
+    /// @param Walker The walker/visitor navigating the serialization tree.
+    template< typename SerializeType >
+    void ProtoSerialize(const std::optional<SerializeType>& ToSerialize,
+                        const MemberTags Tags,
+                        const Int32 Version,
+                        Serialization::SerializerWalker& Walker)
+    {
+        using DecayedType = std::decay_t<SerializeType>;
+        if constexpr( IsRegistered<DecayedType>() || IsContainer<DecayedType>() ) {
+            if( ToSerialize ) {
+                ProtoSerialize(ToSerialize.value(),Tags,Version,Walker);
+            }
+        }
+    }
+
     ///////////////////////////////////////////////////////////////////////////////
     // Serialize
 
@@ -590,18 +675,19 @@ namespace Serialization {
                    const Int32 Version,
                    Serialization::SerializerWalker& Walker)
     {
-        (void)Version;
-        namespace Impl = Mezzanine::Serialization::Impl;
         using DecayedType = std::decay_t<SerializeType>;
-        std::cout << "\nSerializing type: \"" << GetRegisteredName<DecayedType>() << "\".\n";
-        if constexpr( std::is_arithmetic_v<DecayedType> ) { // Basic Number Types
+        namespace Impl = Mezzanine::Serialization::Impl;
+        if constexpr( std::is_arithmetic_v<DecayedType> ) {
+            (void)Version;
             Impl::SerializeSimpleMember(Name,ToSerialize,Tags,Walker);
-        }else if constexpr( StringTools::is_string<DecayedType>::value ) { // Strings
+        }else if constexpr( StringTools::is_string<DecayedType>::value ) {
+            (void)Version;
             Impl::SerializeSimpleMember(Name,ToSerialize,Tags,Walker);
-        }else if constexpr( Mezzanine::is_container<DecayedType>::value ) { // Generic Containers
-            Impl::SerializeContainerWithNode(Name,ToSerialize,Tags,Walker);
-        }else{ // Generic Class
-            Impl::SerializeGenericClassWithNode(Name,ToSerialize,Tags,1,Walker);
+        }else if constexpr( IsRegistered<DecayedType>() || IsContainer<DecayedType>() ) {
+            Serialization::ScopedSerializationNode Node(Name,Tags,Walker);
+            if( Node ) {
+                ProtoSerialize(ToSerialize,Tags,Version,Walker);
+            }
         }
     }
     /// @brief Serializes a class, struct, or primitive type behind a pointer.
@@ -619,24 +705,12 @@ namespace Serialization {
                    const Int32 Version,
                    Serialization::SerializerWalker& Walker)
     {
-        static_assert( std::is_pointer_v<SerializeType> , "SerializeType is not a pointer." );
-        namespace Impl = Mezzanine::Serialization::Impl;
-        if constexpr( std::is_polymorphic_v<SerializeType> ) {
-            const std::type_info& BaseInfo = typeid(ToSerialize);
-            const std::type_info& DerivedInfo = typeid(*ToSerialize);
-            if( std::type_index(BaseInfo) != std::type_index(DerivedInfo) ) {
-                Serialization::PolymorphicCasterHolder& Holder = Serialization::GetPolymorphicCasterHolder();
-                Serialization::PolymorphicCaster* Caster = Holder.GetCaster(BaseInfo,DerivedInfo);
-                if( Caster != nullptr ) {
-                    Caster->Serialize(Name,ToSerialize,Tags,Version,Walker);
-                }else{
-                    throw std::runtime_error("No caster found for polymorphic object.");
-                }
-            }else{
-                Impl::SerializePointer(Name,ToSerialize,Tags,Version,Walker);
+        using DecayedType = std::remove_pointer_t< std::decay_t<SerializeType> >;
+        if constexpr( IsRegistered<DecayedType>() || IsContainer<DecayedType>() ) {
+            Serialization::ScopedSerializationNode Node(Name,Tags,Walker);
+            if( Node ) {
+                ProtoSerialize(ToSerialize,Tags,Version,Walker);
             }
-        }else{
-            Impl::SerializePointer(Name,ToSerialize,Tags,Version,Walker);
         }
     }
     /// @brief Serializes a class, struct, or primitive type behind a unique_ptr.
@@ -653,8 +727,13 @@ namespace Serialization {
                    const Int32 Version,
                    Serialization::SerializerWalker& Walker)
     {
-        static_assert( std::is_pointer_v<SerializeType> , "SerializeType is not a pointer." );
-        Serialize(Name,ToSerialize.get(),Tags,Version,Walker);
+        using DecayedType = std::decay_t<SerializeType>;
+        if constexpr( IsRegistered<DecayedType>() || IsContainer<DecayedType>() ) {
+            Serialization::ScopedSerializationNode Node(Name,Tags,Walker);
+            if( Node ) {
+                ProtoSerialize(ToSerialize,Tags,Version,Walker);
+            }
+        }
     }
     /// @brief Serializes a class, struct, or primitive type behind a shared_ptr.
     /// @tparam SerializeType The deduced type to be serialized.
@@ -670,42 +749,12 @@ namespace Serialization {
                    const Int32 Version,
                    Serialization::SerializerWalker& Walker)
     {
-        namespace Impl = Mezzanine::Serialization::Impl;
-        if constexpr( std::is_polymorphic_v<SerializeType> ) {
-            const std::type_info& BaseInfo = typeid( ToSerialize.get() );
-            const std::type_info& DerivedInfo = typeid( *(ToSerialize.get()) );
-            if( std::type_index(BaseInfo) != std::type_index(DerivedInfo) ) {
-                Serialization::PolymorphicCasterHolder& Holder = Serialization::GetPolymorphicCasterHolder();
-                Serialization::PolymorphicCaster* Caster = Holder.GetCaster(BaseInfo,DerivedInfo);
-                if( Caster != nullptr ) {
-                    Caster->Serialize(Name,ToSerialize,Tags,Version,Walker);
-                }else{
-                    throw std::runtime_error("No caster found for polymorphic object.");
-                }
-            }else{
-                Impl::SerializeSharedPointer(Name,ToSerialize,Tags,Version,Walker);
+        using DecayedType = std::decay_t<SerializeType>;
+        if constexpr( IsRegistered<DecayedType>() || IsContainer<DecayedType>() ) {
+            Serialization::ScopedSerializationNode Node(Name,Tags,Walker);
+            if( Node ) {
+                ProtoSerialize(ToSerialize,Tags,Version,Walker);
             }
-        }else{
-            Impl::SerializeSharedPointer(Name,ToSerialize,Tags,Version,Walker);
-        }
-    }
-    /// @brief Serializes a class, struct, or primitive type in an std::optional.
-    /// @tparam SerializeType The deduced type to be serialized.
-    /// @param Name The name associated with the ToSerialize parameter/instance.
-    /// @param ToSerialize The optional to (maybe) be serialized.
-    /// @param Tags Descriptors associated with the data being serialized that may alter serialization behavior.
-    /// @param Version The version the object should be serialized as. Not all types have multiple versions.
-    /// @param Walker The walker/visitor navigating the serialization tree.
-    template< typename SerializeType >
-    void Serialize(const StringView Name,
-                   const std::optional<SerializeType>& ToSerialize,
-                   const MemberTags Tags,
-                   const Int32 Version,
-                   Serialization::SerializerWalker& Walker)
-    {
-        static_assert( std::is_pointer_v<SerializeType> , "SerializeType is not a pointer." );
-        if( ToSerialize ) {
-            Serialize(Name,ToSerialize.value(),Tags,Version,Walker);
         }
     }
 
@@ -792,14 +841,14 @@ namespace Serialization {
     {
     protected:
         Serialization::BackendBase* Backend = nullptr;
-        Serialization::ContextBase* Context = nullptr;
+        //Serialization::ContextBase* Context = nullptr;
     public:
         Serializer(Serialization::BackendBase* Back) :
             Backend(Back)
             {  }
 
 
-        Serialization::ContextBase* GetContext() const
+        /*Serialization::ContextBase* GetContext() const
             { return this->Context; }
 
         template<typename ObjectType, typename IDType>
@@ -810,7 +859,7 @@ namespace Serialization {
                 return reinterpret_cast<ObjectType>(Found);
             }
             return nullptr;
-        }
+        }//*/
     };//Serializer
 
     /// @}

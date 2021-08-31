@@ -37,8 +37,8 @@
    Joseph Toppi - toppij@gmail.com
    John Blackwood - makoenergy02@gmail.com
 */
-#ifndef Mezz_Foundation_Introspection_h
-#define Mezz_Foundation_Introspection_h
+#ifndef Mezz_Foundation_MemberTags_h
+#define Mezz_Foundation_MemberTags_h
 
 /// @file
 /// @brief This file contains basic tools for conveying metadata about class/struct data members.
@@ -77,12 +77,15 @@ namespace Mezzanine {
     /// member data.  For example a networked serialization backend might skip any member with the Local tag.
     enum class MemberTags
     {
-        None       = EnumBit(0), ///< Nothing special about the member.
-        Ignore     = EnumBit(1), ///< Member has been explicitly requested to be ignored.
-        Local      = EnumBit(2), ///< Member is only of use on the local host and should not be shared.
-        Generated  = EnumBit(3), ///< Member is a cache generated from other members and can be regenerated.
-        Deprecated = EnumBit(4), ///< Member is deprecated and it's use should be avoided.
-        NotOwned   = EnumBit(5)  ///< Member is a Pointer or Reference to an object not owned by the parent object.
+        None        = EnumBit(0), ///< Nothing special about the member.
+        Ignore      = EnumBit(1), ///< Member has been explicitly requested to be ignored.
+        Local       = EnumBit(2), ///< Member is only of use on the local host and should not be shared.
+        Generated   = EnumBit(3), ///< Member is a cache generated from other members and can be regenerated.
+        Deprecated  = EnumBit(4), ///< Member is deprecated and it's use should be avoided.
+        Own         = EnumBit(5), ///< Member is a Pointer or Reference to an object owned by the parent object.
+
+        Default     = None,       ///< The default value for non-pointer members.
+        DefaultPtr  = Own         ///< The default value for pointer members.
     };
     ENABLE_BITMASK_OPERATORS_INSIDE_MEZZANINE(MemberTags)
 
@@ -97,6 +100,33 @@ namespace Mezzanine {
         return Stream;
     }
 
+    ///////////////////////////////////////////////////////////////////////////////
+    // Default Tags
+
+    /// @brief Base DefaultMemberTags implementation.
+    /// @remarks This is used as a catch-all for non-specific types.
+    /// @tparam T The type to get the default member tags of.
+    template<typename T>
+    struct DefaultMemberTags
+    {
+        static constexpr MemberTags value = MemberTags::Default;
+    };
+    /// @brief DefaultMemberTags implementation for pointers.
+    /// @remarks This is a template specialization for pointer types.
+    /// @tparam T The type behind the pointer.
+    template<typename T>
+    struct DefaultMemberTags<T*>
+    {
+        static constexpr MemberTags value = MemberTags::DefaultPtr;
+    };
+
+    /// @brief Convenience function to get the default traits for a given type.
+    /// @remarks This function is intended to be used in template metaprogramming.
+    /// @tparam T The type to get the default member tags of.
+    /// @return Returns a MemberTags value containing the default set of tags for the provided type.
+    template<typename T>
+    constexpr MemberTags GetDefaultMemberTags()
+        { return DefaultMemberTags< std::decay_t<T> >::value; }
 }//Mezzanine
 
 #endif

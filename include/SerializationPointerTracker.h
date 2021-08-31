@@ -78,15 +78,41 @@ namespace Serialization {
     /// @brief A struct for tracking Links (non-owned copies of pointers).
     struct MEZZ_LIB ObjectLink
     {
+        /// @brief Convenience type for a std function for a deferred deserialization.
+        using DeferredFunct = std::function<void(void*)>;
+
         /// @brief A container of non-owned pointer instances that are unassigned.
         /// @remarks These instances remain unassigned until the owner is deserialized.
-        std::vector< std::function<void(void*) > UnresolvedLinks;
-        /// @brief The registered name of the type being pointed to.
-        StringView TypeName;
-        /// @brief The unique ID of the object being pointed to.
-        uintptr_t InstanceID = 0;
+        std::vector<DeferredFunct> UnresolvedLinks;
         /// @brief A usable pointer to the object. Should only be valid after successful deserialization.
         void* Instance = nullptr;
+        /// @brief The unique ID of the object being pointed to.
+        uintptr_t InstanceID = 0;
+
+        /// @brief Gets whether or not this link has a deserialized instance.
+        /// @return Returns true if the instance has already been deserialized, false otherwise.
+        [[nodiscard]]
+        Boole HasInstance() const
+            { return this->Instance != nullptr; }
+        /// @brief Adds a deserializing function to this link, to be resolved later.
+        /// @tparam Funct The function/lambda type that will assign the owning ptr.
+        /// @param ApplyFunct The function that will assign the owning pointer to a non-owning pointer.
+        template<typename Funct>
+        void Defer(Funct&& ApplyFunct)
+            { this->UnresolvedLinks.push_back(ApplyFunct); }
+        /// @brief Resolves every stored/deferred deseriailzing function in this link.
+        /// @param DeserializedPtr A copy of the (presumably) recently deserialized owning pointer.
+        /// @return Returns the number of previously deferred deserializations that were finally
+        /// deserialized for this Link.
+        size_t Resolve(void* DeserializedPtr)
+        {
+            this->Instance = DeserializedPtr;
+            size_t Count = this->UnresolvedLinks.size();
+            for( DeferredFunct& Funct : this->UnresolvedLinks )
+                { Funct(DeserializedPtr); }
+            this->UnresolvedLinks.clear();
+            return Count;
+        }
     };
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -95,17 +121,43 @@ namespace Serialization {
     /// @brief A struct for tracking Links (shared ownership of copies of pointers).
     struct MEZZ_LIB ObjectJoin
     {
+        /// @brief Convenience type for a std function for a deferred deserialization.
+        using DeferredFunct = std::function<void(std::shared_ptr<void>)>;
+
         /// @brief A container of unassigned shared_ptr's.
         /// @remarks Despite each pointer being an owner, shared_ptr's will only serialize one instance
         /// in order to avoid data duplication and the issues that introduces. Additionally, we don't know
         /// exactly what order the shared_ptr's will be deserialized. So this exists to work around that.
-        std::vector< std::function<void(void*) > UnresolvedJoins;
-        /// @brief The registered name of the type being pointed to.
-        StringView TypeName;
-        /// @brief The unique ID of the object being pointed to.
-        uintptr_t InstanceID = 0;
+        std::vector<DeferredFunct> UnresolvedJoins;
         /// @brief A usable pointer to the object. Should only be valid after successful deserialization.
         std::shared_ptr<void> Instance = nullptr;
+        /// @brief The unique ID of the object being pointed to.
+        uintptr_t InstanceID = 0;
+
+        /// @brief Gets whether or not this join has a deserialized instance.
+        /// @return Returns true if the instance has already been deserialized, false otherwise.
+        [[nodiscard]]
+        Boole HasInstance() const
+            { return this->Instance != nullptr; }
+        /// @brief Adds a deserializing function to this join, to be resolved later.
+        /// @tparam Funct The function/lambda type that will assign the owning ptr.
+        /// @param ApplyFunct The function that will assign the owning pointer to a non-owning pointer.
+        template<typename Funct>
+        void Defer(Funct&& ApplyFunct)
+            { this->UnresolvedJoins.push_back(ApplyFunct); }
+        /// @brief Resolves every stored/deferred deseriailzing function in this join.
+        /// @param DeserializedPtr A copy of the (presumably) recently deserialized owning pointer.
+        /// @return Returns the number of previously deferred deserializations that were finally
+        /// deserialized for this join.
+        size_t Resolve(std::shared_ptr<void> DeserializedPtr)
+        {
+            this->Instance = DeserializedPtr;
+            size_t Count = this->UnresolvedJoins.size();
+            for( DeferredFunct& Funct : this->UnresolvedJoins )
+                { Funct(DeserializedPtr); }
+            this->UnresolvedJoins.clear();
+            return Count;
+        }
     };
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -191,32 +243,15 @@ namespace Serialization {
         SerializerPointerTracker& operator=(SerializerPointerTracker&& Other) = delete;
 
         ///////////////////////////////////////////////////////////////////////////////
-        // Query
+        // Tracking
 
-        //Serialization
-        // Detect if the object pointed to has already been serialized.
-        //  Error when a second owner is detected.
-        //  Signal for the system to create a link to the original otherwise.
-
-        /// @brief Tracks an object as if it were a pointer.
-        /// @tparam ObjType The deduced type to track.
-        /// @remarks This function exists for the edge cases where a data member on a class may have a pointer
-        /// pointing to it.  In such cases the data wasn't new'd (at least directly) and didn't start it's existance
-        /// as a pointer.  But if it is viewed through a pointer elsewhere then it is still an owned pointer from the
-        /// serialization systems perspective.
-        /// @param ToTrack The object instance to track as if it were a owned pointer.
-        /// @return Returns an ObjectCounter reference that gives basic information about the tracked object/pointer.
-        template<typename ObjType>
-        const ObjectCounter& TrackObject(ObjType& ToTrack)
-            { return TrackObject( &ToTrack ); }
-
-        /// @brief Tracks a regular pointer (owned or not).
+        /// @brief Tracks a non-shared pointer (owned or not).
         /// @remarks The purpose of this function is to keep track of the pointers that exist in the serialization
         /// tree and how many copies exist of each throughout the serialization tree.
         /// @param ToTrack The pointer to be tracked.
         /// @param IsOwner Whether or not the pointer instance being tracked is an owning pointer.
         /// @return Returns an ObjectCounter reference that gives basic information about the tracked pointer.
-        const ObjectCounter& TrackPointer(void* ToTrack, const Boole IsOwner = false)
+        const ObjectCounter& TrackNonSharedPointer(void* ToTrack, const Boole IsOwner)
         {
             uintptr_t PtrID = GetIDOfPtr(ToTrack);
             CountIterator FoundIt = this->PtrCounts.find(PtrID);
@@ -242,7 +277,7 @@ namespace Serialization {
         /// @brief Tracks a shared_ptr.
         /// @remarks The purpose of this function is to keep track of the pointers that exist in the serialization
         /// tree and how many copies exist of each throughout the serialization tree.
-        /// @param ToTrack The shared_ptr to be tracked.
+        /// @param ToTrack The shared pointer to be tracked.
         /// @return Returns an ObjectCounter reference that gives basic information about the tracked pointer.
         const ObjectCounter& TrackSharedPointer(std::shared_ptr<void> ToTrack)
         {
@@ -259,6 +294,22 @@ namespace Serialization {
                 return *( this->PtrCounts.add(NewCounter) );
             }
         }
+
+        /*
+        /// @brief Tracks an object as if it were a pointer.
+        /// @tparam ObjType The deduced type to track.
+        /// @remarks This function exists for the edge cases where a data member on a class may have a pointer
+        /// pointing to it.  In such cases the data wasn't new'd (at least directly) and didn't start it's existance
+        /// as a pointer.  But if it is viewed through a pointer elsewhere then it is still an owned pointer from the
+        /// serialization systems perspective.
+        /// @param ToTrack The object instance to track as if it were a owned pointer.
+        /// @return Returns an ObjectCounter reference that gives basic information about the tracked object/pointer.
+        template<typename ObjType>
+        const ObjectCounter& TrackObject(ObjType& ToTrack)
+            { return TrackPointer( &ToTrack ); }//*/
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Query
 
         /// @brief Gets the beginning of the range of Object/Pointer counts.
         /// @return Returns a const iterator to the beginning of the Object/Pointer count range.
@@ -289,23 +340,16 @@ namespace Serialization {
         LinkContainer TrackedLinks;
         /// @brief The container storing metadata for each shared pointer in the deserialization tree.
         JoinContainer TrackedJoins;
-        /// @brief A pointer to the last Link that was created/manipulated.
-        ObjectLink* LastLink = nullptr;
-        /// @brief A pointer to the last Join that was created/manipulated.
-        ObjectJoin* LastJoin = nullptr;
 
         /// @brief Creates a new ObjectLink with the provided ID, or gets a pre-existing one if it exists.
         /// @sa ObjectLink
-        /// @tparam PtrType The pointer type of the Link.  Only used when creating and only for the registered name.
         /// @param PtrID The ID used to identify the pointer/object instance during deserialization.
         /// @return Returns an ObjectLink reference belonging to the provided PtrID.
-        template<typename PtrType>
         ObjectLink& GetOrCreateLink(uintptr_t PtrID)
         {
             LinkIterator TrackIt = TrackedLinks.find(PtrID);
             if( TrackIt == TrackedLinks.end() ) {
                 ObjectLink NewLink;
-                NewLink.TypeName = GetRegisteredName<std::remove_pointer_t<PtrType>>();
                 NewLink.InstanceID = PtrID;
                 NewLink.Instance = nullptr;
                 return *(TrackedLinks.add(NewLink));
@@ -314,16 +358,13 @@ namespace Serialization {
         }
         /// @brief Creates a new ObjectJoin with the provided ID, or gets a pre-existing one if it exists.
         /// @sa ObjectJoin
-        /// @tparam PtrType The pointer type of the Join.  Only used when creating and only for the registered name.
         /// @param PtrID The ID used to identify the pointer/object instance during deserialization.
         /// @return Returns an ObjectJoin reference belonging to the provided PtrID.
-        template<typename PtrType>
         ObjectJoin& GetOrCreateJoin(uintptr_t PtrID)
         {
             JoinIterator TrackIt = TrackedJoins.find(PtrID);
             if( TrackIt == TrackedJoins.end() ) {
                 ObjectJoin NewJoin;
-                NewJoin.TypeName = GetRegisteredName<std::remove_pointer_t<PtrType>>();
                 NewJoin.InstanceID = PtrID;
                 NewJoin.Instance = nullptr;
                 return *(TrackedJoins.add(NewJoin));
@@ -352,119 +393,86 @@ namespace Serialization {
         DeserializerPointerTracker& operator=(DeserializerPointerTracker&& Other) = delete;
 
         ///////////////////////////////////////////////////////////////////////////////
-        // Query
+        // Tracking
 
-        //Deserialization
-        // Detect if the authoritive (non-link) copy has been deserialized/created.
-        //  Queue a link resolution if it hasn't.
-        //  Assign the value of the authoritive copy if it has.
-        //   Additionally, resolve any pending links if the owned copy exists.
-
+        /// @brief Tracks a non-shared pointer for deserialization.
+        /// @tparam PtrType The type of pointer to be tracked.
+        /// @exception If two owning copies of the same pointer (by ID) are tracked, then on the tracking
+        /// of the second pointer a std::runtime_error exception will be thrown. If the pointer to be
+        /// tracked is non-owning and no owning copy of the pointer exists, it should be deferred instead
+        /// and a std::runtime_error exception will be thrown stating as such.
+        /// @param PtrID The ID of the pointer being tracked.
+        /// @param ToTrack The pointer being tracked.
+        /// @param IsOwned Whether or not the pointer being passed in is an owning copy of the pointer.
         template<typename PtrType>
-        void TrackPointer(uintptr_t PtrID, PtrType OwnedPtr)
+        void TrackNonSharedPointer(uintptr_t PtrID, PtrType& ToTrack, const Boole IsOwned)
         {
             static_assert(std::is_pointer_v<PtrType>,"Provided type is NOT a pointer.");
 
-            // If the provided pointer is an owning copy, mark it as created and apply all pending links.
-
-            // Check of an owning copy of the pointer in question exists.
-
-            // If it does, use Funct to assign it immediately.
-
-            // If it doesn't, then store funct in a sensical way that we can use.
-
-            std::function<void(void*, const std::type_info&)> PendingSetter = [=] (void* ToCast, const std::type_info& Info) {
-                PtrType NonVoid = static_cast<PtrType>(ToCast);
-                Funct(NonVoid);
+            PtrType NoRefToTrack = ToTrack;
+            ObjectLink& FoundLink = this->GetOrCreateLink(PtrID);
+            if( IsOwned ) {
+                if( FoundLink.HasInstance() ) {
+                    StringStream ExceptMessage;
+                    ExceptMessage << "Detected multiple owners to pointer with ID: " << PtrID << ".";
+                    throw std::runtime_error(ExceptMessage.str());
+                }
+                FoundLink.Instance = NoRefToTrack;
+                FoundLink.Resolve(NoRefToTrack);
+            }else{
+                if( FoundLink.HasInstance() ) {
+                    ToTrack = static_cast<PtrType>(FoundLink.Instance);
+                }else{
+                    StringStream ExceptMessage;
+                    ExceptMessage << "Pointer with ID \"" << PtrID << "\" should be deferred, not tracked.";
+                    throw std::runtime_error(ExceptMessage.str());
+                }
             }
         }
+        /// @brief Tracks a shared pointer for deserialization.
+        /// @tparam PtrType The type with the shared pointer to be tracked.
+        /// @param PtrID The ID of the shared pointer being tracked.
+        /// @param ToTrack The shared pointer being tracked.
+        template<typename PtrType>
+        void TrackSharedPointer(uintptr_t PtrID, std::shared_ptr<PtrType>& ToTrack)
+        {
+            ObjectJoin& FoundJoin = this->GetOrCreateJoin(PtrID);
+            if( FoundJoin.HasInstance() ) {
+                StringStream ExceptMessage;
+                ExceptMessage << "Detected multiple deserializations of shared pointer with ID: " << PtrID << ".";
+                throw std::runtime_error(ExceptMessage.str());
+            }
+            FoundJoin.Instance = ToTrack;
+            FoundJoin.Resolve(ToTrack);
+        }
 
+        /// @brief Adds a non-shared pointer to the list of pointers that will have their deserialization deferred.
+        /// @tparam ApplyType A deduced lambda type containing the logic to assign the pointer.
+        /// @param PtrID The ID of the pointer being tracked.
+        /// @param Funct A lambda containing the logic to properly assign the pointer.
         template<typename ApplyType>
-        void TrackPointer(uintptr_t PtrID, ApplyType&& Funct)
+        void DeferNonSharedPointer(uintptr_t PtrID, ApplyType&& Funct)
         {
-            static_assert(std::is_pointer_v<PtrType>,"Provided type is NOT a pointer.");
-
-            // Check of an owning copy of the pointer in question exists.
-
-            // If it does, use Funct to assign it immediately.
-
-            // If it doesn't, then store funct in a sensical way that we can use.
-
-            std::function<void(void*, const std::type_info&)> PendingSetter = [=] (void* ToCast) {
-                PtrType NonVoid = static_cast<PtrType>(ToCast);
-                Funct(NonVoid);
-            }
-        }
-
-        std::optional<ObjectLink*> NeedsLinkApply(uintptr_t PtrID)
-        {
-
-        }
-
-        std::optional<ObjectJoin*> NeedsJoinApply(uintptr_t PtrID)
-        {
-
-        }
-
-        /// @brief Tracks a regular pointer (owned or not).
-        /// @tparam PtrType The type of the pointer to be tracked. Will static_assert if type isn't a pointer.
-        /// @param ToTrack The pointer to be tracked.
-        /// @param IsOwner Whether or not the pointer instance being tracked is an owning pointer.
-        /// @return Returns the tracked pointers ID that can be used for validation.
-        template<typename PtrType>
-        uintptr_t TrackPointer(PtrType& ToTrack, const Boole IsOwner)
-        {
-            static_assert(std::is_pointer_v<PtrType>,"Provided type is NOT a pointer.");
-
-            PtrType NoRefPtr = ToTrack;
-            uintptr_t PtrID = GetIDOfPtr(NoRefPtr);
-            ObjectLink& FoundLink = this->GetOrCreateLink<PtrType>(PtrID);
-            if( IsOwner ) {
-                if( FoundLink.Instance ) {
-                    throw std::runtime_error("Detected multiple owners to pointer.");
-                }
-                FoundLink.Instance = NoRefPtr;
-                if( !FoundLink.UnresolvedLinks.empty() ) {
-                    for( void*& Pending : FoundLink.UnresolvedLinks )
-                        { Pending = NoRefPtr; }
-                }
+            ObjectLink& FoundLink = this->GetOrCreateLink(PtrID);
+            if( FoundLink.HasInstance() ) {
+                Funct(FoundLink.Instance);
             }else{
-                if( FoundLink.Instance ) {
-                    ToTrack = FoundLink.Instance;
-                }else{
-                    FoundLink.UnresolvedLinks.push_back( std::ref(ToTrack) );
-                }
+                FoundLink.Defer(Funct);
             }
-            return PtrID;
         }
-        /// @brief Tracks a shared_ptr.
-        /// @tparam PtrType The type of the pointer to be tracked. Will static_assert if type isn't a pointer.
-        /// @param ToTrack The shared_ptr to be tracked.
-        /// @return Returns the tracked pointers ID that can be used for validation.
-        template<typename PtrType>
-        uintptr_t TrackPointer(std::shared_ptr<PtrType>& ToTrack, const Boole IsOwner)
+        /// @brief Adds a shared pointer to the list of pointers that will have their deserialization deferred.
+        /// @tparam ApplyType A deduced lambda type containing the logic to assign the shared pointer.
+        /// @param PtrID The ID of the shared pointer being tracked.
+        /// @param Funct A lambda containing the logic to properly assign the pointer.
+        template<typename ApplyType>
+        void DeferSharedPointer(uintptr_t PtrID, ApplyType&& Funct)
         {
-            static_assert(std::is_pointer_v<PtrType>,"Provided type is NOT a pointer.");
-
-            uintptr_t PtrID = GetIDOfPtr(ToTrack.get());
-            ObjectJoin& FoundJoin = this->GetOrCreateJoin<PtrType>(PtrID);
-            if( IsOwner ) {
-                if( FoundJoin.Instance ) {
-                    throw std::runtime_error("Detected multiple owners to pointer.");
-                }
-                FoundJoin.Instance = ToTrack;
-                if( !FoundJoin.UnresolvedJoins.empty() ) {
-                    for( std::shared_ptr<void>& Pending : FoundJoin.UnresolvedJoins )
-                        { Pending = ToTrack; }
-                }
+            ObjectJoin& FoundJoin = this->GetOrCreateJoin(PtrID);
+            if( FoundJoin.HasInstance() ) {
+                Funct(FoundJoin.Instance);
             }else{
-                if( FoundJoin.Instance ) {
-                    ToTrack = FoundJoin.Instance;
-                }else{
-                    FoundJoin.UnresolvedJoins.push_back( std::ref(ToTrack) );
-                }
+                FoundJoin.Defer(Funct);
             }
-            return PtrID;
         }
     };//DeserializerPointerTracker
 /*

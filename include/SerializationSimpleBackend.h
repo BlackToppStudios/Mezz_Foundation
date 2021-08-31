@@ -44,6 +44,7 @@
 /// @brief This file contains a basic backend for serialization that will create formatted output.
 
 #ifndef SWIG
+    #include "StringTools.h"
     #include "SerializationTree.h"
 #endif // SWIG
 
@@ -55,7 +56,7 @@ namespace Serialization {
     public:
         /// @brief The character used to separate multiple Attributes in a Node.
         static const char SeparatorChar = ' ';
-        /// @brief The character used to separate/link a value with it's name.
+        /// @brief The character used to connect a value with it's name.
         static const char LinkChar = ':';
     protected:
         /// @brief The name of the Attribute.
@@ -138,7 +139,7 @@ namespace Serialization {
         /// @brief The name of the Node.
         String Name;
         /// @brief A container of Attributes belonging to the Node.
-        std::vector<Attribute> Attributes;
+        std::vector<SimpleAttribute> Attributes;
         /// @brief A container of child Nodes belonging to the Node.
         std::vector<SimpleNode*> Nodes; // Storing pointers is ick, but we need to avoid invalidation issues.
         /// @brief A pointer to the Nodes parent Node.
@@ -236,13 +237,13 @@ namespace Serialization {
 
         /// @brief Creates a new Attribute for the Node.
         /// @return Returns a reference to the new Attribute.
-        Attribute& CreateChildAttribute()
+        SimpleAttribute& CreateChildAttribute()
             { return this->Attributes.emplace_back(); }
         /// @brief Creates a new Attribute for the Node.
         /// @param AttribName The name to be given to the new Attribute.
         /// @param AttribValue The value to be given to the new Attribute.
         /// @return Returns a reference to the new Attribute.
-        Attribute& CreateChildAttribute(const String& AttribName, const String& AttribValue)
+        SimpleAttribute& CreateChildAttribute(const String& AttribName, const String& AttribValue)
             { return this->Attributes.emplace_back(AttribName,AttribValue); }
         /// @brief Gets the number of child Attributes in the Node.
         /// @return Returns the current number of child Attributes belonging to the Node.
@@ -253,21 +254,21 @@ namespace Serialization {
         /// @param Index The index of the Attribute to retrieve.
         /// @return Returns a reference to the Attribute at the specified index.
         [[nodiscard]]
-        Attribute& GetAttribute(const size_t Index)
+        SimpleAttribute& GetAttribute(const size_t Index)
             { return this->Attributes.at(Index); }
         /// @brief Gets an Attribute by Index.
         /// @param Index The index of the Attribute to retrieve.
         /// @return Returns a const reference to the Attribute at the specified index.
         [[nodiscard]]
-        const Attribute& GetAttribute(const size_t Index) const
+        const SimpleAttribute& GetAttribute(const size_t Index) const
             { return this->Attributes.at(Index); }
         /// @brief Gets an Attribute by name.
         /// @param AttribName The name of the Attribute to retrieve.
         /// @return Returns a reference to the specified Attribute.
         [[nodiscard]]
-        Attribute& GetAttribute(const StringView AttribName)
+        SimpleAttribute& GetAttribute(const StringView AttribName)
         {
-            for( Attribute& Attrib : this->Attributes )
+            for( SimpleAttribute& Attrib : this->Attributes )
             {
                 if( Attrib.GetName() == AttribName ) {
                     return Attrib;
@@ -279,9 +280,9 @@ namespace Serialization {
         /// @param AttribName The name of the Attribute to retrieve.
         /// @return Returns a const reference to the specified Attribute.
         [[nodiscard]]
-        const Attribute& GetAttribute(const StringView AttribName) const
+        const SimpleAttribute& GetAttribute(const StringView AttribName) const
         {
-            for( const Attribute& Attrib : this->Attributes )
+            for( const SimpleAttribute& Attrib : this->Attributes )
             {
                 if( Attrib.GetName() == AttribName ) {
                     return Attrib;
@@ -293,22 +294,22 @@ namespace Serialization {
         /// @brief Gets the first Attribute.
         /// @return Returns a reference to the first Attribute in the Node.
         [[nodiscard]]
-        Attribute& GetFirstAttribute()
+        SimpleAttribute& GetFirstAttribute()
             { assert( this->GetNumAttributes() );  return this->Attributes.front(); }
         /// @brief Gets the first Attribute.
         /// @return Returns a const reference to the first Attribute in the Node.
         [[nodiscard]]
-        const Attribute& GetFirstAttribute() const
+        const SimpleAttribute& GetFirstAttribute() const
             { assert( this->GetNumAttributes() );  return this->Attributes.front(); }
         /// @brief Gets the last Attribute.
         /// @return Returns a reference to the last Attribute in the Node.
         [[nodiscard]]
-        Attribute& GetLastAttribute()
+        SimpleAttribute& GetLastAttribute()
             { assert( this->GetNumAttributes() );  return this->Attributes.back(); }
         /// @brief Gets the last Attribute.
         /// @return Returns a const reference to the last Attribute in the Node.
         [[nodiscard]]
-        const Attribute& GetLastAttribute() const
+        const SimpleAttribute& GetLastAttribute() const
             { assert( this->GetNumAttributes() );  return this->Attributes.back(); }
         /// @brief Removes all Attributes from the Node.
         void ClearAttributes()
@@ -329,11 +330,11 @@ namespace Serialization {
         size_t NodeDepth = ToSerialize.GetDepth();
         for( size_t IndentCount = 0 ; IndentCount < NodeDepth ; ++IndentCount )
             { Stream << SimpleNode::Indent; }
-        Stream << SimpleNode::NodeStartChar << ToSerialize.GetName() << Attribute::SeparatorChar;
+        Stream << SimpleNode::NodeStartChar << ToSerialize.GetName() << SimpleAttribute::SeparatorChar;
         if( ToSerialize.GetNumAttributes() > 0 ) {
-            Stream << SimpleNode::AttributeStartChar << Attribute::SeparatorChar;
+            Stream << SimpleNode::AttributeStartChar << SimpleAttribute::SeparatorChar;
             for( size_t AttribIndex = 0 ; AttribIndex < ToSerialize.GetNumAttributes() ; ++AttribIndex )
-                { Stream << ToSerialize.GetAttribute(AttribIndex) << Attribute::SeparatorChar; }
+                { Stream << ToSerialize.GetAttribute(AttribIndex) << SimpleAttribute::SeparatorChar; }
             Stream << SimpleNode::AttributeEndChar;
         }
         for( size_t NodeIndex = 0 ; NodeIndex < ToSerialize.GetNumNodes() ; ++NodeIndex )
@@ -353,7 +354,7 @@ namespace Serialization {
     {
         String Temp;
         Stream.ignore(std::numeric_limits<std::streamsize>::max(),SimpleNode::NodeStartChar);
-        std::getline(Stream,Temp,Attribute::SeparatorChar);
+        std::getline(Stream,Temp,SimpleAttribute::SeparatorChar);
         ToDeserialize.SetName(Temp);
         while( Stream.peek() != SimpleNode::NodeEndChar || Stream.peek() != std::istream::traits_type::eof() )
         {
@@ -605,7 +606,7 @@ namespace Serialization {
         /// @copydoc Serialization::TreeWalker::Parent()
         virtual Serialization::TreeWalker& Parent()
         {
-            Node& Parent = this->GetParentNode();
+            SimpleNode& Parent = this->GetParentNode();
             for( size_t Index = 0 ; Index < Parent.GetNumNodes() ; ++Index )
             {
                 if( &( Parent.GetNode(Index) ) == &( this->GetSelfNode() ) ) {
@@ -629,7 +630,7 @@ namespace Serialization {
         {
             for( size_t Index = 0 ; Index < this->GetSelfNode().GetNumNodes() ; ++Index )
             {
-                Node& CurrNode = this->GetSelfNode().GetNode(Index);
+                SimpleNode& CurrNode = this->GetSelfNode().GetNode(Index);
                 if( CurrNode.GetName() == Name ) {
                     this->SelfIndex = Index;
                     this->SelfNode = CurrNode;
@@ -700,7 +701,7 @@ namespace Serialization {
     {
     protected:
         /// @brief The Node at the top of the tree.
-        Node RootNode;
+        SimpleNode RootNode;
         /// @brief The walker visiting the Nodes in the tree.
         SimpleWalker CurrentNode;
     public:

@@ -504,7 +504,11 @@ namespace Mezzanine {
     template<typename CommonMethod>
     [[nodiscard]]
     constexpr auto MakeMemberAccessor(const StringView Name, CommonMethod Common)
-        { return MemberAccessor<CommonMethod,CommonMethod,MemberTags::None>(Name,Common); }
+    {
+        using DecayedType = typename DeduceSetterTypes<CommonMethod>::DecayedType;
+        constexpr MemberTags DefaultTags = GetDefaultMemberTags<DecayedType>();
+        return MemberAccessor<CommonMethod,CommonMethod,DefaultTags>(Name,Common);
+    }
     /// @brief Convenience method to initialize a MemberAccessor from deduced types.
     /// @tparam Tags A MemberTags bitmask to describe the member.
     /// @tparam CommonMethod The deduced type to use as both the setter and getter method of the MemberAccessor.
@@ -529,11 +533,15 @@ namespace Mezzanine {
     template<typename SetterMethod, typename GetterMethod>
     [[nodiscard]]
     constexpr auto MakeMemberAccessor(const StringView Name, SetterMethod Setter, GetterMethod Getter)
-        { return MemberAccessor<SetterMethod,GetterMethod,MemberTags::None>(Name,Setter,Getter); }
+    {
+        using DecayedType = typename DeduceSetterTypes<SetterMethod>::DecayedType;
+        constexpr MemberTags DefaultTags = GetDefaultMemberTags<DecayedType>();
+        return MemberAccessor<SetterMethod,GetterMethod,DefaultTags>(Name,Setter,Getter);
+    }
     /// @brief Convenience method to initialize a MemberAccessor from deduced types.
     /// @tparam Tags A MemberTags bitmask to describe the member.
     /// @tparam SetterMethod The member pointer type to use for setting the member value.
-    /// @tParam GetterMethod The member pointer type to use for getting the member value.
+    /// @tparam GetterMethod The member pointer type to use for getting the member value.
     /// @pre SetterMethod Preconditions are the same as what is stated in the @ref MemberAccessor docs.
     /// @pre GetterMethod Preconditions are the same as what is stated in the @ref MemberAccessor docs.
     /// @param Name The name of the member.
@@ -758,7 +766,7 @@ namespace Mezzanine {
     /// @brief This is the same as MergeMembers, but will discard duplicate types collected.
     /// @tparam TupleTypes A collection of tuple types representing the class members to be merged.
     /// @remarks This is intended for use with 1 or more tuples of MemberAccessor instances being passed
-    /// in, but no enforcement is made that that happens.  If any else is passed in something will break.
+    /// in, but no enforcement is made.  If anything else is passed in something will break.
     /// @param ToMerge A list of MemberAccessor tuples to be bundled together.
     /// @return Returns a Tuple containing all the tuples merged into one bigger tuple without duplicate types.
     template<typename... TupleTypes>

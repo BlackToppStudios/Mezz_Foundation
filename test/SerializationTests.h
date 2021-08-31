@@ -178,8 +178,8 @@ namespace SerializationTest {
             using namespace Mezzanine;
             return Members(
                 MakeMemberAccessor("SimpleObj",&ComposedOne::SimpleObj),
-                MakeMemberAccessor<MemberTags::NotOwned>("SimplePtr",&ComposedOne::SimplePtr),
-                MakeMemberAccessor<MemberTags::NotOwned>("Parent",&ComposedOne::Parent)
+                MakeMemberAccessor<MemberTags::None>("SimplePtr",&ComposedOne::SimplePtr),
+                MakeMemberAccessor<MemberTags::None>("Parent",&ComposedOne::Parent)
             );
         }
     };//ComposedOne
@@ -210,9 +210,9 @@ namespace SerializationTest {
             using namespace Mezzanine;
             return Members(
                 MakeMemberAccessor("OwnedComposed",&ComposedTwo::OwnedComposed),
-                MakeMemberAccessor<MemberTags::NotOwned>("NonOwnedSimpleObj",&ComposedTwo::NonOwnedSimpleObj),
-                MakeMemberAccessor("SharedSimplePtr",&ComposedTwo::SharedSimplePtr),
-                MakeMemberAccessor<MemberTags::NotOwned>("Parent",&ComposedTwo::Parent)
+                MakeMemberAccessor<MemberTags::None>("NonOwnedSimpleObj",&ComposedTwo::NonOwnedSimpleObj),
+                MakeMemberAccessor<MemberTags::None>("Parent",&ComposedTwo::Parent),
+                MakeMemberAccessor("SharedSimplePtr",&ComposedTwo::SharedSimplePtr)
             );
         }
     };//ComposedTwo
@@ -282,7 +282,7 @@ AUTOMATIC_TEST_GROUP(SerializationTests,Serialization)
     SuperComposed FakeManagerOne;
     SuperComposed FakeManagerTwo;
 
-    Backend SerializerBack;
+    Serialization::SimpleBackend SerializerBack;
     Serialization::SerializerWalker Walker(SerializerBack.GetWalker());
 
     Mezzanine::Serialize("FakeManager",FakeManagerOne,Serialization::LatestVersion,Walker);

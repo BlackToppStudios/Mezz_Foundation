@@ -98,6 +98,7 @@ namespace Serialization {
     ///////////////////////////////////////////////////////////////////////////////
     // SerializerContext
 
+    /*
     class ContextBase
     {
     public:
@@ -142,7 +143,7 @@ namespace Serialization {
             }
         }
         return Current;
-    }
+    }//*/
 
     ///////////////////////////////////////////////////////////////////////////////
     // TreeWalker
@@ -306,7 +307,7 @@ namespace Serialization {
         template<typename Datum>
         [[nodiscard]]
         std::optional<Datum> GetValue(const StringView Name, const TreeWalker& Walker)
-            { (void)Walker;  return std::optional<Datum>(); }
+            { (void)Name;  (void)Walker;  return std::optional<Datum>(); }
 
         template<>
         void SetValue<StringView>(const StringView Name, const StringView Value, TreeWalker& Walker)
