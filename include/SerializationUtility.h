@@ -53,13 +53,46 @@ namespace Mezzanine {
     /// @{
 
     ///////////////////////////////////////////////////////////////////////////////
-    // Result Enums
+    // Deserialization Results
 
     /// @brief An enum used by Deseriailze functions to communicate non-critical results of the operation.
-    enum class DeserializeResult
+    /// @details A "Completed" status does not mean an object was successfully deserialized.  It could mean some
+    /// kind of failure as well.  But it does mean the object won't be revisited and it's status is final for the
+    /// current deserialization.  Or more directly, it is not deferred.  A deferred status means the object could
+    /// not be deserialized, but might be able to be deserialized later.  This largely just applies to pointers,
+    /// so the pointer is cached until the authoritative copy is found and deserialized.  Then the cached copy is
+    /// updated.  If the status is "Completed", this will not happen.
+    enum class DeserializeStatus
     {
-        Success,       ///< The object was deserialized.
-        NeedsDeferred  ///< The object is not ready to be deserialized and needs to be cached.
+        Completed,      ///< Object deserialization was completed.  This can mean success or failure.
+        Deferred,       ///< The object is not ready to be deserialized and needs to be cached and deserialized later.
+    };//DeserializeStatus
+
+    /// @brief A simple struct containing the result info of a deserialization.
+    /// @details This struct is primarily useful
+    struct MEZZ_LIB DeserializeResult
+    {
+        /// @brief The ID of the instance being deserialized.  Only valid when the deserialization is deferred.
+        uintptr_t InstanceID = 0;
+        /// @brief The status of the deserialization.  See @ref DeserializeStatus for more information.
+        DeserializeStatus Status = DeserializeStatus::Completed;
+
+        /// @brief Completed constructor.
+        /// @details This initializes the result with a completed status and zero'd Instance ID.
+        DeserializeResult() = default;
+        /// @brief Deferred constructor.
+        /// @details This takes an Instance ID and sets the status to Deferred.
+        DeserializeResult(uintptr_t ID) :
+            InstanceID(ID),
+            Status(DeserializeStatus::Deferred)
+            {  }
+
+        /// @brief Convenience operator for checking the resulting status of a deserialization.
+        /// @return Returns true if the Status is DeserializeResult::Completed, false otherwise.
+        explicit operator bool()
+        {
+            return Status == DeserializeStatus::Completed;
+        }
     };//DeserializeResult
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -152,70 +185,83 @@ namespace Serialization {
     template< typename DeserializeType,
               typename = std::enable_if_t< !std::is_pointer_v<DeserializeType> >,
               typename = void >
-    void ProtoDeserialize(DeserializeType& ToDeserialize,
-                          const MemberTags Tags,
-                          Serialization::DeserializerWalker& Walker);
+    DeserializeResult
+    ProtoDeserialize(DeserializeType& ToDeserialize,
+                     const MemberTags Tags,
+                     Serialization::DeserializerWalker& Walker);
     template< typename DeserializeType,
               typename = std::enable_if_t< std::is_pointer_v<DeserializeType> > >
-    void ProtoDeserialize(DeserializeType& ToDeserialize,
-                          const MemberTags Tags,
-                          Serialization::DeserializerWalker& Walker);
+    DeserializeResult
+    ProtoDeserialize(DeserializeType& ToDeserialize,
+                     const MemberTags Tags,
+                     Serialization::DeserializerWalker& Walker);
     template< typename DeserializeType >
-    void ProtoDeserialize(std::unique_ptr<DeserializeType>& ToDeserialize,
-                          const MemberTags Tags,
-                          Serialization::DeserializerWalker& Walker);
+    DeserializeResult
+    ProtoDeserialize(std::unique_ptr<DeserializeType>& ToDeserialize,
+                     const MemberTags Tags,
+                     Serialization::DeserializerWalker& Walker);
     template< typename DeserializeType >
-    void ProtoDeserialize(std::shared_ptr<DeserializeType>& ToDeserialize,
-                          const MemberTags Tags,
-                          Serialization::DeserializerWalker& Walker);
+    DeserializeResult
+    ProtoDeserialize(std::shared_ptr<DeserializeType>& ToDeserialize,
+                     const MemberTags Tags,
+                     Serialization::DeserializerWalker& Walker);
     template< typename SerializeType >
-    void ProtoDeserialize(const std::optional<SerializeType>& ToSerialize,
-                          const MemberTags Tags,
-                          Serialization::SerializerWalker& Walker);
+    DeserializeResult
+    ProtoDeserialize(const std::optional<SerializeType>& ToSerialize,
+                     const MemberTags Tags,
+                     Serialization::SerializerWalker& Walker);
 
     template< typename DeserializeType,
               typename = std::enable_if_t< !std::is_pointer_v<DeserializeType> >,
               typename = void >
-    void Deserialize(const StringView Name,
-                     DeserializeType& ToDeserialize,
-                     const MemberTags Tags,
-                     Serialization::DeserializerWalker& Walker);
+    DeserializeResult
+    Deserialize(const StringView Name,
+                DeserializeType& ToDeserialize,
+                const MemberTags Tags,
+                Serialization::DeserializerWalker& Walker);
     template< typename DeserializeType,
               typename = std::enable_if_t< std::is_pointer_v<DeserializeType> > >
-    void Deserialize(const StringView Name,
-                     DeserializeType& ToDeserialize,
-                     const MemberTags Tags,
-                     Serialization::DeserializerWalker& Walker);
+    DeserializeResult
+    Deserialize(const StringView Name,
+                DeserializeType& ToDeserialize,
+                const MemberTags Tags,
+                Serialization::DeserializerWalker& Walker);
     template< typename DeserializeType >
-    void Deserialize(const StringView Name,
-                     std::shared_ptr<DeserializeType>& ToDeserialize,
-                     const MemberTags Tags,
-                     Serialization::DeserializerWalker& Walker);
+    DeserializeResult
+    Deserialize(const StringView Name,
+                std::shared_ptr<DeserializeType>& ToDeserialize,
+                const MemberTags Tags,
+                Serialization::DeserializerWalker& Walker);
     template< typename DeserializeType >
-    void Deserialize(const StringView Name,
-                     std::unique_ptr<DeserializeType>& ToDeserialize,
-                     const MemberTags Tags,
-                     Serialization::DeserializerWalker& Walker);
+    DeserializeResult
+    Deserialize(const StringView Name,
+                std::unique_ptr<DeserializeType>& ToDeserialize,
+                const MemberTags Tags,
+                Serialization::DeserializerWalker& Walker);
 
     template< typename DeserializeType,
               typename = std::enable_if_t< !std::is_pointer_v<DeserializeType> >,
               typename = void >
-    void Deserialize(const StringView Name,
-                     DeserializeType& ToDeserialize,
-                     Serialization::DeserializerWalker& Walker);
+    DeserializeResult
+    Deserialize(const StringView Name,
+                DeserializeType& ToDeserialize,
+                Serialization::DeserializerWalker& Walker);
     template< typename DeserializeType,
               typename = std::enable_if_t< std::is_pointer_v<DeserializeType> > >
-    void Deserialize(const StringView Name,
-                     DeserializeType& ToDeserialize,
-                     Serialization::DeserializerWalker& Walker);
+    DeserializeResult
+    Deserialize(const StringView Name,
+                DeserializeType& ToDeserialize,
+                Serialization::DeserializerWalker& Walker);
     template< typename DeserializeType >
-    void Deserialize(const StringView Name,
-                     std::shared_ptr<DeserializeType>& ToDeserialize,
-                     Serialization::DeserializerWalker& Walker);
+    DeserializeResult
+    Deserialize(const StringView Name,
+                std::shared_ptr<DeserializeType>& ToDeserialize,
+                Serialization::DeserializerWalker& Walker);
     template< typename DeserializeType >
-    void Deserialize(const StringView Name,
-                     std::unique_ptr<DeserializeType>& ToDeserialize,
-                     Serialization::DeserializerWalker& Walker);
+    DeserializeResult
+    Deserialize(const StringView Name,
+                std::unique_ptr<DeserializeType>& ToDeserialize,
+                Serialization::DeserializerWalker& Walker);
 
 namespace Serialization {
     ///////////////////////////////////////////////////////////////////////////////
@@ -335,6 +381,13 @@ SUPPRESS_CLANG_WARNING("-Wmissing-variable-declarations")
 
     /// @brief An integer constant to represent the value for the latest version available for serialization.
     inline constexpr Integer LatestVersion = 0;
+
+    /// @brief A String used with pointer serialization to say the pointer can be deserialized immediately.
+    inline constexpr StringView DeserializeTrue = "true";
+    /// @brief A String used with pointer serialization to say the pointer deserialization must be deferred.
+    inline constexpr StringView DeserializeFalse = "false";
+    /// @brief A String used with pointer serialization to say the pointer value is null.
+    inline constexpr StringView DeserializeNull = "null";
 
 RESTORE_WARNING_STATE
 

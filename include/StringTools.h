@@ -390,6 +390,9 @@ namespace StringTools {
     {
         Return Converted{};
         StringStream Converter;
+        if constexpr( std::is_same_v<Return,double> ) {
+            Converter.precision(15);
+        }
         Converter << ToConvert;
         Converter >> Converted;
         return Converted;
@@ -425,6 +428,9 @@ namespace StringTools {
     String ConvertToString(const T& ToConvert)
     {
         StringStream Converter;
+        if constexpr( std::is_same_v<T,double> ) {
+            Converter.precision(15);
+        }
         Converter << ToConvert;
         return Converter.str();
     }

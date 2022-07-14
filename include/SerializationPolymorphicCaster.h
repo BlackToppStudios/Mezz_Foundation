@@ -128,16 +128,16 @@ namespace Serialization {
         /// @param ToDeserialize The instance being deserialized.
         /// @param Tags Descriptors associated with the data being deserialized that may alter deserialization behavior.
         /// @param Walker The walker/visitor navigating the deserialization tree.
-        virtual void Deserialize(void*& ToDeserialize,
-                                 const MemberTags Tags,
-                                 Serialization::DeserializerWalker& Walker) = 0;
+        virtual DeserializeResult Deserialize(void*& ToDeserialize,
+                                              const MemberTags Tags,
+                                              Serialization::DeserializerWalker& Walker) = 0;
         /// @brief Performs a cast to the derived type in a shared_ptr and then invokes Deserialize.
         /// @param ToDeserialize The instance being deserialized.
         /// @param Tags Descriptors associated with the data being deserialized that may alter deserialization behavior.
         /// @param Walker The walker/visitor navigating the deserialization tree.
-        virtual void Deserialize(std::shared_ptr<void>& ToDeserialize,
-                                 const MemberTags Tags,
-                                 Serialization::DeserializerWalker& Walker) = 0;
+        virtual DeserializeResult Deserialize(std::shared_ptr<void>& ToDeserialize,
+                                              const MemberTags Tags,
+                                              Serialization::DeserializerWalker& Walker) = 0;
     };//PolymorphicCaster
 
     /// @brief This class stores all of the Polymorphic caster implementations for deserialization.
@@ -188,10 +188,12 @@ namespace Serialization {
         template<class Base, class Derived>
         void RegisterCaster()
         {
-            using CasterType = PolymorphicCasterImpl<Base,Derived>;
+            using DecayedBase = std::decay_t<Base>;
+            using DecayedDerived = std::decay_t<Derived>;
+            using CasterType = PolymorphicCasterImpl<DecayedBase,DecayedDerived>;
             std::shared_ptr<CasterType> NewCaster = std::make_shared<CasterType>();
-            this->CastersByTypeInfo[ std::type_index( typeid(Base) ) ].push_back(NewCaster);
-            this->CastersByTypeName[ GetRegisteredName<Base>() ].push_back(NewCaster);
+            this->CastersByTypeInfo[ std::type_index( typeid(DecayedBase) ) ].push_back(NewCaster);
+            this->CastersByTypeName[ GetRegisteredName<DecayedBase>() ].push_back(NewCaster);
         }
 
         /// @brief Gets a caster that can upcast from base to derived.
@@ -299,7 +301,12 @@ RESTORE_WARNING_STATE
             { return GetRegisteredName<Derived>(); }
         /// @copydoc PolymorphicCaster::CanUpcast(const std::type_info&, const std::type_info&) const
         Boole CanUpcast(const std::type_info& BaseType, const std::type_info& DerivedType) const
-            { return ( BaseType == typeid(Base) && DerivedType == typeid(Derived) ); }
+        {
+            using DecayedBase = std::decay_t<Base>;
+            using DecayedDerived = std::decay_t<Derived>;
+            return ( std::type_index( BaseType ) == std::type_index( typeid(DecayedBase) ) &&
+                     std::type_index( DerivedType ) == std::type_index( typeid(DecayedDerived) ) );
+        }
         /// @copydoc PolymorphicCaster::CanUpcast(const StringView, const StringView) const
         Boole CanUpcast(const StringView BaseType, const StringView DerivedType) const
             { return ( BaseType == GetBaseTypeName() && DerivedType == GetDerivedTypeName() ); }
@@ -323,21 +330,21 @@ RESTORE_WARNING_STATE
             Mezzanine::ProtoSerialize(TempPtr,Tags,Version,Walker);
         }
         /// @copydoc PolymorphicCaster::Deserialize
-        void Deserialize(void*& ToDeserialize,
-                         const MemberTags Tags,
-                         Serialization::DeserializerWalker& Walker)
+        DeserializeResult Deserialize(void*& ToDeserialize,
+                                      const MemberTags Tags,
+                                      Serialization::DeserializerWalker& Walker)
         {
             Derived* TempPtr = static_cast<Derived*>( ToDeserialize );
-            Mezzanine::ProtoDeserialize<Derived*>(TempPtr,Tags,Walker);
+            return Mezzanine::ProtoDeserialize<Derived*>(TempPtr,Tags,Walker);
             //ToDeserialize = TempPtr;
         }
         /// @copydoc PolymorphicCaster::Deserialize
-        void Deserialize(std::shared_ptr<void>& ToDeserialize,
-                         const MemberTags Tags,
-                         Serialization::DeserializerWalker& Walker)
+        DeserializeResult Deserialize(std::shared_ptr<void>& ToDeserialize,
+                                      const MemberTags Tags,
+                                      Serialization::DeserializerWalker& Walker)
         {
             std::shared_ptr<Derived> TempPtr = std::static_pointer_cast<Derived>( ToDeserialize );
-            Mezzanine::ProtoDeserialize(TempPtr,Tags,Walker);
+            return Mezzanine::ProtoDeserialize(TempPtr,Tags,Walker);
             //ToDeserialize = TempPtr;
         }
     };//PolymorphicCasterImpl

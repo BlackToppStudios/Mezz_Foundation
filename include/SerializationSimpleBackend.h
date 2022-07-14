@@ -170,7 +170,7 @@ namespace Serialization {
         [[nodiscard]]
         Boole IsRoot() const
             { return this->Parent == nullptr; }
-        /// @brief Gets a reference to the
+        /// @brief Gets a reference to the parent of this node.
         /// @remarks If the Node is a root Node then this function will assert.
         /// @return Returns a reference to the parent of the Node.
         [[nodiscard]]
@@ -325,8 +325,6 @@ namespace Serialization {
     std::ostream& operator<<(std::ostream& Stream, const SimpleNode& ToSerialize);
     std::ostream& operator<<(std::ostream& Stream, const SimpleNode& ToSerialize)
     {
-        std::cout << "\nSerializing SimpleNode: \"" << ToSerialize.GetName() << "\".\n";
-        Stream << '\n';
         size_t NodeDepth = ToSerialize.GetDepth();
         for( size_t IndentCount = 0 ; IndentCount < NodeDepth ; ++IndentCount )
             { Stream << SimpleNode::Indent; }
@@ -338,10 +336,12 @@ namespace Serialization {
             Stream << SimpleNode::AttributeEndChar;
         }
         for( size_t NodeIndex = 0 ; NodeIndex < ToSerialize.GetNumNodes() ; ++NodeIndex )
-            { Stream << ToSerialize.GetNode(NodeIndex); }
-        Stream << '\n';
-        for( size_t IndentCount = 0 ; IndentCount < NodeDepth ; ++IndentCount )
-            { Stream << SimpleNode::Indent; }
+            { Stream << '\n' << ToSerialize.GetNode(NodeIndex); }
+        if( ToSerialize.GetNumNodes() > 0 ) {
+            Stream << '\n';
+            for( size_t IndentCount = 0 ; IndentCount < NodeDepth ; ++IndentCount )
+                { Stream << SimpleNode::Indent; }
+        }
         Stream << SimpleNode::NodeEndChar;
         return Stream;
     }
@@ -356,7 +356,8 @@ namespace Serialization {
         Stream.ignore(std::numeric_limits<std::streamsize>::max(),SimpleNode::NodeStartChar);
         std::getline(Stream,Temp,SimpleAttribute::SeparatorChar);
         ToDeserialize.SetName(Temp);
-        while( Stream.peek() != SimpleNode::NodeEndChar || Stream.peek() != std::istream::traits_type::eof() )
+        constexpr std::istream::int_type EoFBit = std::istream::traits_type::eof();
+        while( Stream.peek() != SimpleNode::NodeEndChar && Stream.peek() != EoFBit )
         {
             if( Stream.peek() == SimpleNode::AttributeStartChar ) {
                 Stream.ignore(2);
@@ -365,6 +366,7 @@ namespace Serialization {
                 Stream.ignore();
             }else if( Stream.peek() == SimpleNode::NodeStartChar ) {
                 Stream >> ToDeserialize.CreateChildNode();
+                Stream.ignore();
             }else{
                 Stream.ignore();
             }
@@ -536,75 +538,35 @@ namespace Serialization {
         virtual ~SimpleWalker() = default;
 
         ///////////////////////////////////////////////////////////////////////////////
+        // I/O Operations
+
+        /// @copydoc Serialization::TreeWalker::ReadFromStream(std::istream&)
+        virtual std::istream& ReadFromStream(std::istream& Stream) override
+            { return ( Stream >> this->GetSelfNode() ); }
+        /// @copydoc Serialization::TreeWalker::WriteToStream(std::ostream&)
+        virtual std::ostream& WriteToStream(std::ostream& Stream) const override
+            { return ( Stream << this->GetSelfNode() ); }
+
+        ///////////////////////////////////////////////////////////////////////////////
         // Name Operations
 
         /// @copydoc Serialization::TreeWalker::SetName(const StringView)
-        virtual void SetName(const StringView Name)
+        virtual void SetName(const StringView Name) override
             { this->GetSelfNode().SetName(Name); }
         /// @copydoc Serialization::TreeWalker::GetName() const
         [[nodiscard]]
-        virtual StringView GetName() const
+        virtual StringView GetName() const override
             { return this->GetSelfNode().GetName(); }
 
         ///////////////////////////////////////////////////////////////////////////////
         // Navigation
 
-        /// @copydoc Serialization::TreeWalker::AtRoot() const
+        /// @copydoc Serialization::TreeWalker::HasParent() const
         [[nodiscard]]
-        virtual Boole AtRoot() const
-            { return this->GetSelfNode().IsRoot(); }
-        /// @copydoc Serialization::TreeWalker::HasChildren() const
-        [[nodiscard]]
-        virtual Boole HasChildren() const
-            { return ( this->GetSelfNode().GetNumNodes() > 0 ); }
-        /// @copydoc Serialization::TreeWalker::HasChild(const StringView) const
-        [[nodiscard]]
-        virtual Boole HasChild(const StringView Name) const
-        {
-            for( size_t Index = 0 ; Index < this->GetSelfNode().GetNumNodes() ; ++Index )
-            {
-                if( this->GetSelfNode().GetNode(Index).GetName() == Name ) {
-                    return true;
-                }
-            }
-            return false;
-        }
-        /// @copydoc Serialization::TreeWalker::HasNextSibling() const
-        [[nodiscard]]
-        virtual Boole HasNextSibling() const
-        {
-            if( this->AtRoot() ) {
-                return false;
-            }
-            return ( this->SelfIndex < this->GetParentNode().GetNumNodes() - 1 );
-        }
-        /// @copydoc Serialization::TreeWalker::HasPreviousSibling() const
-        [[nodiscard]]
-        virtual Boole HasPreviousSibling() const
-        {
-            return ( this->SelfIndex > 0 );
-        }
-
-        /// @copydoc Serialization::TreeWalker::Next()
-        virtual Serialization::TreeWalker& Next()
-        {
-            if( this->HasNextSibling() ) {
-                this->SelfIndex++;
-                this->SelfNode = this->GetParentNode().GetNode(this->SelfIndex);
-            }
-            return *this;
-        }
-        /// @copydoc Serialization::TreeWalker::Previous()
-        virtual Serialization::TreeWalker& Previous()
-        {
-            if( this->HasPreviousSibling() ) {
-                this->SelfIndex--;
-                this->SelfNode = this->GetParentNode().GetNode(this->SelfIndex);
-            }
-            return *this;
-        }
-        /// @copydoc Serialization::TreeWalker::Parent()
-        virtual Serialization::TreeWalker& Parent()
+        virtual Boole HasParent() const override
+            { return !this->GetSelfNode().IsRoot(); }
+        /// @copydoc Serialization::TreeWalker::MoveToParent()
+        virtual Serialization::TreeWalker& MoveToParent() override
         {
             SimpleNode& Parent = this->GetParentNode();
             for( size_t Index = 0 ; Index < Parent.GetNumNodes() ; ++Index )
@@ -617,16 +579,67 @@ namespace Serialization {
             this->SelfNode = Parent;
             return *this;
         }
-        /// @copydoc Serialization::TreeWalker::FirstChild()
-        virtual Serialization::TreeWalker& FirstChild()
+
+        /// @copydoc Serialization::TreeWalker::HasNextSibling() const
+        [[nodiscard]]
+        virtual Boole HasNextSibling() const override
+        {
+            if( !this->HasParent() ) {
+                return false;
+            }
+            return ( this->SelfIndex < this->GetParentNode().GetNumNodes() - 1 );
+        }
+        /// @copydoc Serialization::TreeWalker::MoveToNext()
+        virtual Serialization::TreeWalker& MoveToNext() override
+        {
+            if( this->HasNextSibling() ) {
+                this->SelfIndex++;
+                this->SelfNode = this->GetParentNode().GetNode(this->SelfIndex);
+            }
+            return *this;
+        }
+        /// @copydoc Serialization::TreeWalker::HasPreviousSibling() const
+        [[nodiscard]]
+        virtual Boole HasPreviousSibling() const override
+        {
+            return ( this->SelfIndex > 0 );
+        }
+        /// @copydoc Serialization::TreeWalker::MoveToPrevious()
+        virtual Serialization::TreeWalker& MoveToPrevious() override
+        {
+            if( this->HasPreviousSibling() ) {
+                this->SelfIndex--;
+                this->SelfNode = this->GetParentNode().GetNode(this->SelfIndex);
+            }
+            return *this;
+        }
+
+        /// @copydoc Serialization::TreeWalker::HasChildren() const
+        [[nodiscard]]
+        virtual Boole HasChildren() const override
+            { return ( this->GetSelfNode().GetNumNodes() > 0 ); }
+        /// @copydoc Serialization::TreeWalker::HasChild(const StringView) const
+        [[nodiscard]]
+        virtual Boole HasChild(const StringView Name) const override
+        {
+            for( size_t Index = 0 ; Index < this->GetSelfNode().GetNumNodes() ; ++Index )
+            {
+                if( this->GetSelfNode().GetNode(Index).GetName() == Name ) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        /// @copydoc Serialization::TreeWalker::MoveToFirstChild()
+        virtual Serialization::TreeWalker& MoveToFirstChild() override
         {
             this->SelfNode = this->GetSelfNode().GetNode(0);
             this->SelfIndex = 0;
             return *this;
         }
-        /// @copydoc Serialization::TreeWalker::Child(const StringView)
+        /// @copydoc Serialization::TreeWalker::MoveToChild(const StringView)
         [[nodiscard]]
-        virtual Boole Child(const StringView Name)
+        virtual Boole MoveToChild(const StringView Name) override
         {
             for( size_t Index = 0 ; Index < this->GetSelfNode().GetNumNodes() ; ++Index )
             {
@@ -642,7 +655,7 @@ namespace Serialization {
 
         /// @copydoc Serialization::TreeWalker::CreateChild(const StringView, const MemberTags, const Boole)
         [[nodiscard]]
-        virtual Boole CreateChild(const StringView Name, const MemberTags Tags, const Boole Move)
+        virtual Boole CreateChild(const StringView Name, const MemberTags Tags, const Boole Move) override
         {
             (void)Tags;
             for( size_t Index = 0 ; Index < this->GetSelfNode().GetNumNodes() ; ++Index )
@@ -666,11 +679,11 @@ namespace Serialization {
 
         /// @copydoc Serialization::TreeWalker::HasAttributes() const
         [[nodiscard]]
-        virtual Boole HasAttributes() const
+        virtual Boole HasAttributes() const override
             { return ( this->GetSelfNode().GetNumAttributes() > 0 ); }
         /// @copydoc Serialization::TreeWalker::HasAttribute(const StringView) const
         [[nodiscard]]
-        virtual Boole HasAttribute(const StringView Name) const
+        virtual Boole HasAttribute(const StringView Name) const override
         {
             for( size_t Index = 0 ; Index < this->GetSelfNode().GetNumAttributes() ; ++Index )
             {
@@ -682,7 +695,7 @@ namespace Serialization {
         }
         /// @copydoc Serialization::TreeWalker::CreateAttribute(const StringView, const MemberTags)
         [[nodiscard]]
-        virtual Boole CreateAttribute(const StringView Name, const MemberTags Tags)
+        virtual Boole CreateAttribute(const StringView Name, const MemberTags Tags) override
         {
             (void)Tags;
             for( size_t Index = 0 ; Index < this->GetSelfNode().GetNumAttributes() ; ++Index )

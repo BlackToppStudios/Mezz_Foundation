@@ -69,8 +69,6 @@ namespace Serialization {
     ///////////////////////////////////////////////////////////////////////////////
     // Backend Interface
 
-    // Needs ObjectNode forward declare
-
     class MEZZ_LIB BackendBase
     {
     public:
@@ -222,6 +220,18 @@ namespace Serialization {
         virtual ~TreeWalker() = default;
 
         ///////////////////////////////////////////////////////////////////////////////
+        // I/O Operations
+
+        /// @brief Reads a node and all child nodes from a stream.
+        /// @param Stream The stream to be read from.
+        /// @return Returns the stream that was read from.
+        virtual std::istream& ReadFromStream(std::istream& Stream) = 0;
+        /// @brief Writes this node and all child nodes to a stream.
+        /// @param Stream The stream to write to.
+        /// @return Returns the stream that was written to.
+        virtual std::ostream& WriteToStream(std::ostream& Stream) const = 0;
+
+        ///////////////////////////////////////////////////////////////////////////////
         // Name Operations
 
         /// @brief Sets the name of the Node being visited.
@@ -235,26 +245,78 @@ namespace Serialization {
         ///////////////////////////////////////////////////////////////////////////////
         // Navigation
 
+        /// @brief Gets whether the current node has a parent node.
+        /// @remarks This function serves as the check for @ref MoveToParent. @n
+        /// If this function returns false, then the walker is at the root node.
+        /// @return Returns true if the current node has a parent node, or false if it is the root node.
         [[nodiscard]]
-        virtual Boole AtRoot() const = 0;
-        [[nodiscard]]
-        virtual Boole HasChildren() const = 0;
-        [[nodiscard]]
-        virtual Boole HasChild(const StringView Name) const = 0;
+        virtual Boole HasParent() const = 0;
+        /// @brief Moves the walker to the parent node of the current node.
+        /// @return Returns a reference to this.
+        virtual TreeWalker& MoveToParent() = 0;
+
+        /// @brief Gets whether there is a sibling node ahead of the current node.
+        /// @remarks This function serves as the check for @ref MoveToNext.
+        /// @return Returns true if there is a sibling node ahead of the current node, false otherwise.
         [[nodiscard]]
         virtual Boole HasNextSibling() const = 0;
+        /// @brief Moves the walker to the next sibling node.
+        /// @return Returns a reference to this.
+        virtual TreeWalker& MoveToNext() = 0;
+        /// @brief Gets whether there is a sibling node behind the current node.
+        /// @remarks This function serves as the check for @ref MoveToPrevious.
+        /// @return Returns true if there is a sibling node behind the current node, false otherwise.
         [[nodiscard]]
         virtual Boole HasPreviousSibling() const = 0;
+        /// @brief Moves the walker to the previous sibling node.
+        /// @return Returns a reference to this.
+        virtual TreeWalker& MoveToPrevious() = 0;
 
-        virtual TreeWalker& Next() = 0;
-        virtual TreeWalker& Previous() = 0;
-        virtual TreeWalker& Parent() = 0;
-        virtual TreeWalker& FirstChild() = 0;
+        /// @brief Gets whether the current node has any child nodes.
+        /// @remarks This function serves as the check for @ref MoveToFirstChild.
+        /// @return Returns true if the current node has one or more child nodes, false otherwise.
         [[nodiscard]]
-        virtual Boole Child(const StringView Name) = 0;
+        virtual Boole HasChildren() const = 0;
+        /// @brief Gets whether there is a specific named child node to the current node.
+        /// @remarks This function serves as the check for @ref MoveToChild.
+        /// @param Name The name of the child to move to.
+        /// @return Returns true if the named child was found and was moved to, false otherwise.
+        [[nodiscard]]
+        virtual Boole HasChild(const StringView Name) const = 0;
+        /// @brief Moves the walker to the first child node of the current node.
+        /// @return Returns a reference to this.
+        virtual TreeWalker& MoveToFirstChild() = 0;
+        /// @brief Moves to a specific named child node of the current node.
+        /// @param Name The name of the child to be moved to.
+        /// @return Returns true if the named node was found and successfully moved to, false otherwise.
+        [[nodiscard]]
+        virtual Boole MoveToChild(const StringView Name) = 0;
 
+        /// @brief Moves the walker back to the root node of the hierarchy.
+        /// @return Returns a reference to this.
+        TreeWalker& MoveToRoot()
+        {
+            while( this->HasParent() ) {
+                this->MoveToParent();
+            }
+            return *this;
+        }
+
+        /// @brief Creates a new child node under the current node.
+        /// @param Name The name of the child node to be created.
+        /// @param Tags Member tags describing the data to be (de)serialized.
+        /// @param Move Whether or not the child should be moved to immediately after being created.
+        /// @return Returns true if the child was successfully created, false if there was a failure.
         [[nodiscard]]
         virtual Boole CreateChild(const StringView Name, const MemberTags Tags, const Boole Move) = 0;
+        /// @brief Creates a new child node under the current node.
+        /// @param Name The name of the child node to be created.
+        /// @param Move Whether or not the child should be moved to immediately after being created.
+        /// @return Returns true if the child was successfully created, false if there was a failure.
+        [[nodiscard]]
+        Boole CreateChild(const StringView Name, const Boole Move)
+            { return this->CreateChild(Name,MemberTags::None,Move); }
+
 
         ///////////////////////////////////////////////////////////////////////////////
         // Attributes
@@ -279,6 +341,7 @@ namespace Serialization {
             StringView AttribView(Attrib.data(),Attrib.size());
             this->Attribute(Name,Tags,AttribView);
         }
+
         template<typename AttributeType,
                  typename = std::enable_if_t< !std::is_same_v<std::decay_t<AttributeType>,String> > >
         void Attribute(const StringView Name, AttributeType&& Attrib)
@@ -289,7 +352,9 @@ namespace Serialization {
         {
             this->Attribute(Name,MemberTags::None,Attrib);
         }
-        template<typename AttributeType>
+
+        template<typename AttributeType,
+                 typename = std::enable_if_t< !std::is_same_v<std::decay_t<AttributeType>,String> > >
         [[nodiscard]]
         std::optional<AttributeType> Attribute(const StringView Name) const
         {
@@ -297,6 +362,20 @@ namespace Serialization {
                 return this->GetValue<AttributeType>(Name);
             }
             return std::optional<AttributeType>();
+        }
+        template<typename AttributeType,
+                 typename = std::enable_if_t< std::is_same_v<std::decay_t<AttributeType>,String> > >
+        [[nodiscard]]
+        std::optional<String> Attribute(const StringView Name) const
+        {
+            if( this->HasAttribute(Name) ) {
+                std::optional<StringView> Attrib = this->GetValue<StringView>(Name);
+                if( Attrib ) {
+                    String Ret{ Attrib.value() };
+                    return std::optional<String>{ Ret };
+                }
+            }
+            return std::optional<String>();
         }
     };//TreeWalker
 

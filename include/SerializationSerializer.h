@@ -94,8 +94,26 @@ namespace Serialization {
             Logger(Log.rdbuf()),
             Walker(ToWrap)
             {  }
+        /// @brief Copy constructor.
+        /// @param Other The other SerializerWalker to NOT be copied.
+        SerializerWalker(const SerializerWalker& Other) = delete;
+        /// @brief Move constructor.
+        /// @param Other The other SerializerWalker to be moved.
+        SerializerWalker(SerializerWalker&& Other) = default;
         /// @brief Class destructor.
         ~SerializerWalker() = default;
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Assignment Operators
+
+        /// @brief Copy Assignment Operator.
+        /// @param Other The other SerializerWalker to NOT be copied.
+        /// @return Returns a reference to this.
+        SerializerWalker& operator=(const SerializerWalker& Other) = delete;
+        /// @brief Move Assignment Operator.
+        /// @param Other The other SerializerWalker to be moved.
+        /// @return Returns a reference to this.
+        SerializerWalker& operator=(SerializerWalker&& Other) = default;
 
         ///////////////////////////////////////////////////////////////////////////////
         // Logging
@@ -154,40 +172,60 @@ namespace Serialization {
         ///////////////////////////////////////////////////////////////////////////////
         // Navigation
 
+        /// @copydoc TreeWalker::HasParent() const
         [[nodiscard]]
-        Boole AtRoot() const
-            { return this->GetWalker().AtRoot(); }
-        [[nodiscard]]
-        Boole HasChildren() const
-            { return this->GetWalker().HasChildren(); }
-        [[nodiscard]]
-        Boole HasChild(const StringView Name) const
-            { return this->GetWalker().HasChild(Name); }
-        [[nodiscard]]
-        Boole HasNextSibling() const
-            { return this->GetWalker().HasNextSibling(); }
-        [[nodiscard]]
-        Boole HasPreviousSibling() const
-            { return this->GetWalker().HasPreviousSibling(); }
+        virtual Boole HasParent() const
+            { return this->GetWalker().HasParent(); }
+        /// @copydoc TreeWalker::MoveToParent()
+        virtual TreeWalker& MoveToParent()
+            { return this->GetWalker().MoveToParent(); }
 
-        TreeWalker& Next()
-            { return this->GetWalker().Next(); }
-        TreeWalker& Previous()
-            { return this->GetWalker().Previous(); }
-        TreeWalker& Parent()
-            { return this->GetWalker().Parent(); }
-        TreeWalker& FirstChild()
-            { return this->GetWalker().FirstChild(); }
+        /// @copydoc TreeWalker::HasNextSibling() const
         [[nodiscard]]
-        Boole Child(const StringView Name)
-            { return this->GetWalker().Child(Name); }
+        virtual Boole HasNextSibling() const
+            { return this->GetWalker().HasNextSibling(); }
+        /// @copydoc TreeWalker::MoveToNext()
+        virtual TreeWalker& MoveToNext()
+            { return this->GetWalker().MoveToNext(); }
+        /// @copydoc TreeWalker::HasPreviousSibling() const
+        [[nodiscard]]
+        virtual Boole HasPreviousSibling() const
+            { return this->GetWalker().HasPreviousSibling(); }
+        /// @copydoc TreeWalker::MoveToPrevious()
+        virtual TreeWalker& MoveToPrevious()
+            { return this->GetWalker().MoveToPrevious(); }
+
+        /// @copydoc TreeWalker::HasChildren() const
+        [[nodiscard]]
+        virtual Boole HasChildren() const
+            { return this->GetWalker().HasChildren(); }
+        /// @copydoc TreeWalker::HasChild(const StringView) const
+        [[nodiscard]]
+        virtual Boole HasChild(const StringView Name) const
+            { return this->GetWalker().HasChild(Name); }
+        /// @copydoc TreeWalker::MoveToFirstChild()
+        virtual TreeWalker& MoveToFirstChild()
+            { return this->GetWalker().MoveToFirstChild(); }
+        /// @copydoc TreeWalker::MoveToChild(const StringView)
+        [[nodiscard]]
+        virtual Boole MoveToChild(const StringView Name)
+            { return this->GetWalker().MoveToChild(Name); }
+
+        /// @copydoc TreeWalker::MoveToRoot()
+        TreeWalker& MoveToRoot()
+            { return this->GetWalker().MoveToRoot(); }
 
         ///////////////////////////////////////////////////////////////////////////////
         // Serializer Specific Navigation
 
+        /// @copydoc TreeWalker::CreateChild(const StringView, const MemberTags, const Boole)
         [[nodiscard]]
-        Boole CreateChild(const StringView Name, const MemberTags Tags, const Boole Move)
+        virtual Boole CreateChild(const StringView Name, const MemberTags Tags, const Boole Move)
             { return this->GetWalker().CreateChild(Name,Tags,Move); }
+        /// @copydoc TreeWalker::CreateChild(const StringView, const Boole)
+        [[nodiscard]]
+        Boole CreateChild(const StringView Name, const Boole Move)
+            { return this->GetWalker().CreateChild(Name,Move); }
 
         ///////////////////////////////////////////////////////////////////////////////
         // Attributes
@@ -208,16 +246,13 @@ namespace Serialization {
             { this->GetWalker().Attribute(Name,Tags,std::forward<AttributeType>(Attrib)); }
         void Attribute(const StringView Name, const MemberTags Tags, const String& Attrib)
             { this->GetWalker().Attribute(Name,Tags,Attrib); }
+
         template<typename AttributeType,
                  typename = std::enable_if_t< !std::is_same_v<std::decay_t<AttributeType>,String> > >
         void Attribute(const StringView Name, AttributeType&& Attrib)
             { this->GetWalker().Attribute(Name,std::forward<AttributeType>(Attrib)); }
         void Attribute(const StringView Name, const String& Attrib)
             { this->GetWalker().Attribute(Name,Attrib); }
-        /*template<typename AttributeType>
-        [[nodiscard]]
-        std::optional<AttributeType> Attribute(const StringView Name)
-            { return this->GetWalker().Attribute<AttributeType>(Name); }//*/
     };//SerializerWalker
 
     /// @brief Helper class scope-based navigation of a serialization tree during serialization.
@@ -250,7 +285,7 @@ namespace Serialization {
         ~ScopedSerializationNode()
         {
             if( this->IsValid() ) {
-                this->Node->Parent();
+                this->Node->MoveToParent();
             }
         }
 
@@ -278,14 +313,14 @@ namespace Serialization {
                                       const Int32 Version,
                                       Serialization::SerializerWalker& Walker)
         {
-            Walker.GetLogger() << "\nEntering \"SerializeClassValidation\".\n";
+            Walker.GetLogger() << "Entering \"SerializeClassValidation\".\n";
             (void)ToSerialize;
             using DecayedType = std::decay_t<SerializeType>;
             if constexpr( IsRegistered<DecayedType>() ) {
                 Walker.Attribute("TypeName",GetRegisteredName<DecayedType>());
                 Walker.Attribute("Version",Version);
             }
-            Walker.GetLogger() << "\nExiting \"SerializeClassValidation\".\n";
+            Walker.GetLogger() << "Exiting \"SerializeClassValidation\".\n";
         }
         /// @brief Serializes a String or primitive type.
         /// @tparam SerializeType The deduced type to be serialized.
@@ -314,7 +349,6 @@ namespace Serialization {
                                  Serialization::SerializerWalker& Walker)
         {
             using DecayedType = std::decay_t<SerializeType>;
-            std::cout << "\nEntering \"SerializeAllMembers\" for type \"" << GetRegisteredName<DecayedType>() << "\".\n";
             if constexpr( IsRegistered<DecayedType>() ) {
                 DoForAllMembers<DecayedType>([&](const auto& Member) {
                     constexpr MemberTags Tags = std::remove_reference_t<decltype(Member)>::GetTags();
@@ -323,7 +357,6 @@ namespace Serialization {
                     }
                 });
             }
-            std::cout << "\nExiting \"SerializeAllMembers\" for type \"" << GetRegisteredName<DecayedType>() << "\".\n";
         }
         /// @brief Serializes an associative container to the current node.
         /// @tparam SerializeType The deduced type to be serialized.
@@ -399,15 +432,15 @@ namespace Serialization {
                                    const Int32 Version,
                                    Serialization::SerializerWalker& Walker)
         {
-            std::cout << "\nEntering \"SerializeGenericClass\".\n";
             using DecayedType = std::decay_t<SerializeType>;
+            std::cout << "Entering SerializeGenericClass<" << GetRegisteredName<DecayedType>() << ">.\n";
             if constexpr( HasSerialize<DecayedType>() ) {
                 ToSerialize.Serialize(Version,Walker);
             }else if constexpr( IsRegistered<DecayedType>() ) {
                 Serialization::Impl::SerializeClassValidation(ToSerialize,Version,Walker);
                 Serialization::Impl::SerializeAllMembers(ToSerialize,Walker);
             }
-            std::cout << "\nExiting \"SerializeGenericClass\".\n";
+            std::cout << "Exiting SerializeGenericClass<" << GetRegisteredName<DecayedType>() << ">.\n";
         }
         /// @brief Serializes a struct, class, or primitive behind a owned pointer.
         /// @tparam SerializeType The deduced type to be serialized.
@@ -426,7 +459,7 @@ namespace Serialization {
             static_assert( std::is_pointer_v<SerializeType> , "SerializeType is not a pointer." );
             using DecayedType = std::remove_pointer_t<SerializeType>;
             if constexpr( IsRegistered<DecayedType>() ) {
-                Walker.Attribute("CanDeserialize",true);
+                Walker.Attribute("CanDeserialize",DeserializeTrue);
                 Walker.Attribute("InstanceID",InstanceID);
                 ProtoSerialize(*ToSerialize,Tags,Version,Walker);
             }
@@ -445,9 +478,25 @@ namespace Serialization {
             static_assert( std::is_pointer_v<SerializeType> , "SerializeType is not a pointer." );
             using DecayedType = std::remove_pointer_t<SerializeType>;
             if constexpr( IsRegistered<DecayedType>() ) {
-                Walker.Attribute("CanDeserialize",false);
+                Walker.Attribute("CanDeserialize",DeserializeFalse);
                 Walker.Attribute("TypeName",GetRegisteredName<DecayedType>());
                 Walker.Attribute("InstanceID",InstanceID);
+            }
+        }
+        /// @brief Serializes necessary metadata for a null pointer.
+        /// @tparam SerializeType The deduced type to be serialized.
+        /// @param ToSerialize The null pointer to be (kinda) serialized.  Used to serialize the type name.
+        /// @param Walker The walker/visitor navigating the serialization tree.
+        template<class SerializeType>
+        void SerializeNullPointer(const SerializeType ToSerialize,
+                                  Serialization::SerializerWalker& Walker)
+        {
+            (void)ToSerialize;
+            static_assert( std::is_pointer_v<SerializeType> , "SerializeType is not a pointer." );
+            using DecayedType = std::remove_pointer_t<SerializeType>;
+            if constexpr( IsRegistered<DecayedType>() ) {
+                Walker.Attribute("CanDeserialize",DeserializeNull);
+                Walker.Attribute("TypeName",GetRegisteredName<DecayedType>());
             }
         }
 
@@ -465,13 +514,20 @@ namespace Serialization {
                               const Int32 Version,
                               Serialization::SerializerWalker& Walker)
         {
+            using DecayedType = std::remove_pointer_t<SerializeType>;
             static_assert( std::is_pointer_v<SerializeType> , "SerializeType is not a pointer." );
-            const ObjectCounter Counter = Walker.TrackNonSharedPointer(ToSerialize,IsOwned(Tags));
-            if( Serialization::IsNotOwned(Tags) ) {
-                Serialization::Impl::SerializeNonOwnedPointer(Counter.InstanceID,ToSerialize,Walker);
+            std::cout << "Entering SerializePointer<" << GetRegisteredName<DecayedType>() << ">.\n";
+            if( ToSerialize != nullptr ) {
+                const ObjectCounter Counter = Walker.TrackNonSharedPointer(ToSerialize,IsOwned(Tags));
+                if( Serialization::IsNotOwned(Tags) ) {
+                    Impl::SerializeNonOwnedPointer(Counter.InstanceID,ToSerialize,Walker);
+                }else{
+                    Impl::SerializeOwnedPointer(Counter.InstanceID,ToSerialize,Tags,Version,Walker);
+                }
             }else{
-                Serialization::Impl::SerializeOwnedPointer(Counter.InstanceID,ToSerialize,Tags,Version,Walker);
+                Impl::SerializeNullPointer(ToSerialize,Walker);
             }
+            std::cout << "Exiting SerializePointer<" << GetRegisteredName<DecayedType>() << ">.\n";
         }
         /// @brief Serializes a class, struct, or primitive type behind a shared_ptr.
         /// @tparam SerializeType The deduced type to be serialized.
@@ -485,11 +541,15 @@ namespace Serialization {
                                     const Int32 Version,
                                     Serialization::SerializerWalker& Walker)
         {
-            const ObjectCounter& CountInfo = Walker.TrackSharedPointer(ToSerialize);
-            if( CountInfo.OwnerOrJoinCount > 1 ) {
-                Impl::SerializeNonOwnedPointer(CountInfo.InstanceID,ToSerialize.get(),Walker);
+            if( ToSerialize ) {
+                const ObjectCounter& CountInfo = Walker.TrackSharedPointer(ToSerialize);
+                if( CountInfo.OwnerOrJoinCount > 1 ) {
+                    Impl::SerializeNonOwnedPointer(CountInfo.InstanceID,ToSerialize.get(),Walker);
+                }else{
+                    Impl::SerializeOwnedPointer(CountInfo.InstanceID,ToSerialize.get(),Tags,Version,Walker);
+                }
             }else{
-                Impl::SerializeOwnedPointer(CountInfo.InstanceID,ToSerialize.get(),Tags,Version,Walker);
+                Impl::SerializeNullPointer(ToSerialize.get(),Walker);
             }
         }
         /// @brief Serializes type behind a polymorphic pointer.
@@ -505,17 +565,21 @@ namespace Serialization {
                                          Serialization::SerializerWalker& Walker)
         {
             static_assert( std::is_pointer_v<SerializeType> , "SerializeType is not a pointer." );
-            const std::type_info& BaseInfo = typeid(ToSerialize);
-            const std::type_info& DerivedInfo = typeid(*ToSerialize);
-            if( std::type_index(BaseInfo) != std::type_index(DerivedInfo) ) {
-                Serialization::PolymorphicCaster* Caster = Serialization::GetPolymorphicCaster(BaseInfo,DerivedInfo);
-                if( Caster != nullptr ) {
-                    Caster->Serialize(ToSerialize,Tags,Version,Walker);
+            if( ToSerialize != nullptr ) {
+                const std::type_info& BaseInfo = typeid( std::remove_pointer_t<SerializeType> );
+                const std::type_info& DerivedInfo = typeid( *ToSerialize );
+                if( std::type_index(BaseInfo) != std::type_index(DerivedInfo) ) {
+                    PolymorphicCaster* Caster = GetPolymorphicCaster(BaseInfo,DerivedInfo);
+                    if( Caster != nullptr ) {
+                        Caster->Serialize(ToSerialize,Tags,Version,Walker);
+                    }else{
+                        throw std::runtime_error("No caster found for polymorphic object.");
+                    }
                 }else{
-                    throw std::runtime_error("No caster found for polymorphic object.");
+                    Impl::SerializePointer(ToSerialize,Tags,Version,Walker);
                 }
             }else{
-                Impl::SerializePointer(ToSerialize,Tags,Version,Walker);
+                Impl::SerializeNullPointer(ToSerialize,Walker);
             }
         }
         /// @brief Serializes type behind a polymorphic pointer.
@@ -530,18 +594,21 @@ namespace Serialization {
                                          const Int32 Version,
                                          Serialization::SerializerWalker& Walker)
         {
-            static_assert( std::is_pointer_v<SerializeType> , "SerializeType is not a pointer." );
-            const std::type_info& BaseInfo = typeid(ToSerialize.get());
-            const std::type_info& DerivedInfo = typeid(*ToSerialize.get());
-            if( std::type_index(BaseInfo) != std::type_index(DerivedInfo) ) {
-                Serialization::PolymorphicCaster* Caster = Serialization::GetPolymorphicCaster(BaseInfo,DerivedInfo);
-                if( Caster != nullptr ) {
-                    Caster->Serialize(ToSerialize,Tags,Version,Walker);
+            if( ToSerialize ) {
+                const std::type_info& BaseInfo = typeid( SerializeType );
+                const std::type_info& DerivedInfo = typeid( *ToSerialize.get() );
+                if( std::type_index(BaseInfo) != std::type_index(DerivedInfo) ) {
+                    PolymorphicCaster* Caster = GetPolymorphicCaster(BaseInfo,DerivedInfo);
+                    if( Caster != nullptr ) {
+                        Caster->Serialize(ToSerialize,Tags,Version,Walker);
+                    }else{
+                        throw std::runtime_error("No caster found for polymorphic object.");
+                    }
                 }else{
-                    throw std::runtime_error("No caster found for polymorphic object.");
+                    Impl::SerializeSharedPointer(ToSerialize,Tags,Version,Walker);
                 }
             }else{
-                Impl::SerializeSharedPointer(ToSerialize,Tags,Version,Walker);
+                Impl::SerializeNullPointer(ToSerialize.get(),Walker);
             }
         }
     }//Impl

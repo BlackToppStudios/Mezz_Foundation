@@ -227,9 +227,9 @@ namespace Serialization {
         /// @brief Deleted Copy Constructor.
         /// @param Other The other tracker that WON'T be copied.
         SerializerPointerTracker(const SerializerPointerTracker& Other) = delete;
-        /// @brief Deleted Move Constructor.
-        /// @param Other The other track that WON'T be moved.
-        SerializerPointerTracker(SerializerPointerTracker&& Other) = delete;
+        /// @brief Move Constructor.
+        /// @param Other The other track that will be moved.
+        SerializerPointerTracker(SerializerPointerTracker&& Other) = default;
         /// @brief Class destructor.
         ~SerializerPointerTracker() = default;
 
@@ -237,10 +237,10 @@ namespace Serialization {
         /// @param Other The other tracker that WON'T be copied.
         /// @return Returns a reference to this, or at least...it would.
         SerializerPointerTracker& operator=(const SerializerPointerTracker& Other) = delete;
-        /// @brief Deleted Move Assignment Operator.
-        /// @param Other The other tracker that WON'T be moved.
-        /// @return Returns a reference to this, or at least...it would.
-        SerializerPointerTracker& operator=(SerializerPointerTracker&& Other) = delete;
+        /// @brief Move Assignment Operator.
+        /// @param Other The other tracker that will be moved.
+        /// @return Returns a reference to this.
+        SerializerPointerTracker& operator=(SerializerPointerTracker&& Other) = default;
 
         ///////////////////////////////////////////////////////////////////////////////
         // Tracking

@@ -62,6 +62,12 @@ namespace SerializationTest {
         Integer IntVarOne = -100;
         Integer IntVarTwo = 100;
 
+        Simple() = default;
+        Simple(const Integer One, const Integer Two) :
+            IntVarOne(One),
+            IntVarTwo(Two)
+            {  }
+
         static constexpr StringView RegisterName()
             { return "Simple"; }
 
@@ -78,6 +84,12 @@ namespace SerializationTest {
     struct SimpleBase
     {
         String StringVar = "Base";
+
+        SimpleBase() = default;
+        SimpleBase(const String& Str) :
+            StringVar(Str)
+            {  }
+        virtual ~SimpleBase() = default;
 
         static constexpr StringView RegisterName()
             { return "SimpleBase"; }
@@ -96,6 +108,20 @@ namespace SerializationTest {
         double DoubleVar = 3.1415926;
         float FloatVarOne = -3.14f;
         float FloatVarTwo = 3.14f;
+
+        SimpleDerivedOne() = default;
+        SimpleDerivedOne(const double Dbl, const float One, const float Two) :
+            DoubleVar(Dbl),
+            FloatVarOne(One),
+            FloatVarTwo(Two)
+            {  }
+        SimpleDerivedOne(const String& Str, const double Dbl, const float One, const float Two) :
+            SimpleBase(Str),
+            DoubleVar(Dbl),
+            FloatVarOne(One),
+            FloatVarTwo(Two)
+            {  }
+        virtual ~SimpleDerivedOne() = default;
 
         static constexpr StringView RegisterName()
             { return "SimpleDerivedOne"; }
@@ -121,6 +147,29 @@ namespace SerializationTest {
         UInt16 ShortUIntVar = 42;
         Int16 ShortIntVar = -42;
 
+        SimpleDerivedTwo() = default;
+        SimpleDerivedTwo(const UInt32 LongOne,
+                         const Int32 LongTwo,
+                         const UInt16 ShortOne,
+                         const UInt16 ShortTwo) :
+            UIntVar(LongOne),
+            IntVar(LongTwo),
+            ShortUIntVar(ShortOne),
+            ShortIntVar(ShortTwo)
+            {  }
+        SimpleDerivedTwo(const String& Str,
+                         const UInt32 LongOne,
+                         const Int32 LongTwo,
+                         const UInt16 ShortOne,
+                         const UInt16 ShortTwo) :
+            SimpleBase(Str),
+            UIntVar(LongOne),
+            IntVar(LongTwo),
+            ShortUIntVar(ShortOne),
+            ShortIntVar(ShortTwo)
+            {  }
+        virtual ~SimpleDerivedTwo() = default;
+
         static constexpr StringView RegisterName()
             { return "SimpleDerivedTwo"; }
 
@@ -143,6 +192,21 @@ namespace SerializationTest {
     {
         double DoubleVar = 8.675309;
 
+        SimpleDerivedThree() = default;
+        SimpleDerivedThree(const double Dbl) :
+            DoubleVar(Dbl)
+            {  }
+        SimpleDerivedThree(const String& Str,
+                           const UInt32 LongOne,
+                           const Int32 LongTwo,
+                           const UInt16 ShortOne,
+                           const UInt16 ShortTwo,
+                           const double Dbl) :
+            SimpleDerivedTwo(Str,LongOne,LongTwo,ShortOne,ShortTwo),
+            DoubleVar(Dbl)
+            {  }
+        virtual ~SimpleDerivedThree() = default;
+
         static constexpr StringView RegisterName()
             { return "SimpleDerivedThree"; }
 
@@ -160,11 +224,12 @@ namespace SerializationTest {
 
     class ComposedOne
     {
-    protected:
-        Simple SimpleObj;
-        SimpleBase* SimplePtr;
-        SuperComposed* Parent;
     public:
+        Simple SimpleObj;
+        SimpleBase* SimplePtr = nullptr;
+        SuperComposed* Parent = nullptr;
+
+        ComposedOne() = default;
         ComposedOne(SimpleBase* Ptr, SuperComposed* Creator) :
             SimplePtr(Ptr),
             Parent(Creator)
@@ -178,7 +243,7 @@ namespace SerializationTest {
             using namespace Mezzanine;
             return Members(
                 MakeMemberAccessor("SimpleObj",&ComposedOne::SimpleObj),
-                MakeMemberAccessor<MemberTags::None>("SimplePtr",&ComposedOne::SimplePtr),
+                MakeMemberAccessor<MemberTags::Own>("SimplePtr",&ComposedOne::SimplePtr),
                 MakeMemberAccessor<MemberTags::None>("Parent",&ComposedOne::Parent)
             );
         }
@@ -186,12 +251,13 @@ namespace SerializationTest {
 
     class ComposedTwo
     {
-    protected:
-        ComposedOne* OwnedComposed;
-        SimpleBase* NonOwnedSimpleObj;
-        SuperComposed* Parent;
-        std::shared_ptr<Simple> SharedSimplePtr;
     public:
+        ComposedOne* OwnedComposed = nullptr;
+        SimpleBase* NonOwnedSimpleObj = nullptr;
+        SuperComposed* Parent = nullptr;
+        std::shared_ptr<Simple> SharedSimplePtr;
+
+        ComposedTwo() = default;
         ComposedTwo(ComposedOne* Owned, SimpleBase* NonOwned, SuperComposed* Super, std::shared_ptr<Simple> Shared) :
             OwnedComposed(Owned),
             NonOwnedSimpleObj(NonOwned),
@@ -219,13 +285,13 @@ namespace SerializationTest {
 
     class SuperComposed
     {
-    protected:
+    public:
         std::vector<ComposedTwo*> ComposedVector;
         std::map<int,ComposedOne> ComposedMap;
         SimpleDerivedThree FirstDerived;
         SimpleDerivedTwo SecondDerived;
         SimpleDerivedOne ThirdDerived;
-    public:
+
         SuperComposed()
         {
             std::shared_ptr<Simple> SharedSimple = std::make_shared<Simple>();
@@ -277,18 +343,246 @@ AUTOMATIC_TEST_GROUP(SerializationTests,Serialization)
     using namespace Mezzanine;
     using namespace SerializationTest;
 
-    RegisterCasters<SimpleBase,SimpleDerivedOne,SimpleDerivedTwo>();
+    RegisterCasters<SimpleBase,SimpleDerivedOne,SimpleDerivedTwo,SimpleDerivedThree>();
 
-    SuperComposed FakeManagerOne;
-    SuperComposed FakeManagerTwo;
+    auto RootWrap = [](const String& ToWrap) -> String {
+        return "{Root \n    " + ToWrap + "\n}";
+    };
 
-    Serialization::SimpleBackend SerializerBack;
-    Serialization::SerializerWalker Walker(SerializerBack.GetWalker());
+    auto OutputToFile = [](const StringStream& Out) {
+        std::ofstream FileStream("SerializeOutput.txt");
+        FileStream << Out.str();
+        FileStream.close();
+    };//*/
 
-    Mezzanine::Serialize("FakeManager",FakeManagerOne,Serialization::LatestVersion,Walker);
-    //StringStream SerializedManager;
-    std::ofstream SerializedManager("SerializedOutput.txt");
-    SerializerBack.Write(SerializedManager);
+    {//Simple
+        const String SimpleText{
+            "{TestSimple [ TypeName:Simple Version:0 IntVarOne:12 IntVarTwo:24 ]}"
+        };
+        const String FullSimpleText = RootWrap(SimpleText);
+        Simple TestSimple(12,24);
+
+        {//Serialize
+            StringStream SerializeStream;
+            Serialization::SimpleBackend SerializerBack;
+            Serialization::SerializerWalker Walker(SerializerBack.GetWalker());
+
+            Mezzanine::Serialize("TestSimple",TestSimple,Serialization::LatestVersion,Walker);
+            SerializerBack.Write(SerializeStream);
+
+            TEST_EQUAL("Simple-Serialize",FullSimpleText,SerializeStream.str())
+        }//Serialize
+
+        {//Deserialize
+            Simple Result;
+            Serialization::SimpleBackend SerializerBack;
+            StringStream DeserializeStream(FullSimpleText);
+            SerializerBack.Read(DeserializeStream);
+
+            Serialization::DeserializerWalker Walker(SerializerBack.GetWalker());
+            Mezzanine::Deserialize("TestSimple",Result,Walker);
+
+            TEST_EQUAL("Simple-Deserialize-IntVarOne",TestSimple.IntVarOne,Result.IntVarOne);
+            TEST_EQUAL("Simple-Deserialize-IntVarTwo",TestSimple.IntVarTwo,Result.IntVarTwo);
+        }//Deserialize
+    }//Simple
+
+    {//SimpleBase
+        const String SimpleBaseText{
+            "{TestSimpleBase [ TypeName:SimpleBase Version:0 StringVar:OnlyBase ]}"
+        };
+        const String FullSimpleBaseText = RootWrap(SimpleBaseText);
+        SimpleBase TestSimpleBase("OnlyBase");
+
+        {//Serialize
+            StringStream SerializeStream;
+            Serialization::SimpleBackend SerializerBack;
+            Serialization::SerializerWalker Walker(SerializerBack.GetWalker());
+
+            Mezzanine::Serialize("TestSimpleBase",TestSimpleBase,Serialization::LatestVersion,Walker);
+            SerializerBack.Write(SerializeStream);
+
+            TEST_EQUAL("SimpleBase-Serialize",FullSimpleBaseText,SerializeStream.str())
+        }//Serialize
+
+        {//Deserialize
+            SimpleBase Result;
+            Serialization::SimpleBackend SerializerBack;
+            StringStream DeserializeStream(FullSimpleBaseText);
+            SerializerBack.Read(DeserializeStream);
+
+            Serialization::DeserializerWalker Walker(SerializerBack.GetWalker());
+            Mezzanine::Deserialize("TestSimpleBase",Result,Walker);
+
+            TEST_EQUAL("SimpleBase-Deserialize-StringVar",TestSimpleBase.StringVar,Result.StringVar);
+        }//Deserialize
+    }//SimpleBase
+
+    {//SimpleDerivedOne
+        const String DerivedOneText{
+            "{TestDerivedOne [ TypeName:SimpleDerivedOne Version:0 "
+            "StringVar:DerivedOne DoubleVar:2.71828 FloatVarOne:0.5 FloatVarTwo:-0.5 ]}"
+        };
+        const String FullDerivedOneText = RootWrap(DerivedOneText);
+        SimpleDerivedOne TestDerivedOne("DerivedOne",2.71828,0.5,-0.5);
+
+        {//Serialize
+            StringStream SerializeStream;
+            Serialization::SimpleBackend SerializerBack;
+            Serialization::SerializerWalker Walker(SerializerBack.GetWalker());
+
+            Mezzanine::Serialize("TestDerivedOne",TestDerivedOne,Serialization::LatestVersion,Walker);
+            SerializerBack.Write(SerializeStream);
+
+            TEST_EQUAL("SimpleDerivedOne-Serialize",FullDerivedOneText,SerializeStream.str())
+        }//Serialize
+
+        {//Deserialize
+            SimpleDerivedOne Result;
+            Serialization::SimpleBackend SerializerBack;
+            StringStream DeserializeStream(FullDerivedOneText);
+            SerializerBack.Read(DeserializeStream);
+
+            Serialization::DeserializerWalker Walker(SerializerBack.GetWalker());
+            Mezzanine::Deserialize("TestDerivedOne",Result,Walker);
+
+            TEST_EQUAL("SimpleDerivedOne-Deserialize-StringVar",TestDerivedOne.StringVar,Result.StringVar);
+            TEST_EQUAL("SimpleDerivedOne-Deserialize-DoubleVar",TestDerivedOne.DoubleVar,Result.DoubleVar);
+            TEST_EQUAL("SimpleDerivedOne-Deserialize-FloatVarOne",TestDerivedOne.FloatVarOne,Result.FloatVarOne);
+            TEST_EQUAL("SimpleDerivedOne-Deserialize-FloatVarTwo",TestDerivedOne.FloatVarTwo,Result.FloatVarTwo);
+        }//Deserialize
+    }//SimpleDerivedOne
+
+    {//SimpleDerivedTwo
+        const String DerivedTwoText{
+            "{TestDerivedTwo [ TypeName:SimpleDerivedTwo Version:0 "
+            "StringVar:DerivedTwo UIntVar:420 IntVar:-420 ShortUIntVar:666 ShortIntVar:-666 ]}"
+        };
+        const String FullDerivedTwoText = RootWrap(DerivedTwoText);
+        SimpleDerivedTwo TestDerivedTwo("DerivedTwo",420,-420,666,-666);
+
+        {//Serialize
+            StringStream SerializeStream;
+            Serialization::SimpleBackend SerializerBack;
+            Serialization::SerializerWalker Walker(SerializerBack.GetWalker());
+
+            Mezzanine::Serialize("TestDerivedTwo",TestDerivedTwo,Serialization::LatestVersion,Walker);
+            SerializerBack.Write(SerializeStream);
+
+            TEST_EQUAL("SimpleDerivedTwo-Serialize",FullDerivedTwoText,SerializeStream.str())
+        }//Serialize
+
+        {//Deserialize
+            SimpleDerivedTwo Result;
+            Serialization::SimpleBackend SerializerBack;
+            StringStream DeserializeStream(FullDerivedTwoText);
+            SerializerBack.Read(DeserializeStream);
+
+            Serialization::DeserializerWalker Walker(SerializerBack.GetWalker());
+            Mezzanine::Deserialize("TestDerivedTwo",Result,Walker);
+
+            TEST_EQUAL("SimpleDerivedTwo-Deserialize-StringVar",TestDerivedTwo.StringVar,Result.StringVar);
+            TEST_EQUAL("SimpleDerivedTwo-Deserialize-UIntVar",TestDerivedTwo.UIntVar,Result.UIntVar);
+            TEST_EQUAL("SimpleDerivedTwo-Deserialize-IntVar",TestDerivedTwo.IntVar,Result.IntVar);
+            TEST_EQUAL("SimpleDerivedTwo-Deserialize-ShortUIntVar",TestDerivedTwo.ShortUIntVar,Result.ShortUIntVar);
+            TEST_EQUAL("SimpleDerivedTwo-Deserialize-ShortIntVar",TestDerivedTwo.ShortIntVar,Result.ShortIntVar);
+        }//Deserialize
+    }//SimpleDerivedTwo
+
+    {//SimpleDerivedThree
+        const String DerivedThreeText{
+            "{TestDerivedThree [ TypeName:SimpleDerivedThree Version:0 "
+            "StringVar:DerivedThree UIntVar:150 IntVar:-150 ShortUIntVar:69 ShortIntVar:-69 DoubleVar:3.1415926 ]}"
+        };
+        const String FullDerivedThreeText = RootWrap(DerivedThreeText);
+        SimpleDerivedThree TestDerivedThree("DerivedThree",150,-150,69,-69,3.1415926);
+
+        {//Serialize
+            StringStream SerializeStream;
+            Serialization::SimpleBackend SerializerBack;
+            Serialization::SerializerWalker Walker(SerializerBack.GetWalker());
+
+            Mezzanine::Serialize("TestDerivedThree",TestDerivedThree,Serialization::LatestVersion,Walker);
+            SerializerBack.Write(SerializeStream);
+
+            TEST_EQUAL("SimpleDerivedThree-Serialize",FullDerivedThreeText,SerializeStream.str())
+        }//Serialize
+
+        {//Deserialize
+            SimpleDerivedThree Result;
+            Serialization::SimpleBackend SerializerBack;
+            StringStream DeserializeStream(FullDerivedThreeText);
+            SerializerBack.Read(DeserializeStream);
+
+            Serialization::DeserializerWalker Walker(SerializerBack.GetWalker());
+            Mezzanine::Deserialize("TestDerivedThree",Result,Walker);
+
+            TEST_EQUAL("SimpleDerivedThree-Deserialize-StringVar",TestDerivedThree.StringVar,Result.StringVar);
+            TEST_EQUAL("SimpleDerivedThree-Deserialize-UIntVar",TestDerivedThree.UIntVar,Result.UIntVar);
+            TEST_EQUAL("SimpleDerivedThree-Deserialize-IntVar",TestDerivedThree.IntVar,Result.IntVar);
+            TEST_EQUAL("SimpleDerivedThree-Deserialize-ShortUIntVar",TestDerivedThree.ShortUIntVar,Result.ShortUIntVar);
+            TEST_EQUAL("SimpleDerivedThree-Deserialize-ShortIntVar",TestDerivedThree.ShortIntVar,Result.ShortIntVar);
+            TEST_EQUAL("SimpleDerivedThree-Deserialize-DoubleVar",TestDerivedThree.DoubleVar,Result.DoubleVar);
+        }//Deserialize
+    }//SimpleDerivedThree
+    std::cout << "\n\n\n";
+    {//ComposedOne
+        const String ComposedOneTextP1{
+            "{TestComposedOne [ TypeName:ComposedOne Version:0 ]\n"
+        "        {SimpleObj [ TypeName:Simple Version:0 IntVarOne:-100 IntVarTwo:100 ]}\n"
+        "        {SimplePtr [ CanDeserialize:true InstanceID:"
+        };
+        const String ComposedOneTextP2{
+                    " TypeName:SimpleDerivedOne Version:0 "
+                    "StringVar:DerivedOne DoubleVar:12.3456 FloatVarOne:7.5 FloatVarTwo:-7.5 ]}\n"
+        "        {Parent [ CanDeserialize:null TypeName:SuperComposed ]}\n"
+        "    }"
+        };
+
+        SimpleDerivedOne TestDerivedOne("DerivedOne",12.3456,7.5,-7.5);
+        ComposedOne TestComposedOne(&TestDerivedOne,nullptr);
+
+        StringStream ComposedOneStream;
+        ComposedOneStream << ComposedOneTextP1 << uintptr_t(TestComposedOne.SimplePtr) << ComposedOneTextP2;
+        const String FullComposedOneText = RootWrap(ComposedOneStream.str());
+
+        {//Serialize
+            StringStream SerializeStream;
+            Serialization::SimpleBackend SerializerBack;
+            Serialization::SerializerWalker Walker(SerializerBack.GetWalker());
+
+            Mezzanine::Serialize("TestComposedOne",TestComposedOne,Serialization::LatestVersion,Walker);
+            SerializerBack.Write(SerializeStream);
+
+            OutputToFile(SerializeStream);
+
+            TEST_EQUAL("ComposedOne-Serialize",FullComposedOneText,SerializeStream.str())
+        }//Serialize
+        std::cout << "\n";
+        {//Deserialize
+            SimpleDerivedOne ResultMember;
+            ComposedOne Result(&ResultMember,nullptr);
+            Serialization::SimpleBackend SerializerBack;
+            StringStream DeserializeStream(FullComposedOneText);
+            SerializerBack.Read(DeserializeStream);
+
+            Serialization::DeserializerWalker Walker(SerializerBack.GetWalker());
+            Mezzanine::Deserialize("TestComposedOne",Result,Walker);
+
+            TEST_EQUAL("ComposedOne-Deserialize-IntVarOne",
+                       TestComposedOne.SimpleObj.IntVarOne,Result.SimpleObj.IntVarOne);
+            TEST_EQUAL("ComposedOne-Deserialize-IntVarTwo",
+                       TestComposedOne.SimpleObj.IntVarTwo,Result.SimpleObj.IntVarTwo);
+            TEST_EQUAL("ComposedOne-Deserialize-StringVar",
+                       TestDerivedOne.StringVar,ResultMember.StringVar);
+            TEST_EQUAL("ComposedOne-Deserialize-DoubleVar",
+                       TestDerivedOne.DoubleVar,ResultMember.DoubleVar);
+            TEST_EQUAL("ComposedOne-Deserialize-FloatVarOne",
+                       TestDerivedOne.FloatVarOne,ResultMember.FloatVarOne);
+            TEST_EQUAL("ComposedOne-Deserialize-FloatVarTwo",
+                       TestDerivedOne.FloatVarTwo,ResultMember.FloatVarTwo);
+        }//Deserialize
+    }//ComposedOne
 }
 
 #endif

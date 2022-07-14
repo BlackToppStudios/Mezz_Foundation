@@ -449,7 +449,8 @@ namespace ContainerDetect {
               typename = std::enable_if_t< IsNonAssociativeContainer<ContainerType>() > >
     auto AddToContainer(ContainerType& AddingTo, ValueType&& Value)
     {
-        static_assert( std::is_same_v<ValueType,typename ContainerType::value_type>,
+        using DecayedValueType = std::decay_t<ValueType>;
+        static_assert( std::is_same_v<DecayedValueType,typename ContainerType::value_type>,
                        "ValueType provided does not match the ValueType expected by the container." );
         static_assert( ContainerDetect::HasInsert<ContainerType,ValueType>() ||
                        ContainerDetect::HasAdd<ContainerType,ValueType>() ||
@@ -487,7 +488,9 @@ namespace ContainerDetect {
               typename = std::enable_if_t< IsAssociativeContainer<ContainerType>() > >
     auto AddToContainer(ContainerType& AddingTo, KeyType&& Key, MappedType&& Mapped)
     {
-        using ValueType = std::pair<const KeyType,MappedType>;
+        using DecayedKeyType = std::decay_t<KeyType>;
+        using DecayedMappedType = std::decay_t<MappedType>;
+        using ValueType = std::pair<const DecayedKeyType,DecayedMappedType>;
         static_assert( std::is_same_v<ValueType,typename ContainerType::value_type>,
                        "Key and Mapped types provided does not match the ValueType expected by the container." );
         static_assert( ContainerDetect::HasInsert<ContainerType,ValueType>() ||
